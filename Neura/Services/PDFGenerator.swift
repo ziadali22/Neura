@@ -18,20 +18,25 @@ class PDFGenerator {
 
     /// Generate PDF document from array of images
     func generatePDF(from images: [UIImage]) -> PDFDocument? {
+        print("PDFGenerator: Generating PDF from \(images.count) images")
         let pdfDocument = PDFDocument()
 
         for (index, image) in images.enumerated() {
             guard let page = PDFPage(image: image) else {
+                print("PDFGenerator: ERROR - Failed to create PDF page from image at index \(index)")
                 continue
             }
             pdfDocument.insert(page, at: index)
+            print("PDFGenerator: Added page \(index + 1) to PDF")
         }
 
         // Ensure at least one page was added
         guard pdfDocument.pageCount > 0 else {
+            print("PDFGenerator: ERROR - No pages added to PDF")
             return nil
         }
 
+        print("PDFGenerator: PDF created successfully with \(pdfDocument.pageCount) pages")
         return pdfDocument
     }
 
@@ -43,13 +48,17 @@ class PDFGenerator {
     /// Generate and save PDF in one step
     func generateAndSavePDF(from images: [UIImage], to url: URL) -> Result<URL, Error> {
         guard let pdf = generatePDF(from: images) else {
+            print("PDFGenerator: ERROR - PDF generation failed")
             return .failure(PDFError.generationFailed)
         }
 
+        print("PDFGenerator: Attempting to write PDF to: \(url.path)")
         guard pdf.write(to: url) else {
+            print("PDFGenerator: ERROR - Failed to write PDF to disk")
             return .failure(PDFError.saveFailed)
         }
 
+        print("PDFGenerator: PDF written successfully to: \(url.path)")
         return .success(url)
     }
 }

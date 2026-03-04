@@ -7,6 +7,7 @@
 
 import SwiftUI
 import PDFKit
+import QuickLook
 
 struct DocumentImageViewer: View {
     @Environment(\.dismiss) private var dismiss
@@ -24,8 +25,13 @@ struct DocumentImageViewer: View {
 
                 // Route based on document type
                 if let pdfURL = document.pdfURL {
-                    // PDF Viewer
-                    PDFViewerContainer(pdfURL: pdfURL)
+                    // PDF Viewer using QuickLook
+                    PDFQuickLookView(pdfURL: pdfURL)
+                        .ignoresSafeArea()
+                        .onAppear {
+                            print("DocumentImageViewer: Opening PDF at: \(pdfURL)")
+                            print("DocumentImageViewer: isPDF: \(document.isPDF)")
+                        }
                 } else if document.imageURLs.count > 1 {
                     // Multi-page image viewer with TabView (backward compatibility)
                     TabView(selection: $currentPage) {
@@ -40,6 +46,67 @@ struct DocumentImageViewer: View {
                     // Single page image viewer (backward compatibility)
                     DocumentImagePage(imagePath: imagePath)
                 }
+
+                // PROMINENT DEBUG OVERLAY - IMPOSSIBLE TO MISS
+                VStack(spacing: 16) {
+                    Text("🔍 DEBUG INFO")
+                        .font(.title.bold())
+                        .foregroundColor(.white)
+                        .padding()
+                        .background(Color.red)
+                        .cornerRadius(8)
+
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Text("isPDF:")
+                                .font(.title3.bold())
+                                .foregroundColor(.white)
+                            Text(document.isPDF ? "✅ YES" : "❌ NO")
+                                .font(.title3.bold())
+                                .foregroundColor(document.isPDF ? .green : .red)
+                        }
+
+                        if let pdfURL = document.pdfURL {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("PDF URL:")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                Text(pdfURL)
+                                    .font(.caption)
+                                    .foregroundColor(.yellow)
+                                    .lineLimit(nil)
+                            }
+
+                            HStack {
+                                Text("File exists:")
+                                    .font(.title3.bold())
+                                    .foregroundColor(.white)
+                                Text(FileManager.default.fileExists(atPath: pdfURL) ? "✅ YES" : "❌ NO")
+                                    .font(.title3.bold())
+                                    .foregroundColor(FileManager.default.fileExists(atPath: pdfURL) ? .green : .red)
+                            }
+                        } else {
+                            Text("PDF URL: ❌ NIL")
+                                .font(.title3.bold())
+                                .foregroundColor(.red)
+                        }
+
+                        HStack {
+                            Text("Image URLs:")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                            Text("\(document.imageURLs.count)")
+                                .font(.title2.bold())
+                                .foregroundColor(.yellow)
+                        }
+                    }
+                    .padding()
+                    .background(Color.black.opacity(0.9))
+                    .cornerRadius(12)
+                }
+                .padding()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color.blue.opacity(0.3))
             }
             .navigationTitle(document.title)
             .navigationBarTitleDisplayMode(.inline)

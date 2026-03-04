@@ -31,9 +31,23 @@ struct PDFViewerContainer: UIViewRepresentable {
     }
 
     private func loadPDF(into pdfView: PDFView) {
+        print("PDFViewerContainer: Attempting to load PDF from: \(pdfURL)")
+
         let url = URL(fileURLWithPath: pdfURL)
-        if let document = PDFDocument(url: url) {
-            pdfView.document = document
+
+        // Check if file exists
+        let fileExists = FileManager.default.fileExists(atPath: url.path)
+        print("PDFViewerContainer: File exists at path: \(fileExists)")
+
+        if fileExists {
+            if let document = PDFDocument(url: url) {
+                print("PDFViewerContainer: PDF loaded successfully. Page count: \(document.pageCount)")
+                pdfView.document = document
+            } else {
+                print("PDFViewerContainer: ERROR - Failed to create PDFDocument from URL")
+            }
+        } else {
+            print("PDFViewerContainer: ERROR - File does not exist at path: \(url.path)")
         }
     }
 }

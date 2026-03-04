@@ -59,6 +59,9 @@ struct DocsView: View {
                 }
                 .ignoresSafeArea()
             }
+            .onAppear {
+                print("docs showed")
+            }
             .sheet(isPresented: $viewModel.showNamingView) {
                 if let folder = viewModel.selectedFolderForScan {
                     DocumentNamingView(

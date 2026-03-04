@@ -26,6 +26,7 @@ struct CategoryFolderGrid: View {
                 } label: {
                     FolderCard(folder: folder)
                 }
+                .buttonStyle(PlainButtonStyle())
             }
 
             // New Folder Button
@@ -39,60 +40,30 @@ struct CategoryFolderGrid: View {
 
 struct FolderCard: View {
     let folder: CategoryFolder
-    @State private var isPressed = false
 
     var body: some View {
-        ZStack(alignment: .topLeading) {
-            // Main card with gradient background
-            VStack(alignment: .leading, spacing: 0) {
-                // White header bar (like in screenshot)
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(Color.white.opacity(0.3))
-                    .frame(height: 24)
-                    .padding([.horizontal, .top], 10)
+        VStack(alignment: .leading, spacing: 8) {
+            // Icon in colored circle - top left
+            Image(folder.icon)
+                .resizable()
+                .frame(width: 30, height: 30)
+                .padding(.top, 16)
+                .padding(.leading, 16)
 
-                Spacer()
+            Spacer()
 
-                // Icon in circle
-                ZStack {
-                    Circle()
-                        .fill(Color.white.opacity(0.25))
-                        .frame(width: 40, height: 40)
-
-                    Image(systemName: folder.icon)
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.white)
-                }
-                .padding(.leading, 14)
-                .padding(.bottom, 6)
-
-                // Folder name
-                Text(folder.name)
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(.white)
-                    .lineLimit(2)
-                    .padding(.horizontal, 14)
-                    .padding(.bottom, 2)
-
-                // Document count
-                Text("\(folder.count)")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 14)
-                    .padding(.bottom, 14)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .frame(height: 140)
-            .background(
-                LinearGradient(
-                    colors: folder.gradientColors,
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
-            .cornerRadius(18)
-            .shadow(color: folder.gradientColors.first?.opacity(0.3) ?? .clear, radius: 8, x: 0, y: 3)
+            // Folder name with count - leading aligned
+            Text("\(folder.name) (\(folder.count))")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.2))
+                .lineLimit(2)
+                .padding(.horizontal, 16)
+                .padding(.bottom, 16)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(height: 120)
+        .background(Color(red: 0.96, green: 0.95, blue: 0.93))
+        .cornerRadius(12)
     }
 }
 
@@ -101,50 +72,32 @@ struct AddFolderCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // White header bar
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color.white.opacity(0.3))
-                .frame(height: 24)
-                .padding([.horizontal, .top], 10)
+            // Plus icon - top left
+            Image(systemName: "plus")
+                .font(.system(size: 28, weight: .medium))
+                .foregroundColor(Color(red: 0.93, green: 0.42, blue: 0.36))
+                .padding(.top, 16)
+                .padding(.leading, 16)
+                .padding(.bottom, 8)
 
             Spacer()
 
-            // Plus icon in circle
-            ZStack {
-                Circle()
-                    .fill(Color.white.opacity(0.25))
-                    .frame(width: 40, height: 40)
-
-                Image(systemName: "plus")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.white)
-            }
-            .padding(.leading, 14)
-            .padding(.bottom, 6)
-
-            // Text
+            // Text - leading aligned
             Text("New Folder")
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundColor(.white)
-                .padding(.horizontal, 14)
-                .padding(.bottom, 14)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.2))
+                .padding(.horizontal, 16)
+                .padding(.bottom, 16)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .frame(height: 140)
-        .background(
-            LinearGradient(
-                colors: [Color.gray.opacity(0.6), Color.gray.opacity(0.8)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        )
-        .cornerRadius(18)
+        .frame(height: 120)
+        .background(Color(red: 0.96, green: 0.95, blue: 0.93))
+        .cornerRadius(12)
         .overlay(
-            RoundedRectangle(cornerRadius: 18)
-                .strokeBorder(style: StrokeStyle(lineWidth: 2, dash: [8, 6]))
-                .foregroundColor(.white.opacity(0.5))
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(style: StrokeStyle(lineWidth: 2, dash: [6, 4]))
+                .foregroundColor(Color(red: 0.93, green: 0.42, blue: 0.36).opacity(0.5))
         )
-        .shadow(color: Color.gray.opacity(0.2), radius: 8, x: 0, y: 3)
         .scaleEffect(isPressed ? 0.97 : 1.0)
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isPressed)
         .simultaneousGesture(

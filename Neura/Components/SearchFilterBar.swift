@@ -13,28 +13,31 @@ struct SearchFilterBar: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            // Search Bar
-            HStack(spacing: 8) {
+            // Search Bar with blue border
+            HStack(spacing: 10) {
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(.gray)
-                    .font(.system(size: 18))
+                    .foregroundColor(Color(red: 0.27, green: 0.53, blue: 0.71))
+                    .font(.system(size: 16, weight: .medium))
 
                 TextField("Search", text: $searchText)
-                    .font(.system(size: 16))
+                    .font(.system(size: 15))
+                    .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.2))
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 14)
             .padding(.vertical, 12)
-            .background(Color(.systemBackground))
-            .cornerRadius(12)
+            .background(Color.white)
+            .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color(red: 0.27, green: 0.53, blue: 0.71), lineWidth: 1.5)
+            )
 
-            // Filter Button
+            // Filter/Menu Button
             Button(action: onFilterTapped) {
-                Image(systemName: "slider.horizontal.3")
-                    .font(.system(size: 20))
-                    .foregroundColor(.primary)
-                    .frame(width: 48, height: 48)
-                    .background(Color(.systemBackground))
-                    .cornerRadius(12)
+                Image(systemName: "line.3.horizontal")
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.2))
+                    .frame(width: 44, height: 44)
             }
         }
     }

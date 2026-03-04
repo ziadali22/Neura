@@ -37,31 +37,31 @@ class DocsViewModel: ObservableObject {
             CategoryFolder(
                 name: "Blood Tests",
                 count: fileManager.getDocumentCount(for: "Blood Tests"),
-                icon: "drop.fill",
+                icon: "Blood",
                 gradientColors: [Color(hex: "BD6B73"), Color(hex: "A85861")]
             ),
             CategoryFolder(
                 name: "Prescriptions",
                 count: fileManager.getDocumentCount(for: "Prescriptions"),
-                icon: "doc.text.fill",
+                icon: "Prescriptions",
                 gradientColors: [Color(hex: "456990"), Color(hex: "3A5777")]
             ),
             CategoryFolder(
                 name: "Consultations",
                 count: fileManager.getDocumentCount(for: "Consultations"),
-                icon: "stethoscope",
+                icon: "Consultation",
                 gradientColors: [Color(hex: "6B9080"), Color(hex: "5A7A6C")]
             ),
             CategoryFolder(
                 name: "Hospitalization",
                 count: fileManager.getDocumentCount(for: "Hospitalization"),
-                icon: "bed.double.fill",
+                icon: "Hospitalisation",
                 gradientColors: [Color(hex: "536B78"), Color(hex: "455863")]
             ),
             CategoryFolder(
                 name: "Tests & Imaging",
                 count: fileManager.getDocumentCount(for: "Tests & Imaging"),
-                icon: "waveform.path.ecg",
+                icon: "Investigationspdf",
                 gradientColors: [Color(hex: "8B7E8F"), Color(hex: "756A79")]
             )
         ]
@@ -187,6 +187,7 @@ class DocsViewModel: ObservableObject {
             DispatchQueue.main.async {
                 switch result {
                 case .success(let pdfPath):
+                    print("DocsViewModel: PDF saved successfully at: \(pdfPath)")
                     let title = customName ?? self.generateDocumentTitle(for: folder.name)
                     let document = Document(
                         title: title,
@@ -194,6 +195,9 @@ class DocsViewModel: ObservableObject {
                         pdfURL: pdfPath,
                         category: folder.name
                     )
+
+                    print("DocsViewModel: Created document with pdfURL: \(document.pdfURL ?? "nil")")
+                    print("DocsViewModel: Document isPDF: \(document.isPDF)")
 
                     // Add to documents array
                     if self.documents[folder.name] == nil {
