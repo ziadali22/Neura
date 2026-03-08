@@ -1,10 +1,11 @@
 import SwiftUI
 
 struct DocsView: View {
+    @EnvironmentObject private var router: DocsRouter
     @StateObject private var viewModel = DocsViewModel()
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $router.path) {
             VStack(spacing: 0) {
                 SearchFilterBar(
                     searchText: $viewModel.searchText,
@@ -39,6 +40,12 @@ struct DocsView: View {
             .background(Color(red: 0.99, green: 0.98, blue: 0.97))
             .navigationTitle("Documents")
             .navigationBarTitleDisplayMode(.large)
+            .navigationDestination(for: DocsRoute.self) { route in
+                switch route {
+                case .categoryDetail(let name):
+                    EmptyView() // TODO: Implement
+                }
+            }
             .overlay {
                 ScanProcessingView(isProcessing: viewModel.isProcessingScan)
             }
@@ -74,4 +81,5 @@ struct DocsView: View {
 
 #Preview {
     DocsView()
+        .environmentObject(DocsRouter())
 }

@@ -1,16 +1,15 @@
 import SwiftUI
 
 struct HomeView: View {
-    @Binding var hideFloatingButton: Bool
+    @EnvironmentObject private var router: HomeRouter
     @State private var greetingAppear = false
     @State private var profileCardAppear = false
     @State private var completeCardAppear = false
     @State private var recentAppear = false
     @State private var showShareSheet = false
-    @State private var showHealthProfile = false
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $router.path) {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 24) {
                     Text("Good morning")
@@ -27,7 +26,7 @@ struct HomeView: View {
                             location: "Iasi, Romania",
                             backgroundImage: "BG6",
                             onShareTap: { showShareSheet = true },
-                            onTap: { showHealthProfile = true }
+                            onTap: { router.push(.healthProfileDetail) }
                         )
                         .scaleEffect(profileCardAppear ? 1 : 0.95)
                         .opacity(profileCardAppear ? 1 : 0)
@@ -55,10 +54,11 @@ struct HomeView: View {
                 }
             }
             .background(Color(hex: "#fcfaf8"))
-            .navigationDestination(isPresented: $showHealthProfile) {
-                HealthProfileDetailView()
-                    .onAppear { hideFloatingButton = true }
-                    .onDisappear { hideFloatingButton = false }
+            .navigationDestination(for: HomeRoute.self) { route in
+                switch route {
+                case .healthProfileDetail:
+                    HealthProfileDetailView()
+                }
             }
             .sheet(isPresented: $showShareSheet) {
                 ShareHealthProfileSheet()
@@ -84,5 +84,6 @@ struct HomeView: View {
 }
 
 #Preview {
-    HomeView(hideFloatingButton: .constant(false))
+    HomeView()
+        .environmentObject(HomeRouter())
 }

@@ -1,14 +1,14 @@
 import SwiftUI
 
 struct ProfileView: View {
-    @State private var showHealthProfile = false
+    @EnvironmentObject private var router: ProfileRouter
     @State private var showLogOutAlert = false
     @State private var showDeleteAlert = false
     @State private var titleAppear = false
     @State private var contentAppear = false
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $router.path) {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Profile")
@@ -22,7 +22,7 @@ struct ProfileView: View {
                         NeuraProCard()
 
                         SettingsRow(icon: "profile", title: "Health Profile") {
-                            showHealthProfile = true
+                            router.push(.healthProfile)
                         }
                         SettingsRow(icon: "sub", title: "Subscription")
                         SettingsRow(icon: "sec", title: "Security")
@@ -57,8 +57,11 @@ struct ProfileView: View {
             }
             .background(Color.backgroundPrimary)
             .navigationBarHidden(true)
-            .navigationDestination(isPresented: $showHealthProfile) {
-                HealthProfileView()
+            .navigationDestination(for: ProfileRoute.self) { route in
+                switch route {
+                case .healthProfile:
+                    HealthProfileView()
+                }
             }
         }
         .alert("Log Out", isPresented: $showLogOutAlert) {
@@ -104,4 +107,5 @@ private extension ProfileView {
 
 #Preview {
     ProfileView()
+        .environmentObject(ProfileRouter())
 }
