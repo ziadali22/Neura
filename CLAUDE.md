@@ -26,7 +26,24 @@ Camera features (document scanning via VisionKit) require a physical device.
 
 **Folder structure**:
 - `Core/` — Shared design system, extensions, models, services, UI components
-- `Features/` — Feature modules, each with its own View, ViewModel, and Components subfolder
+- `Features/` — Feature modules following a strict MVVM folder convention
+
+Every feature follows this structure:
+
+```
+[FeatureName]/
+├── ViewModel/
+│   └── [FeatureName]ViewModel.swift
+├── Views/
+│   ├── [FeatureName]View.swift
+│   └── Components/
+│       ├── SubComponent1.swift
+│       └── SubComponent2.swift
+└── Models/
+    └── [FeatureName]Model.swift    (if needed)
+```
+
+Feature modules:
   - `Dashboard/` — Root tab controller + floating action button
   - `Home/` — Home feed, SecureProfileCard, CompleteProfileCard
   - `HealthProfile/` — Health profile detail (model, view, viewmodel)

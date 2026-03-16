@@ -22,6 +22,7 @@ final class AppCoordinator: ObservableObject {
 
 enum ProfileRoute: Hashable {
     case healthProfile
+    case language
 }
 
 enum HomeRoute: Hashable {

@@ -1,54 +1,185 @@
 import Foundation
 import PDFKit
+import SwiftUI
 
-struct Document: Identifiable, Equatable {
-    var id = UUID()
-    let title: String
-    let date: Date
-    let imageURLs: [String]
-    let pdfURL: String?
-    let category: String?
+// MARK: - Document Type
 
-    var isPDF: Bool {
-        pdfURL != nil
+enum DocumentType: String, Codable {
+    case scan
+    case pdf
+    case image
+
+    var localizedName: String {
+        switch self {
+        case .scan: return String(localized: "Scan")
+        case .pdf: return String(localized: "PDF")
+        case .image: return String(localized: "Image")
+        }
+    }
+}
+
+// MARK: - Document Category
+
+enum DocumentCategory: String, Codable, CaseIterable, Identifiable {
+    case bloodTests = "Blood Tests"
+    case medicalLetter = "Medical Letter"
+    case consultations = "Consultations"
+    case prescriptions = "Prescriptions"
+    case hospitalization = "Hospitalization"
+    case vaccination = "Vaccination"
+    case imaging = "Imaging"
+    case other = "Other"
+
+    var id: String { rawValue }
+
+    var localizedName: String {
+        String(localized: String.LocalizationValue(rawValue))
     }
 
-    var thumbnailURL: String? {
-        imageURLs.first
+    var icon: String {
+        switch self {
+        case .bloodTests: return "drop.fill"
+        case .medicalLetter: return "envelope.fill"
+        case .consultations: return "stethoscope"
+        case .prescriptions: return "pill.fill"
+        case .hospitalization: return "bed.double.fill"
+        case .vaccination: return "syringe.fill"
+        case .imaging: return "waveform.path.ecg"
+        case .other: return "doc.fill"
+        }
+    }
+
+    /// Custom asset icon name from Assets.xcassets/Docs, nil if SF Symbol only.
+    var assetIcon: String? {
+        switch self {
+        case .bloodTests: return "Blood"
+        case .medicalLetter: return "Letter"
+        case .consultations: return "Consultation"
+        case .prescriptions: return "Prescriptions"
+        case .hospitalization: return "Hospitalisation"
+        case .vaccination: return "Vaccination"
+        case .imaging: return "Investigationspdf"
+        default: return nil
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .bloodTests: return Color(hex: "E74C3C")
+        case .medicalLetter: return Color(hex: "27AE60")
+        case .consultations: return Color(hex: "3498DB")
+        case .prescriptions: return Color(hex: "9B59B6")
+        case .hospitalization: return Color(hex: "536B78")
+        case .vaccination: return Color(hex: "2ECC71")
+        case .imaging: return Color(hex: "1ABC9C")
+        case .other: return Color(hex: "95A5A6")
+        }
+    }
+}
+
+// MARK: - Document Model
+
+struct Document: Identifiable, Codable, Equatable, Hashable {
+    let id: UUID
+    var name: String
+    /// The filename only (e.g. "ABC123.pdf"). The full URL is resolved at runtime.
+    var filename: String
+    var createdAt: Date
+    let documentType: DocumentType
+    var category: DocumentCategory?
+    var doctorName: String?
+    var notes: String?
+    var tags: [String]?
+
+    /// Full resolved URL in the current sandbox. Not encoded.
+    var fileURL: URL {
+        DocumentFileManager.shared.resolveURL(for: filename)
+    }
+
+    init(
+        id: UUID = UUID(),
+        name: String,
+        fileURL: URL,
+        createdAt: Date = Date(),
+        documentType: DocumentType,
+        category: DocumentCategory? = nil,
+        doctorName: String? = nil,
+        notes: String? = nil,
+        tags: [String]? = nil
+    ) {
+        self.id = id
+        self.name = name
+        self.filename = fileURL.lastPathComponent
+        self.createdAt = createdAt
+        self.documentType = documentType
+        self.category = category
+        self.doctorName = doctorName
+        self.notes = notes
+        self.tags = tags
+    }
+
+    // MARK: - Codable
+
+    private enum CodingKeys: String, CodingKey {
+        case id, name, filename, createdAt, documentType, category, doctorName, notes, tags
+        // Legacy key for backward compatibility
+        case fileURL
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        createdAt = try container.decode(Date.self, forKey: .createdAt)
+        documentType = try container.decode(DocumentType.self, forKey: .documentType)
+        category = try container.decodeIfPresent(DocumentCategory.self, forKey: .category)
+        doctorName = try container.decodeIfPresent(String.self, forKey: .doctorName)
+        notes = try container.decodeIfPresent(String.self, forKey: .notes)
+        tags = try container.decodeIfPresent([String].self, forKey: .tags)
+
+        // Try new filename key first, fall back to extracting from legacy fileURL
+        if let fn = try container.decodeIfPresent(String.self, forKey: .filename) {
+            filename = fn
+        } else if let url = try container.decodeIfPresent(URL.self, forKey: .fileURL) {
+            filename = url.lastPathComponent
+        } else {
+            filename = "\(id.uuidString).pdf"
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(name, forKey: .name)
+        try container.encode(filename, forKey: .filename)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(documentType, forKey: .documentType)
+        try container.encodeIfPresent(category, forKey: .category)
+        try container.encodeIfPresent(doctorName, forKey: .doctorName)
+        try container.encodeIfPresent(notes, forKey: .notes)
+        try container.encodeIfPresent(tags, forKey: .tags)
+    }
+
+    // MARK: - Computed Properties
+
+    var fileExists: Bool {
+        FileManager.default.fileExists(atPath: fileURL.path)
+    }
+
+    var isPDF: Bool {
+        documentType == .pdf || documentType == .scan
+    }
+
+    var isImage: Bool {
+        documentType == .image
     }
 
     var pageCount: Int {
-        if isPDF, let pdfPath = pdfURL {
-            let url = URL(fileURLWithPath: pdfPath)
-            if let pdfDocument = PDFDocument(url: url) {
-                return pdfDocument.pageCount
-            }
-        }
-        return imageURLs.count
+        guard isPDF, let pdfDocument = PDFDocument(url: fileURL) else { return 1 }
+        return pdfDocument.pageCount
     }
 
-    init(title: String, date: Date, pdfURL: String, category: String?) {
-        self.title = title
-        self.date = date
-        self.pdfURL = pdfURL
-        self.imageURLs = []
-        self.category = category
-    }
-
-    init(title: String, date: Date, imageURLs: [String], category: String?) {
-        self.title = title
-        self.date = date
-        self.imageURLs = imageURLs
-        self.pdfURL = nil
-        self.category = category
-    }
-
-    init(id: UUID = UUID(), title: String, date: Date, imageURL: String?, category: String?) {
-        self.id = id
-        self.title = title
-        self.date = date
-        self.imageURLs = imageURL != nil ? [imageURL!] : []
-        self.pdfURL = nil
-        self.category = category
+    var fileExtension: String {
+        fileURL.pathExtension.lowercased()
     }
 }

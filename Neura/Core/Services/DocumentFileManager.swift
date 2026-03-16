@@ -2,200 +2,236 @@ import Foundation
 import UIKit
 import PDFKit
 
+// MARK: - Document File Error
+
+enum DocumentFileError: LocalizedError {
+    case directoryCreationFailed
+    case imageConversionFailed
+    case pdfGenerationFailed
+    case pdfSaveFailed
+    case fileNotFound
+    case duplicateDocument(URL)
+
+    var errorDescription: String? {
+        switch self {
+        case .directoryCreationFailed: return "Failed to create storage directory"
+        case .imageConversionFailed: return "Failed to convert image data"
+        case .pdfGenerationFailed: return "Failed to generate PDF"
+        case .pdfSaveFailed: return "Failed to save PDF to disk"
+        case .fileNotFound: return "Document file not found"
+        case .duplicateDocument(let url): return "Document already exists at \(url.lastPathComponent)"
+        }
+    }
+}
+
+// MARK: - Document File Manager
+
 final class DocumentFileManager {
     static let shared = DocumentFileManager()
 
     private let baseDirectory = "NeuraScans"
+    private let fileManager = FileManager.default
+    private let metadataFile = "documents.json"
 
     private init() {
-        createBaseFoldersIfNeeded()
+        createBaseDirectoryIfNeeded()
     }
 
     // MARK: - Directory Management
 
-    private func getDocumentsDirectory() -> URL {
-        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    private var documentsDirectory: URL {
+        fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
     }
 
-    private func getBaseScanDirectory() -> URL {
-        getDocumentsDirectory().appendingPathComponent(baseDirectory)
+    private var baseScanDirectory: URL {
+        documentsDirectory.appendingPathComponent(baseDirectory)
     }
 
-    private func getCategoryDirectory(for category: String) -> URL {
-        let sanitizedCategory = category.replacingOccurrences(of: " ", with: "")
-                                       .replacingOccurrences(of: "&", with: "And")
-        return getBaseScanDirectory().appendingPathComponent(sanitizedCategory)
+    private var metadataURL: URL {
+        baseScanDirectory.appendingPathComponent(metadataFile)
     }
 
-    private func createBaseFoldersIfNeeded() {
-        let categories = ["BloodTests", "Prescriptions", "Consultations", "Hospitalization", "TestsAndImaging"]
-        let fileManager = FileManager.default
-
+    private func createBaseDirectoryIfNeeded() {
         do {
-            try fileManager.createDirectory(at: getBaseScanDirectory(), withIntermediateDirectories: true)
-
-            for category in categories {
-                let categoryURL = getBaseScanDirectory().appendingPathComponent(category)
-                try fileManager.createDirectory(at: categoryURL, withIntermediateDirectories: true)
-            }
+            try fileManager.createDirectory(at: baseScanDirectory, withIntermediateDirectories: true)
         } catch {
-            assertionFailure("Failed to create base folders: \(error.localizedDescription)")
-        }
-    }
-
-    // MARK: - Save Images
-
-    func saveScannedImages(_ images: [UIImage], category: String) -> Result<[String], Error> {
-        let categoryDir = getCategoryDirectory(for: category)
-        let timestamp = Date().timeIntervalSince1970
-        let uuid = UUID().uuidString.prefix(8)
-        var savedURLs: [String] = []
-
-        do {
-            try FileManager.default.createDirectory(at: categoryDir, withIntermediateDirectories: true)
-
-            for (index, image) in images.enumerated() {
-                let filename = "scan_\(category.lowercased().replacingOccurrences(of: " ", with: ""))_\(Int(timestamp))_\(uuid)_page\(index + 1).jpg"
-                let fileURL = categoryDir.appendingPathComponent(filename)
-
-                guard let imageData = image.jpegData(compressionQuality: 0.8) else {
-                    throw NSError(domain: "DocumentFileManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to convert image to JPEG"])
-                }
-
-                try imageData.write(to: fileURL)
-                savedURLs.append(fileURL.path)
-            }
-
-            return .success(savedURLs)
-        } catch {
-            return .failure(error)
+            assertionFailure("Failed to create base directory: \(error.localizedDescription)")
         }
     }
 
     // MARK: - Save PDF
 
-    func generateAndSavePDF(from images: [UIImage], category: String) -> Result<String, Error> {
-        let categoryDir = getCategoryDirectory(for: category)
-        let timestamp = Date().timeIntervalSince1970
-        let uuid = UUID().uuidString.prefix(8)
-        let filename = "scan_\(category.lowercased().replacingOccurrences(of: " ", with: ""))_\(Int(timestamp))_\(uuid).pdf"
+    func savePDF(data: Data, name: String, documentID: UUID = UUID()) throws -> Document {
+        let filename = "\(documentID.uuidString).pdf"
+        let fileURL = baseScanDirectory.appendingPathComponent(filename)
 
-        do {
-            try FileManager.default.createDirectory(at: categoryDir, withIntermediateDirectories: true)
-
-            let fileURL = categoryDir.appendingPathComponent(filename)
-            let result = PDFGenerator.shared.generateAndSavePDF(from: images, to: fileURL)
-
-            switch result {
-            case .success(let url):
-                return .success(url.path)
-            case .failure(let error):
-                return .failure(error)
-            }
-        } catch {
-            return .failure(error)
+        guard !fileManager.fileExists(atPath: fileURL.path) else {
+            throw DocumentFileError.duplicateDocument(fileURL)
         }
+
+        try data.write(to: fileURL, options: .atomic)
+
+        return Document(
+            id: documentID,
+            name: name,
+            fileURL: fileURL,
+            createdAt: Date(),
+            documentType: .pdf
+        )
     }
 
-    func loadPDF(from path: String) -> PDFDocument? {
-        PDFDocument(url: URL(fileURLWithPath: path))
+    func savePDF(from images: [UIImage], name: String, documentID: UUID = UUID()) throws -> Document {
+        guard let pdfDocument = PDFGenerator.shared.generatePDF(from: images) else {
+            throw DocumentFileError.pdfGenerationFailed
+        }
+
+        let filename = "\(documentID.uuidString).pdf"
+        let fileURL = baseScanDirectory.appendingPathComponent(filename)
+
+        guard !fileManager.fileExists(atPath: fileURL.path) else {
+            throw DocumentFileError.duplicateDocument(fileURL)
+        }
+
+        guard pdfDocument.write(to: fileURL) else {
+            throw DocumentFileError.pdfSaveFailed
+        }
+
+        return Document(
+            id: documentID,
+            name: name,
+            fileURL: fileURL,
+            createdAt: Date(),
+            documentType: .scan
+        )
     }
 
-    // MARK: - Load Images
+    // MARK: - Save Image
 
-    func loadImage(from path: String) -> UIImage? {
-        guard let imageData = try? Data(contentsOf: URL(fileURLWithPath: path)) else {
-            return nil
+    func saveImage(_ image: UIImage, name: String, documentID: UUID = UUID()) throws -> Document {
+        guard let imageData = image.jpegData(compressionQuality: 0.85) else {
+            throw DocumentFileError.imageConversionFailed
         }
-        return UIImage(data: imageData)
+
+        let filename = "\(documentID.uuidString).jpg"
+        let fileURL = baseScanDirectory.appendingPathComponent(filename)
+
+        guard !fileManager.fileExists(atPath: fileURL.path) else {
+            throw DocumentFileError.duplicateDocument(fileURL)
+        }
+
+        try imageData.write(to: fileURL, options: .atomic)
+
+        return Document(
+            id: documentID,
+            name: name,
+            fileURL: fileURL,
+            createdAt: Date(),
+            documentType: .image
+        )
+    }
+
+    // MARK: - Load Document
+
+    func loadDocument(url: URL) throws -> Data {
+        guard fileManager.fileExists(atPath: url.path) else {
+            throw DocumentFileError.fileNotFound
+        }
+        return try Data(contentsOf: url)
+    }
+
+    func loadPDF(url: URL) throws -> PDFDocument {
+        guard fileManager.fileExists(atPath: url.path) else {
+            throw DocumentFileError.fileNotFound
+        }
+        guard let pdf = PDFDocument(url: url) else {
+            throw DocumentFileError.pdfGenerationFailed
+        }
+        return pdf
+    }
+
+    func loadImage(url: URL) throws -> UIImage {
+        guard fileManager.fileExists(atPath: url.path) else {
+            throw DocumentFileError.fileNotFound
+        }
+        let data = try Data(contentsOf: url)
+        guard let image = UIImage(data: data) else {
+            throw DocumentFileError.imageConversionFailed
+        }
+        return image
+    }
+
+    // MARK: - Import File (copy external file into sandbox)
+
+    func importFile(from sourceURL: URL, name: String, documentID: UUID = UUID()) throws -> Document {
+        let ext = sourceURL.pathExtension.lowercased()
+        let filename = "\(documentID.uuidString).\(ext)"
+        let fileURL = baseScanDirectory.appendingPathComponent(filename)
+
+        guard !fileManager.fileExists(atPath: fileURL.path) else {
+            throw DocumentFileError.duplicateDocument(fileURL)
+        }
+
+        // Access security-scoped resource if needed
+        let didAccess = sourceURL.startAccessingSecurityScopedResource()
+        defer { if didAccess { sourceURL.stopAccessingSecurityScopedResource() } }
+
+        try fileManager.copyItem(at: sourceURL, to: fileURL)
+
+        let docType: DocumentType = (ext == "pdf") ? .pdf : .image
+
+        return Document(
+            id: documentID,
+            name: name,
+            fileURL: fileURL,
+            createdAt: Date(),
+            documentType: docType
+        )
     }
 
     // MARK: - Delete Document
 
-    func deleteDocument(imageURLs: [String] = [], pdfURL: String? = nil) -> Result<Void, Error> {
-        let fileManager = FileManager.default
+    func deleteDocument(id: UUID) throws {
+        let pdfURL = baseScanDirectory.appendingPathComponent("\(id.uuidString).pdf")
+        let jpgURL = baseScanDirectory.appendingPathComponent("\(id.uuidString).jpg")
 
-        do {
-            if let pdfPath = pdfURL {
-                let url = URL(fileURLWithPath: pdfPath)
-                if fileManager.fileExists(atPath: url.path) {
-                    try fileManager.removeItem(at: url)
-                }
-            }
-
-            for urlPath in imageURLs {
-                let url = URL(fileURLWithPath: urlPath)
-                if fileManager.fileExists(atPath: url.path) {
-                    try fileManager.removeItem(at: url)
-                }
-            }
-
-            return .success(())
-        } catch {
-            return .failure(error)
+        if fileManager.fileExists(atPath: pdfURL.path) {
+            try fileManager.removeItem(at: pdfURL)
+        } else if fileManager.fileExists(atPath: jpgURL.path) {
+            try fileManager.removeItem(at: jpgURL)
         }
     }
 
-    // MARK: - Get Document Count
-
-    func getDocumentCount(for category: String) -> Int {
-        let categoryDir = getCategoryDirectory(for: category)
-
-        do {
-            let files = try FileManager.default.contentsOfDirectory(at: categoryDir, includingPropertiesForKeys: nil)
-            let uniqueDocuments = Set(files.map { url in
-                let filename = url.lastPathComponent
-                let fileExtension = url.pathExtension.lowercased()
-                let components = filename.components(separatedBy: "_")
-
-                if components.count >= 4 {
-                    if fileExtension == "pdf" {
-                        return "\(components[2])_\(components[3].replacingOccurrences(of: ".pdf", with: ""))"
-                    }
-                    return "\(components[2])_\(components[3])"
-                }
-                return filename
-            })
-            return uniqueDocuments.count
-        } catch {
-            return 0
-        }
+    func deleteDocument(_ document: Document) throws {
+        guard fileManager.fileExists(atPath: document.fileURL.path) else { return }
+        try fileManager.removeItem(at: document.fileURL)
     }
 
-    // MARK: - Get All Documents
+    // MARK: - Metadata Persistence
 
-    func getAllDocuments(for category: String) -> [String: [String]] {
-        let categoryDir = getCategoryDirectory(for: category)
-        var documentGroups: [String: [String]] = [:]
+    func saveMetadata(_ documents: [Document]) throws {
+        let data = try JSONEncoder().encode(documents)
+        try data.write(to: metadataURL, options: .atomic)
+    }
 
-        do {
-            let files = try FileManager.default.contentsOfDirectory(at: categoryDir, includingPropertiesForKeys: [.creationDateKey])
-
-            for file in files {
-                let filename = file.lastPathComponent
-                let fileExtension = file.pathExtension.lowercased()
-
-                if fileExtension == "pdf" {
-                    let components = filename.components(separatedBy: "_")
-                    if components.count >= 4 {
-                        let documentKey = "\(components[2])_\(components[3].replacingOccurrences(of: ".pdf", with: ""))"
-                        documentGroups[documentKey] = [file.path]
-                    }
-                } else if fileExtension == "jpg" || fileExtension == "jpeg" {
-                    let components = filename.components(separatedBy: "_")
-                    if components.count >= 4 {
-                        let documentKey = "\(components[2])_\(components[3])"
-                        if documentGroups[documentKey] == nil {
-                            documentGroups[documentKey] = []
-                        }
-                        documentGroups[documentKey]?.append(file.path)
-                    }
-                }
-            }
-        } catch {
-            assertionFailure("Error loading documents: \(error.localizedDescription)")
+    func loadMetadata() -> [Document] {
+        guard fileManager.fileExists(atPath: metadataURL.path),
+              let data = try? Data(contentsOf: metadataURL),
+              let documents = try? JSONDecoder().decode([Document].self, from: data) else {
+            return []
         }
+        return documents
+    }
 
-        return documentGroups
+    // MARK: - URL Resolution
+
+    /// Resolve a filename to a full URL in the current sandbox directory.
+    func resolveURL(for filename: String) -> URL {
+        baseScanDirectory.appendingPathComponent(filename)
+    }
+
+    // MARK: - File Existence
+
+    func fileExists(for document: Document) -> Bool {
+        fileManager.fileExists(atPath: document.fileURL.path)
     }
 }
