@@ -272,6 +272,7 @@ final class DocumentsListViewModel: ObservableObject {
                 // Apply metadata
                 document.createdAt = metadata.documentDate
                 document.category = metadata.category
+                document.specialization = metadata.specialization
                 if !metadata.doctorName.isEmpty { document.doctorName = metadata.doctorName }
                 if !metadata.notes.isEmpty { document.notes = metadata.notes }
 

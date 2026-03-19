@@ -9,6 +9,7 @@ struct HealthProfileDetailView: View {
     @State private var editingGeneralField: GeneralField?
     @State private var editFieldValue = ""
     @State private var selectedSection: SectionSheetID?
+    @State private var showHealthReport = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -31,9 +32,12 @@ struct HealthProfileDetailView: View {
         }
         .background(Color.backgroundPrimary)
         .overlay(alignment: .bottom) {
-            shareButton
-                .padding(.horizontal, 20)
-                .padding(.bottom, 16)
+            HStack(spacing: 12) {
+                reportButton
+                shareButton
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 16)
         }
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .tabBar)
@@ -66,6 +70,11 @@ struct HealthProfileDetailView: View {
         }
         .sheet(item: $selectedSection) { item in
             SectionDetailSheet(viewModel: viewModel, sectionID: item.id)
+                .presentationDragIndicator(.hidden)
+        }
+        .sheet(isPresented: $showHealthReport) {
+            HealthReportSheet()
+                .presentationDetents([.medium])
                 .presentationDragIndicator(.hidden)
         }
     }
@@ -138,6 +147,7 @@ private extension HealthProfileDetailView {
             .init(label: "Weight", placeholder: "Add Weight", keyPath: \.weight, value: data.weight),
             .init(label: "Blood Type", placeholder: "Select Blood Type", keyPath: \.bloodType, value: data.bloodType),
             .init(label: "Insurance Status", placeholder: "Add Status", keyPath: \.insuranceStatus, value: data.insuranceStatus),
+            .init(label: "Emergency Contact", placeholder: "Add Contact", keyPath: \.emergencyContact, value: data.emergencyContact),
         ]
 
         return VStack(alignment: .leading, spacing: 0) {
@@ -275,6 +285,22 @@ private extension HealthProfileDetailView {
             .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
         }
         .buttonStyle(ScaleButtonStyle())
+    }
+
+    // MARK: Report
+
+    var reportButton: some View {
+        Button {
+            showHealthReport = true
+        } label: {
+            Image(systemName: "doc.richtext.fill")
+                .font(.system(size: 20))
+                .foregroundColor(.accent)
+                .frame(width: 56, height: 56)
+                .background(Color.surfaceWhite)
+                .clipShape(Circle())
+                .shadow(color: Color.black.opacity(0.08), radius: 6, x: 0, y: 2)
+        }
     }
 
     // MARK: Share

@@ -77,6 +77,50 @@ enum DocumentCategory: String, Codable, CaseIterable, Identifiable {
     }
 }
 
+// MARK: - Medical Specialization
+
+enum MedicalSpecialization: String, Codable, CaseIterable, Identifiable {
+    case cardiology      = "Cardiology"
+    case dermatology     = "Dermatology"
+    case dentistry       = "Dentistry"
+    case endocrinology   = "Endocrinology"
+    case gastroenterology = "Gastroenterology"
+    case generalMedicine = "General Medicine"
+    case gynaecology     = "Gynaecology"
+    case neurology       = "Neurology"
+    case oncology        = "Oncology"
+    case ophthalmology   = "Ophthalmology"
+    case orthopaedics    = "Orthopaedics"
+    case pulmonology     = "Pulmonology"
+    case psychiatry      = "Psychiatry"
+    case surgery         = "Surgery"
+    case urology         = "Urology"
+    case other           = "Other"
+
+    var id: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .cardiology:       return "heart.fill"
+        case .dermatology:      return "wand.and.sparkles"
+        case .dentistry:        return "mouth.fill"
+        case .endocrinology:    return "drop.circle.fill"
+        case .gastroenterology: return "cross.case.fill"
+        case .generalMedicine:  return "stethoscope"
+        case .gynaecology:      return "figure.stand.dress"
+        case .neurology:        return "brain.head.profile"
+        case .oncology:         return "shield.lefthalf.filled"
+        case .ophthalmology:    return "eye.fill"
+        case .orthopaedics:     return "figure.walk"
+        case .pulmonology:      return "lungs.fill"
+        case .psychiatry:       return "brain"
+        case .surgery:          return "scissors"
+        case .urology:          return "drop.triangle.fill"
+        case .other:            return "ellipsis.circle"
+        }
+    }
+}
+
 // MARK: - Document Model
 
 struct Document: Identifiable, Codable, Equatable, Hashable {
@@ -90,6 +134,7 @@ struct Document: Identifiable, Codable, Equatable, Hashable {
     var doctorName: String?
     var notes: String?
     var tags: [String]?
+    var specialization: MedicalSpecialization?
 
     /// Full resolved URL in the current sandbox. Not encoded.
     var fileURL: URL {
@@ -103,6 +148,7 @@ struct Document: Identifiable, Codable, Equatable, Hashable {
         createdAt: Date = Date(),
         documentType: DocumentType,
         category: DocumentCategory? = nil,
+        specialization: MedicalSpecialization? = nil,
         doctorName: String? = nil,
         notes: String? = nil,
         tags: [String]? = nil
@@ -113,6 +159,7 @@ struct Document: Identifiable, Codable, Equatable, Hashable {
         self.createdAt = createdAt
         self.documentType = documentType
         self.category = category
+        self.specialization = specialization
         self.doctorName = doctorName
         self.notes = notes
         self.tags = tags
@@ -121,7 +168,7 @@ struct Document: Identifiable, Codable, Equatable, Hashable {
     // MARK: - Codable
 
     private enum CodingKeys: String, CodingKey {
-        case id, name, filename, createdAt, documentType, category, doctorName, notes, tags
+        case id, name, filename, createdAt, documentType, category, specialization, doctorName, notes, tags
         // Legacy key for backward compatibility
         case fileURL
     }
@@ -133,6 +180,7 @@ struct Document: Identifiable, Codable, Equatable, Hashable {
         createdAt = try container.decode(Date.self, forKey: .createdAt)
         documentType = try container.decode(DocumentType.self, forKey: .documentType)
         category = try container.decodeIfPresent(DocumentCategory.self, forKey: .category)
+        specialization = try container.decodeIfPresent(MedicalSpecialization.self, forKey: .specialization)
         doctorName = try container.decodeIfPresent(String.self, forKey: .doctorName)
         notes = try container.decodeIfPresent(String.self, forKey: .notes)
         tags = try container.decodeIfPresent([String].self, forKey: .tags)
@@ -155,6 +203,7 @@ struct Document: Identifiable, Codable, Equatable, Hashable {
         try container.encode(createdAt, forKey: .createdAt)
         try container.encode(documentType, forKey: .documentType)
         try container.encodeIfPresent(category, forKey: .category)
+        try container.encodeIfPresent(specialization, forKey: .specialization)
         try container.encodeIfPresent(doctorName, forKey: .doctorName)
         try container.encodeIfPresent(notes, forKey: .notes)
         try container.encodeIfPresent(tags, forKey: .tags)

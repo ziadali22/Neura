@@ -12,7 +12,9 @@ struct HomeView: View {
     @State private var recentAppear = false
     @State private var showShareSheet = false
     @State private var showPaywall = false
+    @State private var showBackgroundPicker = false
     @State private var selectedDocument: Document?
+    @State private var cardBackground: CardBackground = CardBackground.saved()
 
     private var greeting: String {
         let hour = Calendar.current.component(.hour, from: Date())
@@ -50,10 +52,11 @@ struct HomeView: View {
                     // MARK: - Profile Cards
                     VStack(alignment: .leading, spacing: 24) {
                         SecureProfileCard(
-                            name: "CRISTINA\nGAFITESCU",
+                            name: "ZIAD\nKHALIL",
                             location: "Iasi, Romania",
-                            backgroundImage: "bg16",
+                            background: cardBackground,
                             onShareTap: { showShareSheet = true },
+                            onCustomizeTap: { showBackgroundPicker = true },
                             onTap: {
                                 Task {
                                     if await biometricAuth.authenticate() {
@@ -72,6 +75,14 @@ struct HomeView: View {
                         .opacity(completeCardAppear ? 1 : 0)
                     }
                     .padding(.horizontal, 20)
+
+                    // MARK: - Emergency Card
+                    EmergencyCardBanner {
+                        router.push(.emergencyCard)
+                    }
+                    .padding(.horizontal, 20)
+                    .opacity(completeCardAppear ? 1 : 0)
+                    .offset(y: completeCardAppear ? 0 : 20)
 
                     // MARK: - Recent Documents
                     VStack(alignment: .leading, spacing: 12) {
@@ -116,12 +127,19 @@ struct HomeView: View {
                 switch route {
                 case .healthProfileDetail:
                     HealthProfileDetailView()
+                case .emergencyCard:
+                    EmergencyCardView()
                 }
             }
             .sheet(isPresented: $showShareSheet) {
                 ShareHealthProfileSheet()
                     .presentationDetents([.height(525)])
                     .presentationDragIndicator(.visible)
+            }
+            .sheet(isPresented: $showBackgroundPicker) {
+                CardBackgroundPickerSheet(selected: $cardBackground)
+                    .presentationDetents([.medium])
+                    .presentationDragIndicator(.hidden)
             }
             .sheet(isPresented: $showPaywall) {
                 PaywallView(subscriptionManager: subscriptionManager)

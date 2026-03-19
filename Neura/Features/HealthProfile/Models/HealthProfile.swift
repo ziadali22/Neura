@@ -13,6 +13,30 @@ struct HealthProfile: Codable {
         var weight: String
         var bloodType: String
         var insuranceStatus: String
+        var emergencyContact: String
+
+        init(fullName: String, dateOfBirth: String, gender: String, height: String, weight: String, bloodType: String, insuranceStatus: String, emergencyContact: String = "") {
+            self.fullName = fullName
+            self.dateOfBirth = dateOfBirth
+            self.gender = gender
+            self.height = height
+            self.weight = weight
+            self.bloodType = bloodType
+            self.insuranceStatus = insuranceStatus
+            self.emergencyContact = emergencyContact
+        }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            fullName = try container.decode(String.self, forKey: .fullName)
+            dateOfBirth = try container.decode(String.self, forKey: .dateOfBirth)
+            gender = try container.decode(String.self, forKey: .gender)
+            height = try container.decode(String.self, forKey: .height)
+            weight = try container.decode(String.self, forKey: .weight)
+            bloodType = try container.decode(String.self, forKey: .bloodType)
+            insuranceStatus = try container.decode(String.self, forKey: .insuranceStatus)
+            emergencyContact = try container.decodeIfPresent(String.self, forKey: .emergencyContact) ?? ""
+        }
     }
 
     struct HealthSection: Identifiable, Codable {

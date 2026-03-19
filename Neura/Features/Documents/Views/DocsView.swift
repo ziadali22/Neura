@@ -5,6 +5,9 @@ import UniformTypeIdentifiers
 struct DocsView: View {
     @StateObject private var viewModel = DocumentsListViewModel()
     @State private var showFilters = false
+    @State private var isSelecting = false
+    @State private var selectedDocuments: Set<UUID> = []
+    @State private var showDeleteSelectedAlert = false
 
     var body: some View {
         NavigationStack {
@@ -24,11 +27,38 @@ struct DocsView: View {
             .navigationTitle("Documents")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    if isSelecting {
+                        Button {
+                            toggleSelectAll()
+                        } label: {
+                            Text(allSelected ? "Deselect All" : "Select All")
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundColor(.accent)
+                        }
+                    }
+                }
+
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button { viewModel.showAddOptions() } label: {
-                        Image(systemName: "plus")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.accent)
+                    HStack(spacing: 12) {
+                        Button {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                isSelecting.toggle()
+                                if !isSelecting { selectedDocuments.removeAll() }
+                            }
+                        } label: {
+                            Text(isSelecting ? "Done" : "Select")
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundColor(.accent)
+                        }
+
+                        if !isSelecting {
+                            Button { viewModel.showAddOptions() } label: {
+                                Image(systemName: "plus")
+                                    .font(.system(size: 18, weight: .semibold))
+                                    .foregroundColor(.accent)
+                            }
+                        }
                     }
                 }
             }
@@ -123,9 +153,27 @@ struct DocsView: View {
                     Text(error)
                 }
             }
+
+            // Delete selected alert
+            .alert("Delete \(selectedDocuments.count) Document\(selectedDocuments.count == 1 ? "" : "s")?", isPresented: $showDeleteSelectedAlert) {
+                Button("Cancel", role: .cancel) {}
+                Button("Delete", role: .destructive) {
+                    deleteSelectedDocuments()
+                }
+            } message: {
+                Text("This action cannot be undone.")
+            }
             .onAppear {
                 viewModel.loadDocuments()
             }
+            .toolbar(isSelecting && !selectedDocuments.isEmpty ? .hidden : .visible, for: .tabBar)
+            .overlay(alignment: .bottom) {
+                if isSelecting && !selectedDocuments.isEmpty {
+                    selectionBottomBar
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+            }
+            .animation(.spring(response: 0.3, dampingFraction: 0.85), value: selectedDocuments.isEmpty)
         }
     }
 
@@ -232,10 +280,23 @@ struct DocsView: View {
 
                             VStack(spacing: 8) {
                                 ForEach(section.documents) { document in
-                                    NavigationLink(value: document) {
-                                        DocumentRow(document: document)
+                                    if isSelecting {
+                                        Button {
+                                            toggleSelection(document)
+                                        } label: {
+                                            DocumentRow(
+                                                document: document,
+                                                isSelecting: true,
+                                                isSelected: selectedDocuments.contains(document.id)
+                                            )
+                                        }
+                                        .buttonStyle(ScaleButtonStyle())
+                                    } else {
+                                        NavigationLink(value: document) {
+                                            DocumentRow(document: document)
+                                        }
+                                        .buttonStyle(ScaleButtonStyle())
                                     }
-                                    .buttonStyle(ScaleButtonStyle())
                                 }
                             }
                         }
@@ -297,12 +358,116 @@ struct DocsView: View {
             Spacer()
         }
     }
+
+    // MARK: - Selection
+
+    private var allSelected: Bool {
+        let allIDs = Set(viewModel.filteredDocuments.map(\.id))
+        return !allIDs.isEmpty && allIDs.isSubset(of: selectedDocuments)
+    }
+
+    private func toggleSelection(_ document: Document) {
+        withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+            if selectedDocuments.contains(document.id) {
+                selectedDocuments.remove(document.id)
+            } else {
+                selectedDocuments.insert(document.id)
+            }
+        }
+    }
+
+    private func toggleSelectAll() {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+            if allSelected {
+                selectedDocuments.removeAll()
+            } else {
+                selectedDocuments = Set(viewModel.filteredDocuments.map(\.id))
+            }
+        }
+    }
+
+    // MARK: - Selection Bottom Bar
+
+    private var selectionBottomBar: some View {
+        HStack {
+            Button {
+                showDeleteSelectedAlert = true
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "trash")
+                        .font(.system(size: 16, weight: .medium))
+                    Text("Delete")
+                        .font(.system(size: 15, weight: .semibold))
+                }
+                .foregroundColor(.textPrimary)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 14)
+                .background(Color.surfaceWhite)
+                .clipShape(Capsule())
+                .overlay(Capsule().strokeBorder(Color.stroke, lineWidth: 1.5))
+                .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+            }
+
+            Spacer()
+
+            Button {
+                shareSelectedDocuments()
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 16, weight: .medium))
+                    Text("Share")
+                        .font(.system(size: 15, weight: .semibold))
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 14)
+                .background(Color.accent)
+                .clipShape(Capsule())
+                .shadow(color: Color.accent.opacity(0.3), radius: 8, x: 0, y: 4)
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 16)
+    }
+
+    // MARK: - Bulk Actions
+
+    private func shareSelectedDocuments() {
+        let urls = viewModel.documents
+            .filter { selectedDocuments.contains($0.id) && $0.fileExists }
+            .map(\.fileURL)
+
+        guard !urls.isEmpty else { return }
+
+        let activityVC = UIActivityViewController(activityItems: urls, applicationActivities: nil)
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let root = windowScene.windows.first?.rootViewController {
+            var topVC = root
+            while let presented = topVC.presentedViewController { topVC = presented }
+            activityVC.popoverPresentationController?.sourceView = topVC.view
+            topVC.present(activityVC, animated: true)
+        }
+    }
+
+    private func deleteSelectedDocuments() {
+        let toDelete = viewModel.documents.filter { selectedDocuments.contains($0.id) }
+        for doc in toDelete {
+            viewModel.deleteDocument(doc)
+        }
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+            selectedDocuments.removeAll()
+            isSelecting = false
+        }
+    }
 }
 
 // MARK: - Document Row
 
 private struct DocumentRow: View {
     let document: Document
+    var isSelecting: Bool = false
+    var isSelected: Bool = false
 
     var body: some View {
         HStack(spacing: 14) {
@@ -351,9 +516,33 @@ private struct DocumentRow: View {
 
             Spacer()
 
-            Image(systemName: "chevron.right")
-                .font(.system(size: 13))
-                .foregroundColor(.textTertiary)
+            if isSelecting {
+                ZStack {
+                    Circle()
+                        .strokeBorder(
+                            isSelected ? Color.accent : Color.textTertiary.opacity(0.35),
+                            lineWidth: 2
+                        )
+                        .frame(width: 24, height: 24)
+
+                    if isSelected {
+                        Circle()
+                            .fill(Color.accent)
+                            .frame(width: 24, height: 24)
+                            .overlay(
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundColor(.white)
+                            )
+                            .transition(.scale.combined(with: .opacity))
+                    }
+                }
+                .animation(.spring(response: 0.25, dampingFraction: 0.7), value: isSelected)
+            } else {
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13))
+                    .foregroundColor(.textTertiary)
+            }
         }
         .padding(14)
         .background(Color.surfaceWhite)
@@ -362,14 +551,22 @@ private struct DocumentRow: View {
     }
 
     private var documentIcon: some View {
-        ZStack {
+        let iconColor = document.category?.color ?? Color.accent
+        return ZStack {
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color.accent.opacity(0.12))
+                .fill(iconColor.opacity(0.12))
                 .frame(width: 44, height: 44)
 
-            Image(systemName: document.isPDF ? "doc.fill" : "photo.fill")
-                .font(.system(size: 18))
-                .foregroundColor(.accent)
+            if let category = document.category, let assetIcon = category.assetIcon {
+                Image(assetIcon)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 24, height: 24)
+            } else {
+                Image(systemName: document.category?.icon ?? (document.isPDF ? "doc.fill" : "photo.fill"))
+                    .font(.system(size: 18))
+                    .foregroundColor(iconColor)
+            }
         }
     }
 

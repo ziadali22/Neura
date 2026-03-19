@@ -5,6 +5,7 @@ import SwiftUI
 struct DocumentMetadata {
     var name: String = ""
     var category: DocumentCategory?
+    var specialization: MedicalSpecialization = .other
     var doctorName: String = ""
     var notes: String = ""
     var documentDate: Date = Date()
@@ -28,6 +29,7 @@ struct DocumentMetadataView: View {
     @State private var scannedImages: [UIImage] = []
     @State private var showScanner = false
     @State private var showDatePicker = false
+    @State private var showSpecializationPicker = false
     @FocusState private var focusedField: Field?
 
     private enum Field: Hashable {
@@ -40,6 +42,7 @@ struct DocumentMetadataView: View {
                 VStack(spacing: 24) {
                     previewSection
                     categorySection
+                    specializationSection
                     dateSection
                     nameSection
                     doctorSection
@@ -58,6 +61,9 @@ struct DocumentMetadataView: View {
             .background(Color.backgroundPrimary)
             .navigationTitle("Document Details")
             .navigationBarTitleDisplayMode(.inline)
+            .navigationDestination(isPresented: $showSpecializationPicker) {
+                SpecializationPickerView(selected: $metadata.specialization)
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") { dismiss() }
@@ -240,6 +246,37 @@ struct DocumentMetadataView: View {
                     }
                     .buttonStyle(.plain)
                 }
+            }
+        }
+    }
+
+    // MARK: - Specialization Section
+
+    private var specializationSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Specialization")
+                .font(.headingXS)
+                .foregroundColor(.textPrimary)
+
+            Button {
+                focusedField = nil
+                showSpecializationPicker = true
+            } label: {
+                HStack {
+                    Text(metadata.specialization.rawValue)
+                        .font(.bodyL)
+                        .foregroundColor(.textPrimary)
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 14))
+                        .foregroundColor(.textTertiary)
+                }
+                .padding(16)
+                .background(Color.surfaceWhite)
+                .cornerRadius(14)
+                .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
             }
         }
     }
@@ -444,6 +481,60 @@ struct DocumentMetadataView: View {
 
         onSave(trimmed, finalPreview)
         dismiss()
+    }
+}
+
+// MARK: - Specialization Picker View
+
+private struct SpecializationPickerView: View {
+    @Binding var selected: MedicalSpecialization
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 0) {
+                ForEach(MedicalSpecialization.allCases) { spec in
+                    Button {
+                        selected = spec
+                        dismiss()
+                    } label: {
+                        HStack(spacing: 16) {
+                            Image(systemName: spec.icon)
+                                .font(.system(size: 18))
+                                .foregroundColor(.textSecondary)
+                                .frame(width: 28, alignment: .center)
+
+                            Text(spec.rawValue)
+                                .font(.bodyL)
+                                .foregroundColor(.textPrimary)
+
+                            Spacer()
+
+                            if selected == spec {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.accent)
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 14)
+                    }
+                    .buttonStyle(.plain)
+
+                    if spec != MedicalSpecialization.allCases.last {
+                        Divider()
+                            .padding(.leading, 64)
+                    }
+                }
+            }
+            .background(Color.surfaceWhite)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
+        }
+        .background(Color.backgroundPrimary)
+        .navigationTitle("Specialization")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

@@ -27,6 +27,7 @@ enum ProfileRoute: Hashable {
 
 enum HomeRoute: Hashable {
     case healthProfileDetail
+    case emergencyCard
 }
 
 enum DocsRoute: Hashable {

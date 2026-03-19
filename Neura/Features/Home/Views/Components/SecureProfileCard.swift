@@ -3,18 +3,16 @@ import SwiftUI
 struct SecureProfileCard: View {
     let name: String
     let location: String
-    let backgroundImage: String
+    let background: CardBackground
     var onShareTap: (() -> Void)?
+    var onCustomizeTap: (() -> Void)?
     var onTap: (() -> Void)?
 
     @State private var dragAmount = CGSize.zero
 
     var body: some View {
         ZStack {
-            Image(backgroundImage)
-                .resizable()
-                .scaledToFill()
-                .frame(height: 450)
+            CardBackgroundView(background: background, height: 450)
                 .clipShape(RoundedRectangle(cornerRadius: 40))
                 .overlay {
                     VStack {
@@ -82,15 +80,28 @@ private extension SecureProfileCard {
 
             Spacer()
 
-            Button {
-                onShareTap?()
-            } label: {
-                Image(systemName: "square.and.arrow.up")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .frame(width: 35, height: 35)
-                    .background(.black.opacity(0.5))
-                    .clipShape(Circle())
+            HStack(spacing: 6) {
+                Button {
+                    onCustomizeTap?()
+                } label: {
+                    Image(systemName: "paintbrush.fill")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 35, height: 35)
+                        .background(.black.opacity(0.5))
+                        .clipShape(Circle())
+                }
+
+                Button {
+                    onShareTap?()
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 35, height: 35)
+                        .background(.black.opacity(0.5))
+                        .clipShape(Circle())
+                }
             }
         }
     }
@@ -110,6 +121,6 @@ private extension SecureProfileCard {
     SecureProfileCard(
         name: "Ziad Ali Khalil",
         location: "Egypt, Cairo",
-        backgroundImage: "6"
+        background: .default
     )
 }
