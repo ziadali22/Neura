@@ -1,0 +1,102 @@
+import SwiftUI
+
+struct OnboardingView: View {
+    let onComplete: () -> Void
+    @StateObject private var viewModel = OnboardingViewModel()
+
+    var body: some View {
+        ZStack(alignment: .top) {
+            // Animated background
+            (viewModel.currentStep == .welcome ? Color.accent : Color.backgroundPrimary)
+                .ignoresSafeArea()
+                .animation(.easeInOut(duration: 0.35), value: viewModel.currentStep == .welcome)
+
+            VStack(spacing: 0) {
+                topBar
+                    .padding(.horizontal, 20)
+                    .padding(.top, 8)
+                    .frame(height: viewModel.currentStep.showsProgressBar ? 44 : 0)
+                    .clipped()
+
+                stepContent
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+        }
+        .onChange(of: viewModel.isComplete) { _, done in
+            if done { onComplete() }
+        }
+    }
+
+    // MARK: - Top Bar
+
+    private var topBar: some View {
+        ZStack {
+            // Centered progress pill
+            if viewModel.currentStep.showsProgressBar {
+                progressBar
+            }
+
+            // Back button — left aligned
+            HStack {
+                if viewModel.currentStep != .welcome && viewModel.currentStep != .privacy {
+                    Button("Back", systemImage: "chevron.left") {
+                        viewModel.goBack()
+                    }
+                    .labelStyle(.iconOnly)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(Color.textPrimary)
+                    .frame(width: 36, height: 36)
+                    .background(Color.surfaceWhite)
+                    .clipShape(Circle())
+                    .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
+                }
+                Spacer()
+            }
+        }
+    }
+
+    private var progressBar: some View {
+        ZStack(alignment: .leading) {
+            Capsule().fill(Color.stroke).frame(width: 120, height: 4)
+            Capsule()
+                .fill(Color.accent)
+                .frame(width: max(8, 120 * viewModel.progress), height: 4)
+                .animation(.spring(response: 0.5, dampingFraction: 0.8), value: viewModel.progress)
+        }
+    }
+
+    // MARK: - Step Transitions
+
+    private var stepTransition: AnyTransition {
+        .asymmetric(
+            insertion: .move(edge: viewModel.direction > 0 ? .trailing : .leading).combined(with: .opacity),
+            removal:   .move(edge: viewModel.direction > 0 ? .leading  : .trailing).combined(with: .opacity)
+        )
+    }
+
+    @ViewBuilder
+    private var stepContent: some View {
+        Group {
+            switch viewModel.currentStep {
+            case .welcome:       OnboardingWelcomeStep(viewModel: viewModel)
+            case .privacy:       OnboardingPrivacyStep(viewModel: viewModel)
+            case .goals:         OnboardingGoalsStep(viewModel: viewModel)
+            case .profile:       OnboardingProfileStep(viewModel: viewModel)
+            case .emergency:     OnboardingEmergencyStep(viewModel: viewModel)
+            case .biometrics:    OnboardingBiometricsStep(viewModel: viewModel)
+            case .emergencyCard: OnboardingCardStep(viewModel: viewModel)
+            case .healthKit:     OnboardingHealthKitStep(viewModel: viewModel)
+            case .healthData:    OnboardingHealthDataStep(viewModel: viewModel)
+            case .medical:       OnboardingMedicalStep(viewModel: viewModel)
+            case .documents:     OnboardingDocumentsStep(viewModel: viewModel)
+            }
+        }
+        .id(viewModel.currentStep)
+        .transition(stepTransition)
+        .animation(.spring(response: 0.45, dampingFraction: 0.85), value: viewModel.currentStep)
+    }
+}
+
+#Preview {
+    OnboardingView(onComplete: {})
+}
