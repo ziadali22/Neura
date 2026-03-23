@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct OnboardingPrivacyStep: View {
+struct OnboardingStoreAndShareStep: View {
     @ObservedObject var viewModel: OnboardingViewModel
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var appeared = false
@@ -9,35 +9,23 @@ struct OnboardingPrivacyStep: View {
         VStack(spacing: 0) {
             Spacer()
 
-            // Concentric circles + Lock illustration
-            ZStack {
-                ForEach(0..<3, id: \.self) { i in
-                    Circle()
-                        .stroke(Color.stroke.opacity(0.5 - Double(i) * 0.12), lineWidth: 1)
-                        .frame(
-                            width: CGFloat(160 + i * 80),
-                            height: CGFloat(160 + i * 80)
-                        )
-                }
-
-                Image(.lock)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 120, height: 120)
-                    .scaleEffect(appeared ? 1 : 0.8)
-                    .opacity(appeared ? 1 : 0)
-            }
-            .accessibilityHidden(true)
+            // FilesCard illustration
+            Image(.fileCard)
+                .resizable()
+                .scaledToFit()
+                .padding(.horizontal, 24)
+                .scaleEffect(appeared ? 1 : 0.92)
+                .opacity(appeared ? 1 : 0)
 
             Spacer()
 
             // Text content
             VStack(alignment: .leading, spacing: 12) {
-                Text("Your health data is\nprivate and secure")
+                Text("Store and share your\nmedical records")
                     .font(.displayL)
                     .foregroundStyle(Color.textPrimary)
 
-                Text("Your documents are encrypted and stored securely. Only you control what you share.")
+                Text("Upload and access your documents anytime. Share them with your doctor in seconds.")
                     .font(.bodyL)
                     .foregroundStyle(Color.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -75,6 +63,6 @@ struct OnboardingPrivacyStep: View {
 }
 
 #Preview {
-    OnboardingPrivacyStep(viewModel: OnboardingViewModel())
+    OnboardingStoreAndShareStep(viewModel: OnboardingViewModel())
         .background(Color.backgroundPrimary)
 }

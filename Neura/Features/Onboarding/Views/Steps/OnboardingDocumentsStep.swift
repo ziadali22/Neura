@@ -8,7 +8,7 @@ struct OnboardingDocumentsStep: View {
         VStack(spacing: 0) {
             Spacer()
 
-            VStack(spacing: 36) {
+            VStack(spacing: 32) {
                 // Celebration icon
                 ZStack {
                     Circle().fill(Color.accent.opacity(0.08)).frame(width: 120, height: 120)
@@ -36,7 +36,7 @@ struct OnboardingDocumentsStep: View {
                 .offset(y: appeared ? 0 : 16)
 
                 // Feature hints
-                VStack(spacing: 10) {
+                VStack(spacing: 8) {
                     hintRow("doc.viewfinder", "Scan documents using your camera")
                     hintRow("staroflife.fill", "Show your emergency card anywhere")
                     hintRow("square.and.arrow.up", "Share your health profile as PDF")

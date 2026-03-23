@@ -50,37 +50,45 @@ final class OnboardingViewModel: ObservableObject {
 
     private func nextStep(after step: OnboardingStep) -> OnboardingStep {
         switch step {
-        case .welcome:       return .privacy
-        case .privacy:       return .goals
-        case .goals:         return .profile
-        case .profile:       return .emergency
-        case .emergency:     return .biometrics
-        case .biometrics:    return .emergencyCard
-        case .emergencyCard: return .healthKit
+        case .welcome:         return .storeAndShare
+        case .storeAndShare:   return .documentScan
+        case .documentScan:    return .privacySecurity
+        case .privacySecurity: return .medicalAreas
+        case .medicalAreas:    return .profile
+        case .profile:         return .location
+        case .location:        return .profileCard
+        case .profileCard:     return .emergency
+        case .emergency:       return .biometrics
+        case .biometrics:      return .emergencyCard
+        case .emergencyCard:   return .healthKit
         case .healthKit:
             if healthKitStatus == .authorized, healthKitData?.hasAnyData == true { return .healthData }
             return .medical
-        case .healthData:    return .medical
-        case .medical:       return .documents
-        case .documents:     return .documents // sentinel — caller handles completion
+        case .healthData:      return .medical
+        case .medical:         return .documents
+        case .documents:       return .documents // sentinel — caller handles completion
         }
     }
 
     private func previousStep(before step: OnboardingStep) -> OnboardingStep {
         switch step {
-        case .welcome:       return .welcome
-        case .privacy:       return .welcome
-        case .goals:         return .privacy
-        case .profile:       return .goals
-        case .emergency:     return .profile
-        case .biometrics:    return .emergency
-        case .emergencyCard: return .biometrics
-        case .healthKit:     return .emergencyCard
-        case .healthData:    return .healthKit
+        case .welcome:         return .welcome
+        case .storeAndShare:   return .welcome
+        case .documentScan:    return .storeAndShare
+        case .privacySecurity: return .documentScan
+        case .medicalAreas:    return .privacySecurity
+        case .profile:         return .medicalAreas
+        case .location:        return .profile
+        case .profileCard:     return .location
+        case .emergency:       return .profileCard
+        case .biometrics:      return .emergency
+        case .emergencyCard:   return .biometrics
+        case .healthKit:       return .emergencyCard
+        case .healthData:      return .healthKit
         case .medical:
             if healthKitStatus == .authorized, healthKitData?.hasAnyData == true { return .healthData }
             return .healthKit
-        case .documents:     return .medical
+        case .documents:       return .medical
         }
     }
 
@@ -145,9 +153,9 @@ final class OnboardingViewModel: ObservableObject {
 
         let contact: String
         switch (state.emergencyContactName.isEmpty, state.emergencyContactPhone.isEmpty) {
-        case (true, true):  contact = ""
-        case (false, true): contact = state.emergencyContactName
-        case (true, false): contact = state.emergencyContactPhone
+        case (true, true):   contact = ""
+        case (false, true):  contact = state.emergencyContactName
+        case (true, false):  contact = state.emergencyContactPhone
         case (false, false): contact = "\(state.emergencyContactName) · \(state.emergencyContactPhone)"
         }
 
@@ -184,5 +192,25 @@ final class OnboardingViewModel: ObservableObject {
         if let data = try? JSONEncoder().encode(profile) {
             UserDefaults.standard.set(data, forKey: "health_profile_data")
         }
+
+        // Persist selected medical areas
+        let areas = state.medicalAreas.map(\.rawValue)
+        if let data = try? JSONEncoder().encode(areas) {
+            UserDefaults.standard.set(data, forKey: "onboarding_medical_areas")
+        }
+
+        // Persist card background
+        state.cardBackground.save()
+
+        // Persist location
+        let location: String
+        switch (state.city.trimmingCharacters(in: .whitespaces).isEmpty,
+                state.country.trimmingCharacters(in: .whitespaces).isEmpty) {
+        case (false, false): location = "\(state.city), \(state.country)"
+        case (false, true):  location = state.city
+        case (true, false):  location = state.country
+        case (true, true):   location = ""
+        }
+        UserDefaults.standard.set(location, forKey: "user_location")
     }
 }

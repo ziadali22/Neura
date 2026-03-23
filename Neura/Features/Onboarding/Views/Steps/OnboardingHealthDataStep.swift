@@ -8,14 +8,14 @@ struct OnboardingHealthDataStep: View {
         VStack(spacing: 0) {
             Spacer()
 
-            VStack(spacing: 36) {
+            VStack(spacing: 32) {
                 // Icon + title
                 VStack(spacing: 16) {
                     ZStack {
-                        Circle().fill(Color(hex: "34C759").opacity(0.1)).frame(width: 80, height: 80)
+                        Circle().fill(Color(.systemGreen).opacity(0.1)).frame(width: 80, height: 80)
                         Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 40))
-                            .foregroundStyle(Color(hex: "34C759"))
+                            .foregroundStyle(Color(.systemGreen))
                     }
                     .scaleEffect(appeared ? 1 : 0.6)
                     .opacity(appeared ? 1 : 0)
@@ -83,7 +83,7 @@ struct OnboardingHealthDataStep: View {
     }
 
     private func dataRow(_ icon: String, _ label: String, _ value: String) -> some View {
-        HStack(spacing: 14) {
+        HStack(spacing: 12) {
             ZStack {
                 RoundedRectangle(cornerRadius: 10)
                     .fill(Color.accent.opacity(0.08))
@@ -100,9 +100,9 @@ struct OnboardingHealthDataStep: View {
                 .font(.headingXS)
                 .foregroundStyle(Color.textPrimary)
         }
-        .padding(14)
+        .padding(12)
         .background(Color.surfaceWhite)
-        .clipShape(.rect(cornerRadius: 14))
+        .clipShape(.rect(cornerRadius: 12))
         .shadow(color: .black.opacity(0.04), radius: 4, x: 0, y: 2)
     }
 }

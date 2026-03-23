@@ -53,7 +53,7 @@ struct HomeView: View {
                     VStack(alignment: .leading, spacing: 24) {
                         SecureProfileCard(
                             name: "ZIAD\nKHALIL",
-                            location: "Iasi, Romania",
+                            location: UserDefaults.standard.string(forKey: "user_location") ?? "",
                             background: cardBackground,
                             onShareTap: { showShareSheet = true },
                             onCustomizeTap: { showBackgroundPicker = true },

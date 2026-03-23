@@ -4,13 +4,13 @@ struct OnboardingGoalsStep: View {
     @ObservedObject var viewModel: OnboardingViewModel
     @State private var appeared = false
 
-    private let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
+    private let columns = [GridItem(.flexible(), spacing: 16), GridItem(.flexible(), spacing: 16)]
 
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 28) {
-                    VStack(alignment: .leading, spacing: 10) {
+                    VStack(alignment: .leading, spacing: 8) {
                         Text("What will you\nuse Neura for?")
                             .font(.displayL)
                             .foregroundStyle(Color.textPrimary)
@@ -19,17 +19,33 @@ struct OnboardingGoalsStep: View {
                             .foregroundStyle(Color.textSecondary)
                     }
 
-                    LazyVGrid(columns: columns, spacing: 12) {
-                        ForEach(UserGoal.allCases) { goal in
-                            goalCard(goal)
+                    LazyVGrid(columns: columns, spacing: 16) {
+                        ForEach(Array(UserGoal.allCases.enumerated()), id: \.element.id) { index, goal in
+                            GoalCard(
+                                goal: goal,
+                                isSelected: viewModel.state.goals.contains(goal)
+                            ) {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                                    if viewModel.state.goals.contains(goal) {
+                                        viewModel.state.goals.remove(goal)
+                                    } else {
+                                        viewModel.state.goals.insert(goal)
+                                    }
+                                }
+                            }
+                            .opacity(appeared ? 1 : 0)
+                            .offset(y: appeared ? 0 : 20)
+                            .animation(
+                                .spring(response: 0.5, dampingFraction: 0.85)
+                                    .delay(Double(index) * 0.09),
+                                value: appeared
+                            )
                         }
                     }
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 20)
                 .padding(.bottom, 16)
-                .opacity(appeared ? 1 : 0)
-                .offset(y: appeared ? 0 : 16)
             }
             .scrollIndicators(.hidden)
 
@@ -37,44 +53,8 @@ struct OnboardingGoalsStep: View {
         }
         .task {
             try? await Task.sleep(for: .milliseconds(100))
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) { appeared = true }
+            appeared = true
         }
-    }
-
-    private func goalCard(_ goal: UserGoal) -> some View {
-        let selected = viewModel.state.goals.contains(goal)
-        return Button {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                if selected {
-                    viewModel.state.goals.remove(goal)
-                } else {
-                    viewModel.state.goals.insert(goal)
-                }
-            }
-        } label: {
-            VStack(alignment: .leading, spacing: 12) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(selected ? Color.white.opacity(0.25) : Color.accent.opacity(0.08))
-                        .frame(width: 36, height: 36)
-                    Image(systemName: goal.icon)
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundStyle(selected ? .white : Color.accent)
-                }
-                Text(goal.rawValue)
-                    .font(.headingXS)
-                    .foregroundStyle(selected ? .white : Color.textPrimary)
-                    .multilineTextAlignment(.leading)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .padding(16)
-            .background(selected ? Color.black : Color.surfaceWhite)
-            .clipShape(.rect(cornerRadius: 16))
-            .shadow(color: selected ? Color.accent.opacity(0.25) : .black.opacity(0.04), radius: 8, x: 0, y: 3)
-        }
-        .buttonStyle(ScaleButtonStyle())
-        .frame(height: 110)
     }
 
     private var continueButton: some View {
@@ -91,6 +71,72 @@ struct OnboardingGoalsStep: View {
         .buttonStyle(ScaleButtonStyle())
         .padding(.horizontal, 24)
         .padding(.bottom, 32)
+    }
+}
+
+// MARK: - Goal Card
+
+private struct GoalCard: View {
+    let goal: UserGoal
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack(alignment: .top) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(isSelected ? Color.white.opacity(0.18) : Color.accent.opacity(0.08))
+                            .frame(width: 40, height: 40)
+                        Image(systemName: goal.icon)
+                            .font(.system(size: 17, weight: .medium))
+                            .foregroundStyle(isSelected ? .white : Color.accent)
+                            .accessibilityHidden(true)
+                    }
+
+                    Spacer()
+
+                    if isSelected {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 18))
+                            .foregroundStyle(Color.accent)
+                            .accessibilityHidden(true)
+                            .transition(.scale(scale: 0.4).combined(with: .opacity))
+                    }
+                }
+
+                Text(goal.rawValue)
+                    .font(.headingXS)
+                    .foregroundStyle(isSelected ? .white : Color.textPrimary)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .padding(18)
+            .background(isSelected ? Color.black : Color.surfaceWhite)
+            .clipShape(.rect(cornerRadius: 18))
+            .overlay {
+                RoundedRectangle(cornerRadius: 18)
+                    .strokeBorder(
+                        isSelected ? Color.accent.opacity(0.35) : Color.stroke.opacity(0.7),
+                        lineWidth: 1
+                    )
+            }
+            // Layered shadows: tight contact shadow + diffuse ambient
+            .shadow(
+                color: isSelected ? .black.opacity(0.14) : .black.opacity(0.04),
+                radius: isSelected ? 3 : 2,
+                x: 0, y: isSelected ? 2 : 1
+            )
+            .shadow(
+                color: isSelected ? Color.accent.opacity(0.22) : .black.opacity(0.07),
+                radius: isSelected ? 20 : 14,
+                x: 0, y: isSelected ? 8 : 5
+            )
+        }
+        .buttonStyle(ScaleButtonStyle())
+        .frame(minHeight: 120)
     }
 }
 

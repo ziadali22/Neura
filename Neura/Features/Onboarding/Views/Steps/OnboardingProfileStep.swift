@@ -10,8 +10,8 @@ struct OnboardingProfileStep: View {
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
-                VStack(alignment: .leading, spacing: 28) {
-                    VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: 24) {
+                    VStack(alignment: .leading, spacing: 8) {
                         Text("Create your\nhealth profile")
                             .font(.displayL)
                             .foregroundStyle(Color.textPrimary)
@@ -38,7 +38,7 @@ struct OnboardingProfileStep: View {
                             }
                             .padding(16)
                             .background(Color.surfaceWhite)
-                            .clipShape(.rect(cornerRadius: 14))
+                            .clipShape(.rect(cornerRadius: 12))
                             .shadow(color: .black.opacity(0.04), radius: 4, x: 0, y: 2)
                         }
 
@@ -67,7 +67,7 @@ struct OnboardingProfileStep: View {
                                 }
                                 .padding(16)
                                 .background(Color.surfaceWhite)
-                                .clipShape(.rect(cornerRadius: 14))
+                                .clipShape(.rect(cornerRadius: 12))
                                 .shadow(color: .black.opacity(0.04), radius: 4, x: 0, y: 2)
                             }
                             if showDatePicker {
@@ -102,7 +102,7 @@ struct OnboardingProfileStep: View {
                 .offset(y: appeared ? 0 : 16)
             }
             .scrollIndicators(.hidden)
-            .onTapGesture { nameFocused = false }
+            .scrollDismissesKeyboard(.immediately)
 
             continueButton
         }

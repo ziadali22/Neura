@@ -6,16 +6,29 @@ struct OnboardingView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            // Animated background
-            (viewModel.currentStep == .welcome ? Color.accent : Color.backgroundPrimary)
+            // Base background
+            Color.backgroundPrimary
                 .ignoresSafeArea()
-                .animation(.easeInOut(duration: 0.35), value: viewModel.currentStep == .welcome)
+
+            // Welcome gradient — fades in/out with the welcome step
+            LinearGradient(
+                colors: [
+                    Color(hex: "FFBD82"),
+                    Color(hex: "FF7040"),
+                    Color(hex: "D6391A")
+                ],
+                startPoint: .topTrailing,
+                endPoint: .bottomLeading
+            )
+            .ignoresSafeArea()
+            .opacity(viewModel.currentStep == .welcome ? 1 : 0)
+            .animation(.easeInOut(duration: 0.35), value: viewModel.currentStep == .welcome)
 
             VStack(spacing: 0) {
                 topBar
                     .padding(.horizontal, 20)
                     .padding(.top, 8)
-                    .frame(height: viewModel.currentStep.showsProgressBar ? 44 : 0)
+                    .frame(height: viewModel.currentStep.showsTopBar ? 44 : 0)
                     .clipped()
 
                 stepContent
@@ -38,7 +51,7 @@ struct OnboardingView: View {
 
             // Back button — left aligned
             HStack {
-                if viewModel.currentStep != .welcome && viewModel.currentStep != .privacy {
+                if viewModel.currentStep != .welcome {
                     Button("Back", systemImage: "chevron.left") {
                         viewModel.goBack()
                     }
@@ -78,17 +91,21 @@ struct OnboardingView: View {
     private var stepContent: some View {
         Group {
             switch viewModel.currentStep {
-            case .welcome:       OnboardingWelcomeStep(viewModel: viewModel)
-            case .privacy:       OnboardingPrivacyStep(viewModel: viewModel)
-            case .goals:         OnboardingGoalsStep(viewModel: viewModel)
-            case .profile:       OnboardingProfileStep(viewModel: viewModel)
-            case .emergency:     OnboardingEmergencyStep(viewModel: viewModel)
-            case .biometrics:    OnboardingBiometricsStep(viewModel: viewModel)
-            case .emergencyCard: OnboardingCardStep(viewModel: viewModel)
-            case .healthKit:     OnboardingHealthKitStep(viewModel: viewModel)
-            case .healthData:    OnboardingHealthDataStep(viewModel: viewModel)
-            case .medical:       OnboardingMedicalStep(viewModel: viewModel)
-            case .documents:     OnboardingDocumentsStep(viewModel: viewModel)
+            case .welcome:         OnboardingWelcomeStep(viewModel: viewModel)
+            case .storeAndShare:   OnboardingStoreAndShareStep(viewModel: viewModel)
+            case .documentScan:    OnboardingDocumentScanStep(viewModel: viewModel)
+            case .privacySecurity: OnboardingPrivacyStep(viewModel: viewModel)
+            case .medicalAreas:    OnboardingMedicalAreasStep(viewModel: viewModel)
+            case .profile:         OnboardingProfileStep(viewModel: viewModel)
+            case .location:        OnboardingLocationStep(viewModel: viewModel)
+            case .profileCard:     OnboardingProfileCardStep(viewModel: viewModel)
+            case .emergency:       OnboardingEmergencyStep(viewModel: viewModel)
+            case .biometrics:      OnboardingBiometricsStep(viewModel: viewModel)
+            case .emergencyCard:   OnboardingCardStep(viewModel: viewModel)
+            case .healthKit:       OnboardingHealthKitStep(viewModel: viewModel)
+            case .healthData:      OnboardingHealthDataStep(viewModel: viewModel)
+            case .medical:         OnboardingMedicalStep(viewModel: viewModel)
+            case .documents:       OnboardingDocumentsStep(viewModel: viewModel)
             }
         }
         .id(viewModel.currentStep)

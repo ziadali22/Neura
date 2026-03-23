@@ -8,7 +8,7 @@ struct OnboardingCardStep: View {
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
-                VStack(spacing: 28) {
+                VStack(spacing: 24) {
                     // Header
                     VStack(spacing: 8) {
                         Text("Your emergency\ncard is ready")
@@ -67,8 +67,8 @@ struct OnboardingCardStep: View {
                 LinearGradient(colors: [Color(hex: "E8392E"), Color(hex: "C41E14")],
                                startPoint: .topLeading, endPoint: .bottomTrailing)
                 HStack {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("IN CASE OF").font(.system(size: 13, weight: .bold)).tracking(3)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("IN CASE OF").font(.labelM).fontWeight(.bold).tracking(2)
                             .foregroundStyle(.white.opacity(0.7))
                         Text("EMERGENCY").font(.system(size: 26, weight: .heavy)).tracking(1)
                             .foregroundStyle(.white)
@@ -94,10 +94,10 @@ struct OnboardingCardStep: View {
                 Divider().padding(.leading, 56)
 
                 // Neura branding footer
-                HStack(spacing: 6) {
+                HStack(spacing: 8) {
                     Circle().fill(Color.accent).frame(width: 5, height: 5)
-                    Text("Powered by").font(.system(size: 10)).foregroundStyle(Color.textTertiary)
-                    Text("Neura").font(.system(size: 10, weight: .bold)).foregroundStyle(Color.accent)
+                    Text("Powered by").font(.captionS).foregroundStyle(Color.textTertiary)
+                    Text("Neura").font(.captionS).fontWeight(.bold).foregroundStyle(Color.accent)
                 }
                 .padding(.vertical, 12)
             }
@@ -109,23 +109,25 @@ struct OnboardingCardStep: View {
     }
 
     private func cardBodyRow(_ icon: String, _ label: String, _ value: String) -> some View {
-        HStack(spacing: 14) {
+        HStack(spacing: 12) {
             ZStack {
-                RoundedRectangle(cornerRadius: 9)
+                RoundedRectangle(cornerRadius: 8)
                     .fill(Color(hex: "E8392E").opacity(0.08))
                     .frame(width: 34, height: 34)
                 Image(systemName: icon)
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(Color(hex: "E8392E"))
             }
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(label)
-                    .font(.system(size: 10, weight: .semibold))
+                    .font(.captionS)
+                    .fontWeight(.semibold)
                     .foregroundStyle(Color(hex: "CC1A10"))
                     .textCase(.uppercase)
                     .tracking(0.3)
                 Text(value)
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.bodyS)
+                    .fontWeight(.medium)
                     .foregroundStyle(Color.textPrimary)
             }
             Spacer()

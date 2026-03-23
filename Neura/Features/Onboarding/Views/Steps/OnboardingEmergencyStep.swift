@@ -12,7 +12,7 @@ struct OnboardingEmergencyStep: View {
             ScrollView {
                 VStack(spacing: 24) {
                     // Header
-                    VStack(alignment: .leading, spacing: 10) {
+                    VStack(alignment: .leading, spacing: 8) {
                         Text("Set up your\nemergency card")
                             .font(.displayL)
                             .foregroundStyle(Color.textPrimary)
@@ -83,7 +83,7 @@ struct OnboardingEmergencyStep: View {
                 .focused($focusedField, equals: field)
                 .padding(16)
                 .background(Color.surfaceWhite)
-                .clipShape(.rect(cornerRadius: 14))
+                .clipShape(.rect(cornerRadius: 12))
                 .shadow(color: .black.opacity(0.04), radius: 4, x: 0, y: 2)
         }
     }
@@ -98,7 +98,7 @@ struct OnboardingEmergencyStep: View {
             Text(type.rawValue)
                 .font(.buttonM)
                 .foregroundStyle(selected ? .white : Color.textPrimary)
-                .padding(.horizontal, 18)
+                .padding(.horizontal, 16)
                 .padding(.vertical, 10)
                 .background(selected ? Color.black : Color.surfaceWhite)
                 .clipShape(Capsule())
@@ -108,7 +108,7 @@ struct OnboardingEmergencyStep: View {
     }
 
     private var continueButton: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 12) {
             Button(action: viewModel.advance) {
                 Text("Continue")
                     .font(.buttonL)
@@ -144,8 +144,9 @@ private struct MiniEmergencyCard: View {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("IN CASE OF")
-                            .font(.system(size: 11, weight: .bold))
-                            .tracking(2.5)
+                            .font(.captionS)
+                            .fontWeight(.bold)
+                            .tracking(2)
                             .foregroundStyle(.white.opacity(0.7))
                         Text("EMERGENCY")
                             .font(.system(size: 20, weight: .heavy))
@@ -157,8 +158,8 @@ private struct MiniEmergencyCard: View {
                         .font(.system(size: 28))
                         .foregroundStyle(.white.opacity(0.18))
                 }
-                .padding(.horizontal, 18)
-                .padding(.vertical, 14)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
             }
             .frame(height: 72)
             .clipShape(UnevenRoundedRectangle(topLeadingRadius: 18, bottomLeadingRadius: 0,
@@ -194,7 +195,8 @@ private struct MiniEmergencyCard: View {
                     .foregroundStyle(Color(hex: "E8392E"))
             }
             Text(text)
-                .font(.system(size: 14, weight: isPlaceholder ? .regular : .medium))
+                .font(.bodyS)
+                .fontWeight(isPlaceholder ? .regular : .medium)
                 .foregroundStyle(isPlaceholder ? Color.textTertiary : Color.textPrimary)
             Spacer()
         }

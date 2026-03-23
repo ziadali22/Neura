@@ -2,71 +2,102 @@ import SwiftUI
 
 struct OnboardingWelcomeStep: View {
     @ObservedObject var viewModel: OnboardingViewModel
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var appeared = false
 
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
 
-            VStack(spacing: 32) {
-                // Logo
-                Image(.n)
-                    .resizable()
-                    .renderingMode(.template)
-                    .foregroundStyle(.white)
-                    .frame(width: 64, height: 64)
-                    .scaleEffect(appeared ? 1 : 0.6)
-                    .opacity(appeared ? 1 : 0)
+            // Logo
+            Image(.logo)
+                .resizable()
+                .renderingMode(.original)
+                .aspectRatio(contentMode: .fill)
+                .foregroundStyle(.white)
+                .frame(width: 96, height: 96)
+                .scaleEffect(appeared ? 1 : 0.7)
+                .opacity(appeared ? 1 : 0)
 
-                // Text
-                VStack(spacing: 14) {
-                    Text("All your medical history.\nOne secure place.")
-                        .font(.displayXL)
+            Spacer()
+            Spacer()
+
+            // Bottom content
+            VStack(spacing: 0) {
+                // Title + subtitle
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Welcome to Neura")
+                        .font(.displayL)
+                        .fontWeight(.bold)
                         .foregroundStyle(.white)
-                        .multilineTextAlignment(.center)
-                        .opacity(appeared ? 1 : 0)
-                        .offset(y: appeared ? 0 : 20)
 
-                    Text("Private. Offline. Always yours.")
+                    Text("Store, organize, and share your medical records in one secure place.")
                         .font(.bodyL)
-                        .foregroundStyle(.white.opacity(0.75))
-                        .multilineTextAlignment(.center)
-                        .opacity(appeared ? 1 : 0)
-                        .offset(y: appeared ? 0 : 14)
+                        .foregroundStyle(.white.opacity(0.8))
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-            }
-            .padding(.horizontal, 32)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 24)
+                .padding(.bottom, 32)
+                .opacity(appeared ? 1 : 0)
+                .offset(y: appeared ? 0 : 20)
 
-            Spacer()
-            Spacer()
+                // Buttons
+                VStack(spacing: 12) {
+                    Button(action: viewModel.advance) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "apple.logo")
+                                .font(.system(size: 20, weight: .medium))
+                            Text("Continue with Apple")
+                                .font(.buttonL)
+                        }
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 56)
+                        .background(Color.black)
+                        .clipShape(.rect(cornerRadius: 28))
+                    }
+                    .buttonStyle(ScaleButtonStyle())
+                    .accessibilityLabel("Continue with Apple")
 
-            // CTA
-            VStack(spacing: 16) {
-                Button(action: viewModel.advance) {
-                    Text("Get Started")
-                        .font(.buttonL)
-                        .foregroundStyle(Color.accent)
+                    Button(action: viewModel.advance) {
+                        HStack(spacing: 8) {
+                            Image(.googleIcon)
+                                .resizable()
+                                .frame(width: 20, height: 20)
+                            Text("Continue with Google")
+                                .font(.buttonL)
+                                .foregroundStyle(Color.textPrimary)
+                        }
                         .frame(maxWidth: .infinity)
                         .frame(height: 56)
                         .background(.white)
-                        .clipShape(.rect(cornerRadius: 16))
-                        .shadow(color: .black.opacity(0.12), radius: 12, x: 0, y: 6)
+                        .clipShape(.rect(cornerRadius: 28))
+                    }
+                    .buttonStyle(ScaleButtonStyle())
+                    .accessibilityLabel("Continue with Google")
                 }
-                .buttonStyle(ScaleButtonStyle())
+                .padding(.horizontal, 24)
+                .padding(.bottom, 16)
                 .opacity(appeared ? 1 : 0)
                 .offset(y: appeared ? 0 : 24)
 
-                Text("Free to use · No account required")
-                    .font(.captionS)
-                    .foregroundStyle(.white.opacity(0.55))
-                    .opacity(appeared ? 1 : 0)
+                // Footer
+                HStack(spacing: 6) {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 11))
+                    Text("End-to-end encrypted")
+                        .font(.captionS)
+                }
+                .foregroundStyle(.black)
+                .padding(.top, 24)
+                .padding(.bottom, 24)
+                .opacity(appeared ? 1 : 0)
             }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 48)
         }
         .task {
             try? await Task.sleep(for: .milliseconds(200))
-            withAnimation(.spring(response: 0.7, dampingFraction: 0.8)) {
+            withAnimation(reduceMotion ? .none : .spring(response: 0.7, dampingFraction: 0.8)) {
                 appeared = true
             }
         }
@@ -75,7 +106,11 @@ struct OnboardingWelcomeStep: View {
 
 #Preview {
     ZStack {
-        Color.accent.ignoresSafeArea()
+        LinearGradient(
+            colors: [Color(hex: "FFBD82"), Color(hex: "FF7040"), Color(hex: "D6391A")],
+            startPoint: .topTrailing, endPoint: .bottomLeading
+        )
+        .ignoresSafeArea()
         OnboardingWelcomeStep(viewModel: OnboardingViewModel())
     }
 }

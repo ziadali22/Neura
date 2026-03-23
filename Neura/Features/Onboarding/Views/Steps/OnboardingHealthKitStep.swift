@@ -11,12 +11,12 @@ struct OnboardingHealthKitStep: View {
                     // Header
                     VStack(alignment: .leading, spacing: 12) {
                         ZStack {
-                            RoundedRectangle(cornerRadius: 18)
-                                .fill(Color(hex: "FF2D55").opacity(0.1))
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color(.systemPink).opacity(0.1))
                                 .frame(width: 64, height: 64)
                             Image(systemName: "heart.fill")
                                 .font(.system(size: 30))
-                                .foregroundStyle(Color(hex: "FF2D55"))
+                                .foregroundStyle(Color(.systemPink))
                         }
                         Text("Connect to\nApple Health")
                             .font(.displayL)
@@ -43,7 +43,7 @@ struct OnboardingHealthKitStep: View {
                             .foregroundStyle(Color.textTertiary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
-                    .padding(14)
+                    .padding(12)
                     .background(Color.surfaceWhite)
                     .clipShape(.rect(cornerRadius: 12))
                 }
@@ -60,7 +60,7 @@ struct OnboardingHealthKitStep: View {
                 Button {
                     viewModel.requestHealthKit()
                 } label: {
-                    HStack(spacing: 10) {
+                    HStack(spacing: 8) {
                         if viewModel.healthKitStatus == .requesting {
                             ProgressView().tint(.white)
                         } else {
@@ -95,27 +95,27 @@ struct OnboardingHealthKitStep: View {
     }
 
     private func benefitRow(_ icon: String, _ title: String, _ subtitle: String) -> some View {
-        HStack(spacing: 14) {
+        HStack(spacing: 12) {
             ZStack {
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(Color(hex: "FF2D55").opacity(0.08))
+                    .fill(Color(.systemPink).opacity(0.08))
                     .frame(width: 38, height: 38)
                 Image(systemName: icon)
                     .font(.system(size: 16))
-                    .foregroundStyle(Color(hex: "FF2D55"))
+                    .foregroundStyle(Color(.systemPink))
             }
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(title).font(.headingXS).foregroundStyle(Color.textPrimary)
                 Text(subtitle).font(.bodyS).foregroundStyle(Color.textSecondary)
             }
             Spacer()
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: 18))
-                .foregroundStyle(Color(hex: "34C759"))
+                .foregroundStyle(Color(.systemGreen))
         }
-        .padding(14)
+        .padding(12)
         .background(Color.surfaceWhite)
-        .clipShape(.rect(cornerRadius: 14))
+        .clipShape(.rect(cornerRadius: 12))
         .shadow(color: .black.opacity(0.03), radius: 4, x: 0, y: 2)
     }
 }

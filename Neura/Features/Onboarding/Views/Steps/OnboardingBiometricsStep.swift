@@ -55,7 +55,7 @@ struct OnboardingBiometricsStep: View {
                         isRequesting = false
                     }
                 } label: {
-                    HStack(spacing: 10) {
+                    HStack(spacing: 8) {
                         if isRequesting {
                             ProgressView().tint(.white)
                         } else {

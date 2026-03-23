@@ -10,8 +10,8 @@ struct OnboardingMedicalStep: View {
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
-                VStack(alignment: .leading, spacing: 28) {
-                    VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: 24) {
+                    VStack(alignment: .leading, spacing: 8) {
                         HStack(alignment: .top) {
                             Text("Your health\nhistory")
                                 .font(.displayL)
@@ -102,9 +102,9 @@ struct OnboardingMedicalStep: View {
                 .lineLimit(2...)
                 .submitLabel(next != nil ? .next : .done)
                 .onSubmit { focusedField = next }
-                .padding(14)
+                .padding(16)
                 .background(Color.surfaceWhite)
-                .clipShape(.rect(cornerRadius: 14))
+                .clipShape(.rect(cornerRadius: 12))
                 .shadow(color: .black.opacity(0.04), radius: 4, x: 0, y: 2)
         }
     }
