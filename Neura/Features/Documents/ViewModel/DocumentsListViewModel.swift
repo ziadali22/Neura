@@ -23,6 +23,7 @@ final class DocumentsListViewModel: ObservableObject {
 
     // Filtering & Sorting
     @Published var selectedCategoryFilter: DocumentCategory?
+    @Published var selectedSpecializationFilter: MedicalSpecialization?
     @Published var sortOption: DocumentSortOption = .newest
 
     // Subscription
@@ -59,6 +60,11 @@ final class DocumentsListViewModel: ObservableObject {
         // Category filter
         if let category = selectedCategoryFilter {
             result = result.filter { $0.category == category }
+        }
+
+        // Specialization filter
+        if let specialization = selectedSpecializationFilter {
+            result = result.filter { $0.specialization == specialization }
         }
 
         // Search
@@ -147,12 +153,14 @@ final class DocumentsListViewModel: ObservableObject {
     var activeFilterCount: Int {
         var count = 0
         if selectedCategoryFilter != nil { count += 1 }
+        if selectedSpecializationFilter != nil { count += 1 }
         if sortOption != .newest { count += 1 }
         return count
     }
 
     func clearFilters() {
         selectedCategoryFilter = nil
+        selectedSpecializationFilter = nil
         sortOption = .newest
     }
 

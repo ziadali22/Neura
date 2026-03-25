@@ -63,7 +63,7 @@ struct ColumnCard: View {
                     .padding(.horizontal, Spacing.small)
 
                 TaskView(column: $column, activeColumn: $activeColumn)
-                    .matchedGeometryEffect(id: "task", in: namespace)
+                    .matchedGeometryEffect(id: "task-\(column.position)", in: namespace)
             }
         }
         .padding(column.isExpanded ? Spacing.standard : .zero)

@@ -2,8 +2,24 @@ import SwiftUI
 import PhotosUI
 import UniformTypeIdentifiers
 
+// MARK: - View Mode
+
+private enum DocViewMode: CaseIterable {
+    case folders, all
+
+    var label: String {
+        switch self {
+        case .folders: "Folders"
+        case .all: "All"
+        }
+    }
+}
+
+// MARK: - DocsView
+
 struct DocsView: View {
     @StateObject private var viewModel = DocumentsListViewModel()
+    @State private var viewMode: DocViewMode = .folders
     @State private var showFilters = false
     @State private var isSelecting = false
     @State private var selectedDocuments: Set<UUID> = []
@@ -12,55 +28,30 @@ struct DocsView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                searchBar
-                filterBar
-                documentsList
+                segmentControl
+
+                // Mode content
+                ZStack {
+                    if viewMode == .folders {
+                        categoriesGrid
+                            .transition(.opacity)
+                    } else {
+                        VStack(spacing: 0) {
+                            searchBar
+                            filterBar
+                            documentsList
+                        }
+                        .transition(.opacity)
+                    }
+                }
+                .animation(.easeInOut(duration: 0.22), value: viewMode)
             }
             .background(Color.backgroundPrimary)
-            .contentShape(Rectangle())
-            .onTapGesture {
-                UIApplication.shared.sendAction(
-                    #selector(UIResponder.resignFirstResponder),
-                    to: nil, from: nil, for: nil
-                )
-            }
             .navigationTitle("Documents")
             .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    if isSelecting {
-                        Button {
-                            toggleSelectAll()
-                        } label: {
-                            Text(allSelected ? "Deselect All" : "Select All")
-                                .font(.system(size: 15, weight: .medium))
-                                .foregroundColor(.accent)
-                        }
-                    }
-                }
-
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack(spacing: 12) {
-                        Button {
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                isSelecting.toggle()
-                                if !isSelecting { selectedDocuments.removeAll() }
-                            }
-                        } label: {
-                            Text(isSelecting ? "Done" : "Select")
-                                .font(.system(size: 15, weight: .medium))
-                                .foregroundColor(.accent)
-                        }
-
-                        if !isSelecting {
-                            Button { viewModel.showAddOptions() } label: {
-                                Image(systemName: "plus")
-                                    .font(.system(size: 18, weight: .semibold))
-                                    .foregroundColor(.accent)
-                            }
-                        }
-                    }
-                }
+            .toolbar { toolbarContent }
+            .navigationDestination(for: DocumentCategory.self) { category in
+                CategoryDocumentsView(category: category, viewModel: viewModel)
             }
             .navigationDestination(for: Document.self) { document in
                 DocumentViewerView(document: document, onDelete: {
@@ -69,11 +60,7 @@ struct DocsView: View {
                     viewModel.renameDocument(document, to: newName)
                 })
             }
-            .overlay {
-                ScanProcessingView(isProcessing: viewModel.isProcessing)
-            }
-
-            // Custom source picker
+            .overlay { ScanProcessingView(isProcessing: viewModel.isProcessing) }
             .sheet(isPresented: $viewModel.showSourcePicker) {
                 AddDocumentSheet(
                     onScan: { viewModel.startScanning() },
@@ -83,16 +70,10 @@ struct DocsView: View {
                 .presentationDetents([.height(320)])
                 .presentationDragIndicator(.visible)
             }
-
-            // Scanner
             .fullScreenCover(isPresented: $viewModel.showScanner) {
-                DocumentScanner { result in
-                    viewModel.handleScanResult(result)
-                }
-                .ignoresSafeArea()
+                DocumentScanner { result in viewModel.handleScanResult(result) }
+                    .ignoresSafeArea()
             }
-
-            // Photo picker
             .photosPicker(
                 isPresented: $viewModel.showPhotoPicker,
                 selection: $viewModel.selectedPhotoItem,
@@ -101,8 +82,6 @@ struct DocsView: View {
             .onChange(of: viewModel.selectedPhotoItem) { _, item in
                 viewModel.handlePhotoSelection(item)
             }
-
-            // File importer
             .fileImporter(
                 isPresented: $viewModel.showFileImporter,
                 allowedContentTypes: [.pdf, .image],
@@ -110,15 +89,11 @@ struct DocsView: View {
             ) { result in
                 switch result {
                 case .success(let urls):
-                    if let url = urls.first {
-                        viewModel.handleFileImport(.success(url))
-                    }
+                    if let url = urls.first { viewModel.handleFileImport(.success(url)) }
                 case .failure(let error):
                     viewModel.handleFileImport(.failure(error))
                 }
             }
-
-            // Metadata form
             .sheet(isPresented: $viewModel.showMetadataForm) {
                 if let preview = viewModel.pendingPreview {
                     DocumentMetadataView(preview: preview) { metadata, updatedPreview in
@@ -126,46 +101,37 @@ struct DocsView: View {
                     }
                 }
             }
-
-            // Filter sheet
             .sheet(isPresented: $showFilters) {
                 FilterSheet(
                     selectedCategory: $viewModel.selectedCategoryFilter,
+                    selectedSpecialization: $viewModel.selectedSpecializationFilter,
                     sortOption: $viewModel.sortOption,
+                    resultCount: viewModel.filteredDocuments.count,
                     onClear: { viewModel.clearFilters() }
                 )
-                .presentationDetents([.medium])
+                .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
             }
-
-            // Paywall
             .sheet(isPresented: $viewModel.showPaywall) {
                 PaywallView(subscriptionManager: .shared)
                     .presentationDetents([.large])
                     .presentationDragIndicator(.visible)
             }
-
-            // Error alert
             .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
                 Button("OK") { viewModel.errorMessage = nil }
             } message: {
-                if let error = viewModel.errorMessage {
-                    Text(error)
-                }
+                if let error = viewModel.errorMessage { Text(error) }
             }
-
-            // Delete selected alert
-            .alert("Delete \(selectedDocuments.count) Document\(selectedDocuments.count == 1 ? "" : "s")?", isPresented: $showDeleteSelectedAlert) {
+            .alert(
+                "Delete \(selectedDocuments.count) Document\(selectedDocuments.count == 1 ? "" : "s")?",
+                isPresented: $showDeleteSelectedAlert
+            ) {
                 Button("Cancel", role: .cancel) {}
-                Button("Delete", role: .destructive) {
-                    deleteSelectedDocuments()
-                }
+                Button("Delete", role: .destructive, action: deleteSelectedDocuments)
             } message: {
                 Text("This action cannot be undone.")
             }
-            .onAppear {
-                viewModel.loadDocuments()
-            }
+            .onAppear { viewModel.loadDocuments() }
             .toolbar(isSelecting && !selectedDocuments.isEmpty ? .hidden : .visible, for: .tabBar)
             .overlay(alignment: .bottom) {
                 if isSelecting && !selectedDocuments.isEmpty {
@@ -177,23 +143,77 @@ struct DocsView: View {
         }
     }
 
+    // MARK: - Segment Control
+
+    private var segmentControl: some View {
+        HStack(spacing: 2) {
+            ForEach(DocViewMode.allCases, id: \.label) { mode in
+                Button {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                        viewMode = mode
+                        if mode == .folders { isSelecting = false; selectedDocuments.removeAll() }
+                    }
+                } label: {
+                    Text(mode.label)
+                        .font(.labelM)
+                        .fontWeight(viewMode == mode ? .semibold : .regular)
+                        .foregroundStyle(viewMode == mode ? Color.textPrimary : Color.textTertiary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background {
+                            if viewMode == mode {
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color.surfaceWhite)
+                                    .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
+                            }
+                        }
+                }
+            }
+        }
+        .padding(3)
+        .background(Color.backgroundCard)
+        .clipShape(.rect(cornerRadius: 13))
+        .padding(.horizontal, 20)
+        .padding(.top, 8)
+        .padding(.bottom, 4)
+    }
+
+    // MARK: - Categories Grid
+
+    private var categoriesGrid: some View {
+        let docsByCategory = Dictionary(grouping: viewModel.documents, by: { $0.category ?? .other })
+        return ScrollView {
+            LazyVGrid(columns: [GridItem(.flexible())], alignment: .leading, spacing: 12) {
+                ForEach(DocumentCategory.allCases) { category in
+                    CategoryFolderCard(
+                        category: category,
+                        documents: docsByCategory[category] ?? []
+                    )
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 12)
+            .padding(.bottom, 100)
+        }
+        .scrollIndicators(.hidden)
+    }
+
     // MARK: - Search Bar
 
     private var searchBar: some View {
         HStack(spacing: 12) {
             Image(systemName: "magnifyingglass")
-                .foregroundColor(.textTertiary)
-
+                .foregroundStyle(Color.textTertiary)
             TextField("Search documents", text: $viewModel.searchText)
                 .font(.bodyL)
         }
         .padding(12)
-        .background(Color.white)
-        .cornerRadius(12)
+        .background(Color.surfaceWhite)
+        .clipShape(.rect(cornerRadius: 12))
+        .shadow(color: .black.opacity(0.04), radius: 4, x: 0, y: 2)
         .padding(.horizontal, 16)
         .padding(.top, 8)
         .padding(.bottom, 4)
-        .shadow(radius: 1)
     }
 
     // MARK: - Filter Bar
@@ -204,29 +224,23 @@ struct DocsView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "line.3.horizontal.decrease")
                         .font(.system(size: 14, weight: .medium))
-
                     Text("Filter")
                         .font(.labelM)
-
                     if viewModel.activeFilterCount > 0 {
                         Text("\(viewModel.activeFilterCount)")
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                             .frame(width: 18, height: 18)
                             .background(Color.accent)
                             .clipShape(Circle())
                     }
                 }
-                .foregroundColor(viewModel.activeFilterCount > 0 ? .accent : .textSecondary)
+                .foregroundStyle(viewModel.activeFilterCount > 0 ? Color.accent : Color.textSecondary)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
-                .background(
-                    viewModel.activeFilterCount > 0
-                    ? Color.accent.opacity(0.1)
-                    : Color.white
-                )
-                .shadow(radius: 1)
-                .cornerRadius(8)
+                .background(viewModel.activeFilterCount > 0 ? Color.accent.opacity(0.1) : Color.surfaceWhite)
+                .clipShape(.rect(cornerRadius: 8))
+                .shadow(color: .black.opacity(0.04), radius: 2, x: 0, y: 1)
             }
 
             if let category = viewModel.selectedCategoryFilter {
@@ -235,7 +249,6 @@ struct DocsView: View {
                         .font(.system(size: 12))
                     Text(category.localizedName)
                         .font(.labelM)
-
                     Button {
                         withAnimation { viewModel.selectedCategoryFilter = nil }
                     } label: {
@@ -243,18 +256,18 @@ struct DocsView: View {
                             .font(.system(size: 10, weight: .bold))
                     }
                 }
-                .foregroundColor(.accent)
+                .foregroundStyle(Color.accent)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
                 .background(Color.accent.opacity(0.1))
-                .cornerRadius(8)
+                .clipShape(.rect(cornerRadius: 8))
             }
 
             Spacer()
 
             Text("\(viewModel.filteredDocuments.count) docs")
                 .font(.captionS)
-                .foregroundColor(.textTertiary)
+                .foregroundStyle(Color.textTertiary)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
@@ -265,26 +278,23 @@ struct DocsView: View {
     @ViewBuilder
     private var documentsList: some View {
         let sections = viewModel.groupedDocuments
-
         if sections.isEmpty {
             emptyState
         } else {
-            ScrollView(showsIndicators: false) {
+            ScrollView {
                 LazyVStack(spacing: 20) {
                     ForEach(sections) { section in
                         VStack(alignment: .leading, spacing: 8) {
                             Text(section.title)
                                 .font(.headingXS)
-                                .foregroundColor(.textSecondary)
+                                .foregroundStyle(Color.textSecondary)
                                 .padding(.horizontal, 4)
 
                             VStack(spacing: 8) {
                                 ForEach(section.documents) { document in
                                     if isSelecting {
-                                        Button {
-                                            toggleSelection(document)
-                                        } label: {
-                                            DocumentRow(
+                                        Button { toggleSelection(document) } label: {
+                                            DocumentListRow(
                                                 document: document,
                                                 isSelecting: true,
                                                 isSelected: selectedDocuments.contains(document.id)
@@ -293,7 +303,7 @@ struct DocsView: View {
                                         .buttonStyle(ScaleButtonStyle())
                                     } else {
                                         NavigationLink(value: document) {
-                                            DocumentRow(document: document)
+                                            DocumentListRow(document: document)
                                         }
                                         .buttonStyle(ScaleButtonStyle())
                                     }
@@ -306,60 +316,98 @@ struct DocsView: View {
                 .padding(.top, 4)
                 .padding(.bottom, 100)
             }
+            .scrollIndicators(.hidden)
         }
     }
 
     // MARK: - Empty State
 
     private var emptyState: some View {
-        VStack(spacing: 16) {
-            Spacer()
+        ContentUnavailableView(
+            viewModel.activeFilterCount > 0 ? "No Matching Documents" : "No Documents",
+            systemImage: viewModel.activeFilterCount > 0 ? "doc.text.magnifyingglass" : "doc.badge.plus",
+            description: Text(
+                viewModel.activeFilterCount > 0
+                    ? "Try adjusting your filters."
+                    : "Scan or upload your first medical document."
+            )
+        )
+    }
 
-            Image(systemName: "doc.text.magnifyingglass")
-                .font(.system(size: 56))
-                .foregroundColor(.textTertiary.opacity(0.5))
+    // MARK: - Toolbar
 
-            Text(viewModel.activeFilterCount > 0 ? "No Matching Documents" : "No Documents")
-                .font(.headingS)
-                .foregroundColor(.textPrimary)
-
-            Text(viewModel.activeFilterCount > 0
-                 ? "Try adjusting your filters"
-                 : "Scan or upload your first document")
-                .font(.bodyS)
-                .foregroundColor(.textSecondary)
-
-            if viewModel.activeFilterCount > 0 {
-                Button {
-                    withAnimation { viewModel.clearFilters() }
-                } label: {
-                    Text("Clear Filters")
-                        .font(.buttonM)
-                        .foregroundColor(.accent)
-                }
-            } else {
-                Button {
-                    viewModel.showAddOptions()
-                } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "plus")
-                        Text("Add Document")
-                            .fontWeight(.semibold)
-                    }
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 14)
-                    .background(.black)
-                    .cornerRadius(14)
-                }
-                .padding(.top, 8)
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        ToolbarItem(placement: .topBarLeading) {
+            if isSelecting {
+                Button(allSelected ? "Deselect All" : "Select All", action: toggleSelectAll)
+                    .foregroundStyle(Color.accent)
+                    .font(.system(size: 15, weight: .medium))
             }
+        }
+        ToolbarItem(placement: .topBarTrailing) {
+            HStack(spacing: 12) {
+                Button(isSelecting ? "Done" : "Select") {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                        isSelecting.toggle()
+                        if !isSelecting { selectedDocuments.removeAll() }
+                    }
+                }
+                .foregroundStyle(Color.accent)
+                .font(.system(size: 15, weight: .medium))
+                .opacity(viewMode == .all ? 1 : 0)
+                .disabled(viewMode == .folders)
 
-            Spacer()
+                if !isSelecting {
+                    Button("Add document", systemImage: "plus") {
+                        viewModel.showAddOptions()
+                    }
+                    .labelStyle(.iconOnly)
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(Color.accent)
+                }
+            }
         }
     }
 
-    // MARK: - Selection
+    // MARK: - Selection Bottom Bar
+
+    private var selectionBottomBar: some View {
+        HStack {
+            Button {
+                showDeleteSelectedAlert = true
+            } label: {
+                Label("Delete", systemImage: "trash")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(Color.textPrimary)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 14)
+                    .background(Color.surfaceWhite)
+                    .clipShape(Capsule())
+                    .overlay(Capsule().strokeBorder(Color.stroke, lineWidth: 1.5))
+                    .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+            }
+
+            Spacer()
+
+            Button {
+                shareSelectedDocuments()
+            } label: {
+                Label("Share", systemImage: "square.and.arrow.up")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 14)
+                    .background(Color.accent)
+                    .clipShape(Capsule())
+                    .shadow(color: Color.accent.opacity(0.3), radius: 8, x: 0, y: 4)
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 16)
+    }
+
+    // MARK: - Selection Actions
 
     private var allSelected: Bool {
         let allIDs = Set(viewModel.filteredDocuments.map(\.id))
@@ -386,60 +434,11 @@ struct DocsView: View {
         }
     }
 
-    // MARK: - Selection Bottom Bar
-
-    private var selectionBottomBar: some View {
-        HStack {
-            Button {
-                showDeleteSelectedAlert = true
-            } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "trash")
-                        .font(.system(size: 16, weight: .medium))
-                    Text("Delete")
-                        .font(.system(size: 15, weight: .semibold))
-                }
-                .foregroundColor(.textPrimary)
-                .padding(.horizontal, 24)
-                .padding(.vertical, 14)
-                .background(Color.surfaceWhite)
-                .clipShape(Capsule())
-                .overlay(Capsule().strokeBorder(Color.stroke, lineWidth: 1.5))
-                .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
-            }
-
-            Spacer()
-
-            Button {
-                shareSelectedDocuments()
-            } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: 16, weight: .medium))
-                    Text("Share")
-                        .font(.system(size: 15, weight: .semibold))
-                }
-                .foregroundColor(.white)
-                .padding(.horizontal, 24)
-                .padding(.vertical, 14)
-                .background(Color.accent)
-                .clipShape(Capsule())
-                .shadow(color: Color.accent.opacity(0.3), radius: 8, x: 0, y: 4)
-            }
-        }
-        .padding(.horizontal, 20)
-        .padding(.bottom, 16)
-    }
-
-    // MARK: - Bulk Actions
-
     private func shareSelectedDocuments() {
         let urls = viewModel.documents
             .filter { selectedDocuments.contains($0.id) && $0.fileExists }
             .map(\.fileURL)
-
         guard !urls.isEmpty else { return }
-
         let activityVC = UIActivityViewController(activityItems: urls, applicationActivities: nil)
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let root = windowScene.windows.first?.rootViewController {
@@ -452,128 +451,11 @@ struct DocsView: View {
 
     private func deleteSelectedDocuments() {
         let toDelete = viewModel.documents.filter { selectedDocuments.contains($0.id) }
-        for doc in toDelete {
-            viewModel.deleteDocument(doc)
-        }
+        for doc in toDelete { viewModel.deleteDocument(doc) }
         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
             selectedDocuments.removeAll()
             isSelecting = false
         }
-    }
-}
-
-// MARK: - Document Row
-
-private struct DocumentRow: View {
-    let document: Document
-    var isSelecting: Bool = false
-    var isSelected: Bool = false
-
-    var body: some View {
-        HStack(spacing: 14) {
-            documentIcon
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(document.name)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.textPrimary)
-                    .lineLimit(1)
-
-                HStack(spacing: 6) {
-                    if let category = document.category {
-                        Text(category.localizedName)
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.accent)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.accent.opacity(0.1))
-                            .cornerRadius(4)
-                    }
-
-                    Text(formattedDate)
-                        .font(.system(size: 13))
-                        .foregroundColor(.textTertiary)
-
-                    if document.isPDF && document.pageCount > 1 {
-                        Text("·")
-                            .foregroundColor(.textTertiary)
-                        Text("\(document.pageCount) pages")
-                            .font(.system(size: 13))
-                            .foregroundColor(.textTertiary)
-                    }
-                }
-
-                if let doctor = document.doctorName, !doctor.isEmpty {
-                    HStack(spacing: 4) {
-                        Image(systemName: "stethoscope")
-                            .font(.system(size: 11))
-                        Text(doctor)
-                            .font(.system(size: 12))
-                    }
-                    .foregroundColor(.textTertiary)
-                }
-            }
-
-            Spacer()
-
-            if isSelecting {
-                ZStack {
-                    Circle()
-                        .strokeBorder(
-                            isSelected ? Color.accent : Color.textTertiary.opacity(0.35),
-                            lineWidth: 2
-                        )
-                        .frame(width: 24, height: 24)
-
-                    if isSelected {
-                        Circle()
-                            .fill(Color.accent)
-                            .frame(width: 24, height: 24)
-                            .overlay(
-                                Image(systemName: "checkmark")
-                                    .font(.system(size: 12, weight: .bold))
-                                    .foregroundColor(.white)
-                            )
-                            .transition(.scale.combined(with: .opacity))
-                    }
-                }
-                .animation(.spring(response: 0.25, dampingFraction: 0.7), value: isSelected)
-            } else {
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 13))
-                    .foregroundColor(.textTertiary)
-            }
-        }
-        .padding(14)
-        .background(Color.surfaceWhite)
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
-    }
-
-    private var documentIcon: some View {
-        let iconColor = document.category?.color ?? Color.accent
-        return ZStack {
-            RoundedRectangle(cornerRadius: 12)
-                .fill(iconColor.opacity(0.12))
-                .frame(width: 44, height: 44)
-
-            if let category = document.category, let assetIcon = category.assetIcon {
-                Image(assetIcon)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 24, height: 24)
-            } else {
-                Image(systemName: document.category?.icon ?? (document.isPDF ? "doc.fill" : "photo.fill"))
-                    .font(.system(size: 18))
-                    .foregroundColor(iconColor)
-            }
-        }
-    }
-
-    private var formattedDate: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd.MM.yyyy"
-        return formatter.string(from: document.createdAt)
     }
 }
 
@@ -589,53 +471,32 @@ private struct AddDocumentSheet: View {
         VStack(spacing: 0) {
             Text("Add Document")
                 .font(.headingS)
-                .foregroundColor(.textPrimary)
+                .foregroundStyle(Color.textPrimary)
                 .padding(.top, 24)
                 .padding(.bottom, 20)
 
             VStack(spacing: 12) {
-                sourceOption(
-                    icon: "doc.viewfinder",
-                    title: "Scan Document",
-                    subtitle: "Use camera to scan pages",
-                    color: Color.accent
-                ) {
-                    dismiss()
-                    onScan()
+                sourceOption(icon: "doc.viewfinder", title: "Scan Document",
+                             subtitle: "Use camera to scan pages", color: Color.accent) {
+                    dismiss(); onScan()
                 }
-
-                sourceOption(
-                    icon: "photo.on.rectangle",
-                    title: "Upload from Photos",
-                    subtitle: "Choose an image from your library",
-                    color: Color(hex: "456990")
-                ) {
-                    dismiss()
-                    onPhoto()
+                sourceOption(icon: "photo.on.rectangle", title: "Upload from Photos",
+                             subtitle: "Choose an image from your library", color: Color(hex: "456990")) {
+                    dismiss(); onPhoto()
                 }
-
-                sourceOption(
-                    icon: "folder",
-                    title: "Import File",
-                    subtitle: "Select a PDF or image file",
-                    color: Color(hex: "6B9080")
-                ) {
-                    dismiss()
-                    onFile()
+                sourceOption(icon: "folder", title: "Import File",
+                             subtitle: "Select a PDF or image file", color: Color(hex: "6B9080")) {
+                    dismiss(); onFile()
                 }
             }
             .padding(.horizontal, 20)
-
             Spacer()
         }
         .background(Color.backgroundPrimary)
     }
 
     private func sourceOption(
-        icon: String,
-        title: String,
-        subtitle: String,
-        color: Color,
+        icon: String, title: String, subtitle: String, color: Color,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
@@ -644,150 +505,34 @@ private struct AddDocumentSheet: View {
                     RoundedRectangle(cornerRadius: 12)
                         .fill(color.opacity(0.12))
                         .frame(width: 48, height: 48)
-
                     Image(systemName: icon)
                         .font(.system(size: 20))
-                        .foregroundColor(color)
+                        .foregroundStyle(color)
+                        .accessibilityHidden(true)
                 }
-
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title)
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.textPrimary)
-
+                        .foregroundStyle(Color.textPrimary)
                     Text(subtitle)
                         .font(.system(size: 13))
-                        .foregroundColor(.textTertiary)
+                        .foregroundStyle(Color.textTertiary)
                 }
-
                 Spacer()
-
                 Image(systemName: "chevron.right")
                     .font(.system(size: 14))
-                    .foregroundColor(.textTertiary)
+                    .foregroundStyle(Color.textTertiary)
+                    .accessibilityHidden(true)
             }
             .padding(14)
             .background(Color.surfaceWhite)
-            .cornerRadius(14)
+            .clipShape(.rect(cornerRadius: 14))
             .shadow(color: Color.black.opacity(0.03), radius: 4, x: 0, y: 2)
         }
         .buttonStyle(ScaleButtonStyle())
     }
 }
 
-// MARK: - Filter Sheet
-
-private struct FilterSheet: View {
-    @Environment(\.dismiss) private var dismiss
-    @Binding var selectedCategory: DocumentCategory?
-    @Binding var sortOption: DocumentSortOption
-
-    let onClear: () -> Void
-
-    var body: some View {
-        NavigationStack {
-            ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 24) {
-                    // Sort
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Sort By")
-                            .font(.bodyS)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.textSecondary)
-
-                        HStack(spacing: 8) {
-                            ForEach(DocumentSortOption.allCases) { option in
-                                Button {
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                        sortOption = option
-                                    }
-                                } label: {
-                                    Text(option.localizedName)
-                                        .font(.labelM)
-                                        .foregroundColor(sortOption == option ? .white : .textSecondary)
-                                        .padding(.horizontal, 14)
-                                        .padding(.vertical, 10)
-                                        .background(
-                                            sortOption == option
-                                            ? Color.accent
-                                            : Color.backgroundCard
-                                        )
-                                        .cornerRadius(8)
-                                }
-                            }
-                        }
-                    }
-
-                    // Category
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Category")
-                            .font(.bodyS)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.textSecondary)
-
-                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                            ForEach(DocumentCategory.allCases) { cat in
-                                Button {
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                        selectedCategory = (selectedCategory == cat) ? nil : cat
-                                    }
-                                } label: {
-                                    HStack(spacing: 8) {
-                                        Image(systemName: cat.icon)
-                                            .font(.system(size: 14))
-
-                                        Text(cat.localizedName)
-                                            .font(.labelM)
-                                            .lineLimit(1)
-                                    }
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 12)
-                                    .background(
-                                        selectedCategory == cat
-                                        ? Color.accent.opacity(0.12)
-                                        : Color.backgroundCard
-                                    )
-                                    .foregroundColor(
-                                        selectedCategory == cat
-                                        ? .accent
-                                        : .textSecondary
-                                    )
-                                    .cornerRadius(10)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(
-                                                selectedCategory == cat ? Color.accent : Color.clear,
-                                                lineWidth: 1.5
-                                            )
-                                    )
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
-                    }
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 8)
-            }
-            .background(Color.backgroundPrimary)
-            .navigationTitle("Filters")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Clear") {
-                        withAnimation { onClear() }
-                    }
-                    .foregroundColor(.accent)
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") { dismiss() }
-                        .fontWeight(.medium)
-                        .foregroundColor(.textPrimary)
-                }
-            }
-        }
-    }
-}
 
 #Preview {
     DocsView()
