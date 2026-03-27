@@ -49,7 +49,7 @@ struct OnboardingGoalsStep: View {
             }
             .scrollIndicators(.hidden)
 
-            continueButton
+            OnboardingContinueButton(action: viewModel.advance)
         }
         .task {
             try? await Task.sleep(for: .milliseconds(100))
@@ -57,21 +57,6 @@ struct OnboardingGoalsStep: View {
         }
     }
 
-    private var continueButton: some View {
-        Button(action: viewModel.advance) {
-            Text("Continue")
-                .font(.buttonL)
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 56)
-                .background(Color.black)
-                .clipShape(.rect(cornerRadius: 16))
-                .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
-        }
-        .buttonStyle(ScaleButtonStyle())
-        .padding(.horizontal, 24)
-        .padding(.bottom, 32)
-    }
 }
 
 // MARK: - Goal Card

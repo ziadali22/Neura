@@ -35,7 +35,7 @@ struct OnboardingMedicalAreasStep: View {
             }
             .scrollIndicators(.hidden)
 
-            continueButton
+            OnboardingContinueButton(action: viewModel.advance)
         }
         .task {
             try? await Task.sleep(for: .milliseconds(100))
@@ -95,24 +95,6 @@ struct OnboardingMedicalAreasStep: View {
         .accessibilityAddTraits(.isToggle)
     }
 
-    // MARK: - Continue Button
-
-    private var continueButton: some View {
-        Button(action: viewModel.advance) {
-            Text("Continue")
-                .font(.buttonL)
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 56)
-                .background(Color.black)
-                .clipShape(.rect(cornerRadius: 28))
-        }
-        .buttonStyle(ScaleButtonStyle())
-        .padding(.horizontal, 24)
-        .padding(.top, 8)
-        .padding(.bottom, 48)
-        .background(Color.backgroundPrimary)
-    }
 }
 
 #Preview {

@@ -19,6 +19,7 @@ private enum DocViewMode: CaseIterable {
 
 struct DocsView: View {
     @StateObject private var viewModel = DocumentsListViewModel()
+    @EnvironmentObject private var coordinator: AppCoordinator
     @State private var viewMode: DocViewMode = .folders
     @State private var showFilters = false
     @State private var isSelecting = false
@@ -27,18 +28,26 @@ struct DocsView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
+            VStack(alignment: .leading ,spacing: 0) {
+                Text("Documents")
+                    .font(.title.bold())
+                    .padding(.vertical, 16)
+                    .padding(.horizontal, 20)
                 segmentControl
 
                 // Mode content
+
                 ZStack {
                     if viewMode == .folders {
                         categoriesGrid
                             .transition(.opacity)
                     } else {
                         VStack(spacing: 0) {
+
                             searchBar
-                            filterBar
+                            if !viewModel.documents.isEmpty {
+                                filterBar
+                            }
                             documentsList
                         }
                         .transition(.opacity)
@@ -47,7 +56,7 @@ struct DocsView: View {
                 .animation(.easeInOut(duration: 0.22), value: viewMode)
             }
             .background(Color.backgroundPrimary)
-            .navigationTitle("Documents")
+//            .navigationTitle("Documents")
             .navigationBarTitleDisplayMode(.large)
             .toolbar { toolbarContent }
             .navigationDestination(for: DocumentCategory.self) { category in
@@ -131,7 +140,19 @@ struct DocsView: View {
             } message: {
                 Text("This action cannot be undone.")
             }
-            .onAppear { viewModel.loadDocuments() }
+            .onAppear {
+                viewModel.loadDocuments()
+                if coordinator.showAddDocument {
+                    viewModel.showAddOptions()
+                    coordinator.showAddDocument = false
+                }
+            }
+            .onChange(of: coordinator.showAddDocument) { _, shouldAdd in
+                if shouldAdd {
+                    viewModel.showAddOptions()
+                    coordinator.showAddDocument = false
+                }
+            }
             .toolbar(isSelecting && !selectedDocuments.isEmpty ? .hidden : .visible, for: .tabBar)
             .overlay(alignment: .bottom) {
                 if isSelecting && !selectedDocuments.isEmpty {
@@ -346,7 +367,7 @@ struct DocsView: View {
             }
         }
         ToolbarItem(placement: .topBarTrailing) {
-            HStack(spacing: 12) {
+            if isSelecting || (viewMode == .all && !viewModel.filteredDocuments.isEmpty) {
                 Button(isSelecting ? "Done" : "Select") {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                         isSelecting.toggle()
@@ -355,17 +376,6 @@ struct DocsView: View {
                 }
                 .foregroundStyle(Color.accent)
                 .font(.system(size: 15, weight: .medium))
-                .opacity(viewMode == .all ? 1 : 0)
-                .disabled(viewMode == .folders)
-
-                if !isSelecting {
-                    Button("Add document", systemImage: "plus") {
-                        viewModel.showAddOptions()
-                    }
-                    .labelStyle(.iconOnly)
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(Color.accent)
-                }
             }
         }
     }

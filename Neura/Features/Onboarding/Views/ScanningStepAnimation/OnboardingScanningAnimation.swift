@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct OnboardingScanningAnimation: View {
+    var onComplete: (() -> Void)? = nil
+
     @Namespace private var namespace
 
     @State private var columns: [Column] = []
@@ -60,6 +62,7 @@ struct OnboardingScanningAnimation: View {
             try? await Task.sleep(for: .milliseconds(1100))
         }
         // Settle on the last active state — animation complete
+        onComplete?()
     }
 }
 

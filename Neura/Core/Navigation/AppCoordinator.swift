@@ -12,6 +12,7 @@ final class AppCoordinator: ObservableObject {
     }
 
     @Published var selectedTab: Tab = .home
+    @Published var showAddDocument = false
 
     let profileRouter = ProfileRouter()
     let homeRouter = HomeRouter()

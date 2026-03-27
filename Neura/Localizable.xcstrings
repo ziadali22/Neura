@@ -37,12 +37,32 @@
     "%@ free Documents Uploads left" : {
 
     },
-    "%@, %lld %@" : {
+    "%@, %@" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "%1$@, %2$lld %3$@"
+            "value" : "%1$@, %2$@"
+          }
+        }
+      }
+    },
+    "%@, ^[%lld document](inflect: true), %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, ^[%2$lld document](inflect: true), %3$@"
+          }
+        }
+      }
+    },
+    "%@%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@%2$@"
           }
         }
       }
@@ -456,6 +476,7 @@
 
     },
     "Clear" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -470,6 +491,9 @@
           }
         }
       }
+    },
+    "Clear all" : {
+
     },
     "Clear Filters" : {
       "extractionState" : "stale",
@@ -487,6 +511,9 @@
           }
         }
       }
+    },
+    "Close" : {
+
     },
     "Complete your profile" : {
       "localizations" : {
@@ -680,6 +707,7 @@
 
     },
     "Docs" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -1235,6 +1263,7 @@
 
     },
     "Home" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -1375,9 +1404,6 @@
           }
         }
       }
-    },
-    "Last added %@" : {
-
     },
     "Link Expired" : {
 
@@ -1550,6 +1576,9 @@
           }
         }
       }
+    },
+    "No documents yet" : {
+
     },
     "No Documents Yet" : {
       "localizations" : {
@@ -2030,6 +2059,9 @@
         }
       }
     },
+    "See ^[%lld result](inflect: true)" : {
+
+    },
     "Select" : {
 
     },
@@ -2137,6 +2169,7 @@
 
     },
     "Sort By" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {

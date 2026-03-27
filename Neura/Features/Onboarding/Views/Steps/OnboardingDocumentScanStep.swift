@@ -4,6 +4,7 @@ struct OnboardingDocumentScanStep: View {
     @ObservedObject var viewModel: OnboardingViewModel
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var appeared = false
+    @State private var buttonEnabled = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -13,7 +14,7 @@ struct OnboardingDocumentScanStep: View {
             if reduceMotion {
                 staticIllustration
             } else {
-                OnboardingScanningAnimation()
+                OnboardingScanningAnimation(onComplete: { buttonEnabled = true })
                     .padding(.horizontal, 48)
                     .opacity(appeared ? 1 : 0)
             }
@@ -37,9 +38,10 @@ struct OnboardingDocumentScanStep: View {
             .opacity(appeared ? 1 : 0)
             .offset(y: appeared ? 0 : 16)
 
-            continueButton
+            OnboardingContinueButton(action: viewModel.advance, isEnabled: buttonEnabled)
         }
         .task {
+            if reduceMotion { buttonEnabled = true }
             try? await Task.sleep(for: .milliseconds(200))
             withAnimation(reduceMotion ? .none : .spring(response: 0.6, dampingFraction: 0.85)) {
                 appeared = true
@@ -80,22 +82,6 @@ struct OnboardingDocumentScanStep: View {
         .accessibilityLabel("Three steps: Scan your documents, Organize by category, Share with your doctor")
     }
 
-    // MARK: - Continue Button
-
-    private var continueButton: some View {
-        Button(action: viewModel.advance) {
-            Text("Continue")
-                .font(.buttonL)
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 56)
-                .background(Color.black)
-                .clipShape(.rect(cornerRadius: 28))
-        }
-        .buttonStyle(ScaleButtonStyle())
-        .padding(.horizontal, 24)
-        .padding(.bottom, 48)
-    }
 }
 
 #Preview {

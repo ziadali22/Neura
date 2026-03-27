@@ -83,16 +83,16 @@ struct OnboardingProfileStep: View {
                         }
 
                         // Gender
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Gender")
-                                .font(.headingXS)
-                                .foregroundStyle(Color.textPrimary)
-                            HStack(spacing: 8) {
-                                ForEach(ProfileGender.allCases) { gender in
-                                    genderPill(gender)
-                                }
-                            }
-                        }
+//                        VStack(alignment: .leading, spacing: 8) {
+//                            Text("Gender")
+//                                .font(.headingXS)
+//                                .foregroundStyle(Color.textPrimary)
+//                            HStack(spacing: 8) {
+//                                ForEach(ProfileGender.allCases) { gender in
+//                                    genderPill(gender)
+//                                }
+//                            }
+//                        }
                     }
                 }
                 .padding(.horizontal, 24)
@@ -104,7 +104,7 @@ struct OnboardingProfileStep: View {
             .scrollIndicators(.hidden)
             .scrollDismissesKeyboard(.immediately)
 
-            continueButton
+            OnboardingContinueButton(action: viewModel.advance, isEnabled: canContinue)
         }
         .task {
             try? await Task.sleep(for: .milliseconds(100))
@@ -135,22 +135,6 @@ struct OnboardingProfileStep: View {
         !viewModel.state.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
-    private var continueButton: some View {
-        Button(action: viewModel.advance) {
-            Text("Continue")
-                .font(.buttonL)
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 56)
-                .background(canContinue ? Color.black : Color.textTertiary)
-                .clipShape(.rect(cornerRadius: 16))
-                .shadow(color: canContinue ? .black.opacity(0.15) : .clear, radius: 10, x: 0, y: 5)
-        }
-        .buttonStyle(ScaleButtonStyle())
-        .disabled(!canContinue)
-        .padding(.horizontal, 24)
-        .padding(.bottom, 32)
-    }
 }
 
 #Preview { OnboardingProfileStep(viewModel: OnboardingViewModel()) }

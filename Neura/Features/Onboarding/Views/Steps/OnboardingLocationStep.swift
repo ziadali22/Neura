@@ -99,7 +99,7 @@ struct OnboardingLocationStep: View {
             .scrollIndicators(.hidden)
             .onTapGesture { focusedField = nil }
 
-            continueButton
+            OnboardingContinueButton(action: viewModel.advance)
         }
         .task {
             try? await Task.sleep(for: .milliseconds(100))
@@ -107,20 +107,6 @@ struct OnboardingLocationStep: View {
         }
     }
 
-    private var continueButton: some View {
-        Button(action: viewModel.advance) {
-            Text("Continue")
-                .font(.buttonL)
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 56)
-                .background(Color.black)
-                .clipShape(.rect(cornerRadius: 16))
-        }
-        .buttonStyle(ScaleButtonStyle())
-        .padding(.horizontal, 24)
-        .padding(.bottom, 32)
-    }
 }
 
 #Preview {

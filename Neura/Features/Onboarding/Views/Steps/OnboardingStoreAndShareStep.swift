@@ -36,7 +36,7 @@ struct OnboardingStoreAndShareStep: View {
             .opacity(appeared ? 1 : 0)
             .offset(y: appeared ? 0 : 16)
 
-            continueButton
+            OnboardingContinueButton(action: viewModel.advance)
         }
         .task {
             try? await Task.sleep(for: .milliseconds(150))
@@ -44,21 +44,6 @@ struct OnboardingStoreAndShareStep: View {
                 appeared = true
             }
         }
-    }
-
-    private var continueButton: some View {
-        Button(action: viewModel.advance) {
-            Text("Continue")
-                .font(.buttonL)
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 56)
-                .background(Color.black)
-                .clipShape(.rect(cornerRadius: 28))
-        }
-        .buttonStyle(ScaleButtonStyle())
-        .padding(.horizontal, 24)
-        .padding(.bottom, 48)
     }
 }
 
