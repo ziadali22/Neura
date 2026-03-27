@@ -17,13 +17,17 @@ struct DashboardView: View {
             }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            CustomTabBar(selectedTab: $coordinator.selectedTab) {
-                coordinator.selectedTab = .docs
-                coordinator.showAddDocument = true
+            if !coordinator.isInDetailView {
+                CustomTabBar(selectedTab: $coordinator.selectedTab) {
+                    coordinator.selectedTab = .docs
+                    coordinator.showAddDocument = true
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 10)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 10)
         }
+        .animation(.spring(response: 0.35, dampingFraction: 0.85), value: coordinator.isInDetailView)
         .environmentObject(coordinator)
     }
 }

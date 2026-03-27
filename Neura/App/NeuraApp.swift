@@ -1,11 +1,24 @@
 import SwiftUI
+import FirebaseCore
+
+//Firebase Integrations
+class AppDelegate: NSObject, UIApplicationDelegate {
+  func application(_ application: UIApplication,
+                   didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+    FirebaseApp.configure()
+
+    return true
+  }
+}
+
 
 @main
 struct NeuraApp: App {
     @State private var languageManager = LanguageManager.shared
     @State private var showSplash: Bool
     @State private var hasCompletedOnboarding: Bool
-
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    
     init() {
         let key = "hasCompletedOnboarding"
         // Skip onboarding for existing users who already have profile data

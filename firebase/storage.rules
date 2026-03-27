@@ -1,0 +1,14 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Allow the iOS app to upload files into the shared/ prefix.
+    // Reads are blocked here — the doctor accesses files via Cloud Function
+    // signed URLs, which bypass security rules entirely.
+    match /shared/{fileId}/{filename} {
+      allow write: if request.resource.size < 10 * 1024 * 1024; // 10 MB max
+      allow read: if false;
+    }
+
+  }
+}

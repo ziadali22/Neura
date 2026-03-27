@@ -27,25 +27,25 @@ struct SettingsRow: View {
             HStack(spacing: 12) {
                 Image(icon)
                     .font(.system(size: 20))
-                    .foregroundColor(style == .destructive ? .red : .textPrimary)
+                    .foregroundStyle(style == .destructive ? Color.red : Color.textPrimary)
                     .frame(width: 24, height: 24)
 
                 Text(title)
                     .font(.bodyL)
-                    .foregroundColor(style == .destructive ? .red : .textPrimary)
+                    .foregroundStyle(style == .destructive ? Color.red : Color.textPrimary)
 
                 Spacer()
 
                 if showChevron {
                     Image(systemName: "chevron.right")
                         .font(.system(size: 14))
-                        .foregroundColor(.textTertiary)
+                        .foregroundStyle(Color.textTertiary)
                 }
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
             .background(Color.surfaceWhite)
-            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .clipShape(.rect(cornerRadius: 16))
         }
         .buttonStyle(ScaleButtonStyle())
     }

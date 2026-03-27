@@ -5,7 +5,7 @@ import UniformTypeIdentifiers
 // MARK: - View Mode
 
 private enum DocViewMode: CaseIterable {
-    case folders, all
+    case all, folders
 
     var label: String {
         switch self {
@@ -20,7 +20,7 @@ private enum DocViewMode: CaseIterable {
 struct DocsView: View {
     @StateObject private var viewModel = DocumentsListViewModel()
     @EnvironmentObject private var coordinator: AppCoordinator
-    @State private var viewMode: DocViewMode = .folders
+    @State private var viewMode: DocViewMode = .all
     @State private var showFilters = false
     @State private var isSelecting = false
     @State private var selectedDocuments: Set<UUID> = []
@@ -28,11 +28,38 @@ struct DocsView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading ,spacing: 0) {
-                Text("Documents")
-                    .font(.title.bold())
-                    .padding(.vertical, 16)
-                    .padding(.horizontal, 20)
+            VStack(alignment: .leading, spacing: 0) {
+                // Inline header: title + selection buttons
+                HStack(alignment: .center) {
+                    Text("Documents")
+                        .font(.displayXL)
+                        .foregroundStyle(Color.textPrimary)
+
+                    Spacer()
+
+                    if isSelecting {
+                        Button(allSelected ? "Deselect All" : "Select All", action: toggleSelectAll)
+                            .foregroundStyle(Color.accent)
+                            .font(.system(size: 15, weight: .medium))
+                            .transition(.opacity.combined(with: .move(edge: .trailing)))
+                    }
+
+                    if isSelecting || (viewMode == .all && !viewModel.filteredDocuments.isEmpty) {
+                        Button(isSelecting ? "Done" : "Select") {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                isSelecting.toggle()
+                                if !isSelecting { selectedDocuments.removeAll() }
+                            }
+                        }
+                        .foregroundStyle(Color.accent)
+                        .font(.system(size: 15, weight: .medium))
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 16)
+                .padding(.bottom, 8)
+                .animation(.spring(response: 0.3, dampingFraction: 0.8), value: isSelecting)
+
                 segmentControl
 
                 // Mode content
@@ -56,9 +83,7 @@ struct DocsView: View {
                 .animation(.easeInOut(duration: 0.22), value: viewMode)
             }
             .background(Color.backgroundPrimary)
-//            .navigationTitle("Documents")
-            .navigationBarTitleDisplayMode(.large)
-            .toolbar { toolbarContent }
+            .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: DocumentCategory.self) { category in
                 CategoryDocumentsView(category: category, viewModel: viewModel)
             }
@@ -355,31 +380,6 @@ struct DocsView: View {
         )
     }
 
-    // MARK: - Toolbar
-
-    @ToolbarContentBuilder
-    private var toolbarContent: some ToolbarContent {
-        ToolbarItem(placement: .topBarLeading) {
-            if isSelecting {
-                Button(allSelected ? "Deselect All" : "Select All", action: toggleSelectAll)
-                    .foregroundStyle(Color.accent)
-                    .font(.system(size: 15, weight: .medium))
-            }
-        }
-        ToolbarItem(placement: .topBarTrailing) {
-            if isSelecting || (viewMode == .all && !viewModel.filteredDocuments.isEmpty) {
-                Button(isSelecting ? "Done" : "Select") {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                        isSelecting.toggle()
-                        if !isSelecting { selectedDocuments.removeAll() }
-                    }
-                }
-                .foregroundStyle(Color.accent)
-                .font(.system(size: 15, weight: .medium))
-            }
-        }
-    }
-
     // MARK: - Selection Bottom Bar
 
     private var selectionBottomBar: some View {
@@ -491,11 +491,11 @@ private struct AddDocumentSheet: View {
                     dismiss(); onScan()
                 }
                 sourceOption(icon: "photo.on.rectangle", title: "Upload from Photos",
-                             subtitle: "Choose an image from your library", color: Color(hex: "456990")) {
+                             subtitle: "Choose an image from your library", color: Color.blue) {
                     dismiss(); onPhoto()
                 }
                 sourceOption(icon: "folder", title: "Import File",
-                             subtitle: "Select a PDF or image file", color: Color(hex: "6B9080")) {
+                             subtitle: "Select a PDF or image file", color: Color.green) {
                     dismiss(); onFile()
                 }
             }

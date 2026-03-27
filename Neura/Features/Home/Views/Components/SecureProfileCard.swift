@@ -23,7 +23,7 @@ struct SecureProfileCard: View {
                         Spacer()
 
                         VStack(spacing: 8) {
-                            Text(name)
+                            Text(name.uppercased())
                                 .font(.system(size: 32, weight: .bold))
                                 .multilineTextAlignment(.center)
                                 .foregroundStyle(.white)
@@ -63,9 +63,10 @@ struct SecureProfileCard: View {
                     }
                 }
         )
-        .onTapGesture {
-            onTap?()
-        }
+        .onTapGesture { onTap?() }
+        .accessibilityLabel("Health profile card")
+        .accessibilityAddTraits(.isButton)
+        .accessibilityAction { onTap?() }
     }
 }
 
@@ -81,27 +82,21 @@ private extension SecureProfileCard {
             Spacer()
 
             HStack(spacing: 6) {
-                Button {
-                    onCustomizeTap?()
-                } label: {
-                    Image(systemName: "paintbrush.fill")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .frame(width: 35, height: 35)
-                        .background(.black.opacity(0.5))
-                        .clipShape(Circle())
-                }
+                Button("Customize card", systemImage: "paintbrush.fill") { onCustomizeTap?() }
+                    .labelStyle(.iconOnly)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: 35, height: 35)
+                    .background(.black.opacity(0.5))
+                    .clipShape(Circle())
 
-                Button {
-                    onShareTap?()
-                } label: {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .frame(width: 35, height: 35)
-                        .background(.black.opacity(0.5))
-                        .clipShape(Circle())
-                }
+                Button("Share health profile", systemImage: "square.and.arrow.up") { onShareTap?() }
+                    .labelStyle(.iconOnly)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: 35, height: 35)
+                    .background(.black.opacity(0.5))
+                    .clipShape(Circle())
             }
         }
     }

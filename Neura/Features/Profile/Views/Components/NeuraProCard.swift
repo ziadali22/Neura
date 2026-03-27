@@ -10,11 +10,11 @@ struct NeuraProCard: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Neura Pro")
                         .font(.headingL)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
 
                     Text("You have unlimited access.\nThank you for your support!")
                         .font(.bodyS)
-                        .foregroundColor(Color.textOnDark)
+                        .foregroundStyle(Color.textOnDark)
                         .lineSpacing(2)
                 }
 
@@ -22,27 +22,27 @@ struct NeuraProCard: View {
 
                 Image(systemName: "crown.fill")
                     .font(.system(size: 28))
-                    .foregroundColor(.accent)
+                    .foregroundStyle(Color.accent)
             }
             .padding(20)
             .background(Color.surfaceDark)
-            .clipShape(RoundedRectangle(cornerRadius: 20))
+            .clipShape(.rect(cornerRadius: 20))
         } else {
             Button { showPaywall = true } label: {
                 HStack(alignment: .center) {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Get Neura Pro")
                             .font(.headingL)
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
 
                         Text("Unlimited medical documents.\nShare them with doctors anytime.")
                             .font(.bodyS)
-                            .foregroundColor(Color.textOnDark)
+                            .foregroundStyle(Color.textOnDark)
                             .lineSpacing(2)
 
                         Text("Upgrade to Pro")
                             .font(.buttonM)
-                            .foregroundColor(.textPrimary)
+                            .foregroundStyle(Color.textPrimary)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 8)
                             .background(Color.surfaceWhite)
@@ -59,7 +59,7 @@ struct NeuraProCard: View {
                 }
                 .padding(20)
                 .background(Color.surfaceDark)
-                .clipShape(RoundedRectangle(cornerRadius: 20))
+                .clipShape(.rect(cornerRadius: 20))
             }
             .buttonStyle(ScaleButtonStyle())
             .sheet(isPresented: $showPaywall) {
