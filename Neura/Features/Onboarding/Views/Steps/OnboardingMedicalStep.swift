@@ -57,27 +57,8 @@ struct OnboardingMedicalStep: View {
             .scrollIndicators(.hidden)
             .onTapGesture { focusedField = nil }
 
-            // Actions
-            VStack(spacing: 12) {
-                Button(action: viewModel.advance) {
-                    Text("Continue")
-                        .font(.buttonL)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 56)
-                        .background(Color.black)
-                        .clipShape(.rect(cornerRadius: 16))
-                        .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
-                }
-                .buttonStyle(ScaleButtonStyle())
-
-                Button("Skip for now") { viewModel.advance() }
-                    .font(.bodyL)
-                    .foregroundStyle(Color.textTertiary)
-            }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 32)
-            .opacity(appeared ? 1 : 0)
+            OnboardingContinueButton(action: viewModel.advance, secondaryTitle: "Skip for now")
+                .opacity(appeared ? 1 : 0)
         }
         .task {
             try? await Task.sleep(for: .milliseconds(100))

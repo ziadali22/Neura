@@ -3,8 +3,9 @@ import SwiftUI
 struct OnboardingProfileStep: View {
     @ObservedObject var viewModel: OnboardingViewModel
     @State private var appeared = false
-    @State private var showDatePicker = false
-    @State private var localDate: Date = Calendar.current.date(byAdding: .year, value: -25, to: Date()) ?? Date()
+    @State private var selectedDay: Int = 1
+    @State private var selectedMonth: Int = 1
+    @State private var selectedYear: Int = 2000
     @FocusState private var nameFocused: Bool
 
     var body: some View {
@@ -47,39 +48,38 @@ struct OnboardingProfileStep: View {
                             Text("Date of Birth")
                                 .font(.headingXS)
                                 .foregroundStyle(Color.textPrimary)
-                            Button {
-                                nameFocused = false
-                                withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-                                    showDatePicker.toggle()
-                                }
-                            } label: {
-                                HStack {
-                                    Text(viewModel.state.dateOfBirth != nil
-                                         ? localDate.formatted(.dateTime.day().month(.wide).year())
-                                         : "Select date")
-                                        .font(.bodyL)
-                                        .foregroundStyle(viewModel.state.dateOfBirth != nil ? Color.textPrimary : Color.textTertiary)
-                                    Spacer()
-                                    Image(systemName: "chevron.right")
-                                        .font(.system(size: 14))
-                                        .foregroundStyle(Color.textTertiary)
-                                        .rotationEffect(.degrees(showDatePicker ? 90 : 0))
-                                }
-                                .padding(16)
-                                .background(Color.surfaceWhite)
-                                .clipShape(.rect(cornerRadius: 12))
-                                .shadow(color: .black.opacity(0.04), radius: 4, x: 0, y: 2)
-                            }
-                            if showDatePicker {
-                                DatePicker("", selection: $localDate, in: ...Date(), displayedComponents: .date)
-                                    .datePickerStyle(.graphical)
-                                    .tint(.black)
-                                    .labelsHidden()
-                                    .transition(.opacity.combined(with: .scale(scale: 0.96, anchor: .top)))
-                                    .onChange(of: localDate) { _, date in
-                                        viewModel.state.dateOfBirth = date
+                            HStack(spacing: 0) {
+                                Picker("Day", selection: $selectedDay) {
+                                    ForEach(1...31, id: \.self) { day in
+                                        Text("\(day)").tag(day)
                                     }
+                                }
+                                .pickerStyle(.wheel)
+                                .frame(maxWidth: .infinity)
+
+                                Picker("Month", selection: $selectedMonth) {
+                                    ForEach(1...12, id: \.self) { month in
+                                        Text(Calendar.current.shortMonthSymbols[month - 1]).tag(month)
+                                    }
+                                }
+                                .pickerStyle(.wheel)
+                                .frame(maxWidth: .infinity)
+
+                                Picker("Year", selection: $selectedYear) {
+                                    ForEach(1900...currentYear, id: \.self) { year in
+                                        Text(String(year)).tag(year)
+                                    }
+                                }
+                                .pickerStyle(.wheel)
+                                .frame(maxWidth: .infinity)
                             }
+                            .frame(height: 150)
+                            .onChange(of: selectedDay) { _, _ in updateDate() }
+                            .onChange(of: selectedMonth) { _, _ in updateDate() }
+                            .onChange(of: selectedYear) { _, _ in updateDate() }
+                            .background(Color.surfaceWhite)
+                            .clipShape(.rect(cornerRadius: 12))
+                            .shadow(color: .black.opacity(0.04), radius: 4, x: 0, y: 2)
                         }
 
                         // Gender
@@ -107,6 +107,7 @@ struct OnboardingProfileStep: View {
             OnboardingContinueButton(action: viewModel.advance, isEnabled: canContinue)
         }
         .task {
+            updateDate()
             try? await Task.sleep(for: .milliseconds(100))
             withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) { appeared = true }
         }
@@ -129,6 +130,18 @@ struct OnboardingProfileStep: View {
                 .shadow(color: .black.opacity(0.04), radius: 4, x: 0, y: 2)
         }
         .buttonStyle(ScaleButtonStyle())
+    }
+
+    private var currentYear: Int {
+        Calendar.current.component(.year, from: Date())
+    }
+
+    private func updateDate() {
+        var components = DateComponents()
+        components.day = selectedDay
+        components.month = selectedMonth
+        components.year = selectedYear
+        viewModel.state.dateOfBirth = Calendar.current.date(from: components)
     }
 
     private var canContinue: Bool {

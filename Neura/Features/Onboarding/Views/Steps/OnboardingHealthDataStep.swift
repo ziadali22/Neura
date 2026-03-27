@@ -54,26 +54,11 @@ struct OnboardingHealthDataStep: View {
             Spacer()
             Spacer()
 
-            // Actions
-            VStack(spacing: 12) {
-                Button(action: viewModel.advance) {
-                    Text("Use This Data")
-                        .font(.buttonL)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 56)
-                        .background(Color.black)
-                        .clipShape(.rect(cornerRadius: 16))
-                        .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
-                }
-                .buttonStyle(ScaleButtonStyle())
-
-                Button("Enter manually instead") { viewModel.advance() }
-                    .font(.bodyL)
-                    .foregroundStyle(Color.textTertiary)
-            }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 40)
+            OnboardingContinueButton(
+                action: viewModel.advance,
+                title: "Use This Data",
+                secondaryTitle: "Enter manually instead"
+            )
             .opacity(appeared ? 1 : 0)
         }
         .task {

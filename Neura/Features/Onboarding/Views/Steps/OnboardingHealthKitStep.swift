@@ -55,37 +55,14 @@ struct OnboardingHealthKitStep: View {
             }
             .scrollIndicators(.hidden)
 
-            // Actions
-            VStack(spacing: 12) {
-                Button {
-                    viewModel.requestHealthKit()
-                } label: {
-                    HStack(spacing: 8) {
-                        if viewModel.healthKitStatus == .requesting {
-                            ProgressView().tint(.white)
-                        } else {
-                            Image(systemName: "heart.fill")
-                                .font(.system(size: 16))
-                        }
-                        Text("Connect Apple Health")
-                            .font(.buttonL)
-                    }
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 56)
-                    .background(Color.black)
-                    .clipShape(.rect(cornerRadius: 16))
-                    .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
-                }
-                .buttonStyle(ScaleButtonStyle())
-                .disabled(viewModel.healthKitStatus == .requesting)
-
-                Button("Not now") { viewModel.advance() }
-                    .font(.bodyL)
-                    .foregroundStyle(Color.textTertiary)
-            }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 32)
+            OnboardingContinueButton(
+                action: viewModel.requestHealthKit,
+                title: "Connect Apple Health",
+                isLoading: viewModel.healthKitStatus == .requesting,
+                leadingIcon: "heart.fill",
+                secondaryTitle: "Not now",
+                secondaryAction: viewModel.advance
+            )
             .opacity(appeared ? 1 : 0)
         }
         .task {

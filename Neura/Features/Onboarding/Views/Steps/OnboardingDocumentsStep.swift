@@ -2,98 +2,186 @@ import SwiftUI
 
 struct OnboardingDocumentsStep: View {
     @ObservedObject var viewModel: OnboardingViewModel
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var appeared = false
 
     var body: some View {
         VStack(spacing: 0) {
-            Spacer()
+            ScrollView {
+                VStack(alignment: .leading, spacing: 28) {
+                    HStack {
+                        Spacer()
+                        DocStackIllustration(appeared: appeared, reduceMotion: reduceMotion)
+                        Spacer()
+                    }
+                    .padding(.top, 8)
 
-            VStack(spacing: 32) {
-                // Celebration icon
-                ZStack {
-                    Circle().fill(Color.accent.opacity(0.08)).frame(width: 120, height: 120)
-                    Circle().fill(Color.accent.opacity(0.12)).frame(width: 86, height: 86)
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 46))
-                        .foregroundStyle(Color.accent)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Your records,\nalways at hand")
+                            .font(.displayL)
+                            .foregroundStyle(Color.textPrimary)
+
+                        Text("Add prescriptions, lab results, and reports. Neura organizes everything and keeps it ready to share.")
+                            .font(.bodyL)
+                            .foregroundStyle(Color.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    VStack(spacing: 0) {
+                        DocFeatureRow(
+                            icon: "doc.viewfinder",
+                            title: "Scan in seconds",
+                            description: "Point your camera and Neura files it automatically."
+                        )
+                        Divider().padding(.leading, 52)
+                        DocFeatureRow(
+                            icon: "folder.badge.questionmark",
+                            title: "Auto-categorized",
+                            description: "Documents sorted by type so you can find them fast."
+                        )
+                        Divider().padding(.leading, 52)
+                        DocFeatureRow(
+                            icon: "qrcode",
+                            title: "Share via QR code",
+                            description: "Generate a secure link for your doctor in one tap."
+                        )
+                    }
+                    .background(Color.surfaceWhite)
+                    .clipShape(.rect(cornerRadius: 16))
+                    .shadow(color: .black.opacity(0.04), radius: 6, x: 0, y: 2)
                 }
-                .scaleEffect(appeared ? 1 : 0.6)
-                .opacity(appeared ? 1 : 0)
-
-                // Text
-                VStack(spacing: 12) {
-                    Text("You're all set!")
-                        .font(.displayL)
-                        .foregroundStyle(Color.textPrimary)
-                        .multilineTextAlignment(.center)
-
-                    Text("Your health profile is ready.\nAdd documents anytime from the Docs tab.")
-                        .font(.bodyL)
-                        .foregroundStyle(Color.textSecondary)
-                        .multilineTextAlignment(.center)
-                }
+                .padding(.horizontal, 24)
+                .padding(.top, 20)
+                .padding(.bottom, 16)
                 .opacity(appeared ? 1 : 0)
                 .offset(y: appeared ? 0 : 16)
-
-                // Feature hints
-                VStack(spacing: 8) {
-                    hintRow("doc.viewfinder", "Scan documents using your camera")
-                    hintRow("staroflife.fill", "Show your emergency card anywhere")
-                    hintRow("square.and.arrow.up", "Share your health profile as PDF")
-                }
-                .padding(.horizontal, 32)
-                .opacity(appeared ? 1 : 0)
-                .offset(y: appeared ? 0 : 20)
+                .animation(
+                    reduceMotion ? .none : .spring(response: 0.5, dampingFraction: 0.85),
+                    value: appeared
+                )
             }
-            .padding(.horizontal, 24)
+            .scrollIndicators(.hidden)
 
-            Spacer()
-            Spacer()
-
-            // Actions
-            VStack(spacing: 12) {
-                Button(action: viewModel.finalize) {
-                    Text("Get Started")
-                        .font(.buttonL)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 56)
-                        .background(Color.black)
-                        .clipShape(.rect(cornerRadius: 16))
-                        .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
-                }
-                .buttonStyle(ScaleButtonStyle())
-
-                Button("Scan my first document") {
-                    UserDefaults.standard.set(true, forKey: "launchScannerOnStart")
-                    viewModel.finalize()
-                }
-                .font(.bodyL)
-                .foregroundStyle(Color.black)
-            }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 48)
-            .opacity(appeared ? 1 : 0)
-            .offset(y: appeared ? 0 : 20)
+            OnboardingContinueButton(action: viewModel.advance)
         }
         .task {
-            try? await Task.sleep(for: .milliseconds(200))
-            withAnimation(.spring(response: 0.7, dampingFraction: 0.8)) { appeared = true }
-        }
-    }
-
-    private func hintRow(_ icon: String, _ text: String) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.system(size: 14))
-                .foregroundStyle(Color.accent)
-                .frame(width: 20)
-            Text(text)
-                .font(.bodyS)
-                .foregroundStyle(Color.textSecondary)
-            Spacer()
+            try? await Task.sleep(for: .milliseconds(100))
+            appeared = true
         }
     }
 }
 
-#Preview { OnboardingDocumentsStep(viewModel: OnboardingViewModel()) }
+// MARK: - DocStackIllustration
+
+private struct DocStackIllustration: View {
+    let appeared: Bool
+    let reduceMotion: Bool
+
+    private struct DocCard: Identifiable {
+        let id: Int
+        let icon: String
+        let label: String
+        let rotation: Double
+        let xOffset: CGFloat
+        let yOffset: CGFloat
+    }
+
+    private let cards: [DocCard] = [
+        DocCard(id: 0, icon: "pills.circle.fill",    label: "Prescription",    rotation: -7, xOffset: -26, yOffset: 12),
+        DocCard(id: 1, icon: "waveform.path.ecg",    label: "Lab Results",     rotation:  4, xOffset:  22, yOffset:  4),
+        DocCard(id: 2, icon: "doc.text.fill",        label: "Medical Report",  rotation:  0, xOffset:   0, yOffset: -16),
+    ]
+
+    var body: some View {
+        ZStack {
+            ForEach(cards) { card in
+                SingleDocCard(icon: card.icon, label: card.label)
+                    .rotationEffect(.degrees(appeared ? card.rotation : 0))
+                    .offset(
+                        x: appeared ? card.xOffset : 0,
+                        y: appeared ? card.yOffset : 0
+                    )
+                    .zIndex(Double(card.id))
+                    .animation(
+                        reduceMotion ? .none : .spring(response: 0.6, dampingFraction: 0.75).delay(Double(card.id) * 0.07),
+                        value: appeared
+                    )
+            }
+        }
+        .frame(height: 140)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Three stacked document cards: Prescription, Lab Results, Medical Report")
+    }
+}
+
+// MARK: - SingleDocCard
+
+private struct SingleDocCard: View {
+    let icon: String
+    let label: String
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 17))
+                .foregroundStyle(Color.accent)
+                .frame(width: 36, height: 36)
+                .background(Color.accent.opacity(0.1))
+                .clipShape(.rect(cornerRadius: 10))
+
+            Text(label)
+                .font(.headingXS)
+                .foregroundStyle(Color.textPrimary)
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(Color.textTertiary)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .frame(width: 230)
+        .background(Color.surfaceWhite)
+        .clipShape(.rect(cornerRadius: 16))
+        .shadow(color: .black.opacity(0.09), radius: 14, x: 0, y: 5)
+    }
+}
+
+// MARK: - DocFeatureRow
+
+private struct DocFeatureRow: View {
+    let icon: String
+    let title: String
+    let description: String
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 14) {
+            Image(systemName: icon)
+                .font(.system(size: 15))
+                .foregroundStyle(Color.accent)
+                .frame(width: 36, height: 36)
+                .background(Color.accent.opacity(0.08))
+                .clipShape(.rect(cornerRadius: 10))
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.headingXS)
+                    .foregroundStyle(Color.textPrimary)
+                Text(description)
+                    .font(.bodyS)
+                    .foregroundStyle(Color.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+    }
+}
+
+#Preview {
+    OnboardingDocumentsStep(viewModel: OnboardingViewModel())
+        .background(Color.backgroundPrimary)
+}

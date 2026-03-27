@@ -119,24 +119,14 @@ private extension OnboardingProfileCardStep {
     }
 
     var useButton: some View {
-        Button {
-            viewModel.state.cardBackground = presets[selectedIndex]
-            viewModel.advance()
-        } label: {
-            Text("Use this card")
-                .font(.buttonL)
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 56)
-                .background(Color.black)
-                .clipShape(.rect(cornerRadius: 16))
-                .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 5)
-        }
-        .buttonStyle(ScaleButtonStyle())
-        .padding(.horizontal, 24)
-        .padding(.bottom, 32)
-        .opacity(buttonAppeared ? 1 : 0)
-        .offset(y: buttonAppeared ? 0 : 16)
+        OnboardingContinueButton(action: confirmCard, title: "Use this card")
+            .opacity(buttonAppeared ? 1 : 0)
+            .offset(y: buttonAppeared ? 0 : 16)
+    }
+
+    private func confirmCard() {
+        viewModel.state.cardBackground = presets[selectedIndex]
+        viewModel.advance()
     }
 }
 

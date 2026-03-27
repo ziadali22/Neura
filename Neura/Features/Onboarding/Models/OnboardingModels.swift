@@ -11,15 +11,20 @@ enum OnboardingStep: Int, CaseIterable, Hashable {
     case medicalAreas
     case profile, location, profileCard
     case emergency, biometrics, emergencyCard
-    case healthKit, healthData, medical, documents
+    case healthKit, healthData, medical, documents, calculating
 
     /// Whether the top bar (back button + progress) is visible.
-    var showsTopBar: Bool { self != .welcome }
+    var showsTopBar: Bool {
+        switch self {
+        case .welcome, .calculating: return false
+        default: return true
+        }
+    }
 
     /// Whether the centered progress pill is shown within the top bar.
     var showsProgressBar: Bool {
         switch self {
-        case .welcome, .storeAndShare, .documentScan, .privacySecurity: return false
+        case .welcome, .storeAndShare, .documentScan, .privacySecurity, .calculating: return false
         default: return true
         }
     }

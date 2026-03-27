@@ -106,6 +106,7 @@ struct OnboardingView: View {
             case .healthData:      OnboardingHealthDataStep(viewModel: viewModel)
             case .medical:         OnboardingMedicalStep(viewModel: viewModel)
             case .documents:       OnboardingDocumentsStep(viewModel: viewModel)
+            case .calculating:     OnboardingCalculatingStep(viewModel: viewModel)
             }
         }
         .id(viewModel.currentStep)

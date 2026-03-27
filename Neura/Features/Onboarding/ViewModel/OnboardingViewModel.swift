@@ -66,7 +66,8 @@ final class OnboardingViewModel: ObservableObject {
             return .medical
         case .healthData:      return .medical
         case .medical:         return .documents
-        case .documents:       return .documents // sentinel — caller handles completion
+        case .documents:       return .calculating
+        case .calculating:     return .calculating // sentinel — caller handles completion
         }
     }
 
@@ -89,6 +90,7 @@ final class OnboardingViewModel: ObservableObject {
             if healthKitStatus == .authorized, healthKitData?.hasAnyData == true { return .healthData }
             return .healthKit
         case .documents:       return .medical
+        case .calculating:     return .documents
         }
     }
 

@@ -46,47 +46,28 @@ struct OnboardingBiometricsStep: View {
             Spacer()
             Spacer()
 
-            // Actions
-            VStack(spacing: 12) {
-                Button {
-                    isRequesting = true
-                    Task {
-                        await viewModel.requestBiometrics()
-                        isRequesting = false
-                    }
-                } label: {
-                    HStack(spacing: 8) {
-                        if isRequesting {
-                            ProgressView().tint(.white)
-                        } else {
-                            Image(systemName: viewModel.biometricIcon)
-                                .font(.system(size: 17))
-                        }
-                        Text("Enable \(viewModel.biometricLabel)")
-                            .font(.buttonL)
-                    }
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 56)
-                    .background(Color.black)
-                    .clipShape(.rect(cornerRadius: 16))
-                    .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
-                }
-                .buttonStyle(ScaleButtonStyle())
-                .disabled(isRequesting)
-
-                Button("Maybe later") { viewModel.advance() }
-                    .font(.bodyL)
-                    .foregroundStyle(Color.textTertiary)
-            }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 40)
+            OnboardingContinueButton(
+                action: requestBiometrics,
+                title: "Enable \(viewModel.biometricLabel)",
+                isLoading: isRequesting,
+                leadingIcon: viewModel.biometricIcon,
+                secondaryTitle: "Maybe later",
+                secondaryAction: viewModel.advance
+            )
             .opacity(appeared ? 1 : 0)
             .offset(y: appeared ? 0 : 20)
         }
         .task {
             try? await Task.sleep(for: .milliseconds(150))
             withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) { appeared = true }
+        }
+    }
+
+    private func requestBiometrics() {
+        isRequesting = true
+        Task {
+            await viewModel.requestBiometrics()
+            isRequesting = false
         }
     }
 }

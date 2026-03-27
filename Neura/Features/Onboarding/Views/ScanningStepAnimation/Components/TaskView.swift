@@ -33,7 +33,7 @@ struct TaskView: View {
                 .onAppear {
                     guard column.position == 0 else { return }
                     withAnimation(
-                        .easeInOut(duration: 0.65)
+                        .linear(duration: 0.75)
                         .repeatForever(autoreverses: true)
                     ) {
                         scanLineY = 14
@@ -55,7 +55,13 @@ struct TaskView: View {
             .padding(Spacing.standard)
             .background(Color.white)
             .clipShape(.rect(cornerRadius: 12))
-            .transition(.opacity.combined(with: .scale(scale: 0.96, anchor: .top)))
+            .transition(.asymmetric(
+            insertion: .opacity
+                .combined(with: .scale(scale: 0.94))
+                .combined(with: .offset(y: 10)),
+            removal: .opacity
+                .combined(with: .scale(scale: 0.96, anchor: .top))
+        ))
         }
     }
 

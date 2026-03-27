@@ -35,22 +35,22 @@ struct OnboardingScanningAnimation: View {
         // Cards enter one by one
         for stage in stages {
             guard !Task.isCancelled else { return }
-            withAnimation(.bouncy(duration: 0.7)) { columns.append(stage) }
-            try? await Task.sleep(for: .milliseconds(750))
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.75)) { columns.append(stage) }
+            try? await Task.sleep(for: .milliseconds(460))
         }
 
         guard !Task.isCancelled else { return }
 
         // Expand and overlap all cards
-        withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.82)) {
             columns.indices.forEach { columns[$0].isExpanded = true }
             spacing = -CGFloat(Spacing.small)
         }
 
-        try? await Task.sleep(for: .milliseconds(900))
+        try? await Task.sleep(for: .milliseconds(620))
         guard !Task.isCancelled else { return }
 
-        // Cycle the active document through each stage indefinitely
+        // Cycle the active document through each stage
         await cycleActive()
     }
 
@@ -58,8 +58,8 @@ struct OnboardingScanningAnimation: View {
     private func cycleActive() async {
         for column in columns {
             guard !Task.isCancelled else { return }
-            withAnimation(.bouncy(duration: 0.7)) { activeColumn = column }
-            try? await Task.sleep(for: .milliseconds(1100))
+            withAnimation(.spring(response: 0.42, dampingFraction: 0.84)) { activeColumn = column }
+            try? await Task.sleep(for: .milliseconds(820))
         }
         // Settle on the last active state — animation complete
         onComplete?()

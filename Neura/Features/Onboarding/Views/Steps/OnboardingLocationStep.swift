@@ -99,12 +99,17 @@ struct OnboardingLocationStep: View {
             .scrollIndicators(.hidden)
             .onTapGesture { focusedField = nil }
 
-            OnboardingContinueButton(action: viewModel.advance)
+            OnboardingContinueButton(action: viewModel.advance, isEnabled: canContinue)
         }
         .task {
             try? await Task.sleep(for: .milliseconds(100))
             withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) { appeared = true }
         }
+    }
+
+    private var canContinue: Bool {
+        !viewModel.state.city.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !viewModel.state.country.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
 }

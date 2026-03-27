@@ -53,6 +53,9 @@ struct OnboardingEmergencyStep: View {
                             }
                             .scrollIndicators(.hidden)
                         }
+                        
+                        Spacer()
+                            .frame(height: 80)
                     }
                 }
                 .padding(.horizontal, 24)
@@ -108,25 +111,10 @@ struct OnboardingEmergencyStep: View {
     }
 
     private var continueButton: some View {
-        VStack(spacing: 12) {
-            Button(action: viewModel.advance) {
-                Text("Continue")
-                    .font(.buttonL)
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 56)
-                    .background(Color.black)
-                    .clipShape(.rect(cornerRadius: 16))
-                    .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
-            }
-            .buttonStyle(ScaleButtonStyle())
-
-            Button("Skip for now") { viewModel.advance() }
-                .font(.bodyS)
-                .foregroundStyle(Color.textTertiary)
-        }
-        .padding(.horizontal, 24)
-        .padding(.bottom, 32)
+        OnboardingContinueButton(
+            action: viewModel.advance,
+            secondaryTitle: "Skip for now"
+        )
     }
 }
 
