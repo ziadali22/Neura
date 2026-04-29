@@ -143,13 +143,26 @@ private struct ProfileSectionHeader: View {
 
 private extension ProfileView {
     func handleLogOut() {
-        UserDefaults.standard.removeObject(forKey: "health_profile_data")
-        // TODO: Clear session, navigate to onboarding
+        // Clear all local user data
+        let keys = ["health_profile_data", "hasCompletedOnboarding",
+                    "user_location", "onboarding_medical_areas",
+                    "neura_document_upload_count", "neura_share_count", "neura_is_pro"]
+        keys.forEach { UserDefaults.standard.removeObject(forKey: $0) }
+        // Sign out from Firebase — AuthService publishes isSignedIn=false,
+        // which causes NeuraApp to switch back to OnboardingView.
+        AuthService.shared.signOut()
     }
 
     func handleDeleteAccount() {
-        UserDefaults.standard.removeObject(forKey: "health_profile_data")
-        // TODO: Call API to delete account, clear all data, navigate to onboarding
+        Task {
+            // Clear local data first
+            let keys = ["health_profile_data", "hasCompletedOnboarding",
+                        "user_location", "onboarding_medical_areas",
+                        "neura_document_upload_count", "neura_share_count", "neura_is_pro"]
+            keys.forEach { UserDefaults.standard.removeObject(forKey: $0) }
+            // Delete Firebase Auth account (Phase 4: also delete Storage/Firestore data via Cloud Function)
+            try? await AuthService.shared.deleteAccount()
+        }
     }
 }
 

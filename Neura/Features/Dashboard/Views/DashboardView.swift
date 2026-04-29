@@ -17,7 +17,7 @@ struct DashboardView: View {
             }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            if !coordinator.isInDetailView {
+            if !coordinator.isInDetailView && !coordinator.isSelectingDocs {
                 CustomTabBar(selectedTab: $coordinator.selectedTab) {
                     coordinator.selectedTab = .docs
                     coordinator.showAddDocument = true

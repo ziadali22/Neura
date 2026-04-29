@@ -9,6 +9,10 @@ final class OnboardingViewModel: ObservableObject {
     @Published var direction: Int = 1
     @Published var isComplete = false
 
+    // Auth
+    @Published var isSigningIn = false
+    @Published var authError: String?
+
     // HealthKit
     @Published var healthKitStatus: HealthKitStatus = .notRequested
     @Published var healthKitData: HealthKitData?
@@ -138,6 +142,46 @@ final class OnboardingViewModel: ObservableObject {
         let context = LAContext()
         guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil) else { return "lock.fill" }
         return context.biometryType == .faceID ? "faceid" : "touchid"
+    }
+
+    // MARK: - Auth
+
+    func signInWithApple() {
+        guard !isSigningIn else { return }
+        isSigningIn = true
+        authError = nil
+        Task {
+            do {
+                try await AuthService.shared.signInWithApple()
+                advance()
+            } catch {
+                if !isCancellation(error) { authError = error.localizedDescription }
+            }
+            isSigningIn = false
+        }
+    }
+
+    func signInWithGoogle() {
+        guard !isSigningIn else { return }
+        isSigningIn = true
+        authError = nil
+        Task {
+            do {
+                try await AuthService.shared.signInWithGoogle()
+                advance()
+            } catch {
+                if !isCancellation(error) { authError = error.localizedDescription }
+            }
+            isSigningIn = false
+        }
+    }
+
+    private func isCancellation(_ error: Error) -> Bool {
+        let nsError = error as NSError
+        // ASAuthorizationError.canceled = 1001
+        // GIDSignInError.canceled = -5
+        return (nsError.domain == "com.apple.AuthenticationServices.AuthorizationError" && nsError.code == 1001)
+            || (nsError.domain == "com.google.GIDSignIn" && nsError.code == -5)
     }
 
     // MARK: - Complete

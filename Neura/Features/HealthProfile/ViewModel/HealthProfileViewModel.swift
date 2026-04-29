@@ -289,5 +289,6 @@ final class HealthProfileViewModel: ObservableObject {
         if let data = try? JSONEncoder().encode(profile) {
             UserDefaults.standard.set(data, forKey: Self.storageKey)
         }
+        SyncQueueManager.shared.enqueueProfileUpload(profile)
     }
 }

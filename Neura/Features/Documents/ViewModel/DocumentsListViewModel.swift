@@ -51,6 +51,13 @@ final class DocumentsListViewModel: ObservableObject {
     @Published var errorMessage: String?
 
     private let fileManager = DocumentFileManager.shared
+    private var restoreObserver: NSObjectProtocol?
+
+    init() {
+        restoreObserver = NotificationCenter.default.addObserver(
+            forName: .documentsRestored, object: nil, queue: .main
+        ) { [weak self] _ in self?.loadDocuments() }
+    }
 
     // MARK: - Filtered & Sorted Documents
 
@@ -292,6 +299,7 @@ final class DocumentsListViewModel: ObservableObject {
 
                     self.documents.insert(document, at: 0)
                     self.persistMetadata()
+                    SyncQueueManager.shared.enqueueUpload(document)
                     self.pendingPreview = nil
                     self.selectedPhotoItem = nil
                     SubscriptionManager.shared.recordUpload()
@@ -317,6 +325,7 @@ final class DocumentsListViewModel: ObservableObject {
         guard let index = documents.firstIndex(where: { $0.id == document.id }) else { return }
         documents[index].name = newName
         persistMetadata()
+        SyncQueueManager.shared.enqueueMetadataUpdate(documents[index])
     }
 
     // MARK: - Delete

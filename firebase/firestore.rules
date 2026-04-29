@@ -9,5 +9,15 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Per-user encrypted document metadata — only the owning user can access
+    match /users/{uid}/documents/{docId} {
+      allow read, write, delete: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Per-user encrypted health profile
+    match /users/{uid}/profile/{docId} {
+      allow read, write, delete: if request.auth != null && request.auth.uid == uid;
+    }
+
   }
 }

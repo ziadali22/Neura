@@ -1,12 +1,11 @@
 import SwiftUI
 import FirebaseCore
+import GoogleSignIn
 
 //Firebase Integrations
 class AppDelegate: NSObject, UIApplicationDelegate {
   func application(_ application: UIApplication,
                    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-    FirebaseApp.configure()
-
     return true
   }
 }
@@ -17,9 +16,18 @@ struct NeuraApp: App {
     @State private var languageManager = LanguageManager.shared
     @State private var showSplash: Bool
     @State private var hasCompletedOnboarding: Bool
+    @State private var isSignedIn: Bool
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-    
+
     init() {
+        // Configure Firebase first — must happen before any Auth/Firestore access
+        FirebaseApp.configure()
+
+        // Configure Google Sign-In using the client ID from GoogleService-Info.plist
+        if let clientID = FirebaseApp.app()?.options.clientID {
+            GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
+        }
+
         let key = "hasCompletedOnboarding"
         // Skip onboarding for existing users who already have profile data
         if !UserDefaults.standard.bool(forKey: key),
@@ -27,16 +35,16 @@ struct NeuraApp: App {
             UserDefaults.standard.set(true, forKey: key)
         }
         let done = UserDefaults.standard.bool(forKey: key)
+        let signedIn = Auth.auth().currentUser != nil
         _hasCompletedOnboarding = State(initialValue: done)
-        // Only show launch splash for returning users;
-        // new users get it triggered by onComplete instead.
-        _showSplash = State(initialValue: done)
+        _isSignedIn = State(initialValue: signedIn)
+        _showSplash = State(initialValue: done && signedIn)
     }
 
     var body: some Scene {
         WindowGroup {
             ZStack {
-                if hasCompletedOnboarding {
+                if isSignedIn && hasCompletedOnboarding {
                     DashboardView()
                         .preferredColorScheme(.light)
                         .environment(\.locale, languageManager.locale)
@@ -44,10 +52,9 @@ struct NeuraApp: App {
                         .environment(languageManager)
                 } else {
                     OnboardingView(onComplete: {
-                        // Show splash first — it covers the switch to DashboardView,
-                        // turning the hard cut into a branded transition moment.
                         showSplash = true
                         hasCompletedOnboarding = true
+                        isSignedIn = true
                     })
                     .preferredColorScheme(.light)
                     .environment(\.locale, languageManager.locale)
@@ -61,6 +68,19 @@ struct NeuraApp: App {
                         .zIndex(1)
                 }
             }
+            .onOpenURL { url in
+                GIDSignIn.sharedInstance.handle(url)
+            }
+            // Only react to sign-out — not to sign-in during onboarding
+            .onReceive(AuthService.shared.$currentUser) { user in
+                if user == nil {
+                    isSignedIn = false
+                    hasCompletedOnboarding = false
+                }
+            }
         }
     }
 }
+
+// Needed so NeuraApp.init() can read the Firebase auth cache synchronously
+import FirebaseAuth

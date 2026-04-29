@@ -178,7 +178,14 @@ struct DocsView: View {
                     coordinator.showAddDocument = false
                 }
             }
-            .toolbar(isSelecting && !selectedDocuments.isEmpty ? .hidden : .visible, for: .tabBar)
+            .onChange(of: isSelecting) { _, selecting in
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                    coordinator.isSelectingDocs = selecting
+                }
+            }
+            .onDisappear {
+                coordinator.isSelectingDocs = false
+            }
             .overlay(alignment: .bottom) {
                 if isSelecting && !selectedDocuments.isEmpty {
                     selectionBottomBar

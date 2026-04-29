@@ -54,6 +54,69 @@ exports.getShareUrl = functions.https.onRequest(async (req, res) => {
 // Scanned by the doctor's phone. Looks up the share record, generates a
 // 15-minute signed download URL, and redirects the browser to it.
 
+// MARK: - POST /deleteUserData
+// Called by the iOS app before deleting the Firebase Auth account.
+// Verifies the user's ID token, then wipes all their Storage + Firestore data.
+
+exports.deleteUserData = functions.https.onRequest(async (req, res) => {
+  res.set("Access-Control-Allow-Origin", "*");
+
+  if (req.method === "OPTIONS") {
+    res.set("Access-Control-Allow-Methods", "POST");
+    res.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    return res.status(204).send("");
+  }
+
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method Not Allowed" });
+  }
+
+  // Verify Firebase ID token
+  const authorization = req.headers.authorization || "";
+  if (!authorization.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  let uid;
+  try {
+    const token = authorization.split("Bearer ")[1];
+    const decoded = await admin.auth().verifyIdToken(token);
+    uid = decoded.uid;
+  } catch (err) {
+    return res.status(401).json({ error: "Invalid token" });
+  }
+
+  try {
+    // 1. Delete all Storage files under users/{uid}/
+    const bucket = storage.bucket();
+    await bucket.deleteFiles({ prefix: `users/${uid}/` });
+
+    // 2. Delete Firestore subcollections + user document
+    const userRef = db.collection("users").doc(uid);
+
+    const deleteCollection = async (collRef) => {
+      const snap = await collRef.get();
+      if (snap.empty) return;
+      const batch = db.batch();
+      snap.docs.forEach((d) => batch.delete(d.ref));
+      await batch.commit();
+    };
+
+    await deleteCollection(userRef.collection("documents"));
+    await deleteCollection(userRef.collection("profile"));
+    await userRef.delete();
+
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    console.error("deleteUserData error:", err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// MARK: - GET /share/:fileId
+// Scanned by the doctor's phone. Looks up the share record, generates a
+// 15-minute signed download URL, and redirects the browser to it.
+
 exports.share = functions.https.onRequest(async (req, res) => {
   // req.path is "/{fileId}" when invoked as /share/{fileId}
   const fileId = req.path.replace(/^\/+/, "").trim();

@@ -4,6 +4,10 @@ struct OnboardingWelcomeStep: View {
     @ObservedObject var viewModel: OnboardingViewModel
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var appeared = false
+    @State private var showError = false
+    @State private var loadingProvider: AuthProvider?
+
+    enum AuthProvider { case apple, google }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -44,12 +48,19 @@ struct OnboardingWelcomeStep: View {
 
                 // Buttons
                 VStack(spacing: 12) {
-                    Button(action: viewModel.advance) {
+                    Button {
+                        loadingProvider = .apple
+                        viewModel.signInWithApple()
+                    } label: {
                         HStack(spacing: 8) {
-                            Image(systemName: "apple.logo")
-                                .font(.system(size: 20, weight: .medium))
-                            Text("Continue with Apple")
-                                .font(.buttonL)
+                            if loadingProvider == .apple && viewModel.isSigningIn {
+                                ProgressView().tint(.white)
+                            } else {
+                                Image(systemName: "apple.logo")
+                                    .font(.system(size: 20, weight: .medium))
+                                Text("Continue with Apple")
+                                    .font(.buttonL)
+                            }
                         }
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
@@ -58,16 +69,24 @@ struct OnboardingWelcomeStep: View {
                         .clipShape(.rect(cornerRadius: 28))
                     }
                     .buttonStyle(ScaleButtonStyle())
+                    .disabled(viewModel.isSigningIn)
                     .accessibilityLabel("Continue with Apple")
 
-                    Button(action: viewModel.advance) {
+                    Button {
+                        loadingProvider = .google
+                        viewModel.signInWithGoogle()
+                    } label: {
                         HStack(spacing: 8) {
-                            Image(.googleIcon)
-                                .resizable()
-                                .frame(width: 20, height: 20)
-                            Text("Continue with Google")
-                                .font(.buttonL)
-                                .foregroundStyle(Color.textPrimary)
+                            if loadingProvider == .google && viewModel.isSigningIn {
+                                ProgressView().tint(Color.textPrimary)
+                            } else {
+                                Image(.googleIcon)
+                                    .resizable()
+                                    .frame(width: 20, height: 20)
+                                Text("Continue with Google")
+                                    .font(.buttonL)
+                                    .foregroundStyle(Color.textPrimary)
+                            }
                         }
                         .frame(maxWidth: .infinity)
                         .frame(height: 56)
@@ -75,7 +94,18 @@ struct OnboardingWelcomeStep: View {
                         .clipShape(.rect(cornerRadius: 28))
                     }
                     .buttonStyle(ScaleButtonStyle())
+                    .disabled(viewModel.isSigningIn)
                     .accessibilityLabel("Continue with Google")
+
+                    // Error message
+                    if let error = viewModel.authError {
+                        Text(error)
+                            .font(.captionS)
+                            .foregroundStyle(.white.opacity(0.85))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 8)
+                            .transition(.opacity)
+                    }
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 16)

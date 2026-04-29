@@ -246,6 +246,9 @@
         }
       }
     },
+    "Add prescriptions, lab results, and reports. Neura organizes everything and keeps it ready to share." : {
+
+    },
     "Add Section" : {
       "localizations" : {
         "ar" : {
@@ -602,6 +605,9 @@
     "Create your\nhealth profile" : {
 
     },
+    "Customize card" : {
+
+    },
     "Date" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -634,6 +640,9 @@
           }
         }
       }
+    },
+    "Day" : {
+
     },
     "Delete" : {
       "localizations" : {
@@ -1241,6 +1250,9 @@
         }
       }
     },
+    "Health profile card" : {
+
+    },
     "Health Report" : {
 
     },
@@ -1463,6 +1475,9 @@
         }
       }
     },
+    "Month" : {
+
+    },
     "Name" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1666,7 +1681,11 @@
         }
       }
     },
+    "Nothing here yet — scan or upload a document." : {
+
+    },
     "Nothing here yet. Add or scan\na document" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2142,6 +2161,9 @@
         }
       }
     },
+    "Share health profile" : {
+
+    },
     "Share via QR" : {
 
     },
@@ -2283,6 +2305,9 @@
 
     },
     "This sharing link has expired for security.\nGenerate a new one to continue sharing." : {
+
+    },
+    "Three stacked document cards: Prescription, Lab Results, Medical Report" : {
 
     },
     "Three steps: Scan your documents, Organize by category, Share with your doctor" : {
@@ -2482,6 +2507,9 @@
     "Which medical areas\nare relevant to you?" : {
 
     },
+    "Year" : {
+
+    },
     "You control what Neura reads. Data stays on your device and is never shared." : {
 
     },
@@ -2504,9 +2532,6 @@
     "You have unlimited access.\nThank you for your support!" : {
 
     },
-    "You're all set!" : {
-
-    },
     "Your documents are encrypted and stored securely. Only you control what you share." : {
 
     },
@@ -2522,13 +2547,13 @@
     "Your health data is\nprivate and secure" : {
 
     },
-    "Your health profile is ready.\nAdd documents anytime from the Docs tab." : {
-
-    },
     "Your location appears on your health profile card." : {
 
     },
     "Your profile card" : {
+
+    },
+    "Your records,\nalways at hand" : {
 
     }
   },
