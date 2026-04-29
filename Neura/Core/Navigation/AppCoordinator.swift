@@ -12,10 +12,22 @@ final class AppCoordinator: ObservableObject {
     }
 
     @Published var selectedTab: Tab = .home
+    @Published var showAddDocument = false
+    @Published var isInDetailView = false
+    @Published var isSelectingDocs = false
 
     let profileRouter = ProfileRouter()
     let homeRouter = HomeRouter()
     let docsRouter = DocsRouter()
+
+    private var cancellables = Set<AnyCancellable>()
+
+    init() {
+        homeRouter.$path
+            .combineLatest(profileRouter.$path)
+            .map { home, profile in !home.isEmpty || !profile.isEmpty }
+            .assign(to: &$isInDetailView)
+    }
 }
 
 // MARK: - Route Definitions

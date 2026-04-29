@@ -1,0 +1,23 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // The shares collection is only written/read by Cloud Functions
+    // (which use the Admin SDK and bypass these rules).
+    // No client should access it directly.
+    match /shares/{shareId} {
+      allow read, write: if false;
+    }
+
+    // Per-user encrypted document metadata — only the owning user can access
+    match /users/{uid}/documents/{docId} {
+      allow read, write, delete: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Per-user encrypted health profile
+    match /users/{uid}/profile/{docId} {
+      allow read, write, delete: if request.auth != null && request.auth.uid == uid;
+    }
+
+  }
+}

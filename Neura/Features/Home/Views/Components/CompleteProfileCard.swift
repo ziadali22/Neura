@@ -2,7 +2,6 @@ import SwiftUI
 
 struct CompleteProfileCard: View {
     @StateObject private var viewModel = HealthProfileViewModel()
-    @State private var lineAnimation = false
     @State private var arrowBounce = false
 
     var onTap: (() -> Void)?
@@ -23,10 +22,8 @@ struct CompleteProfileCard: View {
     private var subtitle: String {
         let fields = missingFields
         guard !fields.isEmpty else { return "Your profile is complete!" }
-
         let display = fields.prefix(3)
         let joined = display.map { $0.capitalized }.joined(separator: ", ")
-
         if fields.count > 3 {
             return "Add your \(joined) and \(fields.count - 3) more"
         } else {
@@ -34,78 +31,76 @@ struct CompleteProfileCard: View {
         }
     }
 
-    var isComplete: Bool {
-        missingFields.isEmpty
-    }
+    var isComplete: Bool { missingFields.isEmpty }
 
     var body: some View {
         if !isComplete {
             Button {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+                withAnimation(.spring(response: 0.25, dampingFraction: 0.7)) {
                     arrowBounce.toggle()
                 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(120))
                     onTap?()
                 }
             } label: {
-                cardContent
+                ProfileCardContent(subtitle: subtitle, arrowBounce: arrowBounce)
             }
             .buttonStyle(ScaleButtonStyle())
         }
     }
+}
 
-    private var cardContent: some View {
+// MARK: - Card Content
+
+private struct ProfileCardContent: View {
+    let subtitle: String
+    let arrowBounce: Bool
+    @State private var lineAnimation = false
+
+    var body: some View {
         ZStack {
             VStack(spacing: 0) {
                 LinearGradient(
-                    colors: [Color.orange, Color.white],
+                    colors: [Color.accent, Color.white],
                     startPoint: .leading,
                     endPoint: .trailing
                 )
                 .frame(width: lineAnimation ? 186 : 0, height: 1)
                 .offset(x: 73, y: 1)
+                .animation(.easeOut(duration: 0.8).delay(0.5), value: lineAnimation)
 
                 HStack(spacing: 13) {
                     Image("complete_profile")
-                        .font(.system(size: 32))
-                        .foregroundColor(.orange)
                         .frame(width: 54, height: 54)
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Complete your profile")
                             .font(.headingXS)
-                            .foregroundColor(.textPrimary)
+                            .foregroundStyle(Color.textPrimary)
 
                         Text(subtitle)
                             .font(.bodyS)
-                            .foregroundColor(.textSecondary)
+                            .foregroundStyle(Color.textSecondary)
                             .lineLimit(2)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                     Image(systemName: "chevron.right")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .frame(width: 44, height: 44)
                         .background(Color.surfaceDark)
                         .clipShape(Circle())
                         .scaleEffect(arrowBounce ? 0.9 : 1.0)
                         .offset(x: arrowBounce ? 5 : 0)
+                        .animation(.spring(response: 0.25, dampingFraction: 0.7), value: arrowBounce)
                 }
                 .padding(16)
                 .frame(height: 90)
-                .background(Color.white)
-                .cornerRadius(24)
-                .shadow(color: Color.gray.opacity(0.25), radius: 12, x: 0, y: 4)
-
-//                LinearGradient(
-//                    colors: [Color.orange, Color.white],
-//                    startPoint: .leading,
-//                    endPoint: .trailing
-//                )
-//                .frame(width: lineAnimation ? 186 : 0, height: 1)
-//                .offset(x: 133, y: -1)
-//                .scaleEffect(x: 1, y: -1)
+                .background(Color.surfaceWhite)
+                .clipShape(.rect(cornerRadius: 24))
+                .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 4)
             }
         }
         .onAppear {

@@ -23,6 +23,7 @@ final class DocumentsListViewModel: ObservableObject {
 
     // Filtering & Sorting
     @Published var selectedCategoryFilter: DocumentCategory?
+    @Published var selectedSpecializationFilter: MedicalSpecialization?
     @Published var sortOption: DocumentSortOption = .newest
 
     // Subscription
@@ -50,6 +51,13 @@ final class DocumentsListViewModel: ObservableObject {
     @Published var errorMessage: String?
 
     private let fileManager = DocumentFileManager.shared
+    private var restoreObserver: NSObjectProtocol?
+
+    init() {
+        restoreObserver = NotificationCenter.default.addObserver(
+            forName: .documentsRestored, object: nil, queue: .main
+        ) { [weak self] _ in self?.loadDocuments() }
+    }
 
     // MARK: - Filtered & Sorted Documents
 
@@ -59,6 +67,11 @@ final class DocumentsListViewModel: ObservableObject {
         // Category filter
         if let category = selectedCategoryFilter {
             result = result.filter { $0.category == category }
+        }
+
+        // Specialization filter
+        if let specialization = selectedSpecializationFilter {
+            result = result.filter { $0.specialization == specialization }
         }
 
         // Search
@@ -147,12 +160,14 @@ final class DocumentsListViewModel: ObservableObject {
     var activeFilterCount: Int {
         var count = 0
         if selectedCategoryFilter != nil { count += 1 }
+        if selectedSpecializationFilter != nil { count += 1 }
         if sortOption != .newest { count += 1 }
         return count
     }
 
     func clearFilters() {
         selectedCategoryFilter = nil
+        selectedSpecializationFilter = nil
         sortOption = .newest
     }
 
@@ -284,6 +299,7 @@ final class DocumentsListViewModel: ObservableObject {
 
                     self.documents.insert(document, at: 0)
                     self.persistMetadata()
+                    SyncQueueManager.shared.enqueueUpload(document)
                     self.pendingPreview = nil
                     self.selectedPhotoItem = nil
                     SubscriptionManager.shared.recordUpload()
@@ -309,6 +325,7 @@ final class DocumentsListViewModel: ObservableObject {
         guard let index = documents.firstIndex(where: { $0.id == document.id }) else { return }
         documents[index].name = newName
         persistMetadata()
+        SyncQueueManager.shared.enqueueMetadataUpdate(documents[index])
     }
 
     // MARK: - Delete

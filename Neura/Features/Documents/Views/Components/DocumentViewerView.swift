@@ -134,7 +134,7 @@ private extension DocumentViewerView {
                 .disabled(!document.fileExists)
 
                 Button {
-                    if subscriptionManager.isPro {
+                    if subscriptionManager.canShareViaQR {
                         showShareQR = true
                     } else {
                         showPaywall = true

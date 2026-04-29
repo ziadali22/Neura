@@ -8,7 +8,6 @@ struct EmergencyCardBanner: View {
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 14) {
-                // Medical star icon
                 ZStack {
                     RoundedRectangle(cornerRadius: 14)
                         .fill(cardRed)
@@ -16,28 +15,30 @@ struct EmergencyCardBanner: View {
 
                     Image(systemName: "staroflife.fill")
                         .font(.system(size: 20))
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
+                        .accessibilityHidden(true)
                 }
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Emergency Card")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.textPrimary)
+                        .font(.headingXS)
+                        .foregroundStyle(Color.textPrimary)
 
                     Text("Quick access to vital health info")
-                        .font(.system(size: 12))
-                        .foregroundColor(.textTertiary)
+                        .font(.bodyS)
+                        .foregroundStyle(Color.textTertiary)
                 }
 
                 Spacer()
 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(.textTertiary)
+                    .foregroundStyle(Color.textTertiary)
+                    .accessibilityHidden(true)
             }
             .padding(14)
             .background(Color.surfaceWhite)
-            .clipShape(RoundedRectangle(cornerRadius: 20))
+            .clipShape(.rect(cornerRadius: 20))
             .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
         }
         .buttonStyle(ScaleButtonStyle())

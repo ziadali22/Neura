@@ -4,24 +4,30 @@ struct DashboardView: View {
     @StateObject private var coordinator = AppCoordinator()
 
     var body: some View {
-        TabView(selection: $coordinator.selectedTab) {
-            ProfileView()
-                .environmentObject(coordinator.profileRouter)
-                .tabItem { Label("Profile", systemImage: "person.fill") }
-                .tag(AppCoordinator.Tab.profile)
-
-            HomeView()
-                .environmentObject(coordinator.homeRouter)
-                .tabItem { Label("Home", systemImage: "house.fill") }
-                .tag(AppCoordinator.Tab.home)
-
-            DocsView()
-                .tabItem { Label("Docs", systemImage: "doc.text.fill") }
-                .tag(AppCoordinator.Tab.docs)
+        ZStack {
+            switch coordinator.selectedTab {
+            case .profile:
+                ProfileView()
+                    .environmentObject(coordinator.profileRouter)
+            case .home:
+                HomeView()
+                    .environmentObject(coordinator.homeRouter)
+            case .docs:
+                DocsView()
+            }
         }
-        .tint(.orange)
-        .toolbarBackground(.ultraThinMaterial, for: .tabBar)
-        .toolbarBackground(.visible, for: .tabBar)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if !coordinator.isInDetailView && !coordinator.isSelectingDocs {
+                CustomTabBar(selectedTab: $coordinator.selectedTab) {
+                    coordinator.selectedTab = .docs
+                    coordinator.showAddDocument = true
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 10)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(.spring(response: 0.35, dampingFraction: 0.85), value: coordinator.isInDetailView)
         .environmentObject(coordinator)
     }
 }

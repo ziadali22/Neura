@@ -6,13 +6,36 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		42677F612F772B4700BC08A2 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 42677F602F772B4700BC08A2 /* FirebaseCore */; };
+		42677F632F772B4700BC08A2 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 42677F622F772B4700BC08A2 /* FirebaseDatabase */; };
+		42677F702F781F8B00BC08A2 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 42677F6F2F781F8B00BC08A2 /* FirebaseAuth */; };
+		42677F722F781F9000BC08A2 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 42677F712F781F9000BC08A2 /* FirebaseFirestore */; };
+		42677F742F781F9700BC08A2 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 42677F732F781F9700BC08A2 /* FirebaseStorage */; };
+		42677F772F786ACB00BC08A2 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 42677F762F786ACB00BC08A2 /* GoogleSignIn */; };
+		42677F792F786ACB00BC08A2 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 42677F782F786ACB00BC08A2 /* GoogleSignInSwift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		992DECD82F4C801C003CF200 /* Neura.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Neura.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		42677F7D2F786DE400BC08A2 /* Exceptions for "Neura" folder in "Neura" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 992DECD72F4C801C003CF200 /* Neura */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		992DECDA2F4C801C003CF200 /* Neura */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				42677F7D2F786DE400BC08A2 /* Exceptions for "Neura" folder in "Neura" target */,
+			);
 			path = Neura;
 			sourceTree = "<group>";
 		};
@@ -23,16 +46,31 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				42677F632F772B4700BC08A2 /* FirebaseDatabase in Frameworks */,
+				42677F722F781F9000BC08A2 /* FirebaseFirestore in Frameworks */,
+				42677F792F786ACB00BC08A2 /* GoogleSignInSwift in Frameworks */,
+				42677F702F781F8B00BC08A2 /* FirebaseAuth in Frameworks */,
+				42677F742F781F9700BC08A2 /* FirebaseStorage in Frameworks */,
+				42677F612F772B4700BC08A2 /* FirebaseCore in Frameworks */,
+				42677F772F786ACB00BC08A2 /* GoogleSignIn in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		42677F6E2F781F8B00BC08A2 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		992DECCF2F4C801C003CF200 = {
 			isa = PBXGroup;
 			children = (
 				992DECDA2F4C801C003CF200 /* Neura */,
+				42677F6E2F781F8B00BC08A2 /* Frameworks */,
 				992DECD92F4C801C003CF200 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -65,6 +103,13 @@
 			);
 			name = Neura;
 			packageProductDependencies = (
+				42677F602F772B4700BC08A2 /* FirebaseCore */,
+				42677F622F772B4700BC08A2 /* FirebaseDatabase */,
+				42677F6F2F781F8B00BC08A2 /* FirebaseAuth */,
+				42677F712F781F9000BC08A2 /* FirebaseFirestore */,
+				42677F732F781F9700BC08A2 /* FirebaseStorage */,
+				42677F762F786ACB00BC08A2 /* GoogleSignIn */,
+				42677F782F786ACB00BC08A2 /* GoogleSignInSwift */,
 			);
 			productName = Neura;
 			productReference = 992DECD82F4C801C003CF200 /* Neura.app */;
@@ -96,6 +141,10 @@
 			);
 			mainGroup = 992DECCF2F4C801C003CF200;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				42677F5F2F772B4700BC08A2 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				42677F752F786ACB00BC08A2 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 992DECD92F4C801C003CF200 /* Products */;
 			projectDirPath = "";
@@ -253,32 +302,40 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Neura/Neura.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 3ASZ6DB46N;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Neura/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Neura needs camera access to scan your medical documents";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Neura uses Face ID to protect your health profile";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Neura reads your height, weight, date of birth, and biological sex to pre-fill your health profile. No data leaves your device.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Neura;
+				PRODUCT_BUNDLE_IDENTIFIER = com.NeuraA;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -287,32 +344,40 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Neura/Neura.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 3ASZ6DB46N;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Neura/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Neura needs camera access to scan your medical documents";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Neura uses Face ID to protect your health profile";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Neura reads your height, weight, date of birth, and biological sex to pre-fill your health profile. No data leaves your device.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Neura;
+				PRODUCT_BUNDLE_IDENTIFIER = com.NeuraA;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -338,6 +403,63 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		42677F5F2F772B4700BC08A2 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.11.0;
+			};
+		};
+		42677F752F786ACB00BC08A2 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.1.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		42677F602F772B4700BC08A2 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 42677F5F2F772B4700BC08A2 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		42677F622F772B4700BC08A2 /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 42677F5F2F772B4700BC08A2 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
+		42677F6F2F781F8B00BC08A2 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 42677F5F2F772B4700BC08A2 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		42677F712F781F9000BC08A2 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 42677F5F2F772B4700BC08A2 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		42677F732F781F9700BC08A2 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 42677F5F2F772B4700BC08A2 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+		42677F762F786ACB00BC08A2 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 42677F752F786ACB00BC08A2 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		42677F782F786ACB00BC08A2 /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 42677F752F786ACB00BC08A2 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 992DECD02F4C801C003CF200 /* Project object */;
 }

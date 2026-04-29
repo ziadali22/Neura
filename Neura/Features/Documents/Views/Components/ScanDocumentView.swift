@@ -501,25 +501,37 @@ private struct SpecializationPickerView: View {
                         HStack(spacing: 16) {
                             Image(systemName: spec.icon)
                                 .font(.system(size: 18))
-                                .foregroundColor(.textSecondary)
+                                .foregroundStyle(Color.textSecondary)
                                 .frame(width: 28, alignment: .center)
 
                             Text(spec.rawValue)
                                 .font(.bodyL)
-                                .foregroundColor(.textPrimary)
+                                .foregroundStyle(Color.textPrimary)
 
                             Spacer()
 
-                            if selected == spec {
-                                Image(systemName: "checkmark")
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(.accent)
+                            ZStack {
+                                Circle()
+                                    .strokeBorder(
+                                        selected == spec ? Color.accent : Color.textTertiary.opacity(0.35),
+                                        lineWidth: 2
+                                    )
+                                    .frame(width: 22, height: 22)
+
+                                if selected == spec {
+                                    Circle()
+                                        .fill(Color.accent)
+                                        .frame(width: 13, height: 13)
+                                        .transition(.scale.combined(with: .opacity))
+                                }
                             }
+                            .animation(.spring(response: 0.25, dampingFraction: 0.7), value: selected)
                         }
                         .padding(.horizontal, 20)
                         .padding(.vertical, 14)
+                        .contentShape(.rect)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(ScaleButtonStyle())
 
                     if spec != MedicalSpecialization.allCases.last {
                         Divider()

@@ -109,9 +109,13 @@ final class FirebaseUploadService: CloudUploadService {
             throw CloudUploadError.networkError(error)
         }
 
-        guard let shareHttpResponse = shareResponse as? HTTPURLResponse,
-              (200...299).contains(shareHttpResponse.statusCode) else {
+        guard let shareHttpResponse = shareResponse as? HTTPURLResponse else {
             throw CloudUploadError.invalidResponse
+        }
+
+        guard (200...299).contains(shareHttpResponse.statusCode) else {
+            let message = String(data: shareData, encoding: .utf8) ?? "HTTP \(shareHttpResponse.statusCode)"
+            throw CloudUploadError.uploadFailed("Cloud Function error: \(message)")
         }
 
         guard let json = try JSONSerialization.jsonObject(with: shareData) as? [String: Any],
