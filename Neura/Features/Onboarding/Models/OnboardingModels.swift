@@ -21,6 +21,9 @@ enum OnboardingStep: Int, CaseIterable, Hashable {
         }
     }
 
+    /// Whether the skip button is shown in the top bar.
+    var isSkippable: Bool { showsTopBar }
+
     /// Whether the centered progress pill is shown within the top bar.
     var showsProgressBar: Bool {
         switch self {

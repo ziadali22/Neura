@@ -49,7 +49,7 @@ struct OnboardingView: View {
                 progressBar
             }
 
-            // Back button — left aligned
+            // Back + Skip buttons — left and right aligned
             HStack {
                 if viewModel.currentStep != .welcome {
                     Button("Back", systemImage: "chevron.left") {
@@ -64,6 +64,13 @@ struct OnboardingView: View {
                     .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
                 }
                 Spacer()
+                if viewModel.currentStep.isSkippable {
+                    Button("Skip") {
+                        viewModel.advance()
+                    }
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(Color.textSecondary)
+                }
             }
         }
     }
