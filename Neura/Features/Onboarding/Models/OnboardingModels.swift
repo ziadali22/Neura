@@ -6,10 +6,12 @@ import SwiftUI
 enum OnboardingStep: Int, CaseIterable, Hashable {
     case welcome
     case storeAndShare
+    case statistics
+    case recordsLocation
     case documentScan
     case privacySecurity
     case medicalAreas
-    case profile, location, profileCard
+    case profile, location, profileCardIntro, profileCard
     case emergency, biometrics, emergencyCard
     case healthKit, healthData, medical, documents, calculating
 
@@ -27,13 +29,13 @@ enum OnboardingStep: Int, CaseIterable, Hashable {
     /// Whether the centered progress pill is shown within the top bar.
     var showsProgressBar: Bool {
         switch self {
-        case .welcome, .storeAndShare, .documentScan, .privacySecurity, .calculating: return false
+        case .welcome, .storeAndShare, .statistics, .recordsLocation, .documentScan, .privacySecurity, .calculating: return false
         default: return true
         }
     }
 
     static let progressTracked: [OnboardingStep] = [
-        .medicalAreas, .profile, .location, .profileCard, .emergency,
+        .medicalAreas, .profile, .location, .profileCardIntro, .emergency,
         .biometrics, .emergencyCard, .healthKit, .medical, .documents
     ]
 }

@@ -17,11 +17,11 @@ struct OnboardingDocumentsStep: View {
                     .padding(.top, 8)
 
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Your records,\nalways at hand")
+                        Text(L10n.Onboarding.Documents.title)
                             .font(.displayL)
                             .foregroundStyle(Color.textPrimary)
 
-                        Text("Add prescriptions, lab results, and reports. Neura organizes everything and keeps it ready to share.")
+                        Text(L10n.Onboarding.Documents.subtitle)
                             .font(.bodyL)
                             .foregroundStyle(Color.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -30,20 +30,20 @@ struct OnboardingDocumentsStep: View {
                     VStack(spacing: 0) {
                         DocFeatureRow(
                             icon: "doc.viewfinder",
-                            title: "Scan in seconds",
-                            description: "Point your camera and Neura files it automatically."
+                            title: L10n.Onboarding.Documents.scanTitle,
+                            description: L10n.Onboarding.Documents.scanSubtitle
                         )
                         Divider().padding(.leading, 52)
                         DocFeatureRow(
                             icon: "folder.badge.questionmark",
-                            title: "Auto-categorized",
-                            description: "Documents sorted by type so you can find them fast."
+                            title: L10n.Onboarding.Documents.categorizeTitle,
+                            description: L10n.Onboarding.Documents.categorizeSubtitle
                         )
                         Divider().padding(.leading, 52)
                         DocFeatureRow(
                             icon: "qrcode",
-                            title: "Share via QR code",
-                            description: "Generate a secure link for your doctor in one tap."
+                            title: L10n.Onboarding.Documents.qrTitle,
+                            description: L10n.Onboarding.Documents.qrSubtitle
                         )
                     }
                     .background(Color.surfaceWhite)

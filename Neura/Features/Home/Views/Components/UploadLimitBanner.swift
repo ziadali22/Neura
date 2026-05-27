@@ -13,13 +13,13 @@ struct UploadLimitBanner: View {
                     .frame(height: 40)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("\(subscriptionManager.limitText) free Documents Uploads left")
+                    Text(L10n.Home.UploadLimit.remaining(subscriptionManager.limitText))
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(.white)
                         .lineLimit(1)
                         .minimumScaleFactor(0.5)
 
-                    Text("Try Neura Pro to remove limit")
+                    Text(L10n.Home.UploadLimit.upgrade)
                         .font(.captionS)
                         .foregroundColor(Color.white.opacity(0.6))
                 }

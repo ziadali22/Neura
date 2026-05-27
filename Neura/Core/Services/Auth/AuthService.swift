@@ -44,11 +44,16 @@ final class AuthService: ObservableObject {
     // MARK: - Sign In with Google
 
     func signInWithGoogle() async throws {
-        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let rootVC = scene.windows.first?.rootViewController else {
+        guard let scene = UIApplication.shared.connectedScenes
+                .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
+              let rootVC = scene.keyWindow?.rootViewController else {
             throw AuthError.noRootViewController
         }
-        let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: rootVC)
+        var presentingVC = rootVC
+        while let presented = presentingVC.presentedViewController {
+            presentingVC = presented
+        }
+        let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: presentingVC)
         guard let idToken = result.user.idToken?.tokenString else {
             throw AuthError.missingToken
         }

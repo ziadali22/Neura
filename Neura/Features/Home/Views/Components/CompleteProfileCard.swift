@@ -75,7 +75,7 @@ private struct ProfileCardContent: View {
                         .frame(width: 54, height: 54)
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Complete your profile")
+                        Text(L10n.Home.completeProfile)
                             .font(.headingXS)
                             .foregroundStyle(Color.textPrimary)
 

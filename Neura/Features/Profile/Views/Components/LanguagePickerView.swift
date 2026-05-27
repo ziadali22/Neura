@@ -41,7 +41,7 @@ struct LanguagePickerView: View {
             .padding(.top, 16)
         }
         .background(Color.backgroundPrimary)
-        .navigationTitle(String(localized: "Language"))
+        .navigationTitle(L10n.Profile.language)
         .navigationBarTitleDisplayMode(.large)
     }
 }

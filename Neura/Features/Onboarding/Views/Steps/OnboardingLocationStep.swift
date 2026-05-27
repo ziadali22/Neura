@@ -2,6 +2,7 @@ import SwiftUI
 
 struct OnboardingLocationStep: View {
     @ObservedObject var viewModel: OnboardingViewModel
+    @StateObject private var locationDetector = LocationDetector()
     @State private var appeared = false
     @FocusState private var focusedField: Field?
 
@@ -31,21 +32,65 @@ struct OnboardingLocationStep: View {
 
                     // Header
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Where are\nyou based?")
+                        Text(L10n.Onboarding.Location.title)
                             .font(.displayL)
                             .foregroundStyle(Color.textPrimary)
 
-                        Text("Your location appears on your health profile card.")
+                        Text(L10n.Onboarding.Location.subtitle)
                             .font(.bodyL)
                             .foregroundStyle(Color.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    // Detect location button
+                    VStack(alignment: .leading, spacing: 6) {
+                        Button {
+                            focusedField = nil
+                            locationDetector.detect { city, country in
+                                viewModel.state.city = city
+                                viewModel.state.country = country
+                            }
+                        } label: {
+                            HStack(spacing: 10) {
+                                if locationDetector.isDetecting {
+                                    ProgressView()
+                                        .tint(Color.accent)
+                                        .controlSize(.small)
+                                } else {
+                                    Image(systemName: "location.fill")
+                                        .font(.system(size: 15))
+                                        .foregroundStyle(Color.accent)
+                                }
+                                Text(locationDetector.isDetecting ? "Detecting location…" : "Detect my location")
+                                    .font(.bodyL)
+                                    .foregroundStyle(Color.accent)
+                                Spacer()
+                                if !locationDetector.isDetecting {
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 13, weight: .semibold))
+                                        .foregroundStyle(Color.textTertiary)
+                                }
+                            }
+                            .padding(16)
+                            .background(Color.accent.opacity(0.07))
+                            .clipShape(.rect(cornerRadius: 12))
+                        }
+                        .buttonStyle(ScaleButtonStyle())
+                        .disabled(locationDetector.isDetecting)
+
+                        if let error = locationDetector.errorMessage {
+                            Text(error)
+                                .font(.captionS)
+                                .foregroundStyle(.red)
+                                .padding(.horizontal, 4)
+                        }
                     }
 
                     // Fields
                     VStack(spacing: 16) {
                         // City
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("City")
+                            Text(L10n.Onboarding.Location.city)
                                 .font(.headingXS)
                                 .foregroundStyle(Color.textPrimary)
 
@@ -54,7 +99,7 @@ struct OnboardingLocationStep: View {
                                     .font(.system(size: 16))
                                     .foregroundStyle(Color.textTertiary)
 
-                                TextField("e.g. Lasi", text: $viewModel.state.city)
+                                TextField(L10n.Onboarding.Location.cityPlaceholder, text: $viewModel.state.city)
                                     .font(.bodyL)
                                     .focused($focusedField, equals: .city)
                                     .submitLabel(.next)
@@ -68,7 +113,7 @@ struct OnboardingLocationStep: View {
 
                         // Country
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Country")
+                            Text(L10n.Onboarding.Location.country)
                                 .font(.headingXS)
                                 .foregroundStyle(Color.textPrimary)
 
@@ -77,7 +122,7 @@ struct OnboardingLocationStep: View {
                                     .font(.system(size: 16))
                                     .foregroundStyle(Color.textTertiary)
 
-                                TextField("e.g. Romania", text: $viewModel.state.country)
+                                TextField(L10n.Onboarding.Location.countryPlaceholder, text: $viewModel.state.country)
                                     .font(.bodyL)
                                     .focused($focusedField, equals: .country)
                                     .submitLabel(.done)

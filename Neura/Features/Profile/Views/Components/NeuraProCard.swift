@@ -8,11 +8,11 @@ struct NeuraProCard: View {
         if subscriptionManager.isPro {
             HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Neura Pro")
+                    Text(L10n.Profile.Pro.title)
                         .font(.headingL)
                         .foregroundStyle(.white)
 
-                    Text("You have unlimited access.\nThank you for your support!")
+                    Text(L10n.Profile.Pro.unlimitedAccess)
                         .font(.bodyS)
                         .foregroundStyle(Color.textOnDark)
                         .lineSpacing(2)
@@ -31,16 +31,16 @@ struct NeuraProCard: View {
             Button { showPaywall = true } label: {
                 HStack(alignment: .center) {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("Get Neura Pro")
+                        Text(L10n.Profile.Pro.getTitle)
                             .font(.headingL)
                             .foregroundStyle(.white)
 
-                        Text("Unlimited medical documents.\nShare them with doctors anytime.")
+                        Text(L10n.Profile.Pro.getSubtitle)
                             .font(.bodyS)
                             .foregroundStyle(Color.textOnDark)
                             .lineSpacing(2)
 
-                        Text("Upgrade to Pro")
+                        Text(L10n.Profile.Pro.upgrade)
                             .font(.buttonM)
                             .foregroundStyle(Color.textPrimary)
                             .padding(.horizontal, 16)

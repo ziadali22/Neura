@@ -46,6 +46,7 @@ struct SettingsRow: View {
             .padding(.vertical, 14)
             .background(Color.surfaceWhite)
             .clipShape(.rect(cornerRadius: 16))
+            .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 4)
         }
         .buttonStyle(ScaleButtonStyle())
     }

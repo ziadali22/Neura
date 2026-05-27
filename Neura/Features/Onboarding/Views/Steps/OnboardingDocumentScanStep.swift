@@ -23,11 +23,11 @@ struct OnboardingDocumentScanStep: View {
 
             // Text
             VStack(alignment: .leading, spacing: 8) {
-                Text("Scan, organize\n& share records")
+                Text(L10n.Onboarding.DocumentScan.title)
                     .font(.displayL)
                     .foregroundStyle(Color.textPrimary)
 
-                Text("Point your camera at any medical document and Neura files it for you automatically.")
+                Text(L10n.Onboarding.DocumentScan.subtitle)
                     .font(.bodyL)
                     .foregroundStyle(Color.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)

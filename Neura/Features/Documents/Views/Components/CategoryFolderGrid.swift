@@ -75,7 +75,7 @@ private struct AddFolderCard: View {
 
             Spacer()
 
-            Text("New Folder")
+            Text(L10n.Documents.Category.newFolder)
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.2))
                 .padding(.horizontal, 16)

@@ -21,11 +21,11 @@ struct OnboardingHealthDataStep: View {
                     .opacity(appeared ? 1 : 0)
 
                     VStack(spacing: 8) {
-                        Text("We found your data")
+                        Text(L10n.Onboarding.HealthData.title)
                             .font(.displayL)
                             .foregroundStyle(Color.textPrimary)
                             .multilineTextAlignment(.center)
-                        Text("Here's what we pulled from Apple Health:")
+                        Text(L10n.Onboarding.HealthData.subtitle)
                             .font(.bodyL)
                             .foregroundStyle(Color.textSecondary)
                             .multilineTextAlignment(.center)
@@ -37,13 +37,13 @@ struct OnboardingHealthDataStep: View {
                 // Data cards
                 VStack(spacing: 12) {
                     if let height = viewModel.healthKitData?.height {
-                        dataRow("ruler", "Height", height)
+                        dataRow("ruler", L10n.Onboarding.HealthData.height, height)
                     }
                     if let weight = viewModel.healthKitData?.weight {
-                        dataRow("scalemass", "Weight", weight)
+                        dataRow("scalemass", L10n.Onboarding.HealthData.weight, weight)
                     }
                     if let sex = viewModel.healthKitData?.biologicalSex {
-                        dataRow("figure.stand", "Biological Sex", sex)
+                        dataRow("figure.stand", L10n.Onboarding.HealthData.biologicalSex, sex)
                     }
                 }
                 .padding(.horizontal, 24)
@@ -56,8 +56,8 @@ struct OnboardingHealthDataStep: View {
 
             OnboardingContinueButton(
                 action: viewModel.advance,
-                title: "Use This Data",
-                secondaryTitle: "Enter manually instead"
+                title: L10n.Onboarding.HealthData.useThisData,
+                secondaryTitle: L10n.Onboarding.HealthData.enterManually
             )
             .opacity(appeared ? 1 : 0)
         }

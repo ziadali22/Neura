@@ -2,6 +2,13 @@ import SwiftUI
 import PhotosUI
 import Combine
 
+// MARK: - Display Mode
+
+enum DocsDisplayMode {
+    case folders
+    case files
+}
+
 // MARK: - Sort Option
 
 enum DocumentSortOption: String, CaseIterable, Identifiable {
@@ -20,6 +27,7 @@ enum DocumentSortOption: String, CaseIterable, Identifiable {
 final class DocumentsListViewModel: ObservableObject {
     @Published var documents: [Document] = []
     @Published var searchText = ""
+    @Published var displayMode: DocsDisplayMode = .folders
 
     // Filtering & Sorting
     @Published var selectedCategoryFilter: DocumentCategory?
@@ -97,6 +105,11 @@ final class DocumentsListViewModel: ObservableObject {
         return result
     }
 
+    // All documents sorted newest-first (no category/specialisation filter applied).
+    var allFilesSorted: [Document] {
+        documents.sorted { $0.createdAt > $1.createdAt }
+    }
+
     // MARK: - Grouped by Date
 
     struct DateSection: Identifiable {
@@ -143,10 +156,10 @@ final class DocumentsListViewModel: ObservableObject {
         }
 
         var sections: [DateSection] = []
-        if !todayDocs.isEmpty { sections.append(.init(id: "today", title: "Today", documents: todayDocs)) }
-        if !yesterdayDocs.isEmpty { sections.append(.init(id: "yesterday", title: "Yesterday", documents: yesterdayDocs)) }
-        if !thisWeekDocs.isEmpty { sections.append(.init(id: "week", title: "This Week", documents: thisWeekDocs)) }
-        if !thisMonthDocs.isEmpty { sections.append(.init(id: "month", title: "This Month", documents: thisMonthDocs)) }
+        if !todayDocs.isEmpty { sections.append(.init(id: "today", title: L10n.Documents.Section.today, documents: todayDocs)) }
+        if !yesterdayDocs.isEmpty { sections.append(.init(id: "yesterday", title: L10n.Documents.Section.yesterday, documents: yesterdayDocs)) }
+        if !thisWeekDocs.isEmpty { sections.append(.init(id: "week", title: L10n.Documents.Section.thisWeek, documents: thisWeekDocs)) }
+        if !thisMonthDocs.isEmpty { sections.append(.init(id: "month", title: L10n.Documents.Section.thisMonth, documents: thisMonthDocs)) }
 
         for (month, monthDocs) in olderByMonth.sorted(by: { $0.value.first!.createdAt > $1.value.first!.createdAt }) {
             sections.append(.init(id: month, title: month, documents: monthDocs))
@@ -290,6 +303,9 @@ final class DocumentsListViewModel: ObservableObject {
                 document.specialization = metadata.specialization
                 if !metadata.doctorName.isEmpty { document.doctorName = metadata.doctorName }
                 if !metadata.notes.isEmpty { document.notes = metadata.notes }
+                if let folderId = metadata.customFolderId {
+                    document.tags = (document.tags ?? []) + [folderId.uuidString]
+                }
 
                 await MainActor.run {
                     guard !self.documents.contains(where: { $0.id == document.id }) else {
@@ -335,6 +351,7 @@ final class DocumentsListViewModel: ObservableObject {
             try fileManager.deleteDocument(document)
             documents.removeAll { $0.id == document.id }
             persistMetadata()
+            SyncQueueManager.shared.enqueueDelete(document.id)
         } catch {
             errorMessage = "Failed to delete: \(error.localizedDescription)"
         }

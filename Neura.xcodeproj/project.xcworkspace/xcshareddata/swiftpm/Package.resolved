@@ -1,5 +1,5 @@
 {
-  "originHash" : "7ed78cec4688813732ed048994a6c24c5c081e333197fce4007040cea0ee7d0c",
+  "originHash" : "2b500258a0a319cea6f5a8904381b0af53d23e58039787ce46dd3680ca196186",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -116,6 +116,15 @@
       "state" : {
         "revision" : "040d087ac2267d2ddd4cca36c757d1c6a05fdbfe",
         "version" : "101.0.0"
+      }
+    },
+    {
+      "identity" : "l10n-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Decybel07/L10n-swift",
+      "state" : {
+        "revision" : "ad62717311be1eb4571d0025902a0043fdaf5a33",
+        "version" : "5.10.3"
       }
     },
     {

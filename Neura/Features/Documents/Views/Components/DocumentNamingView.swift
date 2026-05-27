@@ -25,7 +25,7 @@ struct DocumentNamingView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") { dismiss() }
+                    Button(L10n.Common.cancel) { dismiss() }
                         .foregroundColor(.primary)
                 }
             }
@@ -47,11 +47,11 @@ struct DocumentNamingView: View {
                 .foregroundColor(.blue)
                 .padding(.top, 40)
 
-            Text("Name Your File")
+            Text(L10n.Documents.Naming.title)
                 .font(.title2)
                 .fontWeight(.bold)
 
-            Text("Scanned \(scannedImages.count) page\(scannedImages.count == 1 ? "" : "s")")
+            Text(L10n.Documents.Naming.scannedPages(scannedImages.count))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }
@@ -72,7 +72,7 @@ struct DocumentNamingView: View {
                                     .stroke(Color.gray.opacity(0.3), lineWidth: 1)
                             )
 
-                        Text("Page \(index + 1)")
+                        Text(L10n.Documents.Naming.page(index + 1))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -85,12 +85,12 @@ struct DocumentNamingView: View {
 
     private var nameInput: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("File Name")
+            Text(L10n.Documents.Naming.fileName)
                 .font(.subheadline)
                 .fontWeight(.semibold)
                 .foregroundColor(.secondary)
 
-            TextField("Enter file name", text: $documentName)
+            TextField(L10n.Documents.Naming.fileNamePlaceholder, text: $documentName)
                 .textFieldStyle(.plain)
                 .font(.system(size: 17))
                 .padding(16)
@@ -107,7 +107,7 @@ struct DocumentNamingView: View {
         HStack {
             Image(systemName: "folder.fill")
                 .foregroundColor(.blue)
-            Text("Saving to \(category)")
+            Text(L10n.Documents.Naming.savingTo(category))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }
@@ -118,7 +118,7 @@ struct DocumentNamingView: View {
         Button { saveDocument() } label: {
             HStack {
                 Image(systemName: "checkmark.circle.fill")
-                Text("Save File")
+                Text(L10n.Documents.Naming.saveFile)
                     .fontWeight(.semibold)
             }
             .foregroundColor(.white)

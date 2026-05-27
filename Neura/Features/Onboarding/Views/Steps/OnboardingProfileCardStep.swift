@@ -28,7 +28,7 @@ struct OnboardingProfileCardStep: View {
         case (false, false): return "\(city), \(country)"
         case (false, true):  return city
         case (true, false):  return country
-        case (true, true):   return "Your City"
+        case (true, true):   return L10n.Onboarding.ProfileCard.yourCity
         }
     }
 
@@ -58,10 +58,10 @@ struct OnboardingProfileCardStep: View {
 private extension OnboardingProfileCardStep {
     var header: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Your profile card")
+            Text(L10n.Onboarding.ProfileCard.title)
                 .font(.displayL)
                 .foregroundStyle(Color.textPrimary)
-            Text("This is how your profile appears on your home screen. Only you can see it — never shared with doctors.")
+            Text(L10n.Onboarding.ProfileCard.subtitle)
                 .font(.bodyL)
                 .foregroundStyle(Color.textSecondary)
         }
@@ -119,7 +119,7 @@ private extension OnboardingProfileCardStep {
     }
 
     var useButton: some View {
-        OnboardingContinueButton(action: confirmCard, title: "Use this card")
+        OnboardingContinueButton(action: confirmCard, title: L10n.Onboarding.ProfileCard.useThisCard)
             .opacity(buttonAppeared ? 1 : 0)
             .offset(y: buttonAppeared ? 0 : 16)
     }

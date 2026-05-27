@@ -52,26 +52,26 @@ struct DocumentViewerView: View {
         .navigationBarBackButtonHidden(true)
         .navigationBarHidden(true)
         .toolbar(.hidden, for: .tabBar)
-        .alert("Delete Document", isPresented: $showDeleteConfirmation) {
-            Button("Cancel", role: .cancel) {}
-            Button("Delete", role: .destructive) {
+        .alert(L10n.Documents.Viewer.deleteTitle, isPresented: $showDeleteConfirmation) {
+            Button(L10n.Common.cancel, role: .cancel) {}
+            Button(L10n.Common.delete, role: .destructive) {
                 onDelete()
                 dismiss()
             }
         } message: {
-            Text("Are you sure you want to delete this document? This action cannot be undone.")
+            Text(L10n.Documents.Viewer.deleteMessage)
         }
-        .alert("Rename Document", isPresented: $showRename) {
-            TextField("Document name", text: $renameText)
-            Button("Cancel", role: .cancel) {}
-            Button("Save") {
+        .alert(L10n.Documents.Viewer.renameTitle, isPresented: $showRename) {
+            TextField(L10n.Documents.Viewer.renamePlaceholder, text: $renameText)
+            Button(L10n.Common.cancel, role: .cancel) {}
+            Button(L10n.Common.save) {
                 let trimmed = renameText.trimmingCharacters(in: .whitespacesAndNewlines)
                 if !trimmed.isEmpty {
                     onRename?(trimmed)
                 }
             }
         } message: {
-            Text("Enter a new name for this document.")
+            Text(L10n.Documents.Viewer.renameMessage)
         }
         .sheet(isPresented: $showInfo) {
             documentInfoSheet
@@ -119,17 +119,17 @@ private extension DocumentViewerView {
                     renameText = document.name
                     showRename = true
                 } label: {
-                    Label("Rename", systemImage: "pencil")
+                    Label(L10n.Common.rename, systemImage: "pencil")
                 }
 
                 Button { showInfo = true } label: {
-                    Label("Info", systemImage: "info.circle")
+                    Label(L10n.Common.info, systemImage: "info.circle")
                 }
 
                 Button {
                     shareDocument()
                 } label: {
-                    Label("Share", systemImage: "square.and.arrow.up")
+                    Label(L10n.Documents.Viewer.share, systemImage: "square.and.arrow.up")
                 }
                 .disabled(!document.fileExists)
 
@@ -140,7 +140,7 @@ private extension DocumentViewerView {
                         showPaywall = true
                     }
                 } label: {
-                    Label("Share via QR", systemImage: "qrcode")
+                    Label(L10n.Documents.Viewer.shareQR, systemImage: "qrcode")
                 }
                 .disabled(!document.fileExists)
 
@@ -149,7 +149,7 @@ private extension DocumentViewerView {
                 Button(role: .destructive) {
                     showDeleteConfirmation = true
                 } label: {
-                    Label("Delete", systemImage: "trash")
+                    Label(L10n.Common.delete, systemImage: "trash")
                 }
             } label: {
                 Image(systemName: "ellipsis")
@@ -215,7 +215,7 @@ private extension DocumentViewerView {
                             Text("·")
                                 .font(.captionS)
                                 .foregroundColor(.textTertiary)
-                            Text("\(document.pageCount) pages")
+                            Text(L10n.Documents.Viewer.pagesCount(document.pageCount))
                                 .font(.captionS)
                                 .foregroundColor(.textTertiary)
                         }
@@ -247,11 +247,11 @@ private extension DocumentViewerView {
                 VStack(spacing: 16) {
                     // Document details card
                     VStack(spacing: 0) {
-                        infoRow("Name", value: document.name, isFirst: true)
-                        infoRow(String(localized: "Type"), value: document.documentType.localizedName)
-                        infoRow("Date", value: formattedDate)
+                        infoRow(L10n.Documents.Viewer.name, value: document.name, isFirst: true)
+                        infoRow(L10n.Documents.Viewer.type, value: document.documentType.localizedName)
+                        infoRow(L10n.Documents.Viewer.date, value: formattedDate)
                         if document.isPDF {
-                            infoRow("Pages", value: "\(document.pageCount)", isLast: true)
+                            infoRow(L10n.Documents.Viewer.pages, value: "\(document.pageCount)", isLast: true)
                         }
                     }
                     .background(Color.surfaceWhite)
@@ -269,7 +269,7 @@ private extension DocumentViewerView {
                             }
 
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("Category")
+                                Text(L10n.Documents.Viewer.category)
                                     .font(.captionS)
                                     .foregroundColor(.textTertiary)
                                 Text(category.localizedName)
@@ -296,7 +296,7 @@ private extension DocumentViewerView {
                             }
 
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("Doctor")
+                                Text(L10n.Documents.Viewer.doctor)
                                     .font(.captionS)
                                     .foregroundColor(.textTertiary)
                                 Text(doctor)
@@ -313,7 +313,7 @@ private extension DocumentViewerView {
 
                     if let notes = document.notes, !notes.isEmpty {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Notes")
+                            Text(L10n.Documents.Viewer.notes)
                                 .font(.captionS)
                                 .foregroundColor(.textTertiary)
                             Text(notes)
@@ -328,7 +328,7 @@ private extension DocumentViewerView {
 
                     if let tags = document.tags, !tags.isEmpty {
                         VStack(alignment: .leading, spacing: 10) {
-                            Text("Tags")
+                            Text(L10n.Documents.Viewer.tags)
                                 .font(.captionS)
                                 .foregroundColor(.textTertiary)
                             FlowTagsView(tags: tags)
@@ -344,11 +344,11 @@ private extension DocumentViewerView {
                 .padding(.bottom, 40)
             }
             .background(Color.backgroundPrimary)
-            .navigationTitle("Document Info")
+            .navigationTitle(L10n.Documents.Viewer.infoTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") { showInfo = false }
+                    Button(L10n.Common.done) { showInfo = false }
                         .font(.buttonM)
                         .foregroundColor(.accent)
                 }
@@ -401,11 +401,11 @@ private extension DocumentViewerView {
             }
 
             VStack(spacing: 6) {
-                Text("File Not Found")
+                Text(L10n.Documents.Viewer.fileNotFound)
                     .font(.headingS)
                     .foregroundColor(.textPrimary)
 
-                Text("The document file could not be located.\nIt may have been moved or deleted.")
+                Text(L10n.Documents.Viewer.fileNotFoundMessage)
                     .font(.bodyS)
                     .foregroundColor(.textSecondary)
                     .multilineTextAlignment(.center)
@@ -519,7 +519,7 @@ private struct ImageDocumentView: View {
                     ProgressView()
                         .controlSize(.large)
                         .tint(.accent)
-                    Text("Loading document...")
+                    Text(L10n.Documents.Viewer.loading)
                         .font(.captionS)
                         .foregroundColor(.textTertiary)
                 }

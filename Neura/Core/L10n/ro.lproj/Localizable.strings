@@ -1,0 +1,402 @@
+// MARK: - Common
+"common.neura" = "Neura";
+"common.cancel" = "Anulează";
+"common.done" = "Gata";
+"common.save" = "Salvează";
+"common.close" = "Închide";
+"common.delete" = "Șterge";
+"common.share" = "Distribuie";
+"common.add" = "Adaugă";
+"common.edit" = "Editează";
+"common.rename" = "Redenumește";
+"common.info" = "Informații";
+"common.retry" = "Reîncearcă";
+"common.back" = "Înapoi";
+"common.notes" = "Note";
+"common.optional" = "Opțional";
+"common.notNow" = "Nu acum";
+"common.maybeLater" = "Poate mai târziu";
+"common.skipForNow" = "Sari deocamdată";
+"common.thisActionCannotBeUndone" = "Această acțiune nu poate fi anulată.";
+"common.areYouSure" = "Ești sigur?";
+"common.select" = "Selectează";
+"common.deselect" = "Deselectează";
+"common.saving" = "Se salvează documentul...";
+"common.loading" = "Se încarcă...";
+"common.skip" = "Omite";
+"common.create" = "Creează";
+"common.error" = "Eroare";
+
+// MARK: - Onboarding Welcome
+"onboarding.welcome.title" = "Bun venit în Neura";
+"onboarding.welcome.subtitle" = "Stochează, organizează și distribuie dosarele tale medicale într-un loc sigur.";
+"onboarding.welcome.continueApple" = "Continuă cu Apple";
+"onboarding.welcome.continueGoogle" = "Continuă cu Google";
+"onboarding.welcome.encrypted" = "Criptare end-to-end";
+
+// MARK: - Onboarding Store & Share
+"onboarding.storeAndShare.title" = "Sună familiar?";
+"onboarding.storeAndShare.subtitle" = "Nu mai căuta răspunsuri cu disperare.";
+"onboarding.storeAndShare.q1" = "Ce medicamente iei?";
+"onboarding.storeAndShare.q2" = "Ai alergii?";
+"onboarding.storeAndShare.q3" = "Când ai făcut ultima analiză de sânge?";
+"onboarding.storeAndShare.q4" = "Ai rezultatele la tine?";
+"onboarding.storeAndShare.q5" = "Ai afecțiuni cronice?";
+
+// MARK: - Onboarding Records Location
+"onboarding.recordsLocation.title" = "Unde îți ții de obicei dosarele medicale?";
+"onboarding.recordsLocation.email" = "Email";
+"onboarding.recordsLocation.whatsapp" = "WhatsApp";
+"onboarding.recordsLocation.folder" = "Foldere pe telefon";
+"onboarding.recordsLocation.shelf" = "Raft";
+"onboarding.recordsLocation.everywhere" = "Peste tot";
+
+// MARK: - Onboarding Statistics
+"onboarding.statistics.number" = "12 milioane";
+"onboarding.statistics.body" = "diagnostice greșite în fiecare an. Cele mai multe ar putea fi prevenite dacă medicii ar avea imaginea completă";
+
+// MARK: - Onboarding Document Scan
+"onboarding.documentScan.title" = "Scanează, organizează\nși distribuie dosarele";
+"onboarding.documentScan.subtitle" = "Îndreaptă camera spre orice document medical și Neura îl arhivează automat.";
+
+// MARK: - Onboarding Privacy
+"onboarding.privacy.title" = "Datele tale de sănătate\nsunt private și securizate";
+"onboarding.privacy.subtitle" = "Documentele tale sunt criptate și stocate în siguranță. Numai tu controlezi ce distribui.";
+
+// MARK: - Onboarding Medical Areas
+"onboarding.medicalAreas.title" = "Ce domenii medicale\nte privesc?";
+"onboarding.medicalAreas.subtitle" = "Selectează câteva pentru a-ți organiza dosarele medicale. Poți modifica oricând.";
+
+// MARK: - Onboarding Profile
+"onboarding.profile.title" = "Creează-ți\nprofilul de sănătate";
+"onboarding.profile.subtitle" = "Doar elementele de bază — poți adăuga mai mult ulterior.";
+"onboarding.profile.fullName" = "Nume complet";
+"onboarding.profile.fullNamePlaceholder" = "Numele tău complet";
+"onboarding.profile.dateOfBirth" = "Data nașterii";
+"onboarding.profile.day" = "Zi";
+"onboarding.profile.month" = "Lună";
+"onboarding.profile.year" = "An";
+
+// MARK: - Onboarding Location
+"onboarding.location.title" = "Unde\nlocuiești?";
+"onboarding.location.subtitle" = "Locația ta apare pe cardul profilului de sănătate.";
+"onboarding.location.city" = "Oraș";
+"onboarding.location.cityPlaceholder" = "ex. Iași";
+"onboarding.location.country" = "Țară";
+"onboarding.location.countryPlaceholder" = "ex. România";
+
+// MARK: - Onboarding Profile Card
+"onboarding.profileCardIntro.title" = "Cunoaște-ți Cardul de Sănătate";
+"onboarding.profileCardIntro.subtitle" = "Tot ce are nevoie un medic să știe despre tine, într-un singur loc, gata de partajat în câteva secunde.";
+"onboarding.profileCard.title" = "Cardul tău de profil";
+"onboarding.profileCard.subtitle" = "Așa apare profilul tău pe ecranul principal. Numai tu îl poți vedea — nu se distribuie niciodată medicilor.";
+"onboarding.profileCard.useThisCard" = "Folosește acest card";
+"onboarding.profileCard.yourCity" = "Orașul tău";
+
+// MARK: - Onboarding Emergency
+"onboarding.emergency.title" = "Configurează\ncardul de urgență";
+"onboarding.emergency.subtitle" = "Echipajele de urgență pot vedea aceasta informație.";
+"onboarding.emergency.contactName" = "Nume contact de urgență";
+"onboarding.emergency.contactNamePlaceholder" = "ex. Ion Popescu";
+"onboarding.emergency.phone" = "Număr de telefon";
+"onboarding.emergency.phonePlaceholder" = "+40 7XX XXX XXX";
+"onboarding.emergency.bloodType" = "Grupa sanguină (opțional)";
+"onboarding.emergency.yourNamePlaceholder" = "Numele tău";
+"onboarding.emergency.contactPlaceholder" = "Contact de urgență";
+"onboarding.emergency.bloodTypePlaceholder" = "Grupa sanguină";
+
+// MARK: - Onboarding Biometrics
+"onboarding.biometrics.title" = "Protejează-ți\nprofilul de sănătate";
+"onboarding.biometrics.subtitleFormat" = "Folosește %@ pentru a bloca profilul, astfel încât doar tu să îl poți accesa.";
+"onboarding.biometrics.enableFormat" = "Activează %@";
+
+// MARK: - Onboarding Emergency Card
+"onboarding.emergencyCard.title" = "Cardul tău de urgență\neste gata";
+"onboarding.emergencyCard.subtitle" = "Medicii și echipajele de urgență îl pot accesa instantaneu.";
+"onboarding.emergencyCard.nameLabel" = "Nume";
+"onboarding.emergencyCard.emergencyContactLabel" = "Contact de urgență";
+"onboarding.emergencyCard.bloodTypeLabel" = "Grupă sanguină";
+"onboarding.emergencyCard.notSet" = "Necompletat";
+"onboarding.emergencyCard.poweredBy" = "Powered by";
+
+// MARK: - Onboarding Health Kit
+"onboarding.healthKit.title" = "Conectează-te la\nApple Health";
+"onboarding.healthKit.subtitle" = "Completează automat profilul de sănătate fără să tastezi.";
+"onboarding.healthKit.importHeight" = "Importă înălțimea ta";
+"onboarding.healthKit.importHeightSub" = "Preluat automat din Apple Health";
+"onboarding.healthKit.importWeight" = "Importă greutatea ta";
+"onboarding.healthKit.importWeightSub" = "Se actualizează cu ultima citire";
+"onboarding.healthKit.importSex" = "Importă sexul biologic";
+"onboarding.healthKit.importSexSub" = "Folosit pentru context medical în rapoarte";
+"onboarding.healthKit.privacyNote" = "Tu controlezi ce citește Neura. Datele rămân pe dispozitivul tău și nu sunt partajate niciodată.";
+"onboarding.healthKit.connect" = "Conectează Apple Health";
+
+// MARK: - Onboarding Health Data
+"onboarding.healthData.title" = "Am găsit datele tale";
+"onboarding.healthData.subtitle" = "Iată ce am preluat din Apple Health:";
+"onboarding.healthData.height" = "Înălțime";
+"onboarding.healthData.weight" = "Greutate";
+"onboarding.healthData.biologicalSex" = "Sex biologic";
+"onboarding.healthData.useThisData" = "Folosește aceste date";
+"onboarding.healthData.enterManually" = "Introduceți manual";
+
+// MARK: - Onboarding Medical
+"onboarding.medical.title" = "Istoricul tău\nde sănătate";
+"onboarding.medical.subtitle" = "Adaugă câteva intrări pentru început — poți edita oricând.";
+"onboarding.medical.medications" = "Medicamente";
+"onboarding.medical.medicationsPlaceholder" = "ex. Vitamina D, Aspirină (separat prin virgulă)";
+"onboarding.medical.allergies" = "Alergii";
+"onboarding.medical.allergiesPlaceholder" = "ex. Arahide, Penicilină";
+"onboarding.medical.conditions" = "Afecțiuni";
+"onboarding.medical.conditionsPlaceholder" = "ex. Hipertensiune, Diabet";
+
+// MARK: - Onboarding Documents
+"onboarding.documents.title" = "Dosarele tale,\nmereu la îndemână";
+"onboarding.documents.subtitle" = "Adaugă rețete, analize și rapoarte. Neura organizează totul și îl ține gata de distribuit.";
+"onboarding.documents.scanTitle" = "Scanează în secunde";
+"onboarding.documents.scanSubtitle" = "Îndreaptă camera și Neura arhivează automat.";
+"onboarding.documents.categorizeTitle" = "Categorizare automată";
+"onboarding.documents.categorizeSubtitle" = "Documentele sortate pe tip pentru a le găsi rapid.";
+"onboarding.documents.qrTitle" = "Distribuie prin cod QR";
+"onboarding.documents.qrSubtitle" = "Generează un link securizat pentru medicul tău într-o singură atingere.";
+
+// MARK: - Onboarding Goals
+"onboarding.goals.title" = "La ce vei folosi\nNeura?";
+"onboarding.goals.subtitle" = "Selectează tot ce se aplică";
+
+// MARK: - Onboarding Calculating
+"onboarding.calculating.building" = "Construim\nprofilul tău Neura…";
+"onboarding.calculating.personalizing" = "Personalizăm experiența ta…";
+"onboarding.calculating.allSet" = "Totul e pregătit!";
+"onboarding.calculating.allSetNameFormat" = "Totul e pregătit, %@!";
+"onboarding.calculating.welcome" = "Bun venit la o viață mai sănătoasă.";
+"onboarding.calculating.profileCreatedFormat" = "Profil creat pentru %@";
+"onboarding.calculating.medicalAreaSingle" = "1 domeniu medical urmărit";
+"onboarding.calculating.medicalAreaFormat" = "%d domenii medicale urmărite";
+"onboarding.calculating.emergencyContact" = "Contact de urgență salvat";
+"onboarding.calculating.healthConnected" = "Apple Health conectat";
+"onboarding.calculating.healthEntrySingle" = "1 intrare de sănătate adăugată";
+"onboarding.calculating.healthEntryFormat" = "%d intrări de sănătate adăugate";
+"onboarding.calculating.healthCardReady" = "Cardul de sănătate pregătit";
+"onboarding.calculating.progressFormat" = "%d din %d configurate";
+"onboarding.scanning.scanLabel" = "Scanează";
+"onboarding.scanning.scanSubtitleText" = "Îndreaptă spre orice document";
+"onboarding.scanning.organizeLabel" = "Organizează";
+"onboarding.scanning.organizeSubtitle" = "Categorizat automat pe tip";
+"onboarding.scanning.shareLabel" = "Distribuie";
+"onboarding.scanning.shareSubtitleText" = "Trimite medicului tău instant";
+"onboarding.scanning.scanning" = "Se scanează…";
+"onboarding.scanning.bloodTest" = "Analize de sânge";
+"onboarding.scanning.readyToShare" = "Gata de partajat";
+
+// MARK: - Home
+"home.greeting.morning" = "Bună dimineața";
+"home.greeting.afternoon" = "Bună ziua";
+"home.greeting.evening" = "Bună seara";
+"home.recent" = "Recente";
+"home.empty" = "Nimic aici — scanează sau încarcă un document.";
+"home.customizeCard" = "Personalizează cardul";
+"home.shareHealthProfile" = "Distribuie profilul de sănătate";
+"home.completeProfile" = "Completează-ți profilul";
+"home.uploadLimit.remainingFormat" = "%@ încărcări gratuite rămase";
+"home.uploadLimit.upgrade" = "Încearcă Neura Pro pentru a elimina limita";
+"home.cardBackground.title" = "Fundal card";
+"home.cardBackground.upload" = "Încarcă";
+"home.cardBackground.yourPhotos" = "Fotografiile tale";
+"home.cardBackground.presets" = "Presetări";
+"home.cardBackground.gradients" = "Degradeuri";
+
+// MARK: - Home Share Health
+"home.shareHealth.title" = "Distribuie profilul tău de sănătate";
+"home.shareHealth.subtitle" = "Oferă acces instant la rezumatul tău medical esențial — sari peste explicații, primește îngrijire mai rapid.";
+"home.shareHealth.share" = "Distribuie";
+
+// MARK: - Emergency
+"emergency.title" = "Card de urgență";
+"emergency.subtitle" = "Acces rapid la informații vitale de sănătate";
+"emergency.inCaseOf" = "ÎN CAZ DE";
+"emergency.emergency" = "URGENȚĂ";
+"emergency.poweredBy" = "Powered by";
+"emergency.callContact" = "Sună contactul de urgență";
+"emergency.share" = "Distribuie";
+
+// MARK: - Documents
+"documents.title" = "Documente";
+"documents.deselectAll" = "Deselectează tot";
+"documents.selectAll" = "Selectează tot";
+"documents.done" = "Gata";
+"documents.select" = "Selectează";
+"documents.searchPlaceholder" = "Caută documente";
+"documents.countFormat" = "%d doc.";
+"documents.noMatchingTitle" = "Niciun document găsit";
+"documents.noDocumentsTitle" = "Niciun document";
+"documents.noMatchingMessage" = "Încearcă să ajustezi filtrele.";
+"documents.noDocumentsMessage" = "Scanează sau încarcă primul tău document medical.";
+"documents.addDocument" = "Adaugă document";
+"documents.scan" = "Scanează document";
+"documents.uploadPhotos" = "Încarcă din poze";
+"documents.importFile" = "Importă fișier";
+"documents.deleteAlertTitleFormat" = "Șterge %d document(e)?";
+"documents.filter.title" = "Filtre";
+"documents.filter.button" = "Filtru";
+"documents.filter.order" = "Ordine";
+"documents.filter.category" = "Categorie";
+"documents.filter.specialization" = "Specializare";
+"documents.filter.clearAll" = "Șterge tot";
+"documents.filter.resultFormat" = "Vezi %d rezultate";
+"documents.filter.newest" = "Cele mai noi";
+"documents.filter.oldest" = "Cele mai vechi";
+"documents.filter.nameAZ" = "Nume A–Z";
+"documents.viewer.rename" = "Redenumește";
+"documents.viewer.info" = "Informații";
+"documents.viewer.share" = "Distribuie";
+"documents.viewer.shareQR" = "Distribuie prin QR";
+"documents.viewer.delete" = "Șterge";
+"documents.viewer.infoTitle" = "Informații document";
+"documents.viewer.fileNotFound" = "Fișier negăsit";
+"documents.viewer.fileNotFoundMessage" = "Fișierul documentului nu a putut fi localizat. Este posibil să fi fost mutat sau șters.";
+"documents.viewer.loading" = "Se încarcă documentul...";
+"documents.viewer.deleteTitle" = "Șterge documentul";
+"documents.viewer.deleteMessage" = "Sigur doriți să ștergeți acest document? Această acțiune nu poate fi anulată.";
+"documents.viewer.renameTitle" = "Redenumește documentul";
+"documents.viewer.renamePlaceholder" = "Numele documentului";
+"documents.viewer.renameMessage" = "Introduceți un nou nume pentru acest document.";
+"documents.viewer.pagesCountFormat" = "%d pagini";
+"documents.viewer.name" = "Nume";
+"documents.viewer.date" = "Dată";
+"documents.viewer.pages" = "Pagini";
+"documents.viewer.type" = "Tip";
+"documents.viewer.category" = "Categorie";
+"documents.viewer.doctor" = "Doctor";
+"documents.viewer.notes" = "Note";
+"documents.viewer.tags" = "Etichete";
+
+// MARK: - Documents Sections
+"documents.section.today" = "Azi";
+"documents.section.yesterday" = "Ieri";
+"documents.section.thisWeek" = "Săptămâna aceasta";
+"documents.section.thisMonth" = "Luna aceasta";
+
+// MARK: - Documents Category
+"documents.category.noDocumentsYet" = "Niciun document încă";
+"documents.category.searchFormat" = "Caută în %@";
+"documents.category.emptyDescriptionFormat" = "Scanează sau încarcă un document și etichetează-l ca %@.";
+"documents.category.scanFirst" = "Scanați primul document pentru a începe";
+"documents.category.addNewFile" = "Adăugați fișier nou";
+"documents.category.newFolder" = "Dosar nou";
+
+// MARK: - Documents Folder
+"documents.folder.renameTitle" = "Redenumește dosarul";
+"documents.folder.namePlaceholder" = "Numele dosarului";
+"documents.folder.noDocuments" = "Niciun document";
+"documents.folder.emptyDescriptionFormat" = "Scanează sau încarcă un document și atribuie-l lui %@.";
+
+// MARK: - Add Document Sheet Subtitles
+"documents.addDocument.scanSubtitle" = "Folosește camera pentru a scana pagini";
+"documents.addDocument.photoSubtitle" = "Alege o imagine din biblioteca ta";
+"documents.addDocument.fileSubtitle" = "Selectează un fișier PDF sau imagine";
+
+// MARK: - Documents Category Picker
+"documents.categoryPicker.title" = "Selectați categoria";
+"documents.categoryPicker.subtitle" = "Alegeți unde să salvați documentul scanat";
+"documents.categoryPicker.documentCountFormat" = "%d document(e)";
+"documents.naming.title" = "Denumește fișierul";
+"documents.naming.scannedPagesFormat" = "Scanate %d pagini";
+"documents.naming.pageFormat" = "Pagina %d";
+"documents.naming.fileName" = "Numele fișierului";
+"documents.naming.fileNamePlaceholder" = "Introdu numele fișierului";
+"documents.naming.savingToFormat" = "Se salvează în %@";
+"documents.naming.saveFile" = "Salvează fișierul";
+"documents.metadata.title" = "Detalii document";
+"documents.metadata.category" = "Categorie";
+"documents.metadata.specialization" = "Specializare";
+"documents.metadata.date" = "Data documentului";
+"documents.metadata.name" = "Numele documentului";
+"documents.metadata.doctor" = "Numele medicului";
+"documents.metadata.notes" = "Note";
+"documents.metadata.notesPlaceholder" = "Detalii suplimentare despre acest document";
+"documents.metadata.save" = "Salvează documentul";
+"documents.metadata.specializationTitle" = "Specializare";
+
+// MARK: - QR Sharing
+"qr.uploading" = "Se încarcă documentul";
+"qr.scanCode" = "Scanează codul QR pentru a deschide documentul";
+"qr.copyLink" = "Copiază linkul";
+"qr.expired" = "Link expirat";
+"qr.expiredMessage" = "Acest link de partajare a expirat din motive de securitate.";
+"qr.generateNew" = "Generează un link nou";
+"qr.failed" = "Încărcare eșuată";
+"qr.retry" = "Reîncearcă";
+
+// MARK: - Health Profile
+"healthProfile.title" = "Profil de sănătate";
+"healthProfile.generalData" = "Date generale";
+"healthProfile.addField" = "Adaugă câmp";
+"healthProfile.addSection" = "Adaugă secțiune";
+"healthProfile.sectionTitlePlaceholder" = "Titlul secțiunii";
+"healthProfile.fullName" = "Nume complet";
+"healthProfile.dateOfBirth" = "Data nașterii";
+"healthProfile.gender" = "Sex";
+"healthProfile.height" = "Înălțime";
+"healthProfile.weight" = "Greutate";
+"healthProfile.insuranceStatus" = "Statut asigurare";
+"healthProfile.bloodType" = "Grupă sanguină";
+"healthProfile.emergencyContact" = "Contact de urgență";
+"healthProfile.addName" = "Adaugă nume";
+"healthProfile.addDate" = "Adaugă data";
+"healthProfile.addGender" = "Adaugă sex";
+"healthProfile.addHeight" = "Adaugă înălțime";
+"healthProfile.addWeight" = "Adaugă greutate";
+"healthProfile.selectBloodType" = "Selectează";
+"healthProfile.addStatus" = "Adaugă statut";
+"healthProfile.addContact" = "Adaugă contact";
+"healthProfile.addHealthInfo" = "Adaugă informații de sănătate";
+"healthProfile.notesOptional" = "Note (opțional)";
+"healthProfile.additionalDetails" = "Detalii suplimentare";
+"healthProfile.noEntries" = "Nicio intrare încă";
+"healthProfile.noEntriesSubtitle" = "Apasă butonul de mai jos pentru a adăuga una";
+"healthProfile.editFormat" = "Editează %@";
+"healthProfile.deleteFormat" = "Șterge %@";
+"healthProfile.report.title" = "Raport de sănătate";
+"healthProfile.report.subtitle" = "Un PDF complet care combină profilul tău de sănătate\ndocumentele și cronologia";
+"healthProfile.report.whatsIncluded" = "Ce conține";
+"healthProfile.report.generating" = "Se generează...";
+"healthProfile.report.generate" = "Generează raport";
+"healthProfile.report.feature1Title" = "Profil de sănătate";
+"healthProfile.report.feature1Subtitle" = "Date generale, afecțiuni, medicamente și altele";
+"healthProfile.report.feature2Title" = "Inventar documente";
+"healthProfile.report.feature2Subtitle" = "Toate documentele grupate pe categorii";
+"healthProfile.report.feature3Title" = "Cronologie medicală";
+"healthProfile.report.feature3Subtitle" = "Vedere cronologică a tuturor evenimentelor de sănătate";
+"healthProfile.report.feature4Title" = "Raport profesional";
+"healthProfile.report.feature4Subtitle" = "Format profesional gata pentru medicul tău";
+"healthProfile.updatedFormat" = "Actualizat %@";
+"healthProfile.valueLabel" = "Valoare";
+
+// MARK: - Profile
+"profile.title" = "Profil";
+"profile.section.profile" = "Profil";
+"profile.section.preferences" = "Preferințe";
+"profile.section.support" = "Asistență";
+"profile.section.account" = "Cont";
+"profile.healthProfile" = "Profil de sănătate";
+"profile.subscription" = "Abonament";
+"profile.security" = "Securitate";
+"profile.language" = "Limbă";
+"profile.feedback" = "Feedback";
+"profile.contactUs" = "Contactează-ne";
+"profile.logOut" = "Deconectare";
+"profile.deleteAccount" = "Șterge contul";
+"profile.logOutMessage" = "Ești sigur că vrei să te deconectezi?";
+"profile.deleteAccountMessage" = "Această acțiune nu poate fi anulată. Toate datele tale vor fi șterse permanent.";
+"profile.pro.title" = "Neura Pro";
+"profile.pro.unlimitedAccess" = "Ai acces nelimitat.\nMulțumim pentru sprijin!";
+"profile.pro.getTitle" = "Obține Neura Pro";
+"profile.pro.getSubtitle" = "Documente medicale nelimitate.\nDistribuie-le medicilor oricând.";
+"profile.pro.upgrade" = "Upgradează la Pro";
+
+// MARK: - Paywall
+"paywall.title" = "Neura Pro";
+"paywall.subtitle" = "Deblochează încărcări nelimitate\nși funcții premium";
+"paywall.continueFormat" = "Continuă cu %@";
+"paywall.restore" = "Restaurează achiziția";

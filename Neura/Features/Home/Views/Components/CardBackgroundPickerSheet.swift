@@ -195,7 +195,7 @@ struct CardBackgroundPickerSheet: View {
                 .frame(width: 40, height: 5)
                 .padding(.top, 10)
 
-            Text("Card Background")
+            Text(L10n.Home.CardBackground.title)
                 .font(.headingS)
                 .foregroundColor(.textPrimary)
                 .padding(.top, 16)
@@ -204,7 +204,7 @@ struct CardBackgroundPickerSheet: View {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 20) {
                     // MARK: Custom Photos
-                    sectionHeader("Your Photos")
+                    sectionHeader(L10n.Home.CardBackground.yourPhotos)
 
                     LazyVGrid(columns: columns, spacing: 12) {
                         // Upload button
@@ -213,7 +213,7 @@ struct CardBackgroundPickerSheet: View {
                                 Image(systemName: "plus.circle.fill")
                                     .font(.system(size: 28))
                                     .foregroundColor(.accent)
-                                Text("Upload")
+                                Text(L10n.Home.CardBackground.upload)
                                     .font(.captionS)
                                     .foregroundColor(.textSecondary)
                             }
@@ -233,7 +233,7 @@ struct CardBackgroundPickerSheet: View {
                     }
 
                     // MARK: Presets
-                    sectionHeader("Presets")
+                    sectionHeader(L10n.Home.CardBackground.presets)
 
                     LazyVGrid(columns: columns, spacing: 12) {
                         ForEach(CardBackground.imageBackgrounds) { bg in
@@ -242,7 +242,7 @@ struct CardBackgroundPickerSheet: View {
                     }
 
                     // MARK: Gradients
-                    sectionHeader("Gradients")
+                    sectionHeader(L10n.Home.CardBackground.gradients)
 
                     LazyVGrid(columns: columns, spacing: 12) {
                         ForEach(CardBackground.gradientBackgrounds) { bg in

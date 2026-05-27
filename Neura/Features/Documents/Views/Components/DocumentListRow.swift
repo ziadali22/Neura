@@ -11,39 +11,14 @@ struct DocumentListRow: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(document.name)
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(Color.textPrimary)
                     .lineLimit(1)
 
-                HStack(spacing: 6) {
-                    if let category = document.category {
-                        Text(category.localizedName)
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundStyle(Color.accent)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.accent.opacity(0.1))
-                            .clipShape(.rect(cornerRadius: 4))
-                    }
-
-                    Text(document.createdAt.formatted(date: .abbreviated, time: .omitted))
-                        .font(.system(size: 13))
-                        .foregroundStyle(Color.textTertiary)
-
-                    if document.isPDF && document.pageCount > 1 {
-                        Text("·")
-                            .foregroundStyle(Color.textTertiary)
-                        Text("\(document.pageCount) pages")
-                            .font(.system(size: 13))
-                            .foregroundStyle(Color.textTertiary)
-                    }
-                }
-
-                if let doctor = document.doctorName, !doctor.isEmpty {
-                    Label(doctor, systemImage: "stethoscope")
-                        .font(.system(size: 12))
-                        .foregroundStyle(Color.textTertiary)
-                }
+                Text(subtitleText)
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.textSecondary)
+                    .lineLimit(1)
             }
 
             Spacer()
@@ -52,7 +27,7 @@ struct DocumentListRow: View {
                 selectionIndicator
             } else {
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 13))
+                    .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(Color.textTertiary)
             }
         }
@@ -62,20 +37,34 @@ struct DocumentListRow: View {
         .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
     }
 
-    // MARK: - Subviews
+    // MARK: - Subtitle
+
+    private var subtitleText: String {
+        var parts: [String] = []
+        parts.append(document.createdAt.formatted(date: .numeric, time: .omitted))
+        if let spec = document.specialization, spec != .other {
+            parts.append(spec.rawValue)
+        }
+        if let doctor = document.doctorName, !doctor.isEmpty {
+            parts.append("Dr. \(doctor)")
+        }
+        return parts.joined(separator: " • ")
+    }
+
+    // MARK: - Icon
 
     private var documentIcon: some View {
         let iconColor = document.category?.color ?? Color.accent
         return ZStack {
-            RoundedRectangle(cornerRadius: 12)
-                .fill(iconColor.opacity(0.12))
-                .frame(width: 44, height: 44)
+            Circle()
+                .fill(iconColor.opacity(0.14))
+                .frame(width: 46, height: 46)
 
             if let assetIcon = document.category?.assetIcon {
                 Image(assetIcon)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 24, height: 24)
+                    .frame(width: 22, height: 22)
                     .accessibilityHidden(true)
             } else {
                 Image(systemName: document.category?.icon ?? (document.isPDF ? "doc.fill" : "photo.fill"))
@@ -86,6 +75,8 @@ struct DocumentListRow: View {
         }
     }
 
+    // MARK: - Selection Indicator
+
     private var selectionIndicator: some View {
         ZStack {
             Circle()
@@ -93,12 +84,12 @@ struct DocumentListRow: View {
                     isSelected ? Color.accent : Color.textTertiary.opacity(0.35),
                     lineWidth: 2
                 )
-                .frame(width: 24, height: 24)
+                .frame(width: 26, height: 26)
 
             if isSelected {
                 Circle()
                     .fill(Color.accent)
-                    .frame(width: 24, height: 24)
+                    .frame(width: 26, height: 26)
                     .overlay {
                         Image(systemName: "checkmark")
                             .font(.system(size: 12, weight: .bold))

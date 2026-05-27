@@ -1,8 +1,21 @@
 import SwiftUI
 
 // MARK: - Design System Typography
-// Source: Figma → Neura / Typography (node 244:8109)
-// All styles use SF Pro (system font)
+// Font: Cairo (Google Fonts)
+// To swap the font app-wide, change the `Cairo` enum below — every token picks it up.
+
+// MARK: - Cairo font names
+
+private enum Cairo {
+    static let light     = "Cairo-Regular"
+    static let regular   = "Cairo-Regular"
+    static let bold      = "Cairo-SemiBold"
+    static let extraBold = "Cairo-Bold"
+
+    static func font(_ name: String, size: CGFloat) -> Font {
+        Font.custom(name, size: size)
+    }
+}
 
 // MARK: - Font Tokens
 
@@ -10,58 +23,58 @@ extension Font {
 
     // MARK: Display
 
-    /// 42pt Heavy - hero text, profile names
-    static let displayArt = Font.system(size: 42, weight: .heavy)
+    /// 42pt ExtraBold - hero text, profile names
+    static let displayArt = Cairo.font(Cairo.extraBold, size: 42)
 
-    /// 32pt Heavy - smaller art display
-    static let displayArtS = Font.system(size: 32, weight: .heavy)
+    /// 32pt ExtraBold - smaller art display
+    static let displayArtS = Cairo.font(Cairo.extraBold, size: 32)
 
-    /// 32pt Semibold - large screen titles
-    static let displayXL = Font.system(size: 32, weight: .semibold)
+    /// 32pt Bold - large screen titles
+    static let displayXL = Cairo.font(Cairo.bold, size: 32)
 
-    /// 28pt Semibold - section headers
-    static let displayL = Font.system(size: 28, weight: .semibold)
+    /// 28pt Bold - section headers
+    static let displayL = Cairo.font(Cairo.bold, size: 28)
 
     // MARK: Heading
 
-    /// 24pt Semibold
-    static let headingL = Font.system(size: 24, weight: .semibold)
+    /// 24pt Bold
+    static let headingL = Cairo.font(Cairo.bold, size: 24)
 
     /// 20pt Regular
-    static let headingM = Font.system(size: 20, weight: .regular)
+    static let headingM = Cairo.font(Cairo.regular, size: 20)
 
-    /// 18pt Medium
-    static let headingS = Font.system(size: 18, weight: .medium)
+    /// 18pt Bold
+    static let headingS = Cairo.font(Cairo.bold, size: 18)
 
-    /// 16pt Medium
-    static let headingXS = Font.system(size: 16, weight: .medium)
+    /// 16pt Bold
+    static let headingXS = Cairo.font(Cairo.bold, size: 16)
 
     // MARK: Body
 
     /// 16pt Regular - primary body text
-    static let bodyL = Font.system(size: 16, weight: .regular)
+    static let bodyL = Cairo.font(Cairo.regular, size: 16)
 
     /// 14pt Regular - secondary body text
-    static let bodyS = Font.system(size: 14, weight: .regular)
+    static let bodyS = Cairo.font(Cairo.regular, size: 14)
 
     // MARK: Button
 
-    /// 17pt Semibold - primary buttons
-    static let buttonL = Font.system(size: 17, weight: .semibold)
+    /// 17pt Bold - primary buttons
+    static let buttonL = Cairo.font(Cairo.bold, size: 17)
 
-    /// 15pt Semibold - secondary buttons
-    static let buttonM = Font.system(size: 15, weight: .semibold)
+    /// 15pt Bold - secondary buttons
+    static let buttonM = Cairo.font(Cairo.bold, size: 15)
 
     // MARK: Label & Caption
 
     /// 14pt Regular - art labels
-    static let labelArt = Font.system(size: 14, weight: .regular)
+    static let labelArt = Cairo.font(Cairo.regular, size: 14)
 
-    /// 13pt Medium - metadata, tags
-    static let labelM = Font.system(size: 13, weight: .medium)
+    /// 13pt Bold - metadata, tags
+    static let labelM = Cairo.font(Cairo.bold, size: 13)
 
     /// 12pt Regular - timestamps, footnotes
-    static let captionS = Font.system(size: 12, weight: .regular)
+    static let captionS = Cairo.font(Cairo.regular, size: 12)
 }
 
 // MARK: - Full Typography Style (includes line height & letter spacing)

@@ -8,13 +8,13 @@ struct CategoryPickerSheet: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                Text("Select Category")
+                Text(L10n.Documents.CategoryPicker.title)
                     .font(.title2)
                     .fontWeight(.bold)
                     .padding(.top, 20)
                     .padding(.bottom, 10)
 
-                Text("Choose where to save your scanned document")
+                Text(L10n.Documents.CategoryPicker.subtitle)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -36,7 +36,7 @@ struct CategoryPickerSheet: View {
             .background(Color(red: 0.99, green: 0.98, blue: 0.97))
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Cancel") {
+                    Button(L10n.Common.cancel) {
                         dismiss()
                     }
                     .foregroundColor(.primary)
@@ -74,7 +74,7 @@ private struct CategoryPickerRow: View {
                         .font(.system(size: 17, weight: .semibold))
                         .foregroundColor(.primary)
 
-                    Text("\(folder.count) document\(folder.count == 1 ? "" : "s")")
+                    Text(L10n.Documents.CategoryPicker.documentCount(folder.count))
                         .font(.system(size: 14))
                         .foregroundColor(.secondary)
                 }

@@ -25,7 +25,11 @@ final class AppCoordinator: ObservableObject {
     init() {
         homeRouter.$path
             .combineLatest(profileRouter.$path)
-            .map { home, profile in !home.isEmpty || !profile.isEmpty }
+            .combineLatest(docsRouter.$path)
+            .map { homePlusProfile, docs in
+                let (home, profile) = homePlusProfile
+                return !home.isEmpty || !profile.isEmpty || !docs.isEmpty
+            }
             .assign(to: &$isInDetailView)
     }
 }

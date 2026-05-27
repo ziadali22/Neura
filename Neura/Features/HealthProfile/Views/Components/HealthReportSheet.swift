@@ -29,11 +29,11 @@ struct HealthReportSheet: View {
                                 .foregroundColor(.accent)
                         }
 
-                        Text("Health Report")
+                        Text(L10n.HealthProfile.Report.title)
                             .font(.system(size: 22, weight: .bold))
                             .foregroundColor(.textPrimary)
 
-                        Text("A comprehensive PDF combining your health\nprofile, documents, and timeline")
+                        Text(L10n.HealthProfile.Report.subtitle)
                             .font(.system(size: 14))
                             .foregroundColor(.textTertiary)
                             .multilineTextAlignment(.center)
@@ -43,16 +43,16 @@ struct HealthReportSheet: View {
 
                     // What's included
                     VStack(alignment: .leading, spacing: 14) {
-                        Text("What's included")
+                        Text(L10n.HealthProfile.Report.whatsIncluded)
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(.textTertiary)
                             .textCase(.uppercase)
                             .padding(.horizontal, 4)
 
-                        featureRow(icon: "person.text.rectangle", title: "Health Profile", subtitle: "General data, conditions, medications & more")
-                        featureRow(icon: "doc.on.doc", title: "Document Inventory", subtitle: "All documents grouped by category")
-                        featureRow(icon: "calendar.badge.clock", title: "Health Timeline", subtitle: "Chronological view of all health events")
-                        featureRow(icon: "paintbrush", title: "Branded Report", subtitle: "Professional layout ready for your doctor")
+                        featureRow(icon: "person.text.rectangle", title: L10n.HealthProfile.Report.feature1Title, subtitle: L10n.HealthProfile.Report.feature1Subtitle)
+                        featureRow(icon: "doc.on.doc", title: L10n.HealthProfile.Report.feature2Title, subtitle: L10n.HealthProfile.Report.feature2Subtitle)
+                        featureRow(icon: "calendar.badge.clock", title: L10n.HealthProfile.Report.feature3Title, subtitle: L10n.HealthProfile.Report.feature3Subtitle)
+                        featureRow(icon: "paintbrush", title: L10n.HealthProfile.Report.feature4Title, subtitle: L10n.HealthProfile.Report.feature4Subtitle)
                     }
 
                     // Generate button
@@ -68,7 +68,7 @@ struct HealthReportSheet: View {
                                     .font(.system(size: 16))
                             }
 
-                            Text(isGenerating ? "Generating..." : "Generate Report")
+                            Text(isGenerating ? L10n.HealthProfile.Report.generating : L10n.HealthProfile.Report.generate)
                                 .font(.system(size: 16, weight: .bold))
                         }
                         .foregroundColor(.white)
@@ -127,6 +127,7 @@ struct HealthReportSheet: View {
 
     private func generateReport() {
         isGenerating = true
+        UserDefaults.standard.set(true, forKey: "neura_has_generated_health_report")
 
         Task.detached(priority: .userInitiated) {
             let profile = await MainActor.run { profileVM.profile }
@@ -143,8 +144,9 @@ struct HealthReportSheet: View {
                 guard let url else { return }
 
                 let activityVC = UIActivityViewController(activityItems: [url], applicationActivities: nil)
-                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                   let root = windowScene.windows.first?.rootViewController {
+                if let windowScene = UIApplication.shared.connectedScenes
+                    .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
+                   let root = windowScene.keyWindow?.rootViewController {
                     var topVC = root
                     while let presented = topVC.presentedViewController { topVC = presented }
                     activityVC.popoverPresentationController?.sourceView = topVC.view

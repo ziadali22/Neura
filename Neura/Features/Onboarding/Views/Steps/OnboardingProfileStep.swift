@@ -13,10 +13,10 @@ struct OnboardingProfileStep: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Create your\nhealth profile")
+                        Text(L10n.Onboarding.Profile.title)
                             .font(.displayL)
                             .foregroundStyle(Color.textPrimary)
-                        Text("Just the basics — you can add more later.")
+                        Text(L10n.Onboarding.Profile.subtitle)
                             .font(.bodyL)
                             .foregroundStyle(Color.textSecondary)
                     }
@@ -24,14 +24,14 @@ struct OnboardingProfileStep: View {
                     VStack(spacing: 16) {
                         // Name
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Full Name")
+                            Text(L10n.Onboarding.Profile.fullName)
                                 .font(.headingXS)
                                 .foregroundStyle(Color.textPrimary)
                             HStack(spacing: 12) {
                                 Image(systemName: "person.fill")
                                     .font(.system(size: 16))
                                     .foregroundStyle(Color.textTertiary)
-                                TextField("Your full name", text: $viewModel.state.name)
+                                TextField(L10n.Onboarding.Profile.fullNamePlaceholder, text: $viewModel.state.name)
                                     .font(.bodyL)
                                     .focused($nameFocused)
                                     .submitLabel(.done)
@@ -45,11 +45,11 @@ struct OnboardingProfileStep: View {
 
                         // Date of Birth
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Date of Birth")
+                            Text(L10n.Onboarding.Profile.dateOfBirth)
                                 .font(.headingXS)
                                 .foregroundStyle(Color.textPrimary)
                             HStack(spacing: 0) {
-                                Picker("Day", selection: $selectedDay) {
+                                Picker(L10n.Onboarding.Profile.day, selection: $selectedDay) {
                                     ForEach(1...31, id: \.self) { day in
                                         Text("\(day)").tag(day)
                                     }
@@ -57,7 +57,7 @@ struct OnboardingProfileStep: View {
                                 .pickerStyle(.wheel)
                                 .frame(maxWidth: .infinity)
 
-                                Picker("Month", selection: $selectedMonth) {
+                                Picker(L10n.Onboarding.Profile.month, selection: $selectedMonth) {
                                     ForEach(1...12, id: \.self) { month in
                                         Text(Calendar.current.shortMonthSymbols[month - 1]).tag(month)
                                     }
@@ -65,7 +65,7 @@ struct OnboardingProfileStep: View {
                                 .pickerStyle(.wheel)
                                 .frame(maxWidth: .infinity)
 
-                                Picker("Year", selection: $selectedYear) {
+                                Picker(L10n.Onboarding.Profile.year, selection: $selectedYear) {
                                     ForEach(1900...currentYear, id: \.self) { year in
                                         Text(String(year)).tag(year)
                                     }

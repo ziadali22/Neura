@@ -77,11 +77,11 @@ struct PaywallView: View {
                     .foregroundColor(.accent)
             }
 
-            Text("Neura Pro")
+            Text(L10n.Paywall.title)
                 .font(.displayL)
                 .foregroundColor(.textPrimary)
 
-            Text("Unlock unlimited document uploads\nand premium features")
+            Text(L10n.Paywall.subtitle)
                 .font(.bodyL)
                 .foregroundColor(.textSecondary)
                 .multilineTextAlignment(.center)
@@ -124,7 +124,7 @@ struct PaywallView: View {
             subscriptionManager.upgradeToPro()
             dismiss()
         } label: {
-            Text("Continue with \(selectedPlan.rawValue)")
+            Text(L10n.Paywall.continueWith(selectedPlan.rawValue))
                 .font(.buttonL)
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
@@ -142,7 +142,7 @@ struct PaywallView: View {
             subscriptionManager.restorePurchase()
             dismiss()
         } label: {
-            Text("Restore Purchase")
+            Text(L10n.Paywall.restore)
                 .font(.bodyS)
                 .foregroundColor(.textTertiary)
         }

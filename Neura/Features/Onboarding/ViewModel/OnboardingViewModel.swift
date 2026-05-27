@@ -55,13 +55,16 @@ final class OnboardingViewModel: ObservableObject {
     private func nextStep(after step: OnboardingStep) -> OnboardingStep {
         switch step {
         case .welcome:         return .storeAndShare
-        case .storeAndShare:   return .documentScan
+        case .storeAndShare:   return .statistics
+        case .statistics:      return .recordsLocation
+        case .recordsLocation: return .documentScan
         case .documentScan:    return .privacySecurity
         case .privacySecurity: return .medicalAreas
         case .medicalAreas:    return .profile
         case .profile:         return .location
-        case .location:        return .profileCard
-        case .profileCard:     return .emergency
+        case .location:          return .profileCardIntro
+        case .profileCardIntro:  return .profileCard
+        case .profileCard:       return .emergency
         case .emergency:       return .biometrics
         case .biometrics:      return .emergencyCard
         case .emergencyCard:   return .healthKit
@@ -79,12 +82,15 @@ final class OnboardingViewModel: ObservableObject {
         switch step {
         case .welcome:         return .welcome
         case .storeAndShare:   return .welcome
-        case .documentScan:    return .storeAndShare
+        case .statistics:      return .storeAndShare
+        case .recordsLocation: return .statistics
+        case .documentScan:    return .recordsLocation
         case .privacySecurity: return .documentScan
         case .medicalAreas:    return .privacySecurity
         case .profile:         return .medicalAreas
         case .location:        return .profile
-        case .profileCard:     return .location
+        case .profileCardIntro: return .location
+        case .profileCard:      return .profileCardIntro
         case .emergency:       return .profileCard
         case .biometrics:      return .emergency
         case .emergencyCard:   return .biometrics

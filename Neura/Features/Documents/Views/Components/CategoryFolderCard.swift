@@ -198,7 +198,7 @@ private struct FolderCardEmptyState: View {
             Divider()
                 .padding(.horizontal, 16)
 
-            Text("No documents yet")
+            Text(L10n.Documents.Category.noDocumentsYet)
                 .font(.captionS)
                 .foregroundStyle(Color.textTertiary)
                 .padding(16)

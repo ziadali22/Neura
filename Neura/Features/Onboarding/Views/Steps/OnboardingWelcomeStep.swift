@@ -30,12 +30,12 @@ struct OnboardingWelcomeStep: View {
             VStack(spacing: 0) {
                 // Title + subtitle
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Welcome to Neura")
+                    Text(L10n.Onboarding.Welcome.title)
                         .font(.displayL)
                         .fontWeight(.bold)
                         .foregroundStyle(.white)
 
-                    Text("Store, organize, and share your medical records in one secure place.")
+                    Text(L10n.Onboarding.Welcome.subtitle)
                         .font(.bodyL)
                         .foregroundStyle(.white.opacity(0.8))
                         .fixedSize(horizontal: false, vertical: true)
@@ -58,7 +58,7 @@ struct OnboardingWelcomeStep: View {
                             } else {
                                 Image(systemName: "apple.logo")
                                     .font(.system(size: 20, weight: .medium))
-                                Text("Continue with Apple")
+                                Text(L10n.Onboarding.Welcome.continueApple)
                                     .font(.buttonL)
                             }
                         }
@@ -83,7 +83,7 @@ struct OnboardingWelcomeStep: View {
                                 Image(.googleIcon)
                                     .resizable()
                                     .frame(width: 20, height: 20)
-                                Text("Continue with Google")
+                                Text(L10n.Onboarding.Welcome.continueGoogle)
                                     .font(.buttonL)
                                     .foregroundStyle(Color.textPrimary)
                             }
@@ -116,7 +116,7 @@ struct OnboardingWelcomeStep: View {
                 HStack(spacing: 6) {
                     Image(systemName: "lock.fill")
                         .font(.system(size: 11))
-                    Text("End-to-end encrypted")
+                    Text(L10n.Onboarding.Welcome.encrypted)
                         .font(.captionS)
                 }
                 .foregroundStyle(.black)

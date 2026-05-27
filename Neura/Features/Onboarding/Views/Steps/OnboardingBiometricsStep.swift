@@ -27,12 +27,12 @@ struct OnboardingBiometricsStep: View {
 
                 // Text
                 VStack(spacing: 12) {
-                    Text("Protect your\nhealth profile")
+                    Text(L10n.Onboarding.Biometrics.title)
                         .font(.displayL)
                         .foregroundStyle(Color.textPrimary)
                         .multilineTextAlignment(.center)
 
-                    Text("Use \(viewModel.biometricLabel) to lock your profile so only you can access it.")
+                    Text(L10n.Onboarding.Biometrics.subtitle(viewModel.biometricLabel))
                         .font(.bodyL)
                         .foregroundStyle(Color.textSecondary)
                         .multilineTextAlignment(.center)
@@ -48,10 +48,10 @@ struct OnboardingBiometricsStep: View {
 
             OnboardingContinueButton(
                 action: requestBiometrics,
-                title: "Enable \(viewModel.biometricLabel)",
+                title: L10n.Onboarding.Biometrics.enable(viewModel.biometricLabel),
                 isLoading: isRequesting,
                 leadingIcon: viewModel.biometricIcon,
-                secondaryTitle: "Maybe later",
+                secondaryTitle: L10n.Common.maybeLater,
                 secondaryAction: viewModel.advance
             )
             .opacity(appeared ? 1 : 0)

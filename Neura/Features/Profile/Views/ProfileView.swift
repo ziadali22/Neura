@@ -13,7 +13,7 @@ struct ProfileView: View {
         NavigationStack(path: $router.path) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    Text("Profile")
+                    Text(L10n.Profile.title)
                         .font(.displayXL)
                         .foregroundStyle(Color.textPrimary)
                         .padding(.top, 24)
@@ -28,48 +28,48 @@ struct ProfileView: View {
                             .padding(.bottom, 20)
 
                         // Profile section
-                        ProfileSectionHeader(title: "Profile")
+                        ProfileSectionHeader(title: L10n.Profile.Section.profile)
                         VStack(spacing: 11) {
-                            SettingsRow(icon: "profile", title: "Health Profile") {
+                            SettingsRow(icon: "profile", title: L10n.Profile.healthProfile) {
                                 router.push(.healthProfile)
                             }
-                            SettingsRow(icon: "sub", title: "Subscription") {
+                            SettingsRow(icon: "sub", title: L10n.Profile.subscription) {
                                 showPaywall = true
                             }
                         }
                         .padding(.bottom, 20)
 
                         // Preferences section
-                        ProfileSectionHeader(title: "Preferences")
+                        ProfileSectionHeader(title: L10n.Profile.Section.preferences)
                         VStack(spacing: 11) {
-                            SettingsRow(icon: "sec", title: "Security")
-                            SettingsRow(icon: "lan", title: String(localized: "Language")) {
+                            SettingsRow(icon: "sec", title: L10n.Profile.security)
+                            SettingsRow(icon: "lan", title: L10n.Profile.language) {
                                 router.push(.language)
                             }
                         }
                         .padding(.bottom, 20)
 
                         // Support section
-                        ProfileSectionHeader(title: "Support")
+                        ProfileSectionHeader(title: L10n.Profile.Section.support)
                         VStack(spacing: 11) {
-                            SettingsRow(icon: "fav", title: "Feedback")
-                            SettingsRow(icon: "fav", title: "Contact Us")
+                            SettingsRow(icon: "fav", title: L10n.Profile.feedback)
+                            SettingsRow(icon: "fav", title: L10n.Profile.contactUs)
                         }
                         .padding(.bottom, 20)
 
                         // Account section
-                        ProfileSectionHeader(title: "Account")
+                        ProfileSectionHeader(title: L10n.Profile.Section.account)
                         VStack(spacing: 11) {
                             SettingsRow(
                                 icon: "logout",
-                                title: "Log Out",
+                                title: L10n.Profile.logOut,
                                 showChevron: false
                             ) {
                                 showLogOutAlert = true
                             }
                             SettingsRow(
                                 icon: "delete",
-                                title: "Delete Account",
+                                title: L10n.Profile.deleteAccount,
                                 style: .destructive,
                                 showChevron: false
                             ) {
@@ -102,17 +102,17 @@ struct ProfileView: View {
                 .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
         }
-        .alert("Log Out", isPresented: $showLogOutAlert) {
-            Button("Log Out", role: .destructive, action: handleLogOut)
+        .alert(L10n.Profile.logOut, isPresented: $showLogOutAlert) {
+            Button(L10n.Profile.logOut, role: .destructive, action: handleLogOut)
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Are you sure you want to log out?")
+            Text(L10n.Profile.logOutMessage)
         }
-        .alert("Delete Account", isPresented: $showDeleteAlert) {
+        .alert(L10n.Profile.deleteAccount, isPresented: $showDeleteAlert) {
             Button("Delete", role: .destructive, action: handleDeleteAccount)
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This action cannot be undone. All your data will be permanently deleted.")
+            Text(L10n.Profile.deleteAccountMessage)
         }
         .onAppear {
             titleAppear = true

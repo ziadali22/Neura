@@ -49,14 +49,14 @@ struct DocumentImageViewer: View {
             }
             .toolbarBackground(Color.black.opacity(0.9), for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
-            .alert("Delete Document", isPresented: $showDeleteConfirmation) {
-                Button("Cancel", role: .cancel) {}
-                Button("Delete", role: .destructive) {
+            .alert(L10n.Documents.Viewer.deleteTitle, isPresented: $showDeleteConfirmation) {
+                Button(L10n.Common.cancel, role: .cancel) {}
+                Button(L10n.Common.delete, role: .destructive) {
                     onDelete()
                     dismiss()
                 }
             } message: {
-                Text("Are you sure you want to delete this document? This action cannot be undone.")
+                Text(L10n.Documents.Viewer.deleteMessage)
             }
         }
     }

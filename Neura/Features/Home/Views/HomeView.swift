@@ -27,7 +27,7 @@ struct HomeView: View {
         }
         let firstName = healthVM.profile.generalData.fullName
             .components(separatedBy: " ").first ?? ""
-        return firstName.isEmpty ? base : "\(base), \(firstName)"
+        return firstName.isEmpty ? base : "\(base)"
     }
 
     private var formattedCardName: String {

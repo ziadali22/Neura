@@ -65,7 +65,7 @@ struct OnboardingView: View {
                 }
                 Spacer()
                 if viewModel.currentStep.isSkippable {
-                    Button("Skip") {
+                    Button(L10n.Common.skip) {
                         viewModel.advance()
                     }
                     .font(.system(size: 15, weight: .medium))
@@ -100,12 +100,15 @@ struct OnboardingView: View {
             switch viewModel.currentStep {
             case .welcome:         OnboardingWelcomeStep(viewModel: viewModel)
             case .storeAndShare:   OnboardingStoreAndShareStep(viewModel: viewModel)
+            case .statistics:      OnboardingStatisticsStep(viewModel: viewModel)
+            case .recordsLocation: OnboardingRecordsLocationStep(viewModel: viewModel)
             case .documentScan:    OnboardingDocumentScanStep(viewModel: viewModel)
             case .privacySecurity: OnboardingPrivacyStep(viewModel: viewModel)
             case .medicalAreas:    OnboardingMedicalAreasStep(viewModel: viewModel)
             case .profile:         OnboardingProfileStep(viewModel: viewModel)
             case .location:        OnboardingLocationStep(viewModel: viewModel)
-            case .profileCard:     OnboardingProfileCardStep(viewModel: viewModel)
+            case .profileCardIntro: OnboardingProfileCardIntroStep(viewModel: viewModel)
+            case .profileCard:      OnboardingProfileCardStep(viewModel: viewModel)
             case .emergency:       OnboardingEmergencyStep(viewModel: viewModel)
             case .biometrics:      OnboardingBiometricsStep(viewModel: viewModel)
             case .emergencyCard:   OnboardingCardStep(viewModel: viewModel)

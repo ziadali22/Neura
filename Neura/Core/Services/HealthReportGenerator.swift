@@ -241,7 +241,7 @@ final class HealthReportGenerator {
         drawSectionHeader("Document Inventory")
 
         // Group by category
-        let grouped = Dictionary(grouping: documents) { $0.category ?? .other }
+        let grouped = Dictionary(grouping: documents.filter { $0.category != nil }) { $0.category! }
         let sortedCategories = grouped.keys.sorted { $0.rawValue < $1.rawValue }
 
         let dateFormatter = DateFormatter()

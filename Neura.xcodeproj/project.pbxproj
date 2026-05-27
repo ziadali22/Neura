@@ -14,6 +14,7 @@
 		42677F742F781F9700BC08A2 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 42677F732F781F9700BC08A2 /* FirebaseStorage */; };
 		42677F772F786ACB00BC08A2 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 42677F762F786ACB00BC08A2 /* GoogleSignIn */; };
 		42677F792F786ACB00BC08A2 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 42677F782F786ACB00BC08A2 /* GoogleSignInSwift */; };
+		BB00A3002F4C801C00BC0001 /* L10n-swift in Frameworks */ = {isa = PBXBuildFile; productRef = BB00A2002F4C801C00BC0001 /* L10n-swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -53,6 +54,7 @@
 				42677F742F781F9700BC08A2 /* FirebaseStorage in Frameworks */,
 				42677F612F772B4700BC08A2 /* FirebaseCore in Frameworks */,
 				42677F772F786ACB00BC08A2 /* GoogleSignIn in Frameworks */,
+				BB00A3002F4C801C00BC0001 /* L10n-swift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -110,6 +112,7 @@
 				42677F732F781F9700BC08A2 /* FirebaseStorage */,
 				42677F762F786ACB00BC08A2 /* GoogleSignIn */,
 				42677F782F786ACB00BC08A2 /* GoogleSignInSwift */,
+				BB00A2002F4C801C00BC0001 /* L10n-swift */,
 			);
 			productName = Neura;
 			productReference = 992DECD82F4C801C003CF200 /* Neura.app */;
@@ -144,6 +147,7 @@
 			packageReferences = (
 				42677F5F2F772B4700BC08A2 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				42677F752F786ACB00BC08A2 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				BB00A1002F4C801C00BC0001 /* XCRemoteSwiftPackageReference "L10n-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 992DECD92F4C801C003CF200 /* Products */;
@@ -304,8 +308,8 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Neura/Neura.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 3ASZ6DB46N;
+				CURRENT_PROJECT_VERSION = 5;
+				DEVELOPMENT_TEAM = 7N5DS8U658;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Neura/Info.plist;
@@ -323,7 +327,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.NeuraA;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Neura.health;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -346,8 +350,8 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Neura/Neura.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 3ASZ6DB46N;
+				CURRENT_PROJECT_VERSION = 5;
+				DEVELOPMENT_TEAM = 7N5DS8U658;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Neura/Info.plist;
@@ -365,7 +369,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.NeuraA;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Neura.health;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -421,6 +425,14 @@
 				minimumVersion = 9.1.0;
 			};
 		};
+		BB00A1002F4C801C00BC0001 /* XCRemoteSwiftPackageReference "L10n-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Decybel07/L10n-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -458,6 +470,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 42677F752F786ACB00BC08A2 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
 			productName = GoogleSignInSwift;
+		};
+		BB00A2002F4C801C00BC0001 /* L10n-swift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BB00A1002F4C801C00BC0001 /* XCRemoteSwiftPackageReference "L10n-swift" */;
+			productName = "L10n-swift";
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
