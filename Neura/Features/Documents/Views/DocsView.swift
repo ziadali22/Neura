@@ -9,6 +9,7 @@ struct DocsView: View {
     @StateObject private var folderStore = CustomFolderStore.shared
     @EnvironmentObject private var coordinator: AppCoordinator
 
+    @State private var navigationPath = NavigationPath()
     @State private var showFilters = false
     @State private var isSelecting = false
     @State private var selectedDocuments: Set<UUID> = []
@@ -17,8 +18,13 @@ struct DocsView: View {
     @State private var newFolderName = ""
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             navigationContent
+        }
+        .onChange(of: navigationPath.count) { _, count in
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                coordinator.isInDetailView = count > 0
+            }
         }
         .sheet(isPresented: $viewModel.showSourcePicker) {
             AddDocumentSheet(
@@ -77,6 +83,16 @@ struct DocsView: View {
                 .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
         }
+        .alert("Photos Access Required", isPresented: $viewModel.showPhotoPermissionAlert) {
+            Button("Open Settings") {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Neura needs access to your photo library to upload images. Please allow access in Settings.")
+        }
         .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
             Button("OK") { viewModel.errorMessage = nil }
         } message: {
@@ -104,15 +120,15 @@ struct DocsView: View {
         }
         .onAppear {
             viewModel.loadDocuments()
-            if coordinator.showAddDocument {
-                viewModel.showAddOptions()
-                coordinator.showAddDocument = false
+            if let action = coordinator.pendingAddAction {
+                coordinator.pendingAddAction = nil
+                handlePendingAction(action)
             }
         }
-        .onChange(of: coordinator.showAddDocument) { _, shouldAdd in
-            if shouldAdd {
-                viewModel.showAddOptions()
-                coordinator.showAddDocument = false
+        .onChange(of: coordinator.pendingAddAction) { _, action in
+            if let action {
+                coordinator.pendingAddAction = nil
+                handlePendingAction(action)
             }
         }
         .onChange(of: isSelecting) { _, selecting in
@@ -291,6 +307,14 @@ struct DocsView: View {
     }
 
     // MARK: - Actions
+
+    private func handlePendingAction(_ action: AppCoordinator.AddDocumentAction) {
+        switch action {
+        case .scan:  viewModel.startScanning()
+        case .photo: viewModel.startPhotoUpload()
+        case .file:  viewModel.startFileImport()
+        }
+    }
 
     private func shareSelectedDocuments() {
         let urls = viewModel.documents

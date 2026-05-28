@@ -46,6 +46,7 @@ final class DocumentsListViewModel: ObservableObject {
     // Photo picker
     @Published var showPhotoPicker = false
     @Published var selectedPhotoItem: PhotosPickerItem?
+    @Published var showPhotoPermissionAlert = false
 
     // File importer
     @Published var showFileImporter = false
@@ -212,8 +213,30 @@ final class DocumentsListViewModel: ObservableObject {
 
     func startPhotoUpload() {
         showSourcePicker = false
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            self.showPhotoPicker = true
+        let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+        switch status {
+        case .authorized, .limited:
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                self.showPhotoPicker = true
+            }
+        case .notDetermined:
+            PHPhotoLibrary.requestAuthorization(for: .readWrite) { [weak self] granted in
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    if granted == .authorized || granted == .limited {
+                        self?.showPhotoPicker = true
+                    } else {
+                        self?.showPhotoPermissionAlert = true
+                    }
+                }
+            }
+        case .denied, .restricted:
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                self.showPhotoPermissionAlert = true
+            }
+        @unknown default:
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                self.showPhotoPicker = true
+            }
         }
     }
 

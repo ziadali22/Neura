@@ -7,13 +7,27 @@ import SwiftUI
 // MARK: - Cairo font names
 
 private enum Cairo {
+    /// Flip to `true` to switch the entire app to SF Pro system font.
+    static let useSFPro = true
+
     static let light     = "Cairo-Regular"
     static let regular   = "Cairo-Regular"
+    static let medium    = "Cairo-Medium"
     static let bold      = "Cairo-SemiBold"
     static let extraBold = "Cairo-Bold"
 
     static func font(_ name: String, size: CGFloat) -> Font {
-        Font.custom(name, size: size)
+        guard !useSFPro else {
+            let weight: Font.Weight = switch name {
+            case extraBold: .bold
+            case bold:      .semibold
+            case medium:    .medium
+            case light:     .light
+            default:        .regular
+            }
+            return .system(size: size, weight: weight, design: .default)
+        }
+        return Font.custom(name, size: size)
     }
 }
 
@@ -40,8 +54,8 @@ extension Font {
     /// 24pt Bold
     static let headingL = Cairo.font(Cairo.bold, size: 24)
 
-    /// 20pt Regular
-    static let headingM = Cairo.font(Cairo.regular, size: 20)
+    /// 20pt Medium
+    static let headingM = Cairo.font(Cairo.medium, size: 20)
 
     /// 18pt Bold
     static let headingS = Cairo.font(Cairo.bold, size: 18)
@@ -75,6 +89,17 @@ extension Font {
 
     /// 12pt Regular - timestamps, footnotes
     static let captionS = Cairo.font(Cairo.regular, size: 12)
+
+    // MARK: Stats
+
+    /// 28pt Bold - large stat value (e.g. "170 cm")
+    static let statValue = Cairo.font(Cairo.bold, size: 28)
+
+    /// 16pt Medium - stat label (e.g. "Height")
+    static let statLabel = Cairo.font(Cairo.medium, size: 16)
+
+    /// 13pt Medium - stat sublabel / unit (e.g. "cm", "last updated")
+    static let statUnit = Cairo.font(Cairo.medium, size: 13)
 }
 
 // MARK: - Full Typography Style (includes line height & letter spacing)

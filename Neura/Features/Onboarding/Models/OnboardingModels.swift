@@ -5,6 +5,7 @@ import SwiftUI
 
 enum OnboardingStep: Int, CaseIterable, Hashable {
     case welcome
+    case stopSearching
     case storeAndShare
     case statistics
     case recordsLocation
@@ -29,7 +30,7 @@ enum OnboardingStep: Int, CaseIterable, Hashable {
     /// Whether the centered progress pill is shown within the top bar.
     var showsProgressBar: Bool {
         switch self {
-        case .welcome, .storeAndShare, .statistics, .recordsLocation, .documentScan, .privacySecurity, .calculating: return false
+        case .welcome, .stopSearching, .storeAndShare, .statistics, .recordsLocation, .documentScan, .privacySecurity, .calculating: return false
         default: return true
         }
     }

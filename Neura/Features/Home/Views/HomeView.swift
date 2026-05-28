@@ -80,7 +80,7 @@ struct HomeView: View {
                         .opacity(profileCardAppear ? 1 : 0)
                         .animation(.spring(response: 0.7, dampingFraction: 0.8), value: profileCardAppear)
 
-                        CompleteProfileCard(onTap: { router.push(.healthProfileDetail) })
+                        CompleteProfileCard(onTap: { router.push(.healthProfile) })
                             .offset(y: completeCardAppear ? 0 : 30)
                             .opacity(completeCardAppear ? 1 : 0)
                             .animation(.spring(response: 0.7, dampingFraction: 0.8), value: completeCardAppear)
@@ -109,6 +109,8 @@ struct HomeView: View {
             .background(Color.backgroundPrimary)
             .navigationDestination(for: HomeRoute.self) { route in
                 switch route {
+                case .healthProfile:
+                    HealthProfileView()
                 case .healthProfileDetail:
                     HealthProfileDetailView()
                 case .emergencyCard:
@@ -205,18 +207,14 @@ private struct RecentDocumentsSection: View {
                     .padding(.vertical, 20)
                     .padding(.horizontal, 20)
             } else {
-                VStack(spacing: 0) {
-                    ForEach(Array(documents.prefix(5).enumerated()), id: \.element.id) { index, document in
-                        RecentDocumentRow(document: document) { onDocumentTap(document) }
-
-                        if index < min(documents.count, 5) - 1 {
-                            Divider().padding(.leading, 72)
+                VStack(spacing: 8) {
+                    ForEach(documents.prefix(5)) { document in
+                        Button { onDocumentTap(document) } label: {
+                            DocumentListRow(document: document)
                         }
+                        .buttonStyle(ScaleButtonStyle())
                     }
                 }
-                .background(Color.surfaceWhite)
-                .clipShape(.rect(cornerRadius: 20))
-                .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 3)
                 .padding(.horizontal, 20)
             }
         }

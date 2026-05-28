@@ -10,6 +10,8 @@
 	<string>Neura uses your location to pre-fill your city and country in your health profile.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Neura uses your camera to scan and save medical documents.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Neura accesses your photo library so you can upload images of your medical documents.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Almarai-Light.ttf</string>

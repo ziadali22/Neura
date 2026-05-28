@@ -56,18 +56,14 @@ struct DocumentListRow: View {
     private var documentIcon: some View {
         let iconColor = document.category?.color ?? Color.accent
         return ZStack {
-            Circle()
-                .fill(iconColor.opacity(0.14))
-                .frame(width: 46, height: 46)
-
-            if let assetIcon = document.category?.assetIcon {
-                Image(assetIcon)
+            if let gridIcon = document.category?.gridIcon {
+                Image(gridIcon)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 22, height: 22)
+                    .frame(width: 36, height: 36)
                     .accessibilityHidden(true)
             } else {
-                Image(systemName: document.category?.icon ?? (document.isPDF ? "doc.fill" : "photo.fill"))
+                Image(systemName: document.isPDF ? "doc.fill" : "photo.fill")
                     .font(.system(size: 18))
                     .foregroundStyle(iconColor)
                     .accessibilityHidden(true)

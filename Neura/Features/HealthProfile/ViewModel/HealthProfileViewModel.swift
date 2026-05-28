@@ -290,5 +290,17 @@ final class HealthProfileViewModel: ObservableObject {
             UserDefaults.standard.set(data, forKey: Self.storageKey)
         }
         SyncQueueManager.shared.enqueueProfileUpload(profile)
+        updateNotifications()
+    }
+
+    private func updateNotifications() {
+        let g = profile.generalData
+        let fields = [g.fullName, g.dateOfBirth, g.gender, g.height, g.weight,
+                      g.bloodType, g.insuranceStatus, g.emergencyContact]
+        let filled = fields.filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }.count
+        ProfileNotificationManager.shared.requestPermissionAndScheduleIfNeeded(
+            filledCount: filled,
+            total: fields.count
+        )
     }
 }

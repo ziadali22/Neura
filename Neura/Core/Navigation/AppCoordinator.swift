@@ -11,8 +11,11 @@ final class AppCoordinator: ObservableObject {
         case docs = 2
     }
 
+    enum AddDocumentAction { case scan, photo, file }
+
     @Published var selectedTab: Tab = .home
-    @Published var showAddDocument = false
+    @Published var showAddMenu = false
+    @Published var pendingAddAction: AddDocumentAction? = nil
     @Published var isInDetailView = false
     @Published var isSelectingDocs = false
 
@@ -42,6 +45,7 @@ enum ProfileRoute: Hashable {
 }
 
 enum HomeRoute: Hashable {
+    case healthProfile
     case healthProfileDetail
     case emergencyCard
 }

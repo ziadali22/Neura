@@ -8,14 +8,23 @@ struct HealthProfileView: View {
     @State private var showAddSection = false
     @State private var newSectionTitle = ""
 
+    // MARK: - General Data Progress
+
+    private var generalDataFields: [String] {
+        let g = viewModel.profile.generalData
+        return [g.fullName, g.dateOfBirth, g.gender, g.height, g.weight, g.bloodType, g.insuranceStatus, g.emergencyContact]
+    }
+
+    private var filledCount: Int { generalDataFields.filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }.count }
+    private var totalCount: Int  { generalDataFields.count }
+    private var isComplete: Bool { filledCount == totalCount }
+
     var body: some View {
         VStack(spacing: 0) {
             navBar
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 11) {
-                    SettingsRow(icon: "generalDataicon", title: "General Data") {
-                        showGeneralData = true
-                    }
+                    generalDataRow
 
                     ForEach(viewModel.profile.sections) { section in
                         SettingsRow(
@@ -76,6 +85,63 @@ struct HealthProfileView: View {
 // MARK: - Subviews
 
 private extension HealthProfileView {
+
+    // MARK: - General Data Row
+
+    var generalDataRow: some View {
+        Button { showGeneralData = true } label: {
+            HStack(spacing: 12) {
+                Image("generalDataicon")
+                    .font(.system(size: 20))
+                    .foregroundStyle(Color.textPrimary)
+                    .frame(width: 24, height: 24)
+
+                VStack(alignment: .leading, spacing: isComplete ? 0 : 6) {
+                    Text("General Data")
+                        .font(.statLabel)
+                        .foregroundStyle(Color.textPrimary)
+
+                    if !isComplete {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("\(filledCount)/\(totalCount) filled")
+                                .font(.system(size: 12))
+                                .foregroundStyle(Color.textSecondary)
+
+                            GeometryReader { geo in
+                                ZStack(alignment: .leading) {
+                                    Capsule()
+                                        .fill(Color.accent.opacity(0.15))
+                                        .frame(height: 4)
+                                    Capsule()
+                                        .fill(Color.accent)
+                                        .frame(width: geo.size.width * CGFloat(filledCount) / CGFloat(totalCount), height: 4)
+                                        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: filledCount)
+                                }
+                            }
+                            .frame(height: 4)
+                        }
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                    }
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14))
+                    .foregroundStyle(Color.textTertiary)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .background(Color.surfaceWhite)
+            .clipShape(.rect(cornerRadius: 16))
+            .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 4)
+            .animation(.spring(response: 0.4, dampingFraction: 0.8), value: isComplete)
+        }
+        .buttonStyle(ScaleButtonStyle())
+    }
+
+    // MARK: - Nav Bar
+
     var navBar: some View {
         ZStack {
             Button { dismiss() } label: {
@@ -117,6 +183,7 @@ private extension HealthProfileView {
             .padding(.vertical, 14)
             .background(Color.surfaceWhite)
             .clipShape(RoundedRectangle(cornerRadius: 16))
+            .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 4)
         }
         .buttonStyle(ScaleButtonStyle())
     }

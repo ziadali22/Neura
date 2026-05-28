@@ -54,7 +54,8 @@ final class OnboardingViewModel: ObservableObject {
 
     private func nextStep(after step: OnboardingStep) -> OnboardingStep {
         switch step {
-        case .welcome:         return .storeAndShare
+        case .welcome:         return .stopSearching
+        case .stopSearching:   return .storeAndShare
         case .storeAndShare:   return .statistics
         case .statistics:      return .recordsLocation
         case .recordsLocation: return .documentScan
@@ -81,7 +82,8 @@ final class OnboardingViewModel: ObservableObject {
     private func previousStep(before step: OnboardingStep) -> OnboardingStep {
         switch step {
         case .welcome:         return .welcome
-        case .storeAndShare:   return .welcome
+        case .stopSearching:   return .welcome
+        case .storeAndShare:   return .stopSearching
         case .statistics:      return .storeAndShare
         case .recordsLocation: return .statistics
         case .documentScan:    return .recordsLocation

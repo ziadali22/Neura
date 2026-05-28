@@ -6,17 +6,10 @@ struct CategoryFolderGridCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            if let assetName = category.assetIcon {
-                Image(assetName)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 48, height: 48)
-            } else {
-                Image(systemName: category.icon)
-                    .font(.system(size: 34))
-                    .foregroundStyle(category.color)
-                    .frame(width: 48, height: 48)
-            }
+            Image(category.gridIcon)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 48, height: 48)
 
             HStack(spacing: 4) {
                 Text(category.localizedName)

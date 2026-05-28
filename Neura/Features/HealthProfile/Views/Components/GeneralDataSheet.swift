@@ -93,8 +93,9 @@ struct GeneralDataSheet: View {
             .init(label: "Gender",           keyPath: \.gender,          value: data.gender,          kind: .options(["Male", "Female", "Prefer not to say"])),
             .init(label: "Height",           keyPath: \.height,          value: data.height,          kind: .wheel(WheelPickerSheet.heightValues)),
             .init(label: "Weight",           keyPath: \.weight,          value: data.weight,          kind: .wheel(WheelPickerSheet.weightValues)),
-            .init(label: "Insurance Status", keyPath: \.insuranceStatus, value: data.insuranceStatus, kind: .options(["Insured", "Uninsured", "Partially Insured"])),
-            .init(label: "Blood Type",       keyPath: \.bloodType,       value: data.bloodType,       kind: .options(["A+", "A−", "B+", "B−", "AB+", "AB−", "O+", "O−"])),
+            .init(label: "Insurance Status",  keyPath: \.insuranceStatus,  value: data.insuranceStatus,  kind: .options(["Insured", "Uninsured", "Partially Insured"])),
+            .init(label: "Blood Type",        keyPath: \.bloodType,        value: data.bloodType,        kind: .options(["A+", "A−", "B+", "B−", "AB+", "AB−", "O+", "O−"])),
+            .init(label: "Emergency Contact", keyPath: \.emergencyContact, value: data.emergencyContact, kind: .text),
         ]
     }
 }
@@ -123,7 +124,7 @@ private extension GeneralDataSheet {
                 } else {
                     HStack(spacing: 6) {
                         Text(field.value)
-                            .font(.bodyL)
+                            .font(.statLabel)
                             .foregroundColor(.textSecondary)
                         if field.kind != .text {
                             Image(systemName: "chevron.up.chevron.down")

@@ -47,7 +47,21 @@ enum DocumentCategory: String, Codable, CaseIterable, Identifiable {
         }
     }
 
-    /// Custom asset icon name from Assets.xcassets/MainIcons, nil falls back to SF Symbol.
+    /// Icon shown on the main folders grid (large card thumbnail).
+    var gridIcon: String {
+        switch self {
+        case .bloodTests:      return "blood"
+        case .consultations:   return "consultations"
+        case .hospitalization: return "hopitalIcon"
+        case .imaging:         return "invistigation"
+        case .medicalLetter:   return "medicalLetter"
+        case .prescriptions:   return "prespections"
+        case .vaccination:     return "vaccinationIcon"
+        }
+    }
+
+    /// Icon used inside folder views (expandable card header, detail header).
+    /// Falls back to the SF Symbol if no asset is available.
     var assetIcon: String? {
         switch self {
         case .bloodTests:      return "BloodTest"

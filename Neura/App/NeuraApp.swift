@@ -72,6 +72,9 @@ struct NeuraApp: App {
                         .zIndex(1)
                 }
             }
+            .onAppear {
+                scheduleProfileNotificationIfNeeded()
+            }
             .onOpenURL { url in
                 GIDSignIn.sharedInstance.handle(url)
             }
@@ -83,6 +86,26 @@ struct NeuraApp: App {
                 }
             }
         }
+    }
+}
+
+// MARK: - Profile notification helper
+
+private extension NeuraApp {
+    /// Reads the saved profile from UserDefaults and asks the notification manager
+    /// to schedule (or cancel) reminders based on current fill state.
+    func scheduleProfileNotificationIfNeeded() {
+        guard let data = UserDefaults.standard.data(forKey: "health_profile_data"),
+              let profile = try? JSONDecoder().decode(HealthProfile.self, from: data) else {
+            // No profile saved yet — schedule a gentle first-time nudge
+            ProfileNotificationManager.shared.requestPermissionAndScheduleIfNeeded(filledCount: 0, total: 8)
+            return
+        }
+        let g = profile.generalData
+        let fields = [g.fullName, g.dateOfBirth, g.gender, g.height, g.weight,
+                      g.bloodType, g.insuranceStatus, g.emergencyContact]
+        let filled = fields.filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }.count
+        ProfileNotificationManager.shared.requestPermissionAndScheduleIfNeeded(filledCount: filled, total: fields.count)
     }
 }
 

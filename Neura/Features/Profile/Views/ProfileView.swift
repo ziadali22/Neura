@@ -28,7 +28,7 @@ struct ProfileView: View {
                             .padding(.bottom, 20)
 
                         // Profile section
-                        ProfileSectionHeader(title: L10n.Profile.Section.profile)
+//                        ProfileSectionHeader(title: L10n.Profile.Section.profile)
                         VStack(spacing: 11) {
                             SettingsRow(icon: "profile", title: L10n.Profile.healthProfile) {
                                 router.push(.healthProfile)
@@ -36,30 +36,17 @@ struct ProfileView: View {
                             SettingsRow(icon: "sub", title: L10n.Profile.subscription) {
                                 showPaywall = true
                             }
-                        }
-                        .padding(.bottom, 20)
-
-                        // Preferences section
-                        ProfileSectionHeader(title: L10n.Profile.Section.preferences)
-                        VStack(spacing: 11) {
                             SettingsRow(icon: "sec", title: L10n.Profile.security)
                             SettingsRow(icon: "lan", title: L10n.Profile.language) {
                                 router.push(.language)
                             }
-                        }
-                        .padding(.bottom, 20)
-
-                        // Support section
-                        ProfileSectionHeader(title: L10n.Profile.Section.support)
-                        VStack(spacing: 11) {
                             SettingsRow(icon: "fav", title: L10n.Profile.feedback)
-                            SettingsRow(icon: "fav", title: L10n.Profile.contactUs)
-                        }
-                        .padding(.bottom, 20)
+                            SettingsRow(icon: "Instagram", title: L10n.Profile.contactUs) {
+                                if let url = URL(string: "https://www.instagram.com/myneura?igsh=MXd4YTVxb3p6amdxbw==") {
+                                    UIApplication.shared.open(url)
+                                }
+                            }
 
-                        // Account section
-                        ProfileSectionHeader(title: L10n.Profile.Section.account)
-                        VStack(spacing: 11) {
                             SettingsRow(
                                 icon: "logout",
                                 title: L10n.Profile.logOut,
@@ -76,6 +63,45 @@ struct ProfileView: View {
                                 showDeleteAlert = true
                             }
                         }
+                        .padding(.bottom, 20)
+
+                        // Preferences section
+//                        ProfileSectionHeader(title: L10n.Profile.Section.preferences)
+//                        VStack(spacing: 11) {
+//                            SettingsRow(icon: "sec", title: L10n.Profile.security)
+//                            SettingsRow(icon: "lan", title: L10n.Profile.language) {
+//                                router.push(.language)
+//                            }
+//                        }
+//                        .padding(.bottom, 20)
+
+                        // Support section
+//                        ProfileSectionHeader(title: L10n.Profile.Section.support)
+//                        VStack(spacing: 11) {
+//                            SettingsRow(icon: "fav", title: L10n.Profile.feedback)
+//                            SettingsRow(icon: "Instagram", title: L10n.Profile.contactUs)
+//                        }
+//                        .padding(.bottom, 20)
+
+                        // Account section
+//                        ProfileSectionHeader(title: L10n.Profile.Section.account)
+//                        VStack(spacing: 11) {
+//                            SettingsRow(
+//                                icon: "logout",
+//                                title: L10n.Profile.logOut,
+//                                showChevron: false
+//                            ) {
+//                                showLogOutAlert = true
+//                            }
+//                            SettingsRow(
+//                                icon: "delete",
+//                                title: L10n.Profile.deleteAccount,
+//                                style: .destructive,
+//                                showChevron: false
+//                            ) {
+//                                showDeleteAlert = true
+//                            }
+//                        }
                     }
                     .opacity(contentAppear ? 1 : 0)
                     .offset(y: contentAppear ? 0 : 20)

@@ -53,6 +53,7 @@ struct OnboardingView: View {
             HStack {
                 if viewModel.currentStep != .welcome {
                     Button("Back", systemImage: "chevron.left") {
+                        HapticManager.light()
                         viewModel.goBack()
                     }
                     .labelStyle(.iconOnly)
@@ -66,6 +67,7 @@ struct OnboardingView: View {
                 Spacer()
                 if viewModel.currentStep.isSkippable {
                     Button(L10n.Common.skip) {
+                        HapticManager.light()
                         viewModel.advance()
                     }
                     .font(.system(size: 15, weight: .medium))
@@ -99,6 +101,7 @@ struct OnboardingView: View {
         Group {
             switch viewModel.currentStep {
             case .welcome:         OnboardingWelcomeStep(viewModel: viewModel)
+            case .stopSearching:   OnboardingStopSearchingStep(viewModel: viewModel)
             case .storeAndShare:   OnboardingStoreAndShareStep(viewModel: viewModel)
             case .statistics:      OnboardingStatisticsStep(viewModel: viewModel)
             case .recordsLocation: OnboardingRecordsLocationStep(viewModel: viewModel)

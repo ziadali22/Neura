@@ -6,12 +6,12 @@ struct CustomFolderGridCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Image(systemName: "folder.fill")
-                .font(.system(size: 34))
-                .foregroundStyle(Color.accent)
+            Image("folder")
+                .resizable()
+                .scaledToFit()
                 .frame(width: 48, height: 48)
 
-            VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 4) {
                 Text(folder.name)
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(Color.textPrimary)

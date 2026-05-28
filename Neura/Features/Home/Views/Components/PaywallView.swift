@@ -3,171 +3,229 @@ import SwiftUI
 struct PaywallView: View {
     @ObservedObject var subscriptionManager: SubscriptionManager
     @Environment(\.dismiss) private var dismiss
-    @State private var appear = false
+    @State private var currentSlide = 0
     @State private var selectedPlan: Plan = .yearly
 
-    enum Plan: String, CaseIterable {
-        case monthly = "Monthly"
-        case yearly = "Yearly"
+    // MARK: - Plan Model
+
+    enum Plan: CaseIterable {
+        case monthly, yearly
+
+        var title: String {
+            switch self {
+            case .monthly: return "Monthly"
+            case .yearly:  return "Yearly"
+            }
+        }
 
         var price: String {
             switch self {
-            case .monthly: return "$4.99"
-            case .yearly: return "$29.99"
+            case .monthly: return "$4.99/month"
+            case .yearly:  return "$49.99/year"
             }
         }
 
-        var period: String {
+        var perMonth: String? {
             switch self {
-            case .monthly: return "/month"
-            case .yearly: return "/year"
-            }
-        }
-
-        var savings: String? {
-            switch self {
-            case .yearly: return "Save 50%"
+            case .yearly:  return "only $4.16/month"
             case .monthly: return nil
             }
         }
+
+        var isBestValue: Bool { self == .yearly }
     }
+
+    // MARK: - Slide Model
+
+    struct Slide {
+        let image: String
+        let title: String
+        let subtitle: String
+    }
+
+    private let slides: [Slide] = [
+        Slide(image: "mockup",  title: "All your records with you",   subtitle: "No more digging before a visit."),
+        Slide(image: "scan",    title: "Upload in seconds",           subtitle: "Scan or upload anything, anytime."),
+        Slide(image: "doctors", title: "Share with your doctors",     subtitle: "Never explain your history from scratch again."),
+        Slide(image: "cards",   title: "Your card, your style",       subtitle: "Only you see it. Make it personal."),
+    ]
+
+    // MARK: - Body
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Drag indicator
-            Capsule()
-                .fill(Color.textTertiary.opacity(0.3))
-                .frame(width: 36, height: 5)
-                .padding(.top, 10)
-
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 28) {
-                    headerSection
-                    featuresSection
-                    plansSection
-                    ctaButton
-                    restoreButton
+        ZStack(alignment: .top) {
+            background
+            VStack(spacing: 0) {
+                topBar
+                VStack(spacing: 8) {
+                    carousel
+                        .frame(height: 360)
+                    pageDots
+                }
+                .padding(.bottom, 16)
+                VStack(spacing: 32) {
+                    plansRow
+                    VStack(spacing: 16) {
+                        ctaButton
+                        cancelLabel
+                    }
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 24)
-                .padding(.bottom, 40)
-            }
-        }
-        .background(Color.backgroundPrimary)
-        .opacity(appear ? 1 : 0)
-        .offset(y: appear ? 0 : 20)
-        .onAppear {
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
-                appear = true
+                .padding(.bottom, 32)
             }
         }
     }
 
-    // MARK: - Header
+    // MARK: - Background
 
-    private var headerSection: some View {
-        VStack(spacing: 12) {
-            ZStack {
-                Circle()
-                    .fill(Color.accent.opacity(0.12))
-                    .frame(width: 72, height: 72)
+    private var background: some View {
+        LinearGradient(
+            stops: [
+                .init(color: Color(hex: "ECA882"), location: 0.0),
+                .init(color: Color(hex: "F5DDD0"), location: 0.35),
+                .init(color: Color(hex: "F5EDE5"), location: 0.6),
+                .init(color: Color(hex: "F5EDE5"), location: 1.0),
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .ignoresSafeArea()
+    }
 
-                Image(systemName: "crown.fill")
-                    .font(.system(size: 32))
-                    .foregroundColor(.accent)
+    // MARK: - Top Bar
+
+    private var topBar: some View {
+        HStack(alignment: .top) {
+            Button {
+                subscriptionManager.restorePurchase()
+                dismiss()
+            } label: {
+                Text("Restore")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(Color.textPrimary.opacity(0.7))
             }
 
-            Text(L10n.Paywall.title)
-                .font(.displayL)
-                .foregroundColor(.textPrimary)
+            Spacer()
 
-            Text(L10n.Paywall.subtitle)
-                .font(.bodyL)
-                .foregroundColor(.textSecondary)
-                .multilineTextAlignment(.center)
-                .lineSpacing(4)
+            VStack(spacing: 8) {
+                Image("nOrange")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 24)
+                Text("Get Neura Pro")
+                    .font(.system(size: 18, weight: .medium))
+            }
+
+            Spacer()
+
+            Button { dismiss() } label: {
+                Image(systemName: "xmark")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(width: 34, height: 34)
+                    .background(Color.black.opacity(0.75))
+                    .clipShape(Circle())
+            }
         }
+        .padding(.horizontal, 20)
+        .padding(.top, 16)
+        .padding(.bottom, 16)
     }
 
-    // MARK: - Features
+    // MARK: - Carousel
 
-    private var featuresSection: some View {
-        VStack(spacing: 16) {
-            FeatureRow(icon: "doc.fill.badge.plus", text: "Unlimited document uploads")
-            FeatureRow(icon: "square.and.arrow.up.fill", text: "Share with doctors anytime")
-            FeatureRow(icon: "lock.shield.fill", text: "End-to-end encryption")
-            FeatureRow(icon: "sparkles", text: "Priority support")
+    private var carousel: some View {
+        TabView(selection: $currentSlide) {
+            ForEach(slides.indices, id: \.self) { i in
+                SlideView(slide: slides[i]).tag(i)
+            }
         }
-        .padding(20)
-        .background(Color.surfaceWhite)
-        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .tabViewStyle(.page(indexDisplayMode: .never))
     }
 
-    // MARK: - Plans
+    // MARK: - Page Dots
 
-    private var plansSection: some View {
-        HStack(spacing: 12) {
-            ForEach(Plan.allCases, id: \.self) { plan in
-                PlanCard(
-                    plan: plan,
-                    isSelected: selectedPlan == plan,
-                    onTap: { selectedPlan = plan }
-                )
+    private var pageDots: some View {
+        HStack(spacing: 6) {
+            ForEach(slides.indices, id: \.self) { i in
+                Capsule()
+                    .fill(i == currentSlide ? Color.accent : Color.black.opacity(0.2))
+                    .frame(width: i == currentSlide ? 18 : 6, height: 6)
+                    .animation(.spring(response: 0.3, dampingFraction: 0.7), value: currentSlide)
             }
         }
     }
 
-    // MARK: - CTA
+    // MARK: - Plans Row
+
+    private var plansRow: some View {
+        HStack(alignment: .top, spacing: 12) {
+            ForEach(Plan.allCases, id: \.title) { plan in
+                PlanCard(plan: plan, isSelected: selectedPlan == plan) {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                        selectedPlan = plan
+                    }
+                }
+                .frame(maxHeight: .infinity)
+            }
+        }
+        .fixedSize(horizontal: false, vertical: true)
+    }
+
+    // MARK: - CTA Button
 
     private var ctaButton: some View {
         Button {
             subscriptionManager.upgradeToPro()
             dismiss()
         } label: {
-            Text(L10n.Paywall.continueWith(selectedPlan.rawValue))
-                .font(.buttonL)
-                .foregroundColor(.white)
+            Text("Get Neura Pro")
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(Color.accent)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .padding(.vertical, 17)
+                .background(Color.black)
+                .clipShape(Capsule())
         }
         .buttonStyle(ScaleButtonStyle())
     }
 
-    // MARK: - Restore
+    // MARK: - Cancel Label
 
-    private var restoreButton: some View {
-        Button {
-            subscriptionManager.restorePurchase()
-            dismiss()
-        } label: {
-            Text(L10n.Paywall.restore)
-                .font(.bodyS)
-                .foregroundColor(.textTertiary)
-        }
+    private var cancelLabel: some View {
+        Text("Cancel anytime")
+            .font(.system(size: 13))
+            .foregroundStyle(Color.black.opacity(0.4))
     }
 }
 
-// MARK: - Feature Row
+// MARK: - Slide View
 
-private struct FeatureRow: View {
-    let icon: String
-    let text: String
+private struct SlideView: View {
+    let slide: PaywallView.Slide
 
     var body: some View {
-        HStack(spacing: 14) {
-            Image(systemName: icon)
-                .font(.system(size: 16))
-                .foregroundColor(.accent)
-                .frame(width: 24)
+        VStack(spacing: 20) {
+            Image(slide.image)
+                .resizable()
+                .scaledToFit()
+                .frame(maxHeight: 240)
+                .clipShape(RoundedRectangle(cornerRadius: 20))
 
-            Text(text)
-                .font(.bodyL)
-                .foregroundColor(.textPrimary)
+            VStack(spacing: 8) {
+                Text(slide.title)
+                    .font(.system(size: 26, weight: .bold))
+                    .foregroundStyle(Color.textPrimary)
+                    .multilineTextAlignment(.center)
 
-            Spacer()
+                Text(slide.subtitle)
+                    .font(.system(size: 15))
+                    .foregroundStyle(Color.textSecondary)
+                    .multilineTextAlignment(.center)
+            }
+            .padding(.horizontal, 32)
         }
+        .frame(maxWidth: .infinity)
     }
 }
 
@@ -179,48 +237,64 @@ private struct PlanCard: View {
     let onTap: () -> Void
 
     var body: some View {
-        Button(action: onTap) {
-            VStack(spacing: 8) {
-                if let savings = plan.savings {
-                    Text(savings)
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(Color.accent)
-                        .clipShape(Capsule())
-                } else {
-                    Spacer().frame(height: 20)
-                }
-
-                Text(plan.rawValue)
-                    .font(.headingXS)
-                    .foregroundColor(.textPrimary)
-
-                HStack(alignment: .firstTextBaseline, spacing: 1) {
-                    Text(plan.price)
-                        .font(.headingL)
-                        .foregroundColor(.textPrimary)
-
-                    Text(plan.period)
-                        .font(.captionS)
-                        .foregroundColor(.textTertiary)
-                }
+        Button { onTap() } label: {
+            ZStack(alignment: .top) {
+                cardBody
+                if plan.isBestValue { bestValueBadge }
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.surfaceWhite)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(isSelected ? Color.accent : Color.stroke, lineWidth: isSelected ? 2 : 1)
-            )
         }
         .buttonStyle(.plain)
     }
+
+    private var cardBody: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            // Invisible badge-height placeholder keeps both cards equal height
+            Text("BEST VALUE")
+                .font(.system(size: 10, weight: .bold))
+                .opacity(0)
+                .padding(.vertical, 2)
+
+            Text(plan.title)
+                .font(.system(size: 18, weight: .bold))
+                .foregroundStyle(Color.textPrimary)
+
+            Text(plan.price)
+                .font(.system(size: 15, weight: .medium))
+                .foregroundStyle(Color.textPrimary)
+
+            // Invisible sublabel placeholder for monthly — preserves height
+            Text(plan.perMonth ?? " ")
+                .font(.system(size: 12))
+                .foregroundStyle(Color.textSecondary)
+                .opacity(plan.perMonth != nil ? 1 : 0)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 16)
+        .background(isSelected ? Color.accent.opacity(0.08) : Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(
+                    isSelected ? Color.accent : Color.black.opacity(0.1),
+                    lineWidth: isSelected ? 2 : 1
+                )
+        )
+    }
+
+    private var bestValueBadge: some View {
+        Text("BEST VALUE")
+            .font(.system(size: 10, weight: .bold))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 4)
+            .background(Color.accent)
+            .clipShape(Capsule())
+            .offset(y: -14)
+    }
 }
+
+// MARK: - Preview
 
 #Preview {
     PaywallView(subscriptionManager: .shared)

@@ -31,7 +31,7 @@ struct SettingsRow: View {
                     .frame(width: 24, height: 24)
 
                 Text(title)
-                    .font(.bodyL)
+                    .font(.statLabel)
                     .foregroundStyle(style == .destructive ? Color.red : Color.textPrimary)
 
                 Spacer()
