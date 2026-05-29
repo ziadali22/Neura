@@ -97,14 +97,12 @@ struct OnboardingStoreAndShareStep: View {
 
     private func makePill(_ pill: QuestionPill) -> some View {
         Text(pill.text)
-            .font(.bodyL)
+            .font(.statLabel)
             .foregroundStyle(Color.textPrimary)
             .padding(.horizontal, 20)
-            .padding(.vertical, 14)
-            .background(Color.surfaceWhite)
+            .padding(.vertical, 20)
+            .background(Color(hex:"F3EDE6"))
             .clipShape(Capsule())
-            .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 2)
-            .rotationEffect(.degrees(pill.rotation))
     }
 
     // MARK: - Animation sequence
@@ -123,7 +121,7 @@ struct OnboardingStoreAndShareStep: View {
 
         // Stagger each pill in
         for i in 0..<questions.count {
-            if i > 0 { try? await Task.sleep(for: .milliseconds(130)) }
+            if i > 0 { try? await Task.sleep(for: .milliseconds(330)) }
             visiblePillCount = i + 1
         }
 

@@ -54,6 +54,12 @@ enum L10n {
             static var q5: String       { "onboarding.storeAndShare.q5".l10n() }
         }
 
+        enum QRShare {
+            static var title: String            { "onboarding.qrShare.title".l10n() }
+            static var subtitle: String         { "onboarding.qrShare.subtitle".l10n() }
+            static var mediaAccessibility: String { "onboarding.qrShare.mediaAccessibility".l10n() }
+        }
+
         enum Statistics {
             static var number: String { "onboarding.statistics.number".l10n() }
             static var body: String   { "onboarding.statistics.body".l10n() }

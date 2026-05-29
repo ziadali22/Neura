@@ -81,10 +81,8 @@ struct DocumentViewerView: View {
                 ShareDocumentSheet(viewModel: vm, documentName: document.name)
             }
         }
-        .sheet(isPresented: $showPaywall) {
+        .fullScreenCover(isPresented: $showPaywall) {
             PaywallView(subscriptionManager: subscriptionManager)
-                .presentationDetents([.large])
-                .presentationDragIndicator(.visible)
         }
         .onAppear {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) {

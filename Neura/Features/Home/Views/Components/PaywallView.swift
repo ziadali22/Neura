@@ -57,15 +57,19 @@ struct PaywallView: View {
             background
             VStack(spacing: 0) {
                 topBar
+                Spacer(minLength: 16)
                 VStack(spacing: 8) {
                     carousel
                         .frame(height: 360)
                     pageDots
                 }
-                .padding(.bottom, 16)
-                VStack(spacing: 32) {
+                .padding(.bottom, 8)
+
+                Spacer(minLength: 16)
+
+                VStack(spacing: 24) {
                     plansRow
-                    VStack(spacing: 16) {
+                    VStack(spacing: 12) {
                         ctaButton
                         cancelLabel
                     }
@@ -129,7 +133,6 @@ struct PaywallView: View {
         }
         .padding(.horizontal, 20)
         .padding(.top, 16)
-        .padding(.bottom, 16)
     }
 
     // MARK: - Carousel
@@ -141,6 +144,14 @@ struct PaywallView: View {
             }
         }
         .tabViewStyle(.page(indexDisplayMode: .never))
+        .task {
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(3))
+                withAnimation(.easeInOut(duration: 0.4)) {
+                    currentSlide = (currentSlide + 1) % slides.count
+                }
+            }
+        }
     }
 
     // MARK: - Page Dots

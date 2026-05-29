@@ -252,7 +252,7 @@ private extension EmergencyCardView {
             .init(icon: "pill.fill", label: "Medications", value: entriesText(for: "medication", or: "supplement"), iconColor: Color(hex: "8B5CF6")),
             .init(icon: "heart.text.clipboard", label: "Conditions", value: entriesText(for: "condition"), iconColor: Color(hex: "E8392E")),
             .init(icon: "shield.checkered", label: "Insurance", value: gd.insuranceStatus, iconColor: Color(hex: "10B981")),
-            .init(icon: "phone.fill", label: "Emergency Contact", value: gd.emergencyContact, iconColor: Color(hex: "10B981")),
+            .init(icon: "phone.fill", label: "Emergency Contact", value: [gd.emergencyContactName, gd.emergencyContactNumber].filter { !$0.isEmpty }.joined(separator: " · "), iconColor: Color(hex: "10B981")),
         ]
     }
 
@@ -297,7 +297,7 @@ private extension EmergencyCardView {
     // MARK: Quick Actions
 
     var emergencyContactsSection: some View {
-        let contact = viewModel.profile.generalData.emergencyContact
+        let contact = viewModel.profile.generalData.emergencyContactNumber
         return Group {
             if !contact.isEmpty {
                 Button {
@@ -542,7 +542,7 @@ private extension EmergencyCardView {
             .init(label: "Medications", value: entriesText(for: "medication", or: "supplement")),
             .init(label: "Conditions", value: entriesText(for: "condition")),
             .init(label: "Insurance", value: profile.generalData.insuranceStatus),
-            .init(label: "Emergency Contact", value: profile.generalData.emergencyContact),
+            .init(label: "Emergency Contact", value: [profile.generalData.emergencyContactName, profile.generalData.emergencyContactNumber].filter { !$0.isEmpty }.joined(separator: " · ")),
         ]
     }
 }

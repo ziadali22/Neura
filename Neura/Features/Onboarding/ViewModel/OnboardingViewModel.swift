@@ -4,7 +4,7 @@ import LocalAuthentication
 
 @MainActor
 final class OnboardingViewModel: ObservableObject {
-    @Published var currentStep: OnboardingStep = .welcome
+    @Published var currentStep: OnboardingStep = .stopSearching
     @Published var state = OnboardingState()
     @Published var direction: Int = 1
     @Published var isComplete = false
@@ -54,55 +54,57 @@ final class OnboardingViewModel: ObservableObject {
 
     private func nextStep(after step: OnboardingStep) -> OnboardingStep {
         switch step {
-        case .welcome:         return .stopSearching
-        case .stopSearching:   return .storeAndShare
-        case .storeAndShare:   return .statistics
-        case .statistics:      return .recordsLocation
-        case .recordsLocation: return .documentScan
-        case .documentScan:    return .privacySecurity
-        case .privacySecurity: return .medicalAreas
-        case .medicalAreas:    return .profile
-        case .profile:         return .location
-        case .location:          return .profileCardIntro
-        case .profileCardIntro:  return .profileCard
-        case .profileCard:       return .emergency
-        case .emergency:       return .biometrics
-        case .biometrics:      return .emergencyCard
-        case .emergencyCard:   return .healthKit
-        case .healthKit:
-            if healthKitStatus == .authorized, healthKitData?.hasAnyData == true { return .healthData }
-            return .medical
-        case .healthData:      return .medical
-        case .medical:         return .documents
-        case .documents:       return .calculating
-        case .calculating:     return .calculating // sentinel — caller handles completion
+        // Active flow
+        case .stopSearching:    return .storeAndShare
+        case .storeAndShare:    return .statistics
+        case .statistics:       return .documentScan
+        case .documentScan:     return .profileCardIntro
+        case .profileCardIntro: return .qrShare
+        case .qrShare:          return .privacySecurity
+        case .privacySecurity:  return .welcome
+        case .welcome:          return .profile
+        case .profile:          return .location
+        case .location:         return .biometrics
+        case .biometrics:       return .healthKit
+        case .healthKit:        return .profileCard
+        case .profileCard:      return .calculating
+        case .calculating:      return .calculating // sentinel — caller handles completion
+        // Retained but off-flow steps
+        case .recordsLocation:  return .documentScan
+        case .medicalAreas:     return .profile
+        case .emergency:        return .biometrics
+        case .emergencyCard:    return .healthKit
+        case .healthData:       return .medical
+        case .medical:          return .documents
+        case .documents:        return .calculating
         }
     }
 
     private func previousStep(before step: OnboardingStep) -> OnboardingStep {
         switch step {
-        case .welcome:         return .welcome
-        case .stopSearching:   return .welcome
-        case .storeAndShare:   return .stopSearching
-        case .statistics:      return .storeAndShare
-        case .recordsLocation: return .statistics
-        case .documentScan:    return .recordsLocation
-        case .privacySecurity: return .documentScan
-        case .medicalAreas:    return .privacySecurity
-        case .profile:         return .medicalAreas
-        case .location:        return .profile
-        case .profileCardIntro: return .location
-        case .profileCard:      return .profileCardIntro
-        case .emergency:       return .profileCard
-        case .biometrics:      return .emergency
-        case .emergencyCard:   return .biometrics
-        case .healthKit:       return .emergencyCard
-        case .healthData:      return .healthKit
-        case .medical:
-            if healthKitStatus == .authorized, healthKitData?.hasAnyData == true { return .healthData }
-            return .healthKit
-        case .documents:       return .medical
-        case .calculating:     return .documents
+        // Active flow
+        case .stopSearching:    return .stopSearching // first step
+        case .storeAndShare:    return .stopSearching
+        case .statistics:       return .storeAndShare
+        case .documentScan:     return .statistics
+        case .profileCardIntro: return .documentScan
+        case .qrShare:          return .profileCardIntro
+        case .privacySecurity:  return .qrShare
+        case .welcome:          return .privacySecurity
+        case .profile:          return .welcome
+        case .location:         return .profile
+        case .biometrics:       return .location
+        case .healthKit:        return .biometrics
+        case .profileCard:      return .healthKit
+        case .calculating:      return .profileCard
+        // Retained but off-flow steps
+        case .recordsLocation:  return .statistics
+        case .medicalAreas:     return .privacySecurity
+        case .emergency:        return .profileCard
+        case .emergencyCard:    return .biometrics
+        case .healthData:       return .healthKit
+        case .medical:          return .healthKit
+        case .documents:        return .medical
         }
     }
 
@@ -223,7 +225,9 @@ final class OnboardingViewModel: ObservableObject {
             weight: healthKitData?.weight ?? "",
             bloodType: state.bloodType?.rawValue ?? "",
             insuranceStatus: "",
-            emergencyContact: contact
+            myPhoneNumber: "",
+            emergencyContactName: state.emergencyContactName,
+            emergencyContactNumber: state.emergencyContactPhone
         )
 
         var profile = HealthProfile.default

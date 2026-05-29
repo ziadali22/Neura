@@ -185,6 +185,23 @@ final class DocumentsListViewModel: ObservableObject {
         sortOption = .newest
     }
 
+    // MARK: - Subscription Lock
+
+    /// The IDs of documents that are inaccessible because the subscription has expired.
+    /// The 3 oldest documents (first uploaded) always remain accessible.
+    var lockedDocumentIDs: Set<UUID> {
+        guard SubscriptionManager.shared.hasExpiredSubscription else { return [] }
+        let accessibleIDs = Set(documents
+            .sorted { $0.createdAt < $1.createdAt }
+            .prefix(3)
+            .map(\.id))
+        return Set(documents.map(\.id)).subtracting(accessibleIDs)
+    }
+
+    func isLocked(_ document: Document) -> Bool {
+        lockedDocumentIDs.contains(document.id)
+    }
+
     // MARK: - Load
 
     func loadDocuments() {

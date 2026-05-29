@@ -123,10 +123,8 @@ struct ProfileView: View {
                 }
             }
         }
-        .sheet(isPresented: $showPaywall) {
+        .fullScreenCover(isPresented: $showPaywall) {
             PaywallView(subscriptionManager: subscriptionManager)
-                .presentationDetents([.large])
-                .presentationDragIndicator(.visible)
         }
         .alert(L10n.Profile.logOut, isPresented: $showLogOutAlert) {
             Button(L10n.Profile.logOut, role: .destructive, action: handleLogOut)

@@ -12,7 +12,7 @@ struct HealthProfileView: View {
 
     private var generalDataFields: [String] {
         let g = viewModel.profile.generalData
-        return [g.fullName, g.dateOfBirth, g.gender, g.height, g.weight, g.bloodType, g.insuranceStatus, g.emergencyContact]
+        return [g.fullName, g.dateOfBirth, g.gender, g.height, g.weight, g.bloodType, g.insuranceStatus, g.myPhoneNumber, g.emergencyContactName, g.emergencyContactNumber]
     }
 
     private var filledCount: Int { generalDataFields.filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }.count }

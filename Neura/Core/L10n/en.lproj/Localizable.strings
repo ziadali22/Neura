@@ -51,6 +51,11 @@
 "onboarding.recordsLocation.shelf" = "Shelf";
 "onboarding.recordsLocation.everywhere" = "Everywhere";
 
+// MARK: - Onboarding QR Share
+"onboarding.qrShare.title" = "Share only what your doctor needs";
+"onboarding.qrShare.subtitle" = "Create a private link or QR code and choose exactly which details and documents are visible.";
+"onboarding.qrShare.mediaAccessibility" = "Demonstration of sharing a document via QR code";
+
 // MARK: - Onboarding Statistics
 "onboarding.statistics.number" = "12 million";
 "onboarding.statistics.body" = "misdiagnoses every year. Most could be prevented if doctors had the full picture";

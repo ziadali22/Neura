@@ -62,10 +62,8 @@ struct NeuraProCard: View {
                 .clipShape(.rect(cornerRadius: 20))
             }
             .buttonStyle(ScaleButtonStyle())
-            .sheet(isPresented: $showPaywall) {
+            .fullScreenCover(isPresented: $showPaywall) {
                 PaywallView(subscriptionManager: subscriptionManager)
-                    .presentationDetents([.large])
-                    .presentationDragIndicator(.visible)
             }
         }
     }

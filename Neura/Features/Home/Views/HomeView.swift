@@ -80,7 +80,10 @@ struct HomeView: View {
                         .opacity(profileCardAppear ? 1 : 0)
                         .animation(.spring(response: 0.7, dampingFraction: 0.8), value: profileCardAppear)
 
-                        CompleteProfileCard(onTap: { router.push(.healthProfile) })
+                        CompleteProfileCard(
+                            generalData: healthVM.profile.generalData,
+                            onTap: { router.push(.healthProfile) }
+                        )
                             .offset(y: completeCardAppear ? 0 : 30)
                             .opacity(completeCardAppear ? 1 : 0)
                             .animation(.spring(response: 0.7, dampingFraction: 0.8), value: completeCardAppear)
@@ -127,10 +130,8 @@ struct HomeView: View {
                     .presentationDetents([.medium])
                     .presentationDragIndicator(.hidden)
             }
-            .sheet(isPresented: $showPaywall) {
+            .fullScreenCover(isPresented: $showPaywall) {
                 PaywallView(subscriptionManager: subscriptionManager)
-                    .presentationDetents([.large])
-                    .presentationDragIndicator(.visible)
             }
             .sheet(item: $selectedDocument) { document in
                 NavigationStack {
@@ -145,6 +146,12 @@ struct HomeView: View {
             .onAppear {
                 loadRecentDocuments()
                 animateEntrance()
+            }
+            .onChange(of: router.path) {
+                if router.path.isEmpty {
+                    healthVM.reload()
+                    loadRecentDocuments()
+                }
             }
         }
     }

@@ -78,10 +78,8 @@ struct DocsView: View {
             .presentationDetents([.large])
             .presentationDragIndicator(.visible)
         }
-        .sheet(isPresented: $viewModel.showPaywall) {
+        .fullScreenCover(isPresented: $viewModel.showPaywall) {
             PaywallView(subscriptionManager: .shared)
-                .presentationDetents([.large])
-                .presentationDragIndicator(.visible)
         }
         .alert("Photos Access Required", isPresented: $viewModel.showPhotoPermissionAlert) {
             Button("Open Settings") {
@@ -184,7 +182,10 @@ struct DocsView: View {
                 HStack {
                     Button {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                            let allIDs = Set(viewModel.filteredDocuments.map(\.id))
+                            // Exclude locked documents from bulk selection
+                            let allIDs = Set(viewModel.filteredDocuments
+                                .filter { !viewModel.isLocked($0) }
+                                .map(\.id))
                             if !allIDs.isEmpty && allIDs.isSubset(of: selectedDocuments) {
                                 selectedDocuments.removeAll()
                             } else {

@@ -9,12 +9,19 @@ final class HealthProfileViewModel: ObservableObject {
     private static let storageKey = "health_profile_data"
 
     init() {
-        if let data = UserDefaults.standard.data(forKey: Self.storageKey),
-           let saved = try? JSONDecoder().decode(HealthProfile.self, from: data) {
-            self.profile = saved
-        } else {
-            self.profile = .sample
+        self.profile = Self.loadFromDisk() ?? .sample
+    }
+
+    func reload() {
+        if let fresh = Self.loadFromDisk() {
+            profile = fresh
         }
+    }
+
+    private static func loadFromDisk() -> HealthProfile? {
+        guard let data = UserDefaults.standard.data(forKey: storageKey),
+              let saved = try? JSONDecoder().decode(HealthProfile.self, from: data) else { return nil }
+        return saved
     }
 
     // MARK: - General Data
@@ -61,216 +68,258 @@ final class HealthProfileViewModel: ObservableObject {
     // MARK: - PDF Generation
 
     func generatePDF() -> URL? {
-        let pageWidth: CGFloat = 595.0  // A4
-        let pageHeight: CGFloat = 842.0
-        let margin: CGFloat = 40.0
-        let contentWidth = pageWidth - margin * 2
+        Self.generatePDF(for: profile)
+    }
 
-        let accentColor = UIColor(red: 1.0, green: 0.353, blue: 0.0, alpha: 1.0) // #FF5A00
-        let textPrimary = UIColor(red: 0.122, green: 0.122, blue: 0.122, alpha: 1.0) // #1F1F1F
-        let textSecondary = UIColor(red: 0.29, green: 0.29, blue: 0.29, alpha: 1.0) // #4A4A4A
-        let textTertiary = UIColor(red: 0.478, green: 0.478, blue: 0.478, alpha: 1.0) // #7A7A7A
-        let strokeColor = UIColor(red: 0.906, green: 0.878, blue: 0.847, alpha: 1.0) // #E7E0D8
-        let cardBg = UIColor.white
+    nonisolated static func generatePDF(for profile: HealthProfile) -> URL? {
+        let pageW: CGFloat = 595
+        let pageH: CGFloat = 842
+        let margin: CGFloat = 40
+        let hPad: CGFloat = 20        // card inner horizontal padding
+        let contentW = pageW - margin * 2
 
-        let titleFont = UIFont.systemFont(ofSize: 28, weight: .bold)
-        let subtitleFont = UIFont.systemFont(ofSize: 12, weight: .regular)
-        let sectionTitleFont = UIFont.systemFont(ofSize: 19, weight: .bold)
-        let labelFont = UIFont.systemFont(ofSize: 14, weight: .regular)
-        let valueFont = UIFont.systemFont(ofSize: 14, weight: .semibold)
-        let entryFont = UIFont.systemFont(ofSize: 14, weight: .regular)
-        let detailFont = UIFont.systemFont(ofSize: 11, weight: .regular)
+        let accent   = UIColor(red: 1.0,   green: 0.353, blue: 0.0,   alpha: 1)
+        let primary  = UIColor(red: 0.122, green: 0.122, blue: 0.122, alpha: 1)
+        let secondary = UIColor(red: 0.29,  green: 0.29,  blue: 0.29,  alpha: 1)
+        let tertiary = UIColor(red: 0.478, green: 0.478, blue: 0.478, alpha: 1)
+        let stroke   = UIColor(red: 0.906, green: 0.878, blue: 0.847, alpha: 1)
+        let pageBg   = UIColor(red: 0.988, green: 0.980, blue: 0.973, alpha: 1)
 
-        var yPosition: CGFloat = 0
-        let renderer = UIGraphicsPDFRenderer(bounds: CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight))
+        let titleF    = UIFont.systemFont(ofSize: 34, weight: .bold)
+        let subtitleF = UIFont.systemFont(ofSize: 15, weight: .regular)
+        let sectionF  = UIFont.systemFont(ofSize: 21, weight: .bold)
+        let labelF    = UIFont.systemFont(ofSize: 16, weight: .regular)
+        let valueF    = UIFont.systemFont(ofSize: 16, weight: .semibold)
+        let detailF   = UIFont.systemFont(ofSize: 14, weight: .regular)
 
-        let data = renderer.pdfData { context in
-            func beginNewPage() {
-                context.beginPage()
-                yPosition = margin
+        var y: CGFloat = 0
+        let renderer = UIGraphicsPDFRenderer(bounds: CGRect(x: 0, y: 0, width: pageW, height: pageH))
+
+        let data = renderer.pdfData { ctx in
+
+            // MARK: Helpers
+
+            func wrapStyle(charWrap: Bool = false) -> NSParagraphStyle {
+                let p = NSMutableParagraphStyle()
+                p.lineBreakMode = charWrap ? .byCharWrapping : .byWordWrapping
+                p.lineSpacing = 1
+                return p
+            }
+
+            func measure(_ text: String, font: UIFont, width: CGFloat, charWrap: Bool = false) -> CGFloat {
+                guard !text.isEmpty else { return 0 }
+                let str = NSAttributedString(string: text, attributes: [.font: font, .paragraphStyle: wrapStyle(charWrap: charWrap)])
+                return ceil(str.boundingRect(
+                    with: CGSize(width: width, height: .greatestFiniteMagnitude),
+                    options: [.usesLineFragmentOrigin, .usesFontLeading],
+                    context: nil).height) + 1
+            }
+
+            @discardableResult
+            func drawText(_ text: String, font: UIFont, color: UIColor, x: CGFloat, atY: CGFloat, width: CGFloat, charWrap: Bool = false) -> CGFloat {
+                guard !text.isEmpty else { return 0 }
+                let h = measure(text, font: font, width: width, charWrap: charWrap)
+                NSAttributedString(string: text, attributes: [
+                    .font: font, .foregroundColor: color, .paragraphStyle: wrapStyle(charWrap: charWrap)
+                ]).draw(in: CGRect(x: x, y: atY, width: width, height: h))
+                return h
+            }
+
+            func newPage() {
+                ctx.beginPage()
+                pageBg.setFill()
+                UIBezierPath(rect: CGRect(x: 0, y: 0, width: pageW, height: pageH)).fill()
+                accent.setFill()
+                UIBezierPath(rect: CGRect(x: 0, y: 0, width: pageW, height: 3)).fill()
+                y = margin + 10
             }
 
             func ensureSpace(_ needed: CGFloat) {
-                if yPosition + needed > pageHeight - margin {
-                    beginNewPage()
-                }
+                if y + needed > pageH - margin { newPage() }
             }
 
-            func drawLine(at y: CGFloat) {
-                let path = UIBezierPath()
-                path.move(to: CGPoint(x: margin + 16, y: y))
-                path.addLine(to: CGPoint(x: pageWidth - margin - 16, y: y))
-                strokeColor.setStroke()
-                path.lineWidth = 0.75
-                path.stroke()
+            func divider(at dy: CGFloat) {
+                let p = UIBezierPath()
+                p.move(to: CGPoint(x: margin + 16, y: dy))
+                p.addLine(to: CGPoint(x: pageW - margin - 16, y: dy))
+                stroke.setStroke(); p.lineWidth = 0.75; p.stroke()
             }
 
-            func drawCard(at y: CGFloat, height: CGFloat) {
-                let rect = CGRect(x: margin, y: y, width: contentWidth, height: height)
-                let path = UIBezierPath(roundedRect: rect, cornerRadius: 12)
-                cardBg.setFill()
-                path.fill()
-                UIColor(white: 0, alpha: 0.15).setStroke()
-                path.lineWidth = 1.0
-                path.stroke()
+            func drawCard(at dy: CGFloat, height: CGFloat) {
+                let r = UIBezierPath(roundedRect: CGRect(x: margin, y: dy, width: contentW, height: height), cornerRadius: 14)
+                UIColor.white.setFill(); r.fill()
+                stroke.setStroke(); r.lineWidth = 1; r.stroke()
             }
 
-            // --- Page 1 ---
-            beginNewPage()
+            // MARK: Field row layout constants
+            let labelColW = contentW * 0.40
+            let valueColX = margin + hPad + labelColW + 8
+            let valueColW = contentW - hPad - labelColW - 8 - hPad
+            let rowVPad: CGFloat = 10
 
-            // Header
-            let titleStr = NSAttributedString(string: "Health Profile", attributes: [
-                .font: titleFont, .foregroundColor: textPrimary
-            ])
-            titleStr.draw(at: CGPoint(x: margin, y: yPosition))
-            yPosition += titleStr.size().height + 4
+            func rowHeight(label: String, value: String) -> CGFloat {
+                let lh = measure(label, font: labelF, width: labelColW)
+                let vh = measure(value.isEmpty ? "—" : value, font: valueF, width: valueColW, charWrap: true)
+                return max(lh, vh) + rowVPad * 2
+            }
 
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateStyle = .medium
-            let dateStr = NSAttributedString(string: "Generated \(dateFormatter.string(from: Date()))", attributes: [
-                .font: subtitleFont, .foregroundColor: textTertiary
-            ])
-            dateStr.draw(at: CGPoint(x: margin, y: yPosition))
-            yPosition += dateStr.size().height + 2
+            func drawRow(label: String, value: String, atY dy: CGFloat) -> CGFloat {
+                let h = rowHeight(label: label, value: value)
+                drawText(label, font: labelF, color: secondary, x: margin + hPad, atY: dy + rowVPad, width: labelColW)
+                let display = value.isEmpty ? "—" : value
+                drawText(display, font: valueF, color: value.isEmpty ? tertiary : primary,
+                         x: valueColX, atY: dy + rowVPad, width: valueColW, charWrap: true)
+                return h
+            }
 
-            let updatedStr = NSAttributedString(string: "Last updated \(dateFormatter.string(from: profile.lastUpdated))", attributes: [
-                .font: subtitleFont, .foregroundColor: textTertiary
-            ])
-            updatedStr.draw(at: CGPoint(x: margin, y: yPosition))
-            yPosition += updatedStr.size().height + 4
+            // MARK: Entry layout constants
+            let bulletX  = margin + hPad
+            let entryX   = bulletX + 14
+            let entryW   = pageW - margin - entryX - hPad
 
-            // Accent bar
-            let barRect = CGRect(x: margin, y: yPosition, width: contentWidth, height: 3)
-            UIBezierPath(roundedRect: barRect, cornerRadius: 1.5).fill(with: .normal, alpha: 1)
-            accentColor.setFill()
-            UIBezierPath(roundedRect: barRect, cornerRadius: 1.5).fill()
-            yPosition += 20
+            func entryHeight(entry: HealthProfile.HealthSection.Entry) -> CGFloat {
+                var h = measure(entry.text, font: valueF, width: entryW) + 4
+                let details = [entry.field1, entry.field2].filter { !$0.isEmpty }.joined(separator: "  ·  ")
+                if !details.isEmpty { h += measure(details, font: detailF, width: entryW) + 4 }
+                if !entry.notes.isEmpty { h += measure("Note: \(entry.notes)", font: detailF, width: entryW) + 4 }
+                return h + 8
+            }
 
-            // --- General Data Card ---
+            // MARK: Page 1
+            newPage()
+
+            let hdrH = measure("Health Profile", font: titleF, width: contentW)
+            drawText("Health Profile", font: titleF, color: primary, x: margin, atY: y, width: contentW)
+            y += hdrH + 4
+
+            let df = DateFormatter(); df.dateStyle = .medium
+            drawText("Generated \(df.string(from: Date()))", font: subtitleF, color: tertiary,
+                     x: margin, atY: y, width: contentW)
+            y += 18
+            drawText("Last updated \(df.string(from: profile.lastUpdated))", font: subtitleF, color: tertiary,
+                     x: margin, atY: y, width: contentW)
+            y += 22
+
+            accent.setFill()
+            UIBezierPath(roundedRect: CGRect(x: margin, y: y, width: contentW, height: 3), cornerRadius: 1.5).fill()
+            y += 20
+
+            // MARK: General Data card
             let generalFields: [(String, String)] = [
-                ("Full Name", profile.generalData.fullName),
-                ("Date of Birth", profile.generalData.dateOfBirth),
-                ("Gender", profile.generalData.gender),
-                ("Height", profile.generalData.height),
-                ("Weight", profile.generalData.weight),
-                ("Blood Type", profile.generalData.bloodType),
-                ("Insurance Status", profile.generalData.insuranceStatus)
+                ("Full Name",         profile.generalData.fullName),
+                ("Date of Birth",     profile.generalData.dateOfBirth),
+                ("Gender",            profile.generalData.gender),
+                ("Height",            profile.generalData.height),
+                ("Weight",            profile.generalData.weight),
+                ("Blood Type",        profile.generalData.bloodType),
+                ("Insurance Status",  profile.generalData.insuranceStatus),
+                ("My Number",         profile.generalData.myPhoneNumber),
+                ("Emergency Contact", profile.generalData.emergencyContactName),
+                ("Emergency Number",  profile.generalData.emergencyContactNumber)
             ].filter { !$1.isEmpty }
 
-            let rowHeight: CGFloat = 34
-            let cardPadding: CGFloat = 18
-            let sectionHeaderHeight: CGFloat = 36
-            let generalCardHeight = cardPadding + sectionHeaderHeight + CGFloat(generalFields.count) * rowHeight + cardPadding
+            let cardVPad: CGFloat = 16
+            let secH: CGFloat = 34
 
-            ensureSpace(generalCardHeight)
-            let generalCardY = yPosition
-            drawCard(at: generalCardY, height: generalCardHeight)
+            var genCardH = cardVPad + secH
+            for f in generalFields { genCardH += rowHeight(label: f.0, value: f.1) }
+            genCardH += cardVPad
 
-            yPosition = generalCardY + cardPadding
-            let sectionTitle = NSAttributedString(string: "General Data", attributes: [
-                .font: sectionTitleFont, .foregroundColor: textPrimary
-            ])
-            sectionTitle.draw(at: CGPoint(x: margin + 20, y: yPosition))
-            yPosition += sectionHeaderHeight
+            ensureSpace(genCardH)
+            let genCardY = y
+            drawCard(at: genCardY, height: genCardH)
+            y = genCardY + cardVPad
 
-            for (index, field) in generalFields.enumerated() {
-                let label = NSAttributedString(string: field.0, attributes: [
-                    .font: labelFont, .foregroundColor: textSecondary
-                ])
-                let value = NSAttributedString(string: field.1, attributes: [
-                    .font: valueFont, .foregroundColor: textPrimary
-                ])
-                label.draw(at: CGPoint(x: margin + 20, y: yPosition + 6))
-                let valueSize = value.size()
-                value.draw(at: CGPoint(x: pageWidth - margin - 20 - valueSize.width, y: yPosition + 6))
+            drawText("General Data", font: sectionF, color: primary,
+                     x: margin + hPad, atY: y, width: contentW - hPad * 2)
+            y += secH
 
-                if index < generalFields.count - 1 {
-                    drawLine(at: yPosition + rowHeight - 1)
-                }
-                yPosition += rowHeight
+            for (i, f) in generalFields.enumerated() {
+                let rh = drawRow(label: f.0, value: f.1, atY: y)
+                y += rh
+                if i < generalFields.count - 1 { divider(at: y) }
             }
-            yPosition = generalCardY + generalCardHeight + 12
+            y = genCardY + genCardH + 16
 
-            // --- Health Sections ---
+            // MARK: Section cards
             for section in profile.sections {
-                let entries = section.entries
-                guard !entries.isEmpty else { continue }
+                guard !section.entries.isEmpty else { continue }
 
-                // Calculate card height
-                var sectionCardHeight = cardPadding + sectionHeaderHeight
-                for entry in entries {
-                    sectionCardHeight += 24
-                    if !entry.field1.isEmpty || !entry.field2.isEmpty {
-                        sectionCardHeight += 18
+                var secCardH = cardVPad + secH
+                for e in section.entries { secCardH += entryHeight(entry: e) }
+                secCardH += cardVPad
+
+                let fitsOnOnePage = secCardH <= pageH - margin * 2 - 30
+
+                if fitsOnOnePage {
+                    ensureSpace(secCardH)
+                    let cardY = y
+                    drawCard(at: cardY, height: secCardH)
+                    y = cardY + cardVPad
+
+                    drawText(section.title, font: sectionF, color: primary,
+                             x: margin + hPad, atY: y, width: contentW - hPad * 2)
+                    y += secH
+
+                    for (i, entry) in section.entries.enumerated() {
+                        NSAttributedString(string: "•", attributes: [.font: valueF, .foregroundColor: accent])
+                            .draw(at: CGPoint(x: bulletX, y: y))
+
+                        let details = [entry.field1, entry.field2].filter { !$0.isEmpty }.joined(separator: "  ·  ")
+                        let th = drawText(entry.text, font: valueF, color: primary, x: entryX, atY: y, width: entryW)
+                        y += th + 4
+                        if !details.isEmpty {
+                            let dh = drawText(details, font: detailF, color: tertiary, x: entryX, atY: y, width: entryW)
+                            y += dh + 4
+                        }
+                        if !entry.notes.isEmpty {
+                            let nh = drawText("Note: \(entry.notes)", font: detailF, color: tertiary, x: entryX, atY: y, width: entryW)
+                            y += nh + 4
+                        }
+                        if i < section.entries.count - 1 { divider(at: y + 3) }
+                        y += 8
                     }
-                    if !entry.notes.isEmpty {
-                        sectionCardHeight += 18
+                    y = cardY + secCardH + 16
+                } else {
+                    // Section too tall for one page — flow without card background
+                    ensureSpace(secH + 30)
+                    drawText(section.title, font: sectionF, color: primary,
+                             x: margin, atY: y, width: contentW)
+                    y += secH
+                    accent.setFill()
+                    UIBezierPath(roundedRect: CGRect(x: margin, y: y, width: 30, height: 2), cornerRadius: 1).fill()
+                    y += 12
+
+                    for (i, entry) in section.entries.enumerated() {
+                        let eh = entryHeight(entry: entry)
+                        ensureSpace(eh)
+                        NSAttributedString(string: "•", attributes: [.font: valueF, .foregroundColor: accent])
+                            .draw(at: CGPoint(x: margin, y: y))
+                        let details = [entry.field1, entry.field2].filter { !$0.isEmpty }.joined(separator: "  ·  ")
+                        let th = drawText(entry.text, font: valueF, color: primary, x: margin + 14, atY: y, width: contentW - 14)
+                        y += th + 4
+                        if !details.isEmpty {
+                            let dh = drawText(details, font: detailF, color: tertiary, x: margin + 14, atY: y, width: contentW - 14)
+                            y += dh + 4
+                        }
+                        if !entry.notes.isEmpty {
+                            let nh = drawText("Note: \(entry.notes)", font: detailF, color: tertiary, x: margin + 14, atY: y, width: contentW - 14)
+                            y += nh + 4
+                        }
+                        if i < section.entries.count - 1 { divider(at: y + 3) }
+                        y += 8
                     }
-                    sectionCardHeight += 8
+                    y += 16
                 }
-                sectionCardHeight += cardPadding - 6
-
-                ensureSpace(sectionCardHeight)
-                let cardY = yPosition
-                drawCard(at: cardY, height: sectionCardHeight)
-
-                yPosition = cardY + cardPadding
-                let secTitle = NSAttributedString(string: section.title, attributes: [
-                    .font: sectionTitleFont, .foregroundColor: textPrimary
-                ])
-                secTitle.draw(at: CGPoint(x: margin + 20, y: yPosition))
-                yPosition += sectionHeaderHeight
-
-                for (index, entry) in entries.enumerated() {
-                    // Bullet + entry name
-                    let bullet = NSAttributedString(string: "•", attributes: [
-                        .font: valueFont, .foregroundColor: accentColor
-                    ])
-                    bullet.draw(at: CGPoint(x: margin + 20, y: yPosition))
-
-                    let entryText = NSAttributedString(string: entry.text, attributes: [
-                        .font: valueFont, .foregroundColor: textPrimary
-                    ])
-                    entryText.draw(at: CGPoint(x: margin + 34, y: yPosition))
-                    yPosition += 24
-
-                    // Field details
-                    if !entry.field1.isEmpty || !entry.field2.isEmpty {
-                        var details: [String] = []
-                        if !entry.field1.isEmpty { details.append(entry.field1) }
-                        if !entry.field2.isEmpty { details.append(entry.field2) }
-                        let detailStr = NSAttributedString(string: details.joined(separator: "  ·  "), attributes: [
-                            .font: detailFont, .foregroundColor: textTertiary
-                        ])
-                        detailStr.draw(at: CGPoint(x: margin + 34, y: yPosition))
-                        yPosition += 18
-                    }
-
-                    if !entry.notes.isEmpty {
-                        let noteStr = NSAttributedString(string: "Note: \(entry.notes)", attributes: [
-                            .font: detailFont, .foregroundColor: textTertiary
-                        ])
-                        noteStr.draw(at: CGPoint(x: margin + 34, y: yPosition))
-                        yPosition += 18
-                    }
-
-                    if index < entries.count - 1 {
-                        drawLine(at: yPosition + 3)
-                    }
-                    yPosition += 8
-                }
-
-                yPosition = cardY + sectionCardHeight + 12
             }
 
             // Footer
-            ensureSpace(40)
-            yPosition += 8
-            let footerStr = NSAttributedString(string: "Generated by Neura", attributes: [
-                .font: UIFont.systemFont(ofSize: 11, weight: .medium), .foregroundColor: accentColor
+            ensureSpace(30)
+            y += 8
+            let footStr = NSAttributedString(string: "Generated by Neura", attributes: [
+                .font: UIFont.systemFont(ofSize: 11, weight: .medium), .foregroundColor: accent
             ])
-            let footerSize = footerStr.size()
-            footerStr.draw(at: CGPoint(x: (pageWidth - footerSize.width) / 2, y: yPosition))
+            footStr.draw(at: CGPoint(x: (pageW - footStr.size().width) / 2, y: y))
         }
 
         let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("Health_Profile.pdf")
@@ -296,7 +345,7 @@ final class HealthProfileViewModel: ObservableObject {
     private func updateNotifications() {
         let g = profile.generalData
         let fields = [g.fullName, g.dateOfBirth, g.gender, g.height, g.weight,
-                      g.bloodType, g.insuranceStatus, g.emergencyContact]
+                      g.bloodType, g.insuranceStatus, g.myPhoneNumber, g.emergencyContactName, g.emergencyContactNumber]
         let filled = fields.filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }.count
         ProfileNotificationManager.shared.requestPermissionAndScheduleIfNeeded(
             filledCount: filled,

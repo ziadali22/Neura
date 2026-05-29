@@ -4,8 +4,27 @@ struct DocumentListRow: View {
     let document: Document
     var isSelecting: Bool = false
     var isSelected: Bool = false
+    var isLocked: Bool = false
+    var onUnlock: () -> Void = {}
 
     var body: some View {
+        ZStack {
+            rowContent
+                .blur(radius: isLocked ? 8 : 0)
+                .allowsHitTesting(!isLocked)
+
+            if isLocked {
+                lockedOverlay
+            }
+        }
+        .background(Color.surfaceWhite)
+        .clipShape(.rect(cornerRadius: 16))
+        .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+    }
+
+    // MARK: - Row Content
+
+    private var rowContent: some View {
         HStack(spacing: 14) {
             documentIcon
 
@@ -32,9 +51,45 @@ struct DocumentListRow: View {
             }
         }
         .padding(14)
-        .background(Color.surfaceWhite)
+    }
+
+    // MARK: - Locked Overlay
+
+    private var lockedOverlay: some View {
+        HStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(Color.accent.opacity(0.12))
+                    .frame(width: 40, height: 40)
+                Image(systemName: "lock.fill")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(Color.accent)
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Subscription Expired")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Color.textPrimary)
+                Text("Renew your plan to open this file")
+                    .font(.system(size: 12))
+                    .foregroundStyle(Color.textSecondary)
+            }
+
+            Spacer()
+
+            Button(action: onUnlock) {
+                Text("Renew")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(Color.accent)
+                    .clipShape(Capsule())
+            }
+        }
+        .padding(14)
+        .background(.ultraThinMaterial)
         .clipShape(.rect(cornerRadius: 16))
-        .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
     }
 
     // MARK: - Subtitle

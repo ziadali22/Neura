@@ -85,10 +85,8 @@ struct HealthReportSheet: View {
             }
         }
         .background(Color.backgroundPrimary)
-        .sheet(isPresented: $showPaywall) {
+        .fullScreenCover(isPresented: $showPaywall) {
             PaywallView(subscriptionManager: subscriptionManager)
-                .presentationDetents([.large])
-                .presentationDragIndicator(.visible)
         }
     }
 

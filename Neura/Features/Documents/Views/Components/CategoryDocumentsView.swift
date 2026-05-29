@@ -3,6 +3,7 @@ import SwiftUI
 struct CategoryDocumentsView: View {
     let category: DocumentCategory
     @ObservedObject var viewModel: DocumentsListViewModel
+    @ObservedObject private var subscriptionManager = SubscriptionManager.shared
 
     @State private var searchText = ""
     @State private var isSelecting = false
@@ -96,7 +97,10 @@ struct CategoryDocumentsView: View {
             // Select All
             Button {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                    let allIDs = Set(filteredDocuments.map(\.id))
+                    // Exclude locked documents from bulk selection
+                    let allIDs = Set(filteredDocuments
+                        .filter { !viewModel.isLocked($0) }
+                        .map(\.id))
                     if !allIDs.isEmpty && allIDs.isSubset(of: selectedDocuments) {
                         selectedDocuments.removeAll()
                     } else {
@@ -183,20 +187,38 @@ struct CategoryDocumentsView: View {
         ScrollView {
             LazyVStack(spacing: 10) {
                 ForEach(filteredDocuments) { document in
+                    let locked = viewModel.isLocked(document)
+
                     if isSelecting {
-                        Button { toggleSelection(document) } label: {
+                        if locked {
                             DocumentListRow(
                                 document: document,
-                                isSelecting: true,
-                                isSelected: selectedDocuments.contains(document.id)
+                                isLocked: true,
+                                onUnlock: { viewModel.showPaywall = true }
                             )
+                        } else {
+                            Button { toggleSelection(document) } label: {
+                                DocumentListRow(
+                                    document: document,
+                                    isSelecting: true,
+                                    isSelected: selectedDocuments.contains(document.id)
+                                )
+                            }
+                            .buttonStyle(ScaleButtonStyle())
                         }
-                        .buttonStyle(ScaleButtonStyle())
                     } else {
-                        NavigationLink(value: document) {
-                            DocumentListRow(document: document)
+                        if locked {
+                            DocumentListRow(
+                                document: document,
+                                isLocked: true,
+                                onUnlock: { viewModel.showPaywall = true }
+                            )
+                        } else {
+                            NavigationLink(value: document) {
+                                DocumentListRow(document: document)
+                            }
+                            .buttonStyle(ScaleButtonStyle())
                         }
-                        .buttonStyle(ScaleButtonStyle())
                     }
                 }
             }

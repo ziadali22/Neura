@@ -2,6 +2,8 @@ import SwiftUI
 
 struct DashboardView: View {
     @StateObject private var coordinator = AppCoordinator()
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
+    @State private var showPaywall = false
 
     var body: some View {
         ZStack {
@@ -38,7 +40,9 @@ struct DashboardView: View {
                     onAction: { action in
                         coordinator.pendingAddAction = action
                         coordinator.selectedTab = .docs
-                    }
+                    },
+                    canUpload: subscriptionManager.canUpload,
+                    onPaywallNeeded: { showPaywall = true }
                 )
                 .padding(.horizontal, 20)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -47,6 +51,9 @@ struct DashboardView: View {
         .animation(.spring(response: 0.35, dampingFraction: 0.85), value: coordinator.isInDetailView)
         .animation(.spring(response: 0.35, dampingFraction: 0.85), value: coordinator.showAddMenu)
         .environmentObject(coordinator)
+        .fullScreenCover(isPresented: $showPaywall) {
+            PaywallView(subscriptionManager: subscriptionManager)
+        }
     }
 }
 

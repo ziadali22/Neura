@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DocsFilesView: View {
     @ObservedObject var viewModel: DocumentsListViewModel
+    @ObservedObject private var subscriptionManager = SubscriptionManager.shared
     @Binding var isSelecting: Bool
     @Binding var selectedDocuments: Set<UUID>
     @Binding var showFilters: Bool
@@ -132,20 +133,39 @@ struct DocsFilesView: View {
 
                             VStack(spacing: 8) {
                                 ForEach(section.documents) { document in
+                                    let locked = viewModel.isLocked(document)
+
                                     if isSelecting {
-                                        Button { toggleSelection(document) } label: {
+                                        if locked {
+                                            // Locked docs are visible but not selectable
                                             DocumentListRow(
                                                 document: document,
-                                                isSelecting: true,
-                                                isSelected: selectedDocuments.contains(document.id)
+                                                isLocked: true,
+                                                onUnlock: { viewModel.showPaywall = true }
                                             )
+                                        } else {
+                                            Button { toggleSelection(document) } label: {
+                                                DocumentListRow(
+                                                    document: document,
+                                                    isSelecting: true,
+                                                    isSelected: selectedDocuments.contains(document.id)
+                                                )
+                                            }
+                                            .buttonStyle(ScaleButtonStyle())
                                         }
-                                        .buttonStyle(ScaleButtonStyle())
                                     } else {
-                                        NavigationLink(value: document) {
-                                            DocumentListRow(document: document)
+                                        if locked {
+                                            DocumentListRow(
+                                                document: document,
+                                                isLocked: true,
+                                                onUnlock: { viewModel.showPaywall = true }
+                                            )
+                                        } else {
+                                            NavigationLink(value: document) {
+                                                DocumentListRow(document: document)
+                                            }
+                                            .buttonStyle(ScaleButtonStyle())
                                         }
-                                        .buttonStyle(ScaleButtonStyle())
                                     }
                                 }
                             }

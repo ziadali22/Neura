@@ -13,9 +13,11 @@ struct HealthProfile: Codable {
         var weight: String
         var bloodType: String
         var insuranceStatus: String
-        var emergencyContact: String
+        var myPhoneNumber: String
+        var emergencyContactName: String
+        var emergencyContactNumber: String
 
-        init(fullName: String, dateOfBirth: String, gender: String, height: String, weight: String, bloodType: String, insuranceStatus: String, emergencyContact: String = "") {
+        init(fullName: String, dateOfBirth: String, gender: String, height: String, weight: String, bloodType: String, insuranceStatus: String, myPhoneNumber: String = "", emergencyContactName: String = "", emergencyContactNumber: String = "") {
             self.fullName = fullName
             self.dateOfBirth = dateOfBirth
             self.gender = gender
@@ -23,7 +25,9 @@ struct HealthProfile: Codable {
             self.weight = weight
             self.bloodType = bloodType
             self.insuranceStatus = insuranceStatus
-            self.emergencyContact = emergencyContact
+            self.myPhoneNumber = myPhoneNumber
+            self.emergencyContactName = emergencyContactName
+            self.emergencyContactNumber = emergencyContactNumber
         }
 
         init(from decoder: Decoder) throws {
@@ -35,7 +39,24 @@ struct HealthProfile: Codable {
             weight = try container.decode(String.self, forKey: .weight)
             bloodType = try container.decode(String.self, forKey: .bloodType)
             insuranceStatus = try container.decode(String.self, forKey: .insuranceStatus)
-            emergencyContact = try container.decodeIfPresent(String.self, forKey: .emergencyContact) ?? ""
+            myPhoneNumber = try container.decodeIfPresent(String.self, forKey: .myPhoneNumber) ?? ""
+            emergencyContactName = try container.decodeIfPresent(String.self, forKey: .emergencyContactName) ?? ""
+            // Migrate old single emergencyContact field into emergencyContactNumber
+            if let number = try container.decodeIfPresent(String.self, forKey: .emergencyContactNumber) {
+                emergencyContactNumber = number
+            } else {
+                let legacy = try decoder.container(keyedBy: LegacyCodingKeys.self)
+                emergencyContactNumber = try legacy.decodeIfPresent(String.self, forKey: .emergencyContact) ?? ""
+            }
+        }
+
+        private enum CodingKeys: String, CodingKey {
+            case fullName, dateOfBirth, gender, height, weight, bloodType, insuranceStatus
+            case myPhoneNumber, emergencyContactName, emergencyContactNumber
+        }
+
+        private enum LegacyCodingKeys: String, CodingKey {
+            case emergencyContact
         }
     }
 
@@ -85,7 +106,10 @@ struct HealthProfile: Codable {
             height: "",
             weight: "",
             bloodType: "",
-            insuranceStatus: ""
+            insuranceStatus: "",
+            myPhoneNumber: "",
+            emergencyContactName: "",
+            emergencyContactNumber: ""
         ),
         sections: [
             HealthSection(title: "Known Conditions"),
@@ -105,7 +129,10 @@ struct HealthProfile: Codable {
             height: "1,65m",
             weight: "54kg",
             bloodType: "",
-            insuranceStatus: "Insured"
+            insuranceStatus: "Insured",
+            myPhoneNumber: "",
+            emergencyContactName: "",
+            emergencyContactNumber: ""
         ),
         sections: [
             HealthSection(title: "Known Conditions", entries: [

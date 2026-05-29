@@ -5,6 +5,8 @@ struct HealthProfileDetailView: View {
     @StateObject private var viewModel = HealthProfileViewModel()
     @State private var showHealthReport = false
     @State private var isGeneratingReport = false
+    @State private var isSharingProfile = false
+    @State private var navigateToEdit = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -34,6 +36,9 @@ struct HealthProfileDetailView: View {
         }
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .tabBar)
+        .navigationDestination(isPresented: $navigateToEdit) {
+            HealthProfileView()
+        }
         .sheet(isPresented: $showHealthReport) {
             HealthReportSheet()
                 .presentationDetents([.height(650)])
@@ -69,6 +74,16 @@ private extension HealthProfileDetailView {
                     .font(.captionS)
                     .foregroundColor(.textTertiary)
             }
+
+            Button { navigateToEdit = true } label: {
+                Image(systemName: "pencil")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.textPrimary)
+                    .frame(width: 40, height: 40)
+                    .background(Color.surfaceWhite)
+                    .clipShape(Circle())
+            }
+            .frame(maxWidth: .infinity, alignment: .trailing)
         }
         .padding(.horizontal, 20)
         .padding(.top, 12)
@@ -86,14 +101,16 @@ private extension HealthProfileDetailView {
     var generalDataCard: some View {
         let data = viewModel.profile.generalData
         let fields: [(label: String, value: String)] = [
-            ("Full Name",         data.fullName),
-            ("Date of Birth",     data.dateOfBirth),
-            ("Gender",            data.gender),
-            ("Height",            data.height),
-            ("Weight",            data.weight),
-            ("Blood Type",        data.bloodType),
-            ("Insurance Status",  data.insuranceStatus),
-            ("Emergency Contact", data.emergencyContact),
+            ("Full Name",           data.fullName),
+            ("Date of Birth",       data.dateOfBirth),
+            ("Gender",              data.gender),
+            ("Height",              data.height),
+            ("Weight",              data.weight),
+            ("Blood Type",          data.bloodType),
+            ("Insurance Status",    data.insuranceStatus),
+            ("My Number",           data.myPhoneNumber),
+            ("Emergency Contact",   data.emergencyContactName),
+            ("Emergency Number",    data.emergencyContactNumber),
         ]
 
         return VStack(alignment: .leading, spacing: 0) {
@@ -198,18 +215,21 @@ private extension HealthProfileDetailView {
 
     var shareButton: some View {
         Button {
-            if let url = viewModel.generatePDF() {
-                shareURL(url)
-            }
+            generateAndShareProfile()
         } label: {
-            HStack(spacing: 10) {
-                Text("Share")
-                    .font(.headingS)
-                    .foregroundColor(.white)
-
-                Image(systemName: "square.and.arrow.up")
-                    .font(.system(size: 18))
-                    .foregroundColor(.white)
+            ZStack {
+                if isSharingProfile {
+                    ProgressView().tint(.white)
+                } else {
+                    HStack(spacing: 10) {
+                        Text("Share")
+                            .font(.headingS)
+                            .foregroundColor(.white)
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 18))
+                            .foregroundColor(.white)
+                    }
+                }
             }
             .frame(maxWidth: .infinity)
             .frame(height: 56)
@@ -217,9 +237,25 @@ private extension HealthProfileDetailView {
             .clipShape(Capsule())
             .shadow(color: Color.accent.opacity(0.3), radius: 10, x: 0, y: 4)
         }
+        .disabled(isSharingProfile)
     }
 
     // MARK: - Helpers
+
+    func generateAndShareProfile() {
+        guard !isSharingProfile else { return }
+        isSharingProfile = true
+
+        Task.detached(priority: .userInitiated) {
+            let profile = await MainActor.run { viewModel.profile }
+            let url = HealthProfileViewModel.generatePDF(for: profile)
+
+            await MainActor.run {
+                isSharingProfile = false
+                if let url { shareURL(url) }
+            }
+        }
+    }
 
     func generateAndShareReport() {
         guard !isGeneratingReport else { return }

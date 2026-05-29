@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct GeneralDataSheet: View {
     @ObservedObject var viewModel: HealthProfileViewModel
@@ -47,7 +48,7 @@ struct GeneralDataSheet: View {
         .background(Color.backgroundPrimary)
         // Text input sheet (Name only)
         .sheet(item: $textEditingField) { field in
-            EditFieldSheet(fieldName: field.label, value: field.value) { newValue in
+            EditFieldSheet(fieldName: field.label, value: field.value, keyboardType: field.keyboardType) { newValue in
                 viewModel.updateGeneralField(field.keyPath, value: newValue)
             }
             .presentationDragIndicator(.hidden)
@@ -93,9 +94,11 @@ struct GeneralDataSheet: View {
             .init(label: "Gender",           keyPath: \.gender,          value: data.gender,          kind: .options(["Male", "Female", "Prefer not to say"])),
             .init(label: "Height",           keyPath: \.height,          value: data.height,          kind: .wheel(WheelPickerSheet.heightValues)),
             .init(label: "Weight",           keyPath: \.weight,          value: data.weight,          kind: .wheel(WheelPickerSheet.weightValues)),
-            .init(label: "Insurance Status",  keyPath: \.insuranceStatus,  value: data.insuranceStatus,  kind: .options(["Insured", "Uninsured", "Partially Insured"])),
-            .init(label: "Blood Type",        keyPath: \.bloodType,        value: data.bloodType,        kind: .options(["A+", "A−", "B+", "B−", "AB+", "AB−", "O+", "O−"])),
-            .init(label: "Emergency Contact", keyPath: \.emergencyContact, value: data.emergencyContact, kind: .text),
+            .init(label: "Insurance Status",    keyPath: \.insuranceStatus,       value: data.insuranceStatus,       kind: .options(["Insured", "Uninsured", "Partially Insured"])),
+            .init(label: "Blood Type",          keyPath: \.bloodType,             value: data.bloodType,             kind: .options(["A+", "A−", "B+", "B−", "AB+", "AB−", "O+", "O−"])),
+            .init(label: "My Number",           keyPath: \.myPhoneNumber,         value: data.myPhoneNumber,         kind: .text, keyboardType: .phonePad),
+            .init(label: "Emergency Contact",   keyPath: \.emergencyContactName,  value: data.emergencyContactName,  kind: .text),
+            .init(label: "Emergency Number",    keyPath: \.emergencyContactNumber, value: data.emergencyContactNumber, kind: .text, keyboardType: .phonePad),
         ]
     }
 }
@@ -193,6 +196,15 @@ struct GeneralFieldInfo: Identifiable {
     let keyPath: WritableKeyPath<HealthProfile.GeneralData, String>
     let value: String
     let kind: GeneralFieldKind
+    let keyboardType: UIKeyboardType
+
+    init(label: String, keyPath: WritableKeyPath<HealthProfile.GeneralData, String>, value: String, kind: GeneralFieldKind, keyboardType: UIKeyboardType = .default) {
+        self.label = label
+        self.keyPath = keyPath
+        self.value = value
+        self.kind = kind
+        self.keyboardType = keyboardType
+    }
 
     var options: [String] {
         if case .options(let opts) = kind { return opts }

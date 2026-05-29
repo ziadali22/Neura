@@ -6,6 +6,8 @@ struct CustomTabBar: View {
     @Binding var selectedTab: AppCoordinator.Tab
     @Binding var isMenuOpen: Bool
     let onAction: (AppCoordinator.AddDocumentAction) -> Void
+    var canUpload: Bool = true
+    var onPaywallNeeded: () -> Void = {}
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -127,8 +129,12 @@ struct CustomTabBar: View {
     private var fab: some View {
         Button {
             HapticManager.medium()
-            withAnimation(reduceMotion ? .easeInOut(duration: 0.22) : spring) {
-                isMenuOpen.toggle()
+            if canUpload {
+                withAnimation(reduceMotion ? .easeInOut(duration: 0.22) : spring) {
+                    isMenuOpen.toggle()
+                }
+            } else {
+                onPaywallNeeded()
             }
         } label: {
             Image(systemName: "plus")

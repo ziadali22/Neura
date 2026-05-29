@@ -7,6 +7,7 @@ enum OnboardingStep: Int, CaseIterable, Hashable {
     case welcome
     case stopSearching
     case storeAndShare
+    case qrShare
     case statistics
     case recordsLocation
     case documentScan
@@ -19,7 +20,7 @@ enum OnboardingStep: Int, CaseIterable, Hashable {
     /// Whether the top bar (back button + progress) is visible.
     var showsTopBar: Bool {
         switch self {
-        case .welcome, .calculating: return false
+        case .stopSearching, .calculating: return false
         default: return true
         }
     }
@@ -30,14 +31,15 @@ enum OnboardingStep: Int, CaseIterable, Hashable {
     /// Whether the centered progress pill is shown within the top bar.
     var showsProgressBar: Bool {
         switch self {
-        case .welcome, .stopSearching, .storeAndShare, .statistics, .recordsLocation, .documentScan, .privacySecurity, .calculating: return false
+        case .stopSearching, .storeAndShare, .statistics, .documentScan,
+             .profileCardIntro, .qrShare, .privacySecurity, .welcome, .calculating:
+            return false
         default: return true
         }
     }
 
     static let progressTracked: [OnboardingStep] = [
-        .medicalAreas, .profile, .location, .profileCardIntro, .emergency,
-        .biometrics, .emergencyCard, .healthKit, .medical, .documents
+        .profile, .location, .biometrics, .healthKit, .profileCard
     ]
 }
 

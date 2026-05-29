@@ -12,10 +12,16 @@ final class SubscriptionManager: ObservableObject {
     private let uploadCountKey = "neura_document_upload_count"
     private let shareCountKey = "neura_share_count"
     private let isProKey = "neura_is_pro"
+    private let subscriptionExpiredKey = "neura_subscription_expired"
 
     @Published private(set) var uploadCount: Int
     @Published private(set) var shareCount: Int
     @Published private(set) var isPro: Bool
+    /// True when the user *had* a Pro subscription that has since lapsed.
+    @Published private(set) var subscriptionExpired: Bool
+
+    /// Locked-document gate: subscription was active but is now expired.
+    var hasExpiredSubscription: Bool { subscriptionExpired && !isPro }
 
     var remainingUploads: Int {
         max(0, freeUploadLimit - uploadCount)
@@ -37,6 +43,7 @@ final class SubscriptionManager: ObservableObject {
         self.uploadCount = UserDefaults.standard.integer(forKey: uploadCountKey)
         self.shareCount = UserDefaults.standard.integer(forKey: shareCountKey)
         self.isPro = UserDefaults.standard.bool(forKey: isProKey)
+        self.subscriptionExpired = UserDefaults.standard.bool(forKey: subscriptionExpiredKey)
     }
 
     // MARK: - Actions
@@ -55,7 +62,17 @@ final class SubscriptionManager: ObservableObject {
 
     func upgradeToPro() {
         isPro = true
+        subscriptionExpired = false
         UserDefaults.standard.set(true, forKey: isProKey)
+        UserDefaults.standard.set(false, forKey: subscriptionExpiredKey)
+    }
+
+    /// Call this when StoreKit notifies that the subscription renewal failed / lapsed.
+    func expireSubscription() {
+        isPro = false
+        subscriptionExpired = true
+        UserDefaults.standard.set(false, forKey: isProKey)
+        UserDefaults.standard.set(true, forKey: subscriptionExpiredKey)
     }
 
     func restorePurchase() {
@@ -66,9 +83,11 @@ final class SubscriptionManager: ObservableObject {
 
     func reset() {
         isPro = false
+        subscriptionExpired = false
         uploadCount = 0
         shareCount = 0
         UserDefaults.standard.set(false, forKey: isProKey)
+        UserDefaults.standard.set(false, forKey: subscriptionExpiredKey)
         UserDefaults.standard.set(0, forKey: uploadCountKey)
         UserDefaults.standard.set(0, forKey: shareCountKey)
     }

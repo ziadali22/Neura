@@ -103,7 +103,7 @@ private extension NeuraApp {
         }
         let g = profile.generalData
         let fields = [g.fullName, g.dateOfBirth, g.gender, g.height, g.weight,
-                      g.bloodType, g.insuranceStatus, g.emergencyContact]
+                      g.bloodType, g.insuranceStatus, g.myPhoneNumber, g.emergencyContactName, g.emergencyContactNumber]
         let filled = fields.filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }.count
         ProfileNotificationManager.shared.requestPermissionAndScheduleIfNeeded(filledCount: filled, total: fields.count)
     }

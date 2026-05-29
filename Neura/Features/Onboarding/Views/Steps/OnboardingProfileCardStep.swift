@@ -75,7 +75,7 @@ private extension OnboardingProfileCardStep {
 
     var carousel: some View {
         ScrollView(.horizontal) {
-            LazyHStack(spacing: 16) {
+            LazyHStack(spacing: 12) {
                 ForEach(presets) { bg in
                     SecureProfileCard(
                         name: displayName,
@@ -83,11 +83,11 @@ private extension OnboardingProfileCardStep {
                         background: bg
                     )
                     .allowsHitTesting(false)
-                    .containerRelativeFrame(.horizontal) { width, _ in width - 80 }
+                    .containerRelativeFrame(.horizontal) { width, _ in width - 88 }
                     .scrollTransition { content, phase in
                         content
-                            .scaleEffect(phase.isIdentity ? 1 : 0.88)
-                            .opacity(phase.isIdentity ? 1 : 0.65)
+                            .scaleEffect(phase.isIdentity ? 1 : 0.93)
+                            .opacity(phase.isIdentity ? 1 : 0.78)
                     }
                     .id(bg.id)
                 }
