@@ -83,6 +83,7 @@ final class SyncQueueManager: ObservableObject {
             if let profile = try? await HealthProfileSyncService.shared.download(uid: uid, key: key),
                let data = try? JSONEncoder().encode(profile) {
                 UserDefaults.standard.set(data, forKey: "health_profile_data")
+                NotificationCenter.default.post(name: .healthProfileRestored, object: nil)
             }
 
             // 2. Documents — download missing files, rebuild metadata
@@ -105,8 +106,9 @@ final class SyncQueueManager: ObservableObject {
     }
 }
 
-// MARK: - Notification Name
+// MARK: - Notification Names
 
 extension Notification.Name {
     static let documentsRestored = Notification.Name("com.neura.documentsRestored")
+    static let healthProfileRestored = Notification.Name("com.neura.healthProfileRestored")
 }

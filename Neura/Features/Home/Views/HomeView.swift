@@ -122,7 +122,7 @@ struct HomeView: View {
             }
             .sheet(isPresented: $showShareSheet) {
                 ShareHealthProfileSheet()
-                    .presentationDetents([.height(525)])
+                    .presentationDetents([.height(490)])
                     .presentationDragIndicator(.visible)
             }
             .sheet(isPresented: $showBackgroundPicker) {

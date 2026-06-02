@@ -33,26 +33,31 @@ struct DashboardView: View {
             }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            if !coordinator.isInDetailView && !coordinator.isSelectingDocs {
-                CustomTabBar(
-                    selectedTab: $coordinator.selectedTab,
-                    isMenuOpen: $coordinator.showAddMenu,
-                    onAction: { action in
-                        coordinator.pendingAddAction = action
-                        coordinator.selectedTab = .docs
-                    },
-                    canUpload: subscriptionManager.canUpload,
-                    onPaywallNeeded: { showPaywall = true }
-                )
-                .padding(.horizontal, 20)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-            }
+            let visible = !coordinator.isInDetailView && !coordinator.isSelectingDocs
+            CustomTabBar(
+                selectedTab: $coordinator.selectedTab,
+                isMenuOpen: $coordinator.showAddMenu,
+                onAction: { action in
+                    coordinator.pendingAddAction = action
+                    coordinator.selectedTab = .docs
+                },
+                canUpload: subscriptionManager.canUpload,
+                onPaywallNeeded: { showPaywall = true }
+            )
+            .padding(.horizontal, 20)
+            .opacity(visible ? 1 : 0)
+            .allowsHitTesting(visible)
+            .animation(.easeInOut(duration: 0.2), value: visible)
         }
-        .animation(.spring(response: 0.35, dampingFraction: 0.85), value: coordinator.isInDetailView)
         .animation(.spring(response: 0.35, dampingFraction: 0.85), value: coordinator.showAddMenu)
         .environmentObject(coordinator)
         .fullScreenCover(isPresented: $showPaywall) {
             PaywallView(subscriptionManager: subscriptionManager)
+        }
+        .task {
+            // Give the UI a moment to settle before the system dialog appears
+            try? await Task.sleep(for: .seconds(1))
+            await ATTrackingService.requestIfNeeded()
         }
     }
 }

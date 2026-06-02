@@ -19,21 +19,22 @@ struct SectionDetailSheet: View {
         VStack(spacing: 0) {
             navBar
 
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 12) {
-                    if let section {
-                        if section.entries.isEmpty {
-                            emptyState
-                        } else {
+            if let section, section.entries.isEmpty {
+                emptyState
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 12) {
+                        if let section {
                             ForEach(section.entries) { entry in
                                 entryCard(entry)
                             }
                         }
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 12)
+                    .padding(.bottom, 100)
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 12)
-                .padding(.bottom, 100)
             }
         }
         .background(Color.backgroundPrimary)
@@ -77,6 +78,7 @@ private extension SectionDetailSheet {
                     .frame(width: 40, height: 40)
                     .background(Color.surfaceWhite)
                     .clipShape(Circle())
+                    .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 4)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -91,7 +93,7 @@ private extension SectionDetailSheet {
 
     var emptyState: some View {
         VStack(spacing: 12) {
-            Spacer().frame(height: 60)
+            Spacer()
 
             Image(systemName: "tray")
                 .font(.system(size: 44))

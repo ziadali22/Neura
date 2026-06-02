@@ -41,7 +41,7 @@ struct EditFieldSheet: View {
                     .foregroundStyle(Color.textPrimary)
 
                 TextField(fieldName, text: $value)
-                    .font(.bodyL)
+                    .font(.BodyML)
                     .foregroundStyle(Color.textPrimary)
                     .keyboardType(keyboardType)
                     .padding(.horizontal, 16)
@@ -56,6 +56,7 @@ struct EditFieldSheet: View {
             Spacer()
         }
         .background(Color.backgroundPrimary)
+        .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 4)
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 isFocused = true

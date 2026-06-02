@@ -54,7 +54,7 @@ struct OptionPickerSheet: View {
                             } label: {
                                 HStack {
                                     Text(option)
-                                        .font(.bodyL)
+                                        .font(.BodyML)
                                         .foregroundStyle(Color.textPrimary)
                                     Spacer()
                                     if selected == option {
@@ -86,6 +86,7 @@ struct OptionPickerSheet: View {
             }
         }
         .background(Color.backgroundPrimary)
+        .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 4)
     }
 }
 

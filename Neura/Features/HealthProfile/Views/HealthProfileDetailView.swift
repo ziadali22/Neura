@@ -62,6 +62,7 @@ private extension HealthProfileDetailView {
                     .frame(width: 40, height: 40)
                     .background(Color.surfaceWhite)
                     .clipShape(Circle())
+                    .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 4)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -82,6 +83,7 @@ private extension HealthProfileDetailView {
                     .frame(width: 40, height: 40)
                     .background(Color.surfaceWhite)
                     .clipShape(Circle())
+                    .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 4)
             }
             .frame(maxWidth: .infinity, alignment: .trailing)
         }

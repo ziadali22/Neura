@@ -32,7 +32,7 @@ struct DocsView: View {
                 onPhoto: { viewModel.startPhotoUpload() },
                 onFile: { viewModel.startFileImport() }
             )
-            .presentationDetents([.height(360)])
+            .presentationDetents([.height(270)])
             .presentationDragIndicator(.hidden)
             .presentationBackground(Color.surfaceWhite)
         }
@@ -249,7 +249,7 @@ struct DocsView: View {
                             .foregroundStyle(Color.textSecondary)
                             .frame(width: 36, height: 36)
                             .background(Color.surfaceWhite)
-                            .clipShape(.rect(cornerRadius: 10))
+                            .clipShape(.rect(cornerRadius: 14))
                             .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
                     }
                 }
@@ -275,10 +275,10 @@ struct DocsView: View {
         .padding(.horizontal, 14)
         .padding(.vertical, 11)
         .background(Color.surfaceWhite)
-        .clipShape(.rect(cornerRadius: 12))
-        .shadow(color: .black.opacity(0.04), radius: 4, x: 0, y: 2)
+        .clipShape(.rect(cornerRadius: 20))
+        .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
         .padding(.horizontal, 20)
-        .padding(.bottom, 12)
+        .padding(.bottom, 24)
     }
 
     // MARK: - Content Area

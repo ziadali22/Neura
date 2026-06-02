@@ -212,16 +212,10 @@ struct DocumentMetadataView: View {
                     } label: {
                         categoryChip(
                             icon: {
-                                if let asset = cat.assetIcon {
-                                    Image(asset)
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                        .frame(width: 28, height: 28)
-                                } else {
-                                    Image(systemName: cat.icon)
-                                        .font(.system(size: 16))
-                                        .foregroundColor(cat.color)
-                                }
+                                Image(cat.gridIcon)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 28, height: 28)
                             },
                             label: cat.localizedName,
                             isSelected: metadata.category == cat

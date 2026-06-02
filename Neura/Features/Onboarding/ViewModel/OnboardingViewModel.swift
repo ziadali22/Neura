@@ -1,6 +1,7 @@
 import SwiftUI
 import Combine
 import LocalAuthentication
+import FirebaseAuth
 
 @MainActor
 final class OnboardingViewModel: ObservableObject {
@@ -12,6 +13,7 @@ final class OnboardingViewModel: ObservableObject {
     // Auth
     @Published var isSigningIn = false
     @Published var authError: String?
+    private var isReturningUser = false
 
     // HealthKit
     @Published var healthKitStatus: HealthKitStatus = .notRequested
@@ -150,7 +152,7 @@ final class OnboardingViewModel: ObservableObject {
 
     var biometricIcon: String {
         let context = LAContext()
-        guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil) else { return "lock.fill" }
+        guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil) else { return "faceid" }
         return context.biometryType == .faceID ? "faceid" : "touchid"
     }
 
@@ -163,7 +165,8 @@ final class OnboardingViewModel: ObservableObject {
         Task {
             do {
                 try await AuthService.shared.signInWithApple()
-                advance()
+                await checkReturningUser()
+                isReturningUser ? finalize() : advance()
             } catch {
                 if !isCancellation(error) { authError = error.localizedDescription }
             }
@@ -178,12 +181,18 @@ final class OnboardingViewModel: ObservableObject {
         Task {
             do {
                 try await AuthService.shared.signInWithGoogle()
-                advance()
+                await checkReturningUser()
+                isReturningUser ? finalize() : advance()
             } catch {
                 if !isCancellation(error) { authError = error.localizedDescription }
             }
             isSigningIn = false
         }
+    }
+
+    private func checkReturningUser() async {
+        guard let uid = AuthService.shared.currentUser?.uid else { return }
+        isReturningUser = await AuthService.shared.hasExistingCloudData(uid: uid)
     }
 
     private func isCancellation(_ error: Error) -> Bool {
@@ -203,6 +212,10 @@ final class OnboardingViewModel: ObservableObject {
     }
 
     private func saveProfile() {
+        // Returning users already have their profile in the cloud; skip overwriting
+        // so performInitialRestore can write the real data without conflict.
+        guard !isReturningUser else { return }
+
         let dob = state.dateOfBirth.map {
             $0.formatted(.dateTime.day().month(.wide).year())
         } ?? ""

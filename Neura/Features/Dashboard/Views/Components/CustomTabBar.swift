@@ -130,9 +130,7 @@ struct CustomTabBar: View {
         Button {
             HapticManager.medium()
             if canUpload {
-                withAnimation(reduceMotion ? .easeInOut(duration: 0.22) : spring) {
-                    isMenuOpen.toggle()
-                }
+                isMenuOpen.toggle()
             } else {
                 onPaywallNeeded()
             }

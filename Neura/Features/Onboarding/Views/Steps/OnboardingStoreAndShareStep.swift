@@ -121,7 +121,7 @@ struct OnboardingStoreAndShareStep: View {
 
         // Stagger each pill in
         for i in 0..<questions.count {
-            if i > 0 { try? await Task.sleep(for: .milliseconds(330)) }
+            if i > 0 { try? await Task.sleep(for: .milliseconds(700)) }
             visiblePillCount = i + 1
         }
 

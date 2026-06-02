@@ -38,6 +38,13 @@ struct NeuraApp: App {
            UserDefaults.standard.data(forKey: "health_profile_data") != nil {
             UserDefaults.standard.set(true, forKey: key)
         }
+        // Reinstall detection: onboarding not complete means UserDefaults was wiped (reinstall or
+        // fresh install). Sign out any stale Firebase session that persisted in Keychain so the
+        // wrong account's data is never shown and the user is always forced to authenticate fresh.
+        if !UserDefaults.standard.bool(forKey: key),
+           Auth.auth().currentUser != nil {
+            try? Auth.auth().signOut()
+        }
         let done = UserDefaults.standard.bool(forKey: key)
         let signedIn = Auth.auth().currentUser != nil
         _hasCompletedOnboarding = State(initialValue: done)
@@ -89,7 +96,7 @@ struct NeuraApp: App {
     }
 }
 
-// MARK: - Profile notification helper
+// MARK: - Notification helpers
 
 private extension NeuraApp {
     /// Reads the saved profile from UserDefaults and asks the notification manager

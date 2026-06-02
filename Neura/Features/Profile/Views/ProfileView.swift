@@ -24,8 +24,10 @@ struct ProfileView: View {
 
                     VStack(alignment: .leading, spacing: 0) {
                         // Neura Pro
-                        NeuraProCard()
-                            .padding(.bottom, 20)
+                        if !subscriptionManager.isPro {
+                            NeuraProCard()
+                                .padding(.bottom, 20)
+                        }
 
                         // Profile section
 //                        ProfileSectionHeader(title: L10n.Profile.Section.profile)

@@ -4,6 +4,7 @@ struct PaywallView: View {
     @ObservedObject var subscriptionManager: SubscriptionManager
     @Environment(\.dismiss) private var dismiss
     @State private var currentSlide = 0
+    @State private var scrollID: Int? = 0
     @State private var selectedPlan: Plan = .yearly
 
     // MARK: - Plan Model
@@ -138,17 +139,28 @@ struct PaywallView: View {
     // MARK: - Carousel
 
     private var carousel: some View {
-        TabView(selection: $currentSlide) {
-            ForEach(slides.indices, id: \.self) { i in
-                SlideView(slide: slides[i]).tag(i)
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 0) {
+                ForEach(slides.indices, id: \.self) { i in
+                    SlideView(slide: slides[i])
+                        .containerRelativeFrame(.horizontal)
+                        .id(i)
+                }
             }
+            .scrollTargetLayout()
         }
-        .tabViewStyle(.page(indexDisplayMode: .never))
+        .scrollTargetBehavior(.paging)
+        .scrollPosition(id: $scrollID)
+        .scrollClipDisabled(false)
+        .onChange(of: scrollID) { _, newID in
+            currentSlide = newID ?? 0
+        }
         .task {
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(3))
-                withAnimation(.easeInOut(duration: 0.4)) {
-                    currentSlide = (currentSlide + 1) % slides.count
+                try? await Task.sleep(for: .seconds(3.5))
+                let next = ((scrollID ?? 0) + 1) % slides.count
+                withAnimation(.spring(response: 0.65, dampingFraction: 0.82)) {
+                    scrollID = next
                 }
             }
         }
@@ -261,9 +273,9 @@ private struct PlanCard: View {
         VStack(alignment: .leading, spacing: 6) {
             // Invisible badge-height placeholder keeps both cards equal height
             Text("BEST VALUE")
-                .font(.system(size: 10, weight: .bold))
+                .font(.system(size: 13, weight: .bold))
                 .opacity(0)
-                .padding(.vertical, 2)
+                .padding(.vertical, 4)
 
             Text(plan.title)
                 .font(.system(size: 18, weight: .bold))
@@ -295,13 +307,13 @@ private struct PlanCard: View {
 
     private var bestValueBadge: some View {
         Text("BEST VALUE")
-            .font(.system(size: 10, weight: .bold))
+            .font(.system(size: 13, weight: .bold))
             .foregroundStyle(.white)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 4)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 6)
             .background(Color.accent)
             .clipShape(Capsule())
-            .offset(y: -14)
+            .offset(y: -16)
     }
 }
 

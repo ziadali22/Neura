@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>Neura uses this to measure app performance and improve your experience.</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>Neura reads your health data (height, weight, date of birth, and biological sex) to pre-fill your health profile.</string>
 	<key>NSHealthUpdateUsageDescription</key>

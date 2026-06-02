@@ -1,5 +1,6 @@
 import Foundation
 import FirebaseAuth
+import FirebaseFirestore
 import GoogleSignIn
 import UIKit
 import Combine
@@ -89,6 +90,18 @@ final class AuthService: ObservableObject {
         try await user.delete()
         KeychainManager.shared.clearKey()
         currentUser = nil
+    }
+
+    // MARK: - Cloud Existence Check
+
+    /// Returns true if this uid already has a profile document in Firestore.
+    /// Used during onboarding to detect returning users without decrypting anything.
+    func hasExistingCloudData(uid: String) async -> Bool {
+        let snapshot = try? await Firestore.firestore()
+            .collection("users").document(uid)
+            .collection("profile").document("data")
+            .getDocument()
+        return snapshot?.exists == true
     }
 
     // MARK: - Private

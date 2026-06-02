@@ -16,10 +16,6 @@ struct NewFolderGridCard: View {
                 Text("New Folder")
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(Color.accent)
-
-                Text("Create custom")
-                    .font(.system(size: 13))
-                    .foregroundStyle(Color.textTertiary)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

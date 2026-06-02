@@ -57,10 +57,6 @@ struct AddDocumentSheet: View {
                 }
 
                 Spacer()
-
-//                Image(systemName: "chevron.right")
-//                    .font(.system(size: 13, weight: .semibold))
-//                    .foregroundStyle(Color.textTertiary)
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 14)

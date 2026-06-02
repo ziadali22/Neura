@@ -9,42 +9,42 @@ struct OnboardingBiometricsStep: View {
         VStack(spacing: 0) {
             Spacer()
 
-            VStack(spacing: 40) {
-                // Icon
-                ZStack {
-                    Circle()
-                        .fill(Color.accent.opacity(0.08))
-                        .frame(width: 120, height: 120)
-                    Circle()
-                        .fill(Color.accent.opacity(0.12))
-                        .frame(width: 88, height: 88)
-                    Image(systemName: viewModel.biometricIcon)
-                        .font(.system(size: 44))
-                        .foregroundStyle(Color.accent)
-                }
-                .scaleEffect(appeared ? 1 : 0.7)
-                .opacity(appeared ? 1 : 0)
-
-                // Text
-                VStack(spacing: 12) {
-                    Text(L10n.Onboarding.Biometrics.title)
-                        .font(.displayL)
-                        .foregroundStyle(Color.textPrimary)
-                        .multilineTextAlignment(.center)
-
-                    Text(L10n.Onboarding.Biometrics.subtitle(viewModel.biometricLabel))
-                        .font(.bodyL)
-                        .foregroundStyle(Color.textSecondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 8)
-                }
-                .opacity(appeared ? 1 : 0)
-                .offset(y: appeared ? 0 : 16)
+            // Icon — centered, larger
+            ZStack {
+                Circle()
+                    .fill(Color.accent.opacity(0.08))
+                    .frame(width: 160, height: 160)
+                Circle()
+                    .fill(Color.accent.opacity(0.12))
+                    .frame(width: 120, height: 120)
+                Image(systemName: viewModel.biometricIcon)
+                    .font(.system(size: 60))
+                    .foregroundStyle(Color.accent)
             }
-            .padding(.horizontal, 32)
+            .scaleEffect(appeared ? 1 : 0.7)
+            .opacity(appeared ? 1 : 0)
+            .animation(.spring(response: 0.6, dampingFraction: 0.8), value: appeared)
 
             Spacer()
-            Spacer()
+
+            // Title + subtitle near continue button
+            VStack(alignment: .leading, spacing: 8) {
+                Text(L10n.Onboarding.Biometrics.title)
+                    .font(.displayL)
+                    .fontWeight(.bold)
+                    .foregroundStyle(Color.textPrimary)
+
+                Text(L10n.Onboarding.Biometrics.subtitle(viewModel.biometricLabel))
+                    .font(.bodyL)
+                    .foregroundStyle(Color.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 24)
+            .padding(.bottom, 24)
+            .opacity(appeared ? 1 : 0)
+            .offset(y: appeared ? 0 : 20)
+            .animation(.spring(response: 0.6, dampingFraction: 0.85), value: appeared)
 
             OnboardingContinueButton(
                 action: requestBiometrics,
@@ -56,10 +56,11 @@ struct OnboardingBiometricsStep: View {
             )
             .opacity(appeared ? 1 : 0)
             .offset(y: appeared ? 0 : 20)
+            .animation(.spring(response: 0.6, dampingFraction: 0.85), value: appeared)
         }
         .task {
             try? await Task.sleep(for: .milliseconds(150))
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) { appeared = true }
+            appeared = true
         }
     }
 

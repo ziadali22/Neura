@@ -7,9 +7,15 @@ final class HealthProfileViewModel: ObservableObject {
     @Published var profile: HealthProfile
 
     private static let storageKey = "health_profile_data"
+    private var restoreObserver: NSObjectProtocol?
 
     init() {
         self.profile = Self.loadFromDisk() ?? .sample
+        restoreObserver = NotificationCenter.default.addObserver(
+            forName: .healthProfileRestored, object: nil, queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in self?.reload() }
+        }
     }
 
     func reload() {

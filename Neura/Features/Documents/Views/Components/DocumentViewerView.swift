@@ -171,21 +171,10 @@ private extension DocumentViewerView {
             HStack(spacing: 12) {
                 // Category icon
                 if let category = document.category {
-                    if let assetIcon = category.assetIcon {
-                        Image(assetIcon)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 36, height: 36)
-                    } else {
-                        ZStack {
-                            Circle()
-                                .fill(category.color.opacity(0.12))
-                                .frame(width: 36, height: 36)
-                            Image(systemName: category.icon)
-                                .font(.system(size: 15))
-                                .foregroundColor(category.color)
-                        }
-                    }
+                    Image(category.gridIcon)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 36, height: 36)
                 }
 
                 VStack(alignment: .leading, spacing: 2) {
@@ -404,12 +393,13 @@ private extension DocumentViewerView {
                     .foregroundColor(.textPrimary)
 
                 Text(L10n.Documents.Viewer.fileNotFoundMessage)
-                    .font(.bodyS)
+                    .font(.body)
                     .foregroundColor(.textSecondary)
                     .multilineTextAlignment(.center)
                     .lineSpacing(3)
             }
         }
+        .padding(.horizontal, 32)
     }
 
     // MARK: Share via QR
