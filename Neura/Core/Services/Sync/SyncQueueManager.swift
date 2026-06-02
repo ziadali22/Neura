@@ -73,6 +73,17 @@ final class SyncQueueManager: ObservableObject {
         }
     }
 
+    // MARK: - Preferences Upload
+
+    func enqueuePreferencesUpload(_ prefs: UserPreferences) {
+        guard let uid = AuthService.shared.currentUser?.uid,
+              let key = KeychainManager.shared.currentKey else { return }
+
+        Task {
+            try? await PreferencesSyncService.shared.upload(prefs, uid: uid, key: key)
+        }
+    }
+
     // MARK: - Initial Restore (new device / reinstall)
 
     /// Downloads all cloud data for the user and saves it locally.
@@ -83,6 +94,15 @@ final class SyncQueueManager: ObservableObject {
             if let profile = try? await HealthProfileSyncService.shared.download(uid: uid, key: key),
                let data = try? JSONEncoder().encode(profile) {
                 UserDefaults.standard.set(data, forKey: "health_profile_data")
+                NotificationCenter.default.post(name: .healthProfileRestored, object: nil)
+            }
+
+            // 1b. Preferences (medical areas + location)
+            if let prefs = try? await PreferencesSyncService.shared.download(uid: uid, key: key) {
+                UserDefaults.standard.set(prefs.location, forKey: "user_location")
+                if let areasData = try? JSONEncoder().encode(prefs.medicalAreas) {
+                    UserDefaults.standard.set(areasData, forKey: "onboarding_medical_areas")
+                }
                 NotificationCenter.default.post(name: .healthProfileRestored, object: nil)
             }
 

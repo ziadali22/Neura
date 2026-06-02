@@ -263,6 +263,9 @@ final class OnboardingViewModel: ObservableObject {
         if let data = try? JSONEncoder().encode(profile) {
             UserDefaults.standard.set(data, forKey: "health_profile_data")
         }
+        // Upload to Firestore so a future reinstall + relogin restores it
+        // (and hasExistingCloudData detects this user as returning).
+        SyncQueueManager.shared.enqueueProfileUpload(profile)
 
         // Persist selected medical areas
         let areas = state.medicalAreas.map(\.rawValue)
@@ -283,5 +286,9 @@ final class OnboardingViewModel: ObservableObject {
         case (true, true):   location = ""
         }
         UserDefaults.standard.set(location, forKey: "user_location")
+
+        // Upload preferences to Firestore so they restore on reinstall.
+        let prefs = UserPreferences(medicalAreas: areas, location: location)
+        SyncQueueManager.shared.enqueuePreferencesUpload(prefs)
     }
 }
