@@ -27,9 +27,11 @@ struct WordTypingEffectModifier: ViewModifier {
     let wordsPerSecond: Double
     let onTypingCompleted: () -> Void
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     // Index of the last fully committed (fully visible) word
     @State private var visibleWordCount: Int = 0
-    // Opacity of the word currently fading in (0 → 1)
+    // Reveal progress of the word currently fading in (0 → 1)
     @State private var revealProgress: CGFloat = 0
     @State private var typingTask: Task<Void, Never>? = nil
 
@@ -38,46 +40,54 @@ struct WordTypingEffectModifier: ViewModifier {
     }
 
     func body(content: Content) -> some View {
-        content
-            .mask { wordMask }
-            .onAppear { if shouldStartTyping { startTyping() } }
-            .onChange(of: shouldStartTyping) { _, new in if new { startTyping() } }
+        ZStack {
+            // Layer 1 — committed words: sharp, fully opaque.
+            content.mask { committedMask }
+
+            // Layer 2 — current word: fades in AND sharpens from blur.
+            content
+                .mask { currentWordMask }
+                .opacity(Double(revealProgress))
+                .blur(radius: reduceMotion ? 0 : (1 - revealProgress) * 6)
+        }
+        .onAppear { if shouldStartTyping { startTyping() } }
+        .onChange(of: shouldStartTyping) { _, new in if new { startTyping() } }
     }
 
-    // Builds an AttributedString where:
-    //  - words[0..<visibleWordCount]           → fully white (opacity 1)
-    //  - words[visibleWordCount]               → white at revealProgress opacity (fading in)
-    //  - words[visibleWordCount+1...]          → clear (hidden)
-    private var wordMask: some View {
-        let wordList = words
+    // Number of characters spanned by the first `count` words joined with spaces.
+    private func charCount(upToWord count: Int) -> Int {
+        words.prefix(count).joined(separator: " ").count
+    }
+
+    // Mask revealing words[0..<visibleWordCount] in white, rest clear.
+    private var committedMask: some View {
         var attributed = AttributedString(fullText)
         attributed.foregroundColor = .clear
-
-        func charRange(upToWord count: Int) -> Int {
-            wordList.prefix(count).joined(separator: " ").count
-        }
-
-        // Fully visible region
         if visibleWordCount > 0 {
-            let endChar = charRange(upToWord: visibleWordCount)
+            let endChar = charCount(upToWord: visibleWordCount)
             let endIdx = attributed.index(attributed.startIndex, offsetByCharacters: endChar)
             attributed[attributed.startIndex..<endIdx].foregroundColor = .white
         }
+        return Text(attributed)
+            .font(font)
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity)
+    }
 
-        // Currently fading-in word (includes the leading space for words after the first)
-        if visibleWordCount < wordList.count, revealProgress > 0 {
-            let chunkStart = visibleWordCount == 0
-                ? 0
-                : charRange(upToWord: visibleWordCount) // end of prev visible text = start of space+word
-            let chunkEnd = charRange(upToWord: visibleWordCount + 1)
-
+    // Mask revealing ONLY words[visibleWordCount] in white (opacity/blur applied by the layer).
+    private var currentWordMask: some View {
+        let wordList = words
+        var attributed = AttributedString(fullText)
+        attributed.foregroundColor = .clear
+        if visibleWordCount < wordList.count {
+            let chunkStart = visibleWordCount == 0 ? 0 : charCount(upToWord: visibleWordCount)
+            let chunkEnd = charCount(upToWord: visibleWordCount + 1)
             if chunkStart < chunkEnd, chunkEnd <= fullText.count {
                 let startIdx = attributed.index(attributed.startIndex, offsetByCharacters: chunkStart)
-                let endIdx   = attributed.index(attributed.startIndex, offsetByCharacters: chunkEnd)
-                attributed[startIdx..<endIdx].foregroundColor = .white.opacity(Double(revealProgress))
+                let endIdx = attributed.index(attributed.startIndex, offsetByCharacters: chunkEnd)
+                attributed[startIdx..<endIdx].foregroundColor = .white
             }
         }
-
         return Text(attributed)
             .font(font)
             .multilineTextAlignment(.center)
@@ -90,8 +100,8 @@ struct WordTypingEffectModifier: ViewModifier {
         guard !wordList.isEmpty else { return }
 
         let interval = 1.0 / max(wordsPerSecond, 0.5)
-        // Fade duration is ~65% of the interval so the word is fully visible before the next one starts
-        let fadeDuration = interval * 0.65
+        // Longer fade (85% of interval) gives the blur room to read before the next word.
+        let fadeDuration = interval * 0.85
 
         typingTask = Task { @MainActor in
             visibleWordCount = 0
@@ -100,8 +110,8 @@ struct WordTypingEffectModifier: ViewModifier {
             for i in 0..<wordList.count {
                 if Task.isCancelled { return }
 
-                // Soft fade-in for this word
-                withAnimation(.easeInOut(duration: fadeDuration)) {
+                // Soft blur-fade-in for this word.
+                withAnimation(.easeOut(duration: fadeDuration)) {
                     revealProgress = 1
                 }
 
@@ -109,7 +119,7 @@ struct WordTypingEffectModifier: ViewModifier {
                 try? await Task.sleep(nanoseconds: UInt64(interval * 1_000_000_000))
                 if Task.isCancelled { return }
 
-                // Commit — word moves into the fully-visible region, reset progress for next word
+                // Commit — word joins the sharp committed region, reset for next word.
                 visibleWordCount = i + 1
                 revealProgress = 0
 

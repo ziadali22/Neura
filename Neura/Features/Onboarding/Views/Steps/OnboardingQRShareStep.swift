@@ -138,18 +138,18 @@ struct OnboardingQRShareStep: View {
         }
     }
 
-    /// Returns a playable URL for QrVideo.mp4.
+    /// Returns a playable URL for CardVideo.mp4.
     /// Tries the bundle first (zero-copy, streamed from disk).
     /// Falls back to extracting the xcassets dataset to a temp file.
     private static func videoURL() -> URL? {
-        if let url = Bundle.main.url(forResource: "QrVideo", withExtension: "mp4") {
+        if let url = Bundle.main.url(forResource: "CardVideo", withExtension: "mp4") {
             return url
         }
         // xcassets dataset fallback — write once to tmp, reuse on subsequent calls
         let tmp = FileManager.default.temporaryDirectory
-            .appendingPathComponent("QrVideo.mp4")
+            .appendingPathComponent("CardVideo.mp4")
         if FileManager.default.fileExists(atPath: tmp.path) { return tmp }
-        guard let data = NSDataAsset(name: "QrVideo")?.data,
+        guard let data = NSDataAsset(name: "CardVideo")?.data,
               (try? data.write(to: tmp)) != nil else { return nil }
         return tmp
     }
