@@ -38,7 +38,7 @@ struct OnboardingDocumentScanStep: View {
             .opacity(appeared ? 1 : 0)
             .offset(y: appeared ? 0 : 16)
 
-            OnboardingContinueButton(action: viewModel.advance, isEnabled: buttonEnabled)
+            OnboardingContinueButton(action: viewModel.advance, isEnabled: true)
         }
         .task {
             if reduceMotion { buttonEnabled = true }

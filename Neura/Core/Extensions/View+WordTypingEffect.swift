@@ -20,6 +20,12 @@ extension View {
     }
 }
 
+/// Reveals text as a flowing cascade: each word is its own view that fades and
+/// un-blurs in, with OVERLAPPING timing so several words animate at once — a
+/// continuous wave rather than one-word-at-a-time stamps.
+///
+/// Words inherit the ambient `foregroundStyle`, so apply `.foregroundStyle(...)`
+/// to (or outside of) `.wordTypingEffect(...)` rather than before it.
 struct WordTypingEffectModifier: ViewModifier {
     @Binding var shouldStartTyping: Bool
     let fullText: String
@@ -29,10 +35,8 @@ struct WordTypingEffectModifier: ViewModifier {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    // Index of the last fully committed (fully visible) word
-    @State private var visibleWordCount: Int = 0
-    // Reveal progress of the word currently fading in (0 → 1)
-    @State private var revealProgress: CGFloat = 0
+    // Per-word reveal progress (0 → 1).
+    @State private var progress: [Double] = []
     @State private var typingTask: Task<Void, Never>? = nil
 
     private var words: [String] {
@@ -40,93 +44,111 @@ struct WordTypingEffectModifier: ViewModifier {
     }
 
     func body(content: Content) -> some View {
-        ZStack {
-            // Layer 1 — committed words: sharp, fully opaque.
-            content.mask { committedMask }
-
-            // Layer 2 — current word: fades in AND sharpens from blur.
-            content
-                .mask { currentWordMask }
-                .opacity(Double(revealProgress))
-                .blur(radius: reduceMotion ? 0 : (1 - revealProgress) * 6)
-        }
-        .onAppear { if shouldStartTyping { startTyping() } }
-        .onChange(of: shouldStartTyping) { _, new in if new { startTyping() } }
-    }
-
-    // Number of characters spanned by the first `count` words joined with spaces.
-    private func charCount(upToWord count: Int) -> Int {
-        words.prefix(count).joined(separator: " ").count
-    }
-
-    // Mask revealing words[0..<visibleWordCount] in white, rest clear.
-    private var committedMask: some View {
-        var attributed = AttributedString(fullText)
-        attributed.foregroundColor = .clear
-        if visibleWordCount > 0 {
-            let endChar = charCount(upToWord: visibleWordCount)
-            let endIdx = attributed.index(attributed.startIndex, offsetByCharacters: endChar)
-            attributed[attributed.startIndex..<endIdx].foregroundColor = .white
-        }
-        return Text(attributed)
-            .font(font)
-            .multilineTextAlignment(.center)
-            .frame(maxWidth: .infinity)
-    }
-
-    // Mask revealing ONLY words[visibleWordCount] in white (opacity/blur applied by the layer).
-    private var currentWordMask: some View {
-        let wordList = words
-        var attributed = AttributedString(fullText)
-        attributed.foregroundColor = .clear
-        if visibleWordCount < wordList.count {
-            let chunkStart = visibleWordCount == 0 ? 0 : charCount(upToWord: visibleWordCount)
-            let chunkEnd = charCount(upToWord: visibleWordCount + 1)
-            if chunkStart < chunkEnd, chunkEnd <= fullText.count {
-                let startIdx = attributed.index(attributed.startIndex, offsetByCharacters: chunkStart)
-                let endIdx = attributed.index(attributed.startIndex, offsetByCharacters: chunkEnd)
-                attributed[startIdx..<endIdx].foregroundColor = .white
+        // `content` is intentionally unused — we render each word individually
+        // so every word can fade and blur independently.
+        _ = content
+        return FlowLayout(spacing: 5, lineSpacing: 7) {
+            ForEach(Array(words.enumerated()), id: \.offset) { index, word in
+                let p = index < progress.count ? progress[index] : 0
+                Text(word)
+                    .font(font)
+                    .opacity(p)
+                    .blur(radius: reduceMotion ? 0 : (1 - p) * 5)
             }
         }
-        return Text(attributed)
-            .font(font)
-            .multilineTextAlignment(.center)
-            .frame(maxWidth: .infinity)
+        .onAppear { if shouldStartTyping { start() } }
+        .onChange(of: shouldStartTyping) { _, new in if new { start() } }
     }
 
-    private func startTyping() {
+    private func start() {
         typingTask?.cancel()
-        let wordList = words
-        guard !wordList.isEmpty else { return }
+        let count = words.count
+        guard count > 0 else { return }
 
-        let interval = 1.0 / max(wordsPerSecond, 0.5)
-        // Longer fade (85% of interval) gives the blur room to read before the next word.
-        let fadeDuration = interval * 0.85
+        // Snap to hidden (no animation), then cascade in.
+        progress = Array(repeating: 0, count: count)
+
+        guard !reduceMotion else {
+            progress = Array(repeating: 1, count: count)
+            onTypingCompleted()
+            return
+        }
+
+        let stagger = 1.0 / max(wordsPerSecond, 0.5)   // delay between word starts
+        let fade = max(stagger * 2.4, 0.45)            // > stagger ⇒ overlapping cascade
 
         typingTask = Task { @MainActor in
-            visibleWordCount = 0
-            revealProgress = 0
-
-            for i in 0..<wordList.count {
+            for i in 0..<count {
                 if Task.isCancelled { return }
-
-                // Soft blur-fade-in for this word.
-                withAnimation(.easeOut(duration: fadeDuration)) {
-                    revealProgress = 1
+                withAnimation(.easeOut(duration: fade)) {
+                    if i < progress.count { progress[i] = 1 }
                 }
+                try? await Task.sleep(nanoseconds: UInt64(stagger * 1_000_000_000))
+            }
+            // Let the last word finish fading before signalling completion.
+            try? await Task.sleep(nanoseconds: UInt64(fade * 1_000_000_000))
+            if Task.isCancelled { return }
+            onTypingCompleted()
+        }
+    }
+}
 
-                // Wait the full interval before committing
-                try? await Task.sleep(nanoseconds: UInt64(interval * 1_000_000_000))
-                if Task.isCancelled { return }
+// MARK: - Flow layout
 
-                // Commit — word joins the sharp committed region, reset for next word.
-                visibleWordCount = i + 1
-                revealProgress = 0
+/// A simple wrapping layout that flows subviews left-to-right and centers each row.
+private struct FlowLayout: Layout {
+    var spacing: CGFloat = 5
+    var lineSpacing: CGFloat = 7
 
-                if i == wordList.count - 1 {
-                    onTypingCompleted()
-                }
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout Void) -> CGSize {
+        let maxWidth = proposal.width ?? .infinity
+        let rows = computeRows(maxWidth: maxWidth, subviews: subviews)
+        let height = rows.reduce(0) { $0 + $1.height }
+            + lineSpacing * CGFloat(max(0, rows.count - 1))
+        let width = maxWidth.isFinite ? maxWidth : (rows.map(\.width).max() ?? 0)
+        return CGSize(width: width, height: height)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout Void) {
+        let rows = computeRows(maxWidth: bounds.width, subviews: subviews)
+        var y = bounds.minY
+        for row in rows {
+            var x = bounds.minX + (bounds.width - row.width) / 2
+            for index in row.items {
+                let size = subviews[index].sizeThatFits(.unspecified)
+                subviews[index].place(
+                    at: CGPoint(x: x, y: y),
+                    anchor: .topLeading,
+                    proposal: ProposedViewSize(size)
+                )
+                x += size.width + spacing
+            }
+            y += row.height + lineSpacing
+        }
+    }
+
+    private struct Row {
+        var items: [Int] = []
+        var width: CGFloat = 0
+        var height: CGFloat = 0
+    }
+
+    private func computeRows(maxWidth: CGFloat, subviews: Subviews) -> [Row] {
+        var rows: [Row] = []
+        var current = Row()
+        for index in subviews.indices {
+            let size = subviews[index].sizeThatFits(.unspecified)
+            let prospective = current.items.isEmpty ? size.width : current.width + spacing + size.width
+            if !current.items.isEmpty, prospective > maxWidth {
+                rows.append(current)
+                current = Row(items: [index], width: size.width, height: size.height)
+            } else {
+                current.width = prospective
+                current.items.append(index)
+                current.height = max(current.height, size.height)
             }
         }
+        if !current.items.isEmpty { rows.append(current) }
+        return rows
     }
 }

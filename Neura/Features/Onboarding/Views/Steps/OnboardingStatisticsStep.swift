@@ -50,18 +50,19 @@ struct OnboardingStatisticsStep: View {
             // Body text — word-by-word typewriter
             Text(L10n.Onboarding.Statistics.body)
                 .font(.system(size: 20, weight: .semibold))
-                .foregroundStyle(Color.textPrimary)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
                 .wordTypingEffect(
                     shouldStartTyping: $shouldTypeBody,
                     fullText: L10n.Onboarding.Statistics.body,
                     font: .system(size: 20, weight: .semibold),
-                    wordsPerSecond: 4.0,
+                    wordsPerSecond: 3.0,
                     onTypingCompleted: {
                         showBadge = true
                     }
                 )
+                // Applied AFTER the effect so the cascade's word views inherit it.
+                .foregroundStyle(Color.textPrimary)
 
             // Harvard badge
             harvardBadge

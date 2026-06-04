@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4258089D2FCF011700EC4817 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 4258089C2FCF011700EC4817 /* Lottie */; };
 		42677F612F772B4700BC08A2 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 42677F602F772B4700BC08A2 /* FirebaseCore */; };
 		42677F632F772B4700BC08A2 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 42677F622F772B4700BC08A2 /* FirebaseDatabase */; };
 		42677F702F781F8B00BC08A2 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 42677F6F2F781F8B00BC08A2 /* FirebaseAuth */; };
@@ -49,6 +50,7 @@
 			files = (
 				42677F632F772B4700BC08A2 /* FirebaseDatabase in Frameworks */,
 				42677F722F781F9000BC08A2 /* FirebaseFirestore in Frameworks */,
+				4258089D2FCF011700EC4817 /* Lottie in Frameworks */,
 				42677F792F786ACB00BC08A2 /* GoogleSignInSwift in Frameworks */,
 				42677F702F781F8B00BC08A2 /* FirebaseAuth in Frameworks */,
 				42677F742F781F9700BC08A2 /* FirebaseStorage in Frameworks */,
@@ -113,6 +115,7 @@
 				42677F762F786ACB00BC08A2 /* GoogleSignIn */,
 				42677F782F786ACB00BC08A2 /* GoogleSignInSwift */,
 				BB00A2002F4C801C00BC0001 /* L10n-swift */,
+				4258089C2FCF011700EC4817 /* Lottie */,
 			);
 			productName = Neura;
 			productReference = 992DECD82F4C801C003CF200 /* Neura.app */;
@@ -148,6 +151,7 @@
 				42677F5F2F772B4700BC08A2 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				42677F752F786ACB00BC08A2 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				BB00A1002F4C801C00BC0001 /* XCRemoteSwiftPackageReference "L10n-swift" */,
+				4258089B2FCF011700EC4817 /* XCRemoteSwiftPackageReference "lottie-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 992DECD92F4C801C003CF200 /* Products */;
@@ -308,7 +312,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Neura/Neura.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = 7N5DS8U658;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -350,7 +354,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Neura/Neura.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = 7N5DS8U658;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -409,6 +413,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		4258089B2FCF011700EC4817 /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.6.0;
+			};
+		};
 		42677F5F2F772B4700BC08A2 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
@@ -436,6 +448,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		4258089C2FCF011700EC4817 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4258089B2FCF011700EC4817 /* XCRemoteSwiftPackageReference "lottie-ios" */;
+			productName = Lottie;
+		};
 		42677F602F772B4700BC08A2 /* FirebaseCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 42677F5F2F772B4700BC08A2 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
