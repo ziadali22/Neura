@@ -3,10 +3,10 @@ import SwiftUI
 struct DocumentCoachmarkCallout: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Add your first document")
+            Text(L10n.Coachmark.title)
                 .font(.buttonM)
                 .foregroundStyle(Color.textPrimary)
-            Text("Tap + to scan, upload a photo, or import a file.")
+            Text(L10n.Coachmark.subtitle)
                 .font(.bodyS)
                 .foregroundStyle(Color.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)

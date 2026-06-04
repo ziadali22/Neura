@@ -36,7 +36,7 @@ struct DashboardView: View {
             }
 
             // MARK: Coachmark overlay
-            if showCoachmark && !coordinator.showAddMenu {
+            if showCoachmark {
                 Color.black.opacity(0.45)
                     .ignoresSafeArea()
                     .allowsHitTesting(true)
@@ -84,9 +84,11 @@ struct DashboardView: View {
         }
         .task {
             guard !hasSeenCoachmark else { return }
-            let hasDocs = !DocumentFileManager.shared.loadMetadata()
-                .filter { $0.fileExists }
-                .isEmpty
+            let hasDocs = await Task.detached(priority: .userInitiated) {
+                !DocumentFileManager.shared.loadMetadata()
+                    .filter { $0.fileExists }
+                    .isEmpty
+            }.value
             if hasDocs {
                 hasSeenCoachmark = true
                 return
@@ -102,7 +104,7 @@ struct DashboardView: View {
             }
         }
         .onChange(of: coordinator.showAddMenu) { _, open in
-            guard open else { return }
+            guard open, !hasSeenCoachmark else { return }
             if showCoachmark {
                 withAnimation(.easeOut(duration: 0.2)) {
                     showCoachmark = false

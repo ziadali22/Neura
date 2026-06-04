@@ -394,6 +394,10 @@
 "profile.deleteAccount" = "Delete Account";
 "profile.logOutMessage" = "Are you sure you want to log out?";
 "profile.deleteAccountMessage" = "This action cannot be undone. All your data will be permanently deleted.";
+"profile.biometricLockFormat" = "%@ Lock";
+"profile.biometricUnavailableSubtitle" = "Set up device biometrics first";
+"profile.biometricUnavailableTitle" = "Biometrics unavailable";
+"profile.biometricUnavailableMessage" = "Set up Face ID or Touch ID in Settings, then return to Neura to enable this lock.";
 "profile.pro.title" = "Neura Pro";
 "profile.pro.unlimitedAccess" = "You have unlimited access.\nThank you for your support!";
 "profile.pro.getTitle" = "Get Neura Pro";
@@ -405,3 +409,7 @@
 "paywall.subtitle" = "Unlock unlimited document uploads\nand premium features";
 "paywall.continueFormat" = "Continue with %@";
 "paywall.restore" = "Restore Purchase";
+
+// MARK: - Coachmark
+"coachmark.documentUpload.title" = "Add your first document";
+"coachmark.documentUpload.subtitle" = "Tap + to scan, upload a photo, or import a file.";

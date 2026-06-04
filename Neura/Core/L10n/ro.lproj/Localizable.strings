@@ -389,6 +389,10 @@
 "profile.deleteAccount" = "Șterge contul";
 "profile.logOutMessage" = "Ești sigur că vrei să te deconectezi?";
 "profile.deleteAccountMessage" = "Această acțiune nu poate fi anulată. Toate datele tale vor fi șterse permanent.";
+"profile.biometricLockFormat" = "Blocare cu %@";
+"profile.biometricUnavailableSubtitle" = "Configurează mai întâi biometria dispozitivului";
+"profile.biometricUnavailableTitle" = "Biometria nu este disponibilă";
+"profile.biometricUnavailableMessage" = "Configurează Face ID sau Touch ID în Settings, apoi revino în Neura pentru a activa această blocare.";
 "profile.pro.title" = "Neura Pro";
 "profile.pro.unlimitedAccess" = "Ai acces nelimitat.\nMulțumim pentru sprijin!";
 "profile.pro.getTitle" = "Obține Neura Pro";
@@ -400,3 +404,7 @@
 "paywall.subtitle" = "Deblochează încărcări nelimitate\nși funcții premium";
 "paywall.continueFormat" = "Continuă cu %@";
 "paywall.restore" = "Restaurează achiziția";
+
+// MARK: - Coachmark
+"coachmark.documentUpload.title" = "Adaugă primul tău document";
+"coachmark.documentUpload.subtitle" = "Apasă + pentru a scana, a încărca o fotografie sau a importa un fișier.";

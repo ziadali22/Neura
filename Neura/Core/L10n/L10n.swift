@@ -290,6 +290,12 @@ enum L10n {
         static var share: String { "emergency.share".l10n() }
     }
 
+    // MARK: - Coachmark
+    enum Coachmark {
+        static var title: String { "coachmark.documentUpload.title".l10n() }
+        static var subtitle: String { "coachmark.documentUpload.subtitle".l10n() }
+    }
+
     // MARK: - Documents
     enum Documents {
         static var title: String { "documents.title".l10n() }
@@ -500,6 +506,12 @@ enum L10n {
         static var deleteAccount: String { "profile.deleteAccount".l10n() }
         static var logOutMessage: String { "profile.logOutMessage".l10n() }
         static var deleteAccountMessage: String { "profile.deleteAccountMessage".l10n() }
+        static func biometricLock(_ biometricLabel: String) -> String {
+            "profile.biometricLockFormat".l10n(args: [biometricLabel])
+        }
+        static var biometricUnavailableSubtitle: String { "profile.biometricUnavailableSubtitle".l10n() }
+        static var biometricUnavailableTitle: String { "profile.biometricUnavailableTitle".l10n() }
+        static var biometricUnavailableMessage: String { "profile.biometricUnavailableMessage".l10n() }
 
         enum Pro {
             static var title: String { "profile.pro.title".l10n() }

@@ -389,6 +389,10 @@
 "profile.deleteAccount" = "حذف الحساب";
 "profile.logOutMessage" = "هل أنت متأكد أنك تريد تسجيل الخروج؟";
 "profile.deleteAccountMessage" = "لا يمكن التراجع عن هذا الإجراء. ستُحذف جميع بياناتك نهائياً.";
+"profile.biometricLockFormat" = "قفل %@";
+"profile.biometricUnavailableSubtitle" = "قم بإعداد القياسات الحيوية على الجهاز أولاً";
+"profile.biometricUnavailableTitle" = "القياسات الحيوية غير متاحة";
+"profile.biometricUnavailableMessage" = "قم بإعداد Face ID أو Touch ID من الإعدادات، ثم عُد إلى Neura لتفعيل هذا القفل.";
 "profile.pro.title" = "Neura Pro";
 "profile.pro.unlimitedAccess" = "لديك وصول غير محدود.\nشكراً لدعمك!";
 "profile.pro.getTitle" = "احصل على Neura Pro";
@@ -400,3 +404,7 @@
 "paywall.subtitle" = "افتح رفع مستندات غير محدود\nوميزات متميزة";
 "paywall.continueFormat" = "المتابعة مع %@";
 "paywall.restore" = "استعادة الشراء";
+
+// MARK: - Coachmark
+"coachmark.documentUpload.title" = "أضف وثيقتك الأولى";
+"coachmark.documentUpload.subtitle" = "اضغط + لمسح ضوئي أو رفع صورة أو استيراد ملف.";
