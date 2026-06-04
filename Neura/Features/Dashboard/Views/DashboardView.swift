@@ -6,7 +6,7 @@ struct DashboardView: View {
     @StateObject private var subscriptionManager = SubscriptionManager.shared
     @State private var showPaywall = false
     @AppStorage("hasSeenDocumentCoachmark") private var hasSeenCoachmark = false
-    @State private var showCoachmark = true   // hardcoded true for visual testing
+    @State private var showCoachmark = false
 
     var body: some View {
         ZStack {
@@ -82,6 +82,27 @@ struct DashboardView: View {
         .task(id: scenePhase) {
             guard scenePhase == .active else { return }
             await requestTrackingAfterSettling()
+        }
+        .task {
+            guard !hasSeenCoachmark else { return }
+            let hasDocs = !DocumentFileManager.shared.loadMetadata()
+                .filter { $0.fileExists }
+                .isEmpty
+            if hasDocs {
+                hasSeenCoachmark = true
+                return
+            }
+            try? await Task.sleep(for: .milliseconds(900))
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                showCoachmark = true
+            }
+        }
+        .onChange(of: coordinator.showAddMenu) { _, open in
+            guard open, showCoachmark else { return }
+            withAnimation(.easeOut(duration: 0.2)) {
+                showCoachmark = false
+            }
+            hasSeenCoachmark = true
         }
     }
 }
