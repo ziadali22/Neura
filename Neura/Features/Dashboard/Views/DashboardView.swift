@@ -74,7 +74,6 @@ struct DashboardView: View {
             .animation(.easeInOut(duration: 0.2), value: visible)
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.85), value: coordinator.showAddMenu)
-        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: showCoachmark)
         .environmentObject(coordinator)
         .fullScreenCover(isPresented: $showPaywall) {
             PaywallView(subscriptionManager: subscriptionManager)
@@ -92,15 +91,22 @@ struct DashboardView: View {
                 hasSeenCoachmark = true
                 return
             }
-            try? await Task.sleep(for: .milliseconds(900))
+            do {
+                try await Task.sleep(for: .milliseconds(900))
+            } catch {
+                return
+            }
+            guard !hasSeenCoachmark else { return }
             withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                 showCoachmark = true
             }
         }
         .onChange(of: coordinator.showAddMenu) { _, open in
-            guard open, showCoachmark else { return }
-            withAnimation(.easeOut(duration: 0.2)) {
-                showCoachmark = false
+            guard open else { return }
+            if showCoachmark {
+                withAnimation(.easeOut(duration: 0.2)) {
+                    showCoachmark = false
+                }
             }
             hasSeenCoachmark = true
         }
