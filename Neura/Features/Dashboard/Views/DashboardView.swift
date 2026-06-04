@@ -72,6 +72,7 @@ struct DashboardView: View {
             await requestTrackingAfterSettling()
         }
         .task {
+            hasSeenCoachmark = false // TESTING: remove before shipping
             guard !hasSeenCoachmark else { return }
             let hasDocs = await Task.detached(priority: .userInitiated) {
                 !DocumentFileManager.shared.loadMetadata()
@@ -112,24 +113,23 @@ struct DashboardView: View {
 private extension DashboardView {
     var coachmarkOverlay: some View {
         GeometryReader { geo in
+            // Use at least 34pt safe area bottom as fallback (common iPhone home-indicator height)
+            let safeBottom = max(geo.safeAreaInsets.bottom, 34)
             let fabCenterX = geo.size.width - 48
-            let fabCenterY = geo.size.height - geo.safeAreaInsets.bottom - 44
+            let fabCenterY = geo.size.height - safeBottom - 44
             let spotR: CGFloat = 38
 
             ZStack {
-                // Dim with circular FAB cutout
-                Canvas { context, size in
-                    context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(.black.opacity(0.5)))
-                    context.blendMode = .clear
-                    context.fill(
-                        Path(ellipseIn: CGRect(
-                            x: fabCenterX - spotR, y: fabCenterY - spotR,
-                            width: spotR * 2, height: spotR * 2
-                        )),
-                        with: .color(.black)
-                    )
+                // Spotlight dim: compositingGroup + destinationOut creates a true transparent hole
+                ZStack {
+                    Color.black.opacity(0.5)
+                    Circle()
+                        .fill(Color.black)
+                        .frame(width: spotR * 2, height: spotR * 2)
+                        .position(x: fabCenterX, y: fabCenterY)
+                        .blendMode(.destinationOut)
                 }
-                .drawingGroup()
+                .compositingGroup()
                 .allowsHitTesting(false)
 
                 // Tap-absorb layer with hole at FAB — taps in the FAB circle fall through
@@ -144,7 +144,7 @@ private extension DashboardView {
                 DocumentCoachmarkCallout()
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
                     .padding(.trailing, 20)
-                    .padding(.bottom, geo.safeAreaInsets.bottom + 100)
+                    .padding(.bottom, safeBottom + 110)
                     .allowsHitTesting(false)
             }
         }
