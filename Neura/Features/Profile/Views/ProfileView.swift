@@ -8,6 +8,7 @@ struct ProfileView: View {
     @State private var showDeleteAlert = false
     @State private var showPaywall = false
     @State private var showBiometricUnavailableAlert = false
+    @State private var showFeedback = false
     @State private var titleAppear = false
     @State private var contentAppear = false
 
@@ -51,7 +52,9 @@ struct ProfileView: View {
                             SettingsRow(icon: "lan", title: L10n.Profile.language) {
                                 router.push(.language)
                             }
-                            SettingsRow(icon: "fav", title: L10n.Profile.feedback)
+                            SettingsRow(icon: "fav", title: L10n.Profile.feedback) {
+                                showFeedback = true
+                            }
                             SettingsRow(icon: "Instagram", title: L10n.Profile.contactUs) {
                                 if let url = URL(string: "https://www.instagram.com/myneura?igsh=MXd4YTVxb3p6amdxbw==") {
                                     UIApplication.shared.open(url)
@@ -136,6 +139,9 @@ struct ProfileView: View {
         }
         .fullScreenCover(isPresented: $showPaywall) {
             PaywallView(subscriptionManager: subscriptionManager)
+        }
+        .sheet(isPresented: $showFeedback) {
+            FeedbackView()
         }
         .alert(L10n.Profile.logOut, isPresented: $showLogOutAlert) {
             Button(L10n.Profile.logOut, role: .destructive, action: handleLogOut)
