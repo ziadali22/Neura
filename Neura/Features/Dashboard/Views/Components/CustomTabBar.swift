@@ -8,8 +8,10 @@ struct CustomTabBar: View {
     let onAction: (AppCoordinator.AddDocumentAction) -> Void
     var canUpload: Bool = true
     var onPaywallNeeded: () -> Void = {}
+    var showCoachmarkHighlight: Bool = false
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var highlightPulse = false
 
     private let spring: Animation = .spring(response: 0.45, dampingFraction: 0.80)
 
@@ -72,6 +74,13 @@ struct CustomTabBar: View {
         .shadow(color: .black.opacity(0.10), radius: 20, x: 0, y: -4)
         .contentShape(Rectangle())
         .onTapGesture {}
+        .onAppear {
+            guard showCoachmarkHighlight else { return }
+            withAnimation(.easeInOut(duration: 0.85).repeatForever(autoreverses: true)) {
+                highlightPulse = true
+            }
+        }
+        .onDisappear { highlightPulse = false }
     }
 
     private func actionRow(_ item: ActionItem) -> some View {
@@ -102,6 +111,11 @@ struct CustomTabBar: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
             .contentShape(Rectangle())
+            .background {
+                if showCoachmarkHighlight {
+                    Color.accent.opacity(highlightPulse ? 0.12 : 0.04)
+                }
+            }
         }
         .buttonStyle(ScaleButtonStyle())
         .accessibilityLabel(item.title)
