@@ -4,10 +4,10 @@ struct DocumentCoachmarkCallout: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(L10n.Coachmark.title)
-                .font(.buttonM)
+                .buttonMStyle()
                 .foregroundStyle(Color.textPrimary)
             Text(L10n.Coachmark.subtitle)
-                .font(.bodyS)
+                .bodySStyle()
                 .foregroundStyle(Color.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
