@@ -4,13 +4,14 @@ struct DocumentCoachmarkCallout: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("Add your first document")
-                .font(.system(size: 15, weight: .semibold))
+                .font(.buttonM)
                 .foregroundStyle(Color.textPrimary)
             Text("Tap + to scan, upload a photo, or import a file.")
-                .font(.system(size: 13))
+                .font(.custom("Estedad-Regular", size: 13))
                 .foregroundStyle(Color.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
+        .accessibilityElement(children: .combine)
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
         .frame(width: 210)
@@ -20,6 +21,7 @@ struct DocumentCoachmarkCallout: View {
         .overlay(alignment: .bottom) {
             // Arrow pointing down toward the FAB (offset toward trailing)
             CoachmarkArrow()
+                .fill(Color.surfaceWhite)
                 .frame(width: 16, height: 9)
                 .frame(maxWidth: .infinity, alignment: .trailing)
                 .padding(.trailing, 22)
