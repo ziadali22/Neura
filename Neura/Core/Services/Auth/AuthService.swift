@@ -3,6 +3,7 @@ import FirebaseAuth
 import FirebaseFirestore
 import GoogleSignIn
 import UIKit
+import CryptoKit
 import Combine
 
 // MARK: - Auth Service
@@ -20,6 +21,9 @@ final class AuthService: ObservableObject {
     private init() {
         // currentUser is available synchronously from Firebase's persisted cache
         currentUser = Auth.auth().currentUser
+        if let uid = currentUser?.uid {
+            restoreCloudData(for: uid)
+        }
         stateListener = Auth.auth().addStateDidChangeListener { [weak self] _, user in
             Task { @MainActor in self?.currentUser = user }
         }
@@ -94,21 +98,73 @@ final class AuthService: ObservableObject {
 
     // MARK: - Cloud Existence Check
 
-    /// Returns true if this uid already has a profile document in Firestore.
+    /// Returns true if this uid already has any private cloud data in Firestore.
     /// Used during onboarding to detect returning users without decrypting anything.
     func hasExistingCloudData(uid: String) async -> Bool {
-        let snapshot = try? await Firestore.firestore()
-            .collection("users").document(uid)
+        let database = Firestore.firestore()
+        let userDocument = database.collection("users").document(uid)
+
+        async let profileSnapshot = userDocument
             .collection("profile").document("data")
             .getDocument()
-        return snapshot?.exists == true
+
+        async let preferencesSnapshot = userDocument
+            .collection("preferences").document("data")
+            .getDocument()
+
+        async let documentsSnapshot = userDocument
+            .collection("documents")
+            .limit(to: 1)
+            .getDocuments()
+
+        do {
+            let (profile, preferences, documents) = try await (
+                profileSnapshot,
+                preferencesSnapshot,
+                documentsSnapshot
+            )
+            return profile.exists || preferences.exists || !documents.documents.isEmpty
+        } catch {
+            return false
+        }
     }
 
     // MARK: - Private
 
     private func onSignInSuccess(uid: String) {
-        let key = KeychainManager.shared.loadOrCreateKey(for: uid)
-        SyncQueueManager.shared.performInitialRestore(uid: uid, key: key)
+        restoreCloudData(for: uid)
+    }
+
+    private func restoreCloudData(for uid: String) {
+        Task {
+            let key = await resolveKey(for: uid)
+            SyncQueueManager.shared.performInitialRestore(uid: uid, key: key)
+        }
+    }
+
+    /// Returns the user's encryption key. For returning users whose iCloud Keychain
+    /// hasn't synced yet after a reinstall, retries for up to 15 seconds before
+    /// falling back to creating a new key.
+    private func resolveKey(for uid: String) async -> SymmetricKey {
+        if let key = KeychainManager.shared.tryLoadKey(for: uid) { return key }
+
+        // No local key — check whether this UID already has encrypted cloud data.
+        let hasData = await hasExistingCloudData(uid: uid)
+        guard hasData else {
+            // New user — safe to create a fresh key.
+            return KeychainManager.shared.loadOrCreateKey(for: uid)
+        }
+
+        // Returning user: the key exists in iCloud Keychain but may not have synced yet.
+        // Wait up to ~15s in 5s increments.
+        for _ in 0..<3 {
+            try? await Task.sleep(for: .seconds(5))
+            if let key = KeychainManager.shared.tryLoadKey(for: uid) { return key }
+        }
+
+        // Key never arrived — fall back to creating a new one so the app remains usable.
+        // Existing encrypted cloud data won't be recoverable without the original key.
+        return KeychainManager.shared.loadOrCreateKey(for: uid)
     }
 }
 

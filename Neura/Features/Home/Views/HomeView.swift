@@ -153,12 +153,23 @@ struct HomeView: View {
                     loadRecentDocuments()
                 }
             }
+            .onReceive(NotificationCenter.default.publisher(for: .documentsRestored)) { _ in
+                loadRecentDocuments()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .healthProfileRestored)) { _ in
+                healthVM.reload()
+            }
         }
     }
 
     // MARK: - Actions
 
     private func authenticateAndOpenProfile() {
+        guard biometricAuth.isBiometricLockEnabled else {
+            router.push(.healthProfileDetail)
+            return
+        }
+
         Task {
             if await biometricAuth.authenticate() {
                 router.push(.healthProfileDetail)

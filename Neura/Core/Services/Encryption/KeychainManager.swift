@@ -34,6 +34,16 @@ final class KeychainManager {
 
     var currentKey: SymmetricKey? { cachedKey }
 
+    /// Loads from cache or Keychain without creating a new key if absent.
+    func tryLoadKey(for uid: String) -> SymmetricKey? {
+        if let cached = cachedKey { return cached }
+        if let key = loadKey(for: uid) {
+            cachedKey = key
+            return key
+        }
+        return nil
+    }
+
     func clearKey() {
         cachedKey = nil
     }
