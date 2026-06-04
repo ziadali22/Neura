@@ -20,22 +20,44 @@ final class SyncQueueManager: ObservableObject {
     /// Per-document sync status — observe this for UI indicators.
     @Published private(set) var syncStatuses: [UUID: SyncStatus] = [:]
 
-    private init() {}
+    private let pending = PendingSyncStore.shared
+    private var cancellables = Set<AnyCancellable>()
+
+    private init() {
+        // Drain whenever connectivity is (re)established.
+        NetworkMonitor.shared.$isConnected
+            .removeDuplicates()
+            .sink { [weak self] connected in
+                if connected { self?.drainPending() }
+            }
+            .store(in: &cancellables)
+    }
+
+    private var uid: String? { AuthService.shared.currentUser?.uid }
+    private var key: SymmetricKey? { KeychainManager.shared.currentKey }
 
     // MARK: - Upload
 
     func enqueueUpload(_ document: Document) {
-        guard let uid = AuthService.shared.currentUser?.uid,
-              let key = KeychainManager.shared.currentKey else { return }
+        pending.add(PendingSyncOp(kind: .documentUpload, id: document.id.uuidString))
+        attemptUpload(document)
+    }
 
+    private func attemptUpload(_ document: Document) {
+        guard let uid, let key else {
+            SyncLog.info("Upload deferred (no uid/key): \(document.id)")
+            return
+        }
         syncStatuses[document.id] = .syncing
-
         Task {
             do {
                 try await DocumentSyncService.shared.upload(document: document, uid: uid, key: key)
                 syncStatuses[document.id] = .synced
+                pending.remove(PendingSyncOp(kind: .documentUpload, id: document.id.uuidString))
+                SyncLog.success("Uploaded document \(document.id)")
             } catch {
                 syncStatuses[document.id] = .failed
+                SyncLog.failure("Upload failed \(document.id)", error: error)
             }
         }
     }
@@ -43,44 +65,136 @@ final class SyncQueueManager: ObservableObject {
     // MARK: - Metadata Update (rename, notes)
 
     func enqueueMetadataUpdate(_ document: Document) {
-        guard let uid = AuthService.shared.currentUser?.uid,
-              let key = KeychainManager.shared.currentKey else { return }
+        pending.add(PendingSyncOp(kind: .documentMetadata, id: document.id.uuidString))
+        attemptMetadataUpdate(document)
+    }
 
+    private func attemptMetadataUpdate(_ document: Document) {
+        guard let uid, let key else { return }
         Task {
-            try? await DocumentSyncService.shared.updateMetadata(document: document, uid: uid, key: key)
+            do {
+                try await DocumentSyncService.shared.updateMetadata(document: document, uid: uid, key: key)
+                pending.remove(PendingSyncOp(kind: .documentMetadata, id: document.id.uuidString))
+                SyncLog.success("Updated metadata \(document.id)")
+            } catch {
+                SyncLog.failure("Metadata update failed \(document.id)", error: error)
+            }
         }
     }
 
     // MARK: - Delete
 
     func enqueueDelete(_ documentID: UUID) {
-        guard let uid = AuthService.shared.currentUser?.uid else { return }
         syncStatuses.removeValue(forKey: documentID)
+        pending.add(PendingSyncOp(kind: .documentDelete, id: documentID.uuidString))
+        attemptDelete(documentID)
+    }
 
+    private func attemptDelete(_ documentID: UUID) {
+        guard let uid else { return }
         Task {
-            try? await DocumentSyncService.shared.delete(documentID: documentID, uid: uid)
+            do {
+                try await DocumentSyncService.shared.delete(documentID: documentID, uid: uid)
+                pending.remove(PendingSyncOp(kind: .documentDelete, id: documentID.uuidString))
+                SyncLog.success("Deleted document \(documentID)")
+            } catch {
+                SyncLog.failure("Delete failed \(documentID)", error: error)
+            }
         }
     }
 
     // MARK: - Health Profile Upload
 
     func enqueueProfileUpload(_ profile: HealthProfile) {
-        guard let uid = AuthService.shared.currentUser?.uid,
-              let key = KeychainManager.shared.currentKey else { return }
+        pending.add(PendingSyncOp(kind: .profileUpload, id: nil))
+        attemptProfileUpload(profile)
+    }
 
+    private func attemptProfileUpload(_ profile: HealthProfile) {
+        guard let uid, let key else { return }
         Task {
-            try? await HealthProfileSyncService.shared.upload(profile: profile, uid: uid, key: key)
+            do {
+                try await HealthProfileSyncService.shared.upload(profile: profile, uid: uid, key: key)
+                pending.remove(PendingSyncOp(kind: .profileUpload, id: nil))
+                SyncLog.success("Uploaded health profile")
+            } catch {
+                SyncLog.failure("Profile upload failed", error: error)
+            }
         }
     }
 
     // MARK: - Preferences Upload
 
     func enqueuePreferencesUpload(_ prefs: UserPreferences) {
-        guard let uid = AuthService.shared.currentUser?.uid,
-              let key = KeychainManager.shared.currentKey else { return }
+        pending.add(PendingSyncOp(kind: .preferencesUpload, id: nil))
+        attemptPreferencesUpload(prefs)
+    }
 
+    private func attemptPreferencesUpload(_ prefs: UserPreferences) {
+        guard let uid, let key else { return }
         Task {
-            try? await PreferencesSyncService.shared.upload(prefs, uid: uid, key: key)
+            do {
+                try await PreferencesSyncService.shared.upload(prefs, uid: uid, key: key)
+                pending.remove(PendingSyncOp(kind: .preferencesUpload, id: nil))
+                SyncLog.success("Uploaded preferences")
+            } catch {
+                SyncLog.failure("Preferences upload failed", error: error)
+            }
+        }
+    }
+
+    // MARK: - Drain (retry everything pending)
+
+    /// Re-attempts every queued operation. Payloads are reconstructed from local
+    /// state (document metadata on disk, profile/preferences from UserDefaults).
+    func drainPending() {
+        guard uid != nil, key != nil else {
+            SyncLog.info("Drain skipped (no uid/key yet)")
+            return
+        }
+        let ops = pending.all
+        guard !ops.isEmpty else { return }
+        SyncLog.info("Draining \(ops.count) pending op(s)")
+
+        let docs = DocumentFileManager.shared.loadMetadata()
+        for op in ops {
+            switch op.kind {
+            case .documentUpload:
+                if let id = op.id, let uuid = UUID(uuidString: id),
+                   let doc = docs.first(where: { $0.id == uuid }) {
+                    attemptUpload(doc)
+                } else {
+                    pending.remove(op)   // document no longer exists locally
+                }
+            case .documentMetadata:
+                if let id = op.id, let uuid = UUID(uuidString: id),
+                   let doc = docs.first(where: { $0.id == uuid }) {
+                    attemptMetadataUpdate(doc)
+                } else {
+                    pending.remove(op)
+                }
+            case .documentDelete:
+                if let id = op.id, let uuid = UUID(uuidString: id) {
+                    attemptDelete(uuid)
+                } else {
+                    pending.remove(op)
+                }
+            case .profileUpload:
+                if let data = UserDefaults.standard.data(forKey: "health_profile_data"),
+                   let profile = try? JSONDecoder().decode(HealthProfile.self, from: data) {
+                    attemptProfileUpload(profile)
+                } else {
+                    pending.remove(op)
+                }
+            case .preferencesUpload:
+                let location = UserDefaults.standard.string(forKey: "user_location") ?? ""
+                var areas: [String] = []
+                if let areasData = UserDefaults.standard.data(forKey: "onboarding_medical_areas"),
+                   let decoded = try? JSONDecoder().decode([String].self, from: areasData) {
+                    areas = decoded
+                }
+                attemptPreferencesUpload(UserPreferences(medicalAreas: areas, location: location))
+            }
         }
     }
 
@@ -95,6 +209,7 @@ final class SyncQueueManager: ObservableObject {
                let data = try? JSONEncoder().encode(profile) {
                 UserDefaults.standard.set(data, forKey: "health_profile_data")
                 NotificationCenter.default.post(name: .healthProfileRestored, object: nil)
+                SyncLog.success("Restored health profile")
             }
 
             // 1b. Preferences (medical areas + location)
@@ -104,23 +219,20 @@ final class SyncQueueManager: ObservableObject {
                     UserDefaults.standard.set(areasData, forKey: "onboarding_medical_areas")
                 }
                 NotificationCenter.default.post(name: .healthProfileRestored, object: nil)
+                SyncLog.success("Restored preferences")
             }
 
             // 2. Documents — download missing files, rebuild metadata
             if let restored = try? await DocumentSyncService.shared.downloadAll(uid: uid, key: key),
                !restored.isEmpty {
-                // Merge with any existing local docs (avoid duplicates)
                 let existing = DocumentFileManager.shared.loadMetadata()
                 var merged = existing
                 for doc in restored where !existing.contains(where: { $0.id == doc.id }) {
                     merged.append(doc)
                 }
                 try? DocumentFileManager.shared.saveMetadata(merged)
-
-                // Notify DocumentsListViewModel to reload
-                await MainActor.run {
-                    NotificationCenter.default.post(name: .documentsRestored, object: nil)
-                }
+                NotificationCenter.default.post(name: .documentsRestored, object: nil)
+                SyncLog.success("Restored \(restored.count) document(s)")
             }
         }
     }
