@@ -48,6 +48,13 @@ final class KeychainManager {
         cachedKey = nil
     }
 
+    /// Persists a key to the (synchronizable) Keychain and the in-memory cache,
+    /// overwriting any existing entry. Used to cache a key downloaded from Firestore.
+    func store(_ key: SymmetricKey, for uid: String) {
+        saveKey(key, for: uid)
+        cachedKey = key
+    }
+
     // MARK: - Keychain Read
 
     private func loadKey(for uid: String) -> SymmetricKey? {
