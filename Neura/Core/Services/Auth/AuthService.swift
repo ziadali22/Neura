@@ -137,34 +137,15 @@ final class AuthService: ObservableObject {
 
     private func restoreCloudData(for uid: String) {
         Task {
-            let key = await resolveKey(for: uid)
+            guard let key = await EncryptionKeyService.shared.resolveKey(uid: uid) else {
+                SyncLog.info("Key unavailable (offline); deferring restore and sync")
+                return
+            }
+            // Key is now cached in KeychainManager. Pull cloud data down, then push
+            // anything that failed to upload previously.
             SyncQueueManager.shared.performInitialRestore(uid: uid, key: key)
+            SyncQueueManager.shared.drainPending()
         }
-    }
-
-    /// Returns the user's encryption key. For returning users whose iCloud Keychain
-    /// hasn't synced yet after a reinstall, retries for up to 15 seconds before
-    /// falling back to creating a new key.
-    private func resolveKey(for uid: String) async -> SymmetricKey {
-        if let key = KeychainManager.shared.tryLoadKey(for: uid) { return key }
-
-        // No local key — check whether this UID already has encrypted cloud data.
-        let hasData = await hasExistingCloudData(uid: uid)
-        guard hasData else {
-            // New user — safe to create a fresh key.
-            return KeychainManager.shared.loadOrCreateKey(for: uid)
-        }
-
-        // Returning user: the key exists in iCloud Keychain but may not have synced yet.
-        // Wait up to ~15s in 5s increments.
-        for _ in 0..<3 {
-            try? await Task.sleep(for: .seconds(5))
-            if let key = KeychainManager.shared.tryLoadKey(for: uid) { return key }
-        }
-
-        // Key never arrived — fall back to creating a new one so the app remains usable.
-        // Existing encrypted cloud data won't be recoverable without the original key.
-        return KeychainManager.shared.loadOrCreateKey(for: uid)
     }
 }
 
