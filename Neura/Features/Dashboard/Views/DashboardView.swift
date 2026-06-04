@@ -72,7 +72,6 @@ struct DashboardView: View {
             await requestTrackingAfterSettling()
         }
         .task {
-            hasSeenCoachmark = false // TESTING: remove before shipping
             guard !hasSeenCoachmark else { return }
             let hasDocs = await Task.detached(priority: .userInitiated) {
                 !DocumentFileManager.shared.loadMetadata()
