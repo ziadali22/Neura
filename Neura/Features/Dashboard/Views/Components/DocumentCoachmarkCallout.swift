@@ -7,7 +7,7 @@ struct DocumentCoachmarkCallout: View {
                 .font(.buttonM)
                 .foregroundStyle(Color.textPrimary)
             Text("Tap + to scan, upload a photo, or import a file.")
-                .font(.custom("Estedad-Regular", size: 13))
+                .font(.bodyS)
                 .foregroundStyle(Color.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
