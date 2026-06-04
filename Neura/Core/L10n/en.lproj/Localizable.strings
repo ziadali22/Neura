@@ -395,6 +395,13 @@
 "profile.security" = "Security";
 "profile.language" = "Language";
 "profile.feedback" = "Feedback";
+"profile.feedback.title" = "Send Feedback";
+"profile.feedback.emailLabel" = "Email";
+"profile.feedback.emailPlaceholder" = "your@email.com";
+"profile.feedback.messageLabel" = "Your feedback";
+"profile.feedback.messagePlaceholder" = "Tell us what you think about the app…";
+"profile.feedback.submit" = "Send";
+"profile.feedback.errorMessage" = "Something went wrong. Please try again.";
 "profile.contactUs" = "Contact Us";
 "profile.logOut" = "Log Out";
 "profile.deleteAccount" = "Delete Account";

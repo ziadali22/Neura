@@ -390,6 +390,13 @@
 "profile.security" = "Securitate";
 "profile.language" = "Limbă";
 "profile.feedback" = "Feedback";
+"profile.feedback.title" = "Trimite feedback";
+"profile.feedback.emailLabel" = "E-mail";
+"profile.feedback.emailPlaceholder" = "your@email.com";
+"profile.feedback.messageLabel" = "Feedback-ul tău";
+"profile.feedback.messagePlaceholder" = "Spune-ne ce crezi despre aplicație…";
+"profile.feedback.submit" = "Trimite";
+"profile.feedback.errorMessage" = "Ceva n-a mers bine. Încearcă din nou.";
 "profile.contactUs" = "Contactează-ne";
 "profile.logOut" = "Deconectare";
 "profile.deleteAccount" = "Șterge contul";

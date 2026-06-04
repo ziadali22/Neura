@@ -390,6 +390,13 @@
 "profile.security" = "الأمان";
 "profile.language" = "اللغة";
 "profile.feedback" = "ملاحظات";
+"profile.feedback.title" = "إرسال ملاحظات";
+"profile.feedback.emailLabel" = "البريد الإلكتروني";
+"profile.feedback.emailPlaceholder" = "your@email.com";
+"profile.feedback.messageLabel" = "ملاحظاتك";
+"profile.feedback.messagePlaceholder" = "أخبرنا برأيك في التطبيق…";
+"profile.feedback.submit" = "إرسال";
+"profile.feedback.errorMessage" = "حدث خطأ ما. يرجى المحاولة مرة أخرى.";
 "profile.contactUs" = "اتصل بنا";
 "profile.logOut" = "تسجيل الخروج";
 "profile.deleteAccount" = "حذف الحساب";

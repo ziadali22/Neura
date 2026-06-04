@@ -512,6 +512,17 @@ enum L10n {
         static var security: String { "profile.security".l10n() }
         static var language: String { "profile.language".l10n() }
         static var feedback: String { "profile.feedback".l10n() }
+
+        enum Feedback {
+            static var title: String { "profile.feedback.title".l10n() }
+            static var emailLabel: String { "profile.feedback.emailLabel".l10n() }
+            static var emailPlaceholder: String { "profile.feedback.emailPlaceholder".l10n() }
+            static var messageLabel: String { "profile.feedback.messageLabel".l10n() }
+            static var messagePlaceholder: String { "profile.feedback.messagePlaceholder".l10n() }
+            static var submit: String { "profile.feedback.submit".l10n() }
+            static var errorMessage: String { "profile.feedback.errorMessage".l10n() }
+        }
+
         static var contactUs: String { "profile.contactUs".l10n() }
         static var logOut: String { "profile.logOut".l10n() }
         static var deleteAccount: String { "profile.deleteAccount".l10n() }
