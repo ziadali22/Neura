@@ -193,7 +193,13 @@ final class SyncQueueManager: ObservableObject {
                    let decoded = try? JSONDecoder().decode([String].self, from: areasData) {
                     areas = decoded
                 }
-                attemptPreferencesUpload(UserPreferences(medicalAreas: areas, location: location))
+                // Only sync real local preferences — never overwrite good cloud data
+                // with empty values, and drop the op when there's nothing to sync.
+                if location.isEmpty && areas.isEmpty {
+                    pending.remove(op)
+                } else {
+                    attemptPreferencesUpload(UserPreferences(medicalAreas: areas, location: location))
+                }
             }
         }
     }
