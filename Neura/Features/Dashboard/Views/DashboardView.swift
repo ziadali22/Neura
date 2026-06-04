@@ -36,7 +36,7 @@ struct DashboardView: View {
             }
 
             // MARK: Coachmark overlay
-            if showCoachmark {
+            if showCoachmark && !coordinator.showAddMenu {
                 Color.black.opacity(0.45)
                     .ignoresSafeArea()
                     .allowsHitTesting(true)
@@ -74,6 +74,7 @@ struct DashboardView: View {
             .animation(.easeInOut(duration: 0.2), value: visible)
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.85), value: coordinator.showAddMenu)
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: showCoachmark)
         .environmentObject(coordinator)
         .fullScreenCover(isPresented: $showPaywall) {
             PaywallView(subscriptionManager: subscriptionManager)
