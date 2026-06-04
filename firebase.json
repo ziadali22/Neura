@@ -24,7 +24,7 @@
     }
   ],
   "storage": {
-    "rules": "firebase/storage.rules"
+    "rules": "storage.rules"
   },
   "hosting": {
     "public": "public",
