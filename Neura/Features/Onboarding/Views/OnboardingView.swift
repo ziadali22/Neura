@@ -68,7 +68,7 @@ struct OnboardingView: View {
                 if viewModel.currentStep.isSkippable {
                     Button(L10n.Common.skip) {
                         HapticManager.light()
-                        viewModel.advance()
+                        viewModel.skip()
                     }
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(Color.textSecondary)

@@ -1,4 +1,12 @@
 //
+//  BlurRevealRenderer.swift
+//  Neura
+//
+//  Created by Ziad Ali Khalil on 04/06/2026.
+//
+
+
+//
 //  BlurRevealText.swift
 //
 //  Per-character blur + fade reveal for any Text, driven by a TextRenderer.
@@ -171,7 +179,9 @@ private extension Comparable {
                 Spacer()
                 Text("Welcome to Girltalk")
                     .font(.system(size: 40, weight: .semibold, design: .serif))
-                    .blurReveal(trigger: replay)
+                    .blurReveal(trigger: replay, animation: .linear(duration: 1.4),
+                                          blurRadius: 10, yOffset: 10, glyphWindow: 0.4)
+//                    .blurReveal(trigger: replay)
 
                 Text("With over 200.00 women, Girltalk is your guide to decode modern relations.")
                     .font(.subheadline)

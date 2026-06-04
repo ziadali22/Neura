@@ -34,7 +34,19 @@ final class OnboardingViewModel: ObservableObject {
 
     // MARK: - Navigation
 
+    /// Moves to the next step via the primary CTA (Continue / grant a permission).
     func advance() {
+        trackStepCompleted(via: .continue)
+        performAdvance()
+    }
+
+    /// Moves to the next step via a skip action (top-bar Skip, or an in-step "Not now").
+    func skip() {
+        trackStepCompleted(via: .skip)
+        performAdvance()
+    }
+
+    private func performAdvance() {
         direction = 1
         let next = nextStep(after: currentStep)
         if next == currentStep {
@@ -52,6 +64,23 @@ final class OnboardingViewModel: ObservableObject {
         withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
             currentStep = prev
         }
+    }
+
+    // MARK: - Analytics
+
+    private enum CompletionMethod: String {
+        case `continue`, skip
+    }
+
+    /// Fires `onboarding_V{appVersion}_{screen}_completed` for the step being left.
+    /// No-ops for steps with no analytics number (e.g. `.calculating`).
+    private func trackStepCompleted(via method: CompletionMethod) {
+        guard let screen = currentStep.analyticsScreenNumber else { return }
+        let version = AnalyticsManager.shared.appVersion
+        AnalyticsManager.shared.track(
+            "onboarding_V\(version)_\(screen)_completed",
+            properties: ["via": method.rawValue]
+        )
     }
 
     private func nextStep(after step: OnboardingStep) -> OnboardingStep {
@@ -133,27 +162,16 @@ final class OnboardingViewModel: ObservableObject {
     // MARK: - Biometrics
 
     func requestBiometrics() async {
-        let context = LAContext()
-        guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil) else {
-            advance(); return
-        }
-        _ = try? await context.evaluatePolicy(
-            .deviceOwnerAuthenticationWithBiometrics,
-            localizedReason: "Protect your health profile"
-        )
+        _ = await BiometricAuthManager.shared.setBiometricLockEnabled(true)
         advance()
     }
 
     var biometricLabel: String {
-        let context = LAContext()
-        guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil) else { return "Passcode" }
-        return context.biometryType == .faceID ? "Face ID" : "Touch ID"
+        BiometricAuthManager.shared.biometricLabel
     }
 
     var biometricIcon: String {
-        let context = LAContext()
-        guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil) else { return "faceid" }
-        return context.biometryType == .faceID ? "faceid" : "touchid"
+        BiometricAuthManager.shared.biometricIcon
     }
 
     // MARK: - Auth

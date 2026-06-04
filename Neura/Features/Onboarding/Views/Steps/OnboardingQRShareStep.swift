@@ -1,14 +1,9 @@
 import SwiftUI
-import AVFoundation
+import Lottie
 
 struct OnboardingQRShareStep: View {
     @ObservedObject var viewModel: OnboardingViewModel
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
-    // MARK: - Video player (retained for the lifetime of this view)
-
-    @State private var player  = AVQueuePlayer()
-    @State private var looper: AVPlayerLooper?
 
     // MARK: - Animation state
 
@@ -41,17 +36,14 @@ struct OnboardingQRShareStep: View {
             continueButton
         }
         .task { await setupAndAnimate() }
-        .onDisappear { player.pause() }
     }
 
     // MARK: - Media
 
     private var mediaContainer: some View {
-        VideoPlayerView(player: player)
+        LottieView(name: "qrShare", loopMode: .loop)
             .containerRelativeFrame(.vertical) { h, _ in h * 0.60 }
-            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
             .accessibilityLabel(L10n.Onboarding.QRShare.mediaAccessibility)
-            .accessibilityAddTraits(.startsMediaSession)
     }
 
     // MARK: - Text section
@@ -100,8 +92,6 @@ struct OnboardingQRShareStep: View {
 
     @MainActor
     private func setupAndAnimate() async {
-        setupLoopingPlayer()
-
         guard !reduceMotion else {
             mediaAppeared = true
             showTitle     = true
@@ -123,36 +113,6 @@ struct OnboardingQRShareStep: View {
         showButton = true
     }
 
-    /// Resolves the video URL (bundle file or xcassets dataset) and starts
-    /// a seamlessly looping, muted player. All I/O runs off the main thread.
-    private func setupLoopingPlayer() {
-        player.isMuted = true
-
-        Task.detached(priority: .userInitiated) {
-            guard let url = Self.videoURL() else { return }
-            let item = AVPlayerItem(url: url)
-            await MainActor.run {
-                looper = AVPlayerLooper(player: player, templateItem: item)
-                player.play()
-            }
-        }
-    }
-
-    /// Returns a playable URL for CardVideo.mp4.
-    /// Tries the bundle first (zero-copy, streamed from disk).
-    /// Falls back to extracting the xcassets dataset to a temp file.
-    private static func videoURL() -> URL? {
-        if let url = Bundle.main.url(forResource: "CardVideo", withExtension: "mp4") {
-            return url
-        }
-        // xcassets dataset fallback — write once to tmp, reuse on subsequent calls
-        let tmp = FileManager.default.temporaryDirectory
-            .appendingPathComponent("CardVideo.mp4")
-        if FileManager.default.fileExists(atPath: tmp.path) { return tmp }
-        guard let data = NSDataAsset(name: "CardVideo")?.data,
-              (try? data.write(to: tmp)) != nil else { return nil }
-        return tmp
-    }
 }
 
 #Preview {

@@ -46,6 +46,21 @@ enum OnboardingStep: Int, CaseIterable, Hashable {
     static let progressTracked: [OnboardingStep] = [
         .profile, .location, .biometrics, .healthKit, .profileCard
     ]
+
+    /// The active flow in the order users see it — the source of truth for analytics
+    /// screen numbers. Keep in sync with `OnboardingViewModel.nextStep(after:)`.
+    /// Off-flow/retired steps are intentionally absent (they fire no analytics).
+    static let analyticsFlow: [OnboardingStep] = [
+        .stopSearching, .storeAndShare, .statistics, .documentScan,
+        .profileCardIntro, .qrShare, .privacySecurity, .welcome,
+        .profile, .location, .biometrics, .healthKit, .profileCard
+    ]
+
+    /// 1-based position in the visible flow, or `nil` for steps that aren't tracked
+    /// (e.g. `.calculating` and off-flow steps).
+    var analyticsScreenNumber: Int? {
+        OnboardingStep.analyticsFlow.firstIndex(of: self).map { $0 + 1 }
+    }
 }
 
 // MARK: - Profile enums

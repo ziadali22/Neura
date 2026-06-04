@@ -26,6 +26,7 @@
 "common.skip" = "Skip";
 "common.create" = "Create";
 "common.error" = "Error";
+"common.ok" = "OK";
 
 // MARK: - Onboarding Welcome
 "onboarding.welcome.title" = "Welcome to Neura";
@@ -242,6 +243,11 @@
 "documents.uploadPhotos" = "Upload from Photos";
 "documents.importFile" = "Import File";
 "documents.deleteAlertTitleFormat" = "Delete %d Document(s)?";
+"documents.selectedCountFormat" = "%d Items";
+"documents.newFolderMessage" = "Enter a name for your new folder.";
+"documents.photoAccess.title" = "Photos Access Required";
+"documents.photoAccess.openSettings" = "Open Settings";
+"documents.photoAccess.message" = "Neura needs access to your photo library to upload images. Please allow access in Settings.";
 "documents.filter.title" = "Filters";
 "documents.filter.button" = "Filter";
 "documents.filter.order" = "Order";

@@ -10,7 +10,6 @@ struct OnboardingStatisticsStep: View {
     @State private var numberOpacity: CGFloat = 0
     @State private var numberScale: CGFloat = 3
 
-    @State private var shouldTypeBody: Bool = false
     @State private var showBadge: Bool = false
     @State private var showButton: Bool = false
 
@@ -28,12 +27,6 @@ struct OnboardingStatisticsStep: View {
             continueButton
         }
         .task { await runAnimationSequence() }
-        .onChange(of: showBadge) { _, visible in
-            guard visible else { return }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                showButton = true
-            }
-        }
     }
 
     // MARK: - Stat block
@@ -44,24 +37,18 @@ struct OnboardingStatisticsStep: View {
             Text(L10n.Onboarding.Statistics.number)
                 .font(.system(size: 52, weight: .bold, design: .default))
                 .foregroundStyle(Color.accent)
-                .opacity(numberOpacity)
-                .scaleEffect(numberScale)
+                .blurReveal(animation: .linear(duration: 1.4),
+                                      blurRadius: 10, yOffset: 10, glyphWindow: 0.4)
 
             // Body text — word-by-word typewriter
             Text(L10n.Onboarding.Statistics.body)
                 .font(.system(size: 20, weight: .semibold))
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
-                .wordTypingEffect(
-                    shouldStartTyping: $shouldTypeBody,
-                    fullText: L10n.Onboarding.Statistics.body,
-                    font: .system(size: 20, weight: .semibold),
-                    wordsPerSecond: 3.0,
-                    onTypingCompleted: {
-                        showBadge = true
-                    }
-                )
-                // Applied AFTER the effect so the cascade's word views inherit it.
+                .blurReveal(animation: .linear(duration: 1.0),
+                                                 delay: 0.8,
+                                                 blurRadius: 6)
+ 
                 .foregroundStyle(Color.textPrimary)
 
             // Harvard badge
@@ -103,20 +90,23 @@ struct OnboardingStatisticsStep: View {
     private func runAnimationSequence() async {
         guard !reduceMotion else {
             numberOpacity = 1; numberScale = 1
-            shouldTypeBody = true; showBadge = true; showButton = true
+            showBadge = true; showButton = true
             return
         }
 
-        // 1. Spring the big number in after a short pause
+        // 1. Spring the big number in
         try? await Task.sleep(for: .milliseconds(300))
         withAnimation(.spring(duration: 0.6, bounce: 0.6)) {
             numberOpacity = 1
             numberScale   = 1
         }
 
-        // 2. Start word-by-word typewriter; badge → button chain fires via callbacks
-        try? await Task.sleep(for: .milliseconds(500))
-        shouldTypeBody = true
+        // 2. Wait for blurReveal to finish (delay: 0.8s + duration: 1.0s = 1.8s from view appear)
+        try? await Task.sleep(for: .milliseconds(1800))
+        showBadge = true
+
+        try? await Task.sleep(for: .milliseconds(350))
+        showButton = true
     }
 }
 

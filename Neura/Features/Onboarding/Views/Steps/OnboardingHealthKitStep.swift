@@ -57,7 +57,7 @@ struct OnboardingHealthKitStep: View {
                 isLoading: viewModel.healthKitStatus == .requesting,
                 leadingIcon: "heart.fill",
                 secondaryTitle: L10n.Common.notNow,
-                secondaryAction: viewModel.advance
+                secondaryAction: viewModel.skip
             )
             .opacity(appeared ? 1 : 0)
         }

@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>NSUserTrackingUsageDescription</key>
-	<string>Neura uses this to measure app performance and improve your experience.</string>
+	<string>Neura uses this permission to measure campaign performance and improve the app. Your medical data is never used for tracking.</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>Neura reads your health data (height, weight, date of birth, and biological sex) to pre-fill your health profile.</string>
 	<key>NSHealthUpdateUsageDescription</key>

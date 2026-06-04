@@ -1,8 +1,14 @@
 import SwiftUI
+import AVFoundation
 
 struct OnboardingProfileCardIntroStep: View {
     @ObservedObject var viewModel: OnboardingViewModel
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    // MARK: - Video player
+
+    @State private var player = AVQueuePlayer()
+    @State private var looper: AVPlayerLooper?
 
     // MARK: - Animation state
 
@@ -12,40 +18,19 @@ struct OnboardingProfileCardIntroStep: View {
     @State private var showSubtitle: Bool = false
     @State private var showButton: Bool = false
 
-    // MARK: - Derived display values
-
-    private var displayName: String {
-        let n = viewModel.state.name.trimmingCharacters(in: .whitespaces)
-        return n.isEmpty ? "YOUR NAME" : n.uppercased()
-    }
-
-    private var displayLocation: String {
-        let city    = viewModel.state.city.trimmingCharacters(in: .whitespaces)
-        let country = viewModel.state.country.trimmingCharacters(in: .whitespaces)
-        switch (city.isEmpty, country.isEmpty) {
-        case (false, false): return "\(city), \(country)"
-        case (false, true):  return city
-        case (true, false):  return country
-        case (true, true):   return L10n.Onboarding.ProfileCard.yourCity
-        }
-    }
-
     // MARK: - Body
 
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
 
-            // Hero: health card springs in
-            SecureProfileCard(
-                name: displayName,
-                location: displayLocation,
-                background: CardBackground.imageBackgrounds.first ?? .default
-            )
-            .allowsHitTesting(false)
-            .padding(.horizontal, 32)
-            .opacity(cardOpacity)
-            .scaleEffect(cardScale)
+            // Hero: video springs in
+            VideoPlayerView(player: player)
+                .containerRelativeFrame(.vertical) { h, _ in h * 0.55 }
+                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .padding(.horizontal, 24)
+                .opacity(cardOpacity)
+                .scaleEffect(cardScale)
 
             Spacer(minLength: 36)
 
@@ -86,19 +71,22 @@ struct OnboardingProfileCardIntroStep: View {
                 )
         }
         .task { await runAnimationSequence() }
+        .onDisappear { player.pause() }
     }
 
     // MARK: - Animation sequence
 
     @MainActor
     private func runAnimationSequence() async {
+        setupLoopingPlayer()
+
         guard !reduceMotion else {
             cardOpacity = 1; cardScale = 1
             showTitle = true; showSubtitle = true; showButton = true
             return
         }
 
-        // Card springs in
+        // Video springs in
         try? await Task.sleep(for: .milliseconds(150))
         withAnimation(.spring(response: 0.65, dampingFraction: 0.78)) {
             cardOpacity = 1
@@ -116,6 +104,30 @@ struct OnboardingProfileCardIntroStep: View {
         // Button
         try? await Task.sleep(for: .milliseconds(180))
         showButton = true
+    }
+
+    private func setupLoopingPlayer() {
+        player.isMuted = true
+        Task.detached(priority: .userInitiated) {
+            guard let url = Self.videoURL() else { return }
+            let item = AVPlayerItem(url: url)
+            await MainActor.run {
+                self.looper = AVPlayerLooper(player: self.player, templateItem: item)
+                self.player.play()
+            }
+        }
+    }
+
+    private nonisolated static func videoURL() -> URL? {
+        if let url = Bundle.main.url(forResource: "CardVideo", withExtension: "mp4") {
+            return url
+        }
+        let tmp = FileManager.default.temporaryDirectory
+            .appendingPathComponent("CardVideo.mp4")
+        if FileManager.default.fileExists(atPath: tmp.path) { return tmp }
+        guard let data = NSDataAsset(name: "CardVideo")?.data,
+              (try? data.write(to: tmp)) != nil else { return nil }
+        return tmp
     }
 }
 

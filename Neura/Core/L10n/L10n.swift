@@ -32,6 +32,7 @@ enum L10n {
         static var skip: String { "common.skip".l10n() }
         static var create: String { "common.create".l10n() }
         static var error: String { "common.error".l10n() }
+        static var ok: String { "common.ok".l10n() }
     }
 
     // MARK: - Onboarding
@@ -315,6 +316,16 @@ enum L10n {
         static var importFile: String { "documents.importFile".l10n() }
         static func deleteAlertTitle(_ count: Int) -> String {
             "documents.deleteAlertTitleFormat".l10n(args: [count])
+        }
+        static func selectedCount(_ count: Int) -> String {
+            "documents.selectedCountFormat".l10n(args: [count])
+        }
+        static var newFolderMessage: String { "documents.newFolderMessage".l10n() }
+
+        enum PhotoAccess {
+            static var title: String { "documents.photoAccess.title".l10n() }
+            static var openSettings: String { "documents.photoAccess.openSettings".l10n() }
+            static var message: String { "documents.photoAccess.message".l10n() }
         }
 
         enum Filter {

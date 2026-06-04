@@ -32,6 +32,9 @@ struct NeuraApp: App {
             GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
         }
 
+        // Configure analytics (no-ops until a real Mixpanel token is set).
+        AnalyticsManager.shared.initialize()
+
         let key = "hasCompletedOnboarding"
         // Skip onboarding for existing users who already have profile data
         if !UserDefaults.standard.bool(forKey: key),

@@ -26,6 +26,7 @@
 "common.skip" = "Omite";
 "common.create" = "Creează";
 "common.error" = "Eroare";
+"common.ok" = "OK";
 
 // MARK: - Onboarding Welcome
 "onboarding.welcome.title" = "Bun venit în Neura";
@@ -237,6 +238,11 @@
 "documents.uploadPhotos" = "Încarcă din poze";
 "documents.importFile" = "Importă fișier";
 "documents.deleteAlertTitleFormat" = "Șterge %d document(e)?";
+"documents.selectedCountFormat" = "%d elemente";
+"documents.newFolderMessage" = "Introdu un nume pentru noul dosar.";
+"documents.photoAccess.title" = "Acces la poze necesar";
+"documents.photoAccess.openSettings" = "Deschide Setări";
+"documents.photoAccess.message" = "Neura are nevoie de acces la biblioteca ta de poze pentru a încărca imagini. Permite accesul în Setări.";
 "documents.filter.title" = "Filtre";
 "documents.filter.button" = "Filtru";
 "documents.filter.order" = "Ordine";

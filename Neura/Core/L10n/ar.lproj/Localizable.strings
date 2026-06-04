@@ -26,6 +26,7 @@
 "common.skip" = "تخطي";
 "common.create" = "إنشاء";
 "common.error" = "خطأ";
+"common.ok" = "حسناً";
 
 // MARK: - Onboarding Welcome
 "onboarding.welcome.title" = "مرحباً بك في Neura";
@@ -237,6 +238,11 @@
 "documents.uploadPhotos" = "رفع من الصور";
 "documents.importFile" = "استيراد ملف";
 "documents.deleteAlertTitleFormat" = "حذف %d مستند(ات)؟";
+"documents.selectedCountFormat" = "%d عنصر";
+"documents.newFolderMessage" = "أدخل اسماً لمجلدك الجديد.";
+"documents.photoAccess.title" = "الوصول إلى الصور مطلوب";
+"documents.photoAccess.openSettings" = "فتح الإعدادات";
+"documents.photoAccess.message" = "يحتاج Neura إلى الوصول إلى مكتبة صورك لرفع الصور. يُرجى السماح بالوصول من الإعدادات.";
 "documents.filter.title" = "الفلاتر";
 "documents.filter.button" = "فلتر";
 "documents.filter.order" = "الترتيب";

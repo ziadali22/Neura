@@ -52,7 +52,7 @@ struct OnboardingBiometricsStep: View {
                 isLoading: isRequesting,
                 leadingIcon: viewModel.biometricIcon,
                 secondaryTitle: L10n.Common.maybeLater,
-                secondaryAction: viewModel.advance
+                secondaryAction: viewModel.skip
             )
             .opacity(appeared ? 1 : 0)
             .offset(y: appeared ? 0 : 20)

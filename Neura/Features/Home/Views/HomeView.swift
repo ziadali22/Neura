@@ -21,9 +21,9 @@ struct HomeView: View {
         let hour = Calendar.current.component(.hour, from: Date())
         let base: String
         switch hour {
-        case 5..<12: base = String(localized: "Good morning")
-        case 12..<18: base = String(localized: "Good afternoon")
-        default: base = String(localized: "Good evening")
+        case 5..<12: base = L10n.Home.Greeting.morning
+        case 12..<18: base = L10n.Home.Greeting.afternoon
+        default: base = L10n.Home.Greeting.evening
         }
         let firstName = healthVM.profile.generalData.fullName
             .components(separatedBy: " ").first ?? ""
@@ -211,13 +211,13 @@ private struct RecentDocumentsSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Recent")
+            Text(L10n.Home.recent)
                 .font(.headingS)
                 .foregroundStyle(Color.textPrimary)
                 .padding(.horizontal, 20)
 
             if documents.isEmpty {
-                Text("Nothing here yet — scan or upload a document.")
+                Text(L10n.Home.empty)
                     .font(.bodyL)
                     .foregroundStyle(Color.textTertiary)
                     .multilineTextAlignment(.center)

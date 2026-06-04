@@ -81,40 +81,40 @@ struct DocsView: View {
         .fullScreenCover(isPresented: $viewModel.showPaywall) {
             PaywallView(subscriptionManager: .shared)
         }
-        .alert("Photos Access Required", isPresented: $viewModel.showPhotoPermissionAlert) {
-            Button("Open Settings") {
+        .alert(L10n.Documents.PhotoAccess.title, isPresented: $viewModel.showPhotoPermissionAlert) {
+            Button(L10n.Documents.PhotoAccess.openSettings) {
                 if let url = URL(string: UIApplication.openSettingsURLString) {
                     UIApplication.shared.open(url)
                 }
             }
-            Button("Cancel", role: .cancel) {}
+            Button(L10n.Common.cancel, role: .cancel) {}
         } message: {
-            Text("Neura needs access to your photo library to upload images. Please allow access in Settings.")
+            Text(L10n.Documents.PhotoAccess.message)
         }
-        .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
-            Button("OK") { viewModel.errorMessage = nil }
+        .alert(L10n.Common.error, isPresented: .constant(viewModel.errorMessage != nil)) {
+            Button(L10n.Common.ok) { viewModel.errorMessage = nil }
         } message: {
             if let error = viewModel.errorMessage { Text(error) }
         }
         .alert(
-            "Delete \(selectedDocuments.count) Document\(selectedDocuments.count == 1 ? "" : "s")?",
+            L10n.Documents.deleteAlertTitle(selectedDocuments.count),
             isPresented: $showDeleteSelectedAlert
         ) {
-            Button("Cancel", role: .cancel) {}
-            Button("Delete", role: .destructive, action: deleteSelectedDocuments)
+            Button(L10n.Common.cancel, role: .cancel) {}
+            Button(L10n.Common.delete, role: .destructive, action: deleteSelectedDocuments)
         } message: {
-            Text("This action cannot be undone.")
+            Text(L10n.Common.thisActionCannotBeUndone)
         }
-        .alert("New Folder", isPresented: $showNewFolderAlert) {
-            TextField("Folder name", text: $newFolderName)
-            Button("Create") {
+        .alert(L10n.Documents.Category.newFolder, isPresented: $showNewFolderAlert) {
+            TextField(L10n.Documents.Folder.namePlaceholder, text: $newFolderName)
+            Button(L10n.Common.create) {
                 let trimmed = newFolderName.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard !trimmed.isEmpty else { return }
                 folderStore.add(name: trimmed)
             }
-            Button("Cancel", role: .cancel) {}
+            Button(L10n.Common.cancel, role: .cancel) {}
         } message: {
-            Text("Enter a name for your new folder.")
+            Text(L10n.Documents.newFolderMessage)
         }
         .onAppear {
             viewModel.loadDocuments()
@@ -193,7 +193,7 @@ struct DocsView: View {
                             }
                         }
                     } label: {
-                        Text("Select All")
+                        Text(L10n.Documents.selectAll)
                             .font(.system(size: 14, weight: .medium))
                             .foregroundStyle(Color.textPrimary)
                             .padding(.horizontal, 16)
@@ -205,7 +205,7 @@ struct DocsView: View {
 
                     Spacer()
 
-                    Text(selectedDocuments.isEmpty ? "Documents" : "\(selectedDocuments.count) Items")
+                    Text(selectedDocuments.isEmpty ? L10n.Documents.title : L10n.Documents.selectedCount(selectedDocuments.count))
                         .font(.displayXL)
                         .foregroundStyle(Color.textPrimary)
                         .contentTransition(.numericText())
@@ -231,7 +231,7 @@ struct DocsView: View {
             } else {
                 // Normal mode
                 HStack(alignment: .center) {
-                    Text("Documents")
+                    Text(L10n.Documents.title)
                         .font(.displayXL)
                         .foregroundStyle(Color.textPrimary)
 
@@ -269,7 +269,7 @@ struct DocsView: View {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(Color.textTertiary)
                 .font(.system(size: 15))
-            TextField("Search documents", text: $viewModel.searchText)
+            TextField(L10n.Documents.searchPlaceholder, text: $viewModel.searchText)
                 .font(.bodyL)
         }
         .padding(.horizontal, 14)

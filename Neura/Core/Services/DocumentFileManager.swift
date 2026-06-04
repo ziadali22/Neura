@@ -206,6 +206,13 @@ final class DocumentFileManager {
         try fileManager.removeItem(at: document.fileURL)
     }
 
+    func deleteAllLocalDocuments() throws {
+        if fileManager.fileExists(atPath: baseScanDirectory.path) {
+            try fileManager.removeItem(at: baseScanDirectory)
+        }
+        createBaseDirectoryIfNeeded()
+    }
+
     // MARK: - Metadata Persistence
 
     func saveMetadata(_ documents: [Document]) throws {

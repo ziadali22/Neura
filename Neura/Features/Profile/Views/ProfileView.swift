@@ -3,9 +3,11 @@ import SwiftUI
 struct ProfileView: View {
     @EnvironmentObject private var router: ProfileRouter
     @StateObject private var subscriptionManager = SubscriptionManager.shared
+    @StateObject private var biometricAuth = BiometricAuthManager.shared
     @State private var showLogOutAlert = false
     @State private var showDeleteAlert = false
     @State private var showPaywall = false
+    @State private var showBiometricUnavailableAlert = false
     @State private var titleAppear = false
     @State private var contentAppear = false
 
@@ -38,7 +40,14 @@ struct ProfileView: View {
                             SettingsRow(icon: "sub", title: L10n.Profile.subscription) {
                                 showPaywall = true
                             }
-                            SettingsRow(icon: "sec", title: L10n.Profile.security)
+                            BiometricLockRow(
+                                icon: biometricAuth.biometricIcon,
+                                title: L10n.Profile.biometricLock(biometricAuth.biometricLabel),
+                                unavailableSubtitle: L10n.Profile.biometricUnavailableSubtitle,
+                                isOn: biometricAuth.isBiometricLockEnabled,
+                                isAvailable: biometricAuth.isBiometricAvailable,
+                                onChange: handleBiometricToggle
+                            )
                             SettingsRow(icon: "lan", title: L10n.Profile.language) {
                                 router.push(.language)
                             }
@@ -130,15 +139,20 @@ struct ProfileView: View {
         }
         .alert(L10n.Profile.logOut, isPresented: $showLogOutAlert) {
             Button(L10n.Profile.logOut, role: .destructive, action: handleLogOut)
-            Button("Cancel", role: .cancel) {}
+            Button(L10n.Common.cancel, role: .cancel) {}
         } message: {
             Text(L10n.Profile.logOutMessage)
         }
         .alert(L10n.Profile.deleteAccount, isPresented: $showDeleteAlert) {
-            Button("Delete", role: .destructive, action: handleDeleteAccount)
-            Button("Cancel", role: .cancel) {}
+            Button(L10n.Common.delete, role: .destructive, action: handleDeleteAccount)
+            Button(L10n.Common.cancel, role: .cancel) {}
         } message: {
             Text(L10n.Profile.deleteAccountMessage)
+        }
+        .alert(L10n.Profile.biometricUnavailableTitle, isPresented: $showBiometricUnavailableAlert) {
+            Button(L10n.Common.ok, role: .cancel) {}
+        } message: {
+            Text(L10n.Profile.biometricUnavailableMessage)
         }
         .onAppear {
             titleAppear = true
@@ -165,15 +179,56 @@ private struct ProfileSectionHeader: View {
     }
 }
 
+private struct BiometricLockRow: View {
+    let icon: String
+    let title: String
+    let unavailableSubtitle: String
+    let isOn: Bool
+    let isAvailable: Bool
+    let onChange: (Bool) -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 20))
+                .foregroundStyle(isAvailable ? Color.textPrimary : Color.textTertiary)
+                .frame(width: 24, height: 24)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.statLabel)
+                    .foregroundStyle(isAvailable ? Color.textPrimary : Color.textTertiary)
+
+                if !isAvailable {
+                    Text(unavailableSubtitle)
+                        .font(.captionS)
+                        .foregroundStyle(Color.textTertiary)
+                }
+            }
+
+            Spacer()
+
+            Toggle(title, isOn: Binding(
+                get: { isOn },
+                set: { onChange($0) }
+            ))
+            .labelsHidden()
+            .tint(Color.accent)
+            .disabled(!isAvailable)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .background(Color.surfaceWhite)
+        .clipShape(.rect(cornerRadius: 16))
+        .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 4)
+    }
+}
+
 // MARK: - Actions
 
 private extension ProfileView {
     func handleLogOut() {
-        // Clear all local user data
-        let keys = ["health_profile_data", "hasCompletedOnboarding",
-                    "user_location", "onboarding_medical_areas",
-                    "neura_document_upload_count", "neura_share_count", "neura_is_pro"]
-        keys.forEach { UserDefaults.standard.removeObject(forKey: $0) }
+        clearLocalUserData()
         // Sign out from Firebase — AuthService publishes isSignedIn=false,
         // which causes NeuraApp to switch back to OnboardingView.
         AuthService.shared.signOut()
@@ -181,14 +236,36 @@ private extension ProfileView {
 
     func handleDeleteAccount() {
         Task {
-            // Clear local data first
-            let keys = ["health_profile_data", "hasCompletedOnboarding",
-                        "user_location", "onboarding_medical_areas",
-                        "neura_document_upload_count", "neura_share_count", "neura_is_pro"]
-            keys.forEach { UserDefaults.standard.removeObject(forKey: $0) }
+            clearLocalUserData()
             // Delete Firebase Auth account (Phase 4: also delete Storage/Firestore data via Cloud Function)
             try? await AuthService.shared.deleteAccount()
         }
+    }
+
+    func handleBiometricToggle(_ enabled: Bool) {
+        guard biometricAuth.isBiometricAvailable else {
+            showBiometricUnavailableAlert = true
+            return
+        }
+
+        Task {
+            _ = await biometricAuth.setBiometricLockEnabled(enabled)
+        }
+    }
+
+    func clearLocalUserData() {
+        let keys = [
+            "health_profile_data",
+            "hasCompletedOnboarding",
+            "user_location",
+            "onboarding_medical_areas",
+            "neura_biometric_lock_enabled",
+            "neura_document_upload_count",
+            "neura_share_count",
+            "neura_is_pro"
+        ]
+        keys.forEach { UserDefaults.standard.removeObject(forKey: $0) }
+        try? DocumentFileManager.shared.deleteAllLocalDocuments()
     }
 }
 

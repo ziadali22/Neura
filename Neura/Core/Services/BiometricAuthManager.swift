@@ -7,6 +7,13 @@ final class BiometricAuthManager: ObservableObject {
     static let shared = BiometricAuthManager()
 
     @Published var isUnlocked = false
+    @Published private(set) var isBiometricLockEnabled: Bool
+
+    private let preferenceKey = "neura_biometric_lock_enabled"
+
+    private init() {
+        isBiometricLockEnabled = UserDefaults.standard.bool(forKey: preferenceKey)
+    }
 
     enum BiometricType {
         case faceID, touchID, none
@@ -22,6 +29,40 @@ final class BiometricAuthManager: ObservableObject {
         case .touchID: return .touchID
         default: return .none
         }
+    }
+
+    var isBiometricAvailable: Bool {
+        biometricType != .none
+    }
+
+    var biometricLabel: String {
+        switch biometricType {
+        case .faceID: return "Face ID"
+        case .touchID: return "Touch ID"
+        case .none: return "Biometrics"
+        }
+    }
+
+    var biometricIcon: String {
+        switch biometricType {
+        case .faceID: return "faceid"
+        case .touchID: return "touchid"
+        case .none: return "lock.fill"
+        }
+    }
+
+    @discardableResult
+    func setBiometricLockEnabled(_ enabled: Bool) async -> Bool {
+        guard enabled else {
+            updateBiometricLockPreference(false)
+            lock()
+            return true
+        }
+
+        guard isBiometricAvailable else { return false }
+        guard await authenticate() else { return false }
+        updateBiometricLockPreference(true)
+        return true
     }
 
     func authenticate() async -> Bool {
@@ -60,5 +101,10 @@ final class BiometricAuthManager: ObservableObject {
 
     func lock() {
         isUnlocked = false
+    }
+
+    private func updateBiometricLockPreference(_ enabled: Bool) {
+        isBiometricLockEnabled = enabled
+        UserDefaults.standard.set(enabled, forKey: preferenceKey)
     }
 }
