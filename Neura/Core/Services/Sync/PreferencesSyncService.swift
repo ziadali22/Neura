@@ -30,6 +30,7 @@ actor PreferencesSyncService {
     // MARK: - Download
 
     func download(uid: String, key: SymmetricKey) async throws -> UserPreferences? {
+        SyncLog.info("Downloading preferences")
         let snapshot = try await Firestore.firestore()
             .collection("users").document(uid)
             .collection("preferences").document("data")

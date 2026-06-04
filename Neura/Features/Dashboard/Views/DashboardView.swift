@@ -69,6 +69,7 @@ struct DashboardView: View {
         }
         .task(id: scenePhase) {
             guard scenePhase == .active else { return }
+            SyncQueueManager.shared.drainPending()
             await requestTrackingAfterSettling()
         }
         .task {
