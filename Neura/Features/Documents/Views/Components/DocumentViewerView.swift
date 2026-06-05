@@ -491,6 +491,26 @@ private extension DocumentViewerView {
         document.notes = notes.isEmpty ? nil : notes
         document.tags = metadata.customFolderId.map { [$0.uuidString] }
 
+        // A single image that gained pages is promoted to a multi-page PDF on
+        // disk (the .jpg is deleted, a .pdf is written). Rebuild the local copy
+        // so the open viewer points at the new .pdf instead of the deleted file.
+        if document.documentType == .image,
+           case .scannedImages(let images) = preview, images.count > 1 {
+            let pdfURL = DocumentFileManager.shared.resolveURL(for: "\(document.id.uuidString).pdf")
+            document = Document(
+                id: document.id,
+                name: document.name,
+                fileURL: pdfURL,
+                createdAt: document.createdAt,
+                documentType: .scan,
+                category: document.category,
+                specialization: document.specialization,
+                doctorName: document.doctorName,
+                notes: document.notes,
+                tags: document.tags
+            )
+        }
+
         // Persist (and re-save file if pages changed) via the ViewModel.
         onEdit?(metadata, preview)
 
