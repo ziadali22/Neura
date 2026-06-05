@@ -19,5 +19,15 @@ service cloud.firestore {
       allow read, write, delete: if request.auth != null && request.auth.uid == uid;
     }
 
+    // Append-only public feedback. Clients may create with a valid email +
+    // non-empty message; never read, update, or delete.
+    match /feedback/{id} {
+      allow create: if request.auth != null
+                    && request.resource.data.email is string
+                    && request.resource.data.message is string
+                    && request.resource.data.message.size() > 0;
+      allow read, update, delete: if false;
+    }
+
   }
 }
