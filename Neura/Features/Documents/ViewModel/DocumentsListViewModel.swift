@@ -405,8 +405,15 @@ final class DocumentsListViewModel: ObservableObject {
 
         var fileBytesChanged = false
 
-        // Re-save the file in place when pages were supplied (scans/images only).
-        if case .scannedImages(let images) = preview, !images.isEmpty {
+        // Re-save the file ONLY when the page count actually changed. A
+        // metadata-only edit (e.g. rename) must stay lossless — re-rasterizing
+        // the PDF/image on every save would degrade legibility. `pageCount` is
+        // the PDF page count for scans/PDFs and 1 for single images, so an
+        // unchanged count means no add/remove happened and we skip the rewrite.
+        // Limitation: replacing a page with a fresh scan at the same count is
+        // not detected (camera-only, rare).
+        if case .scannedImages(let images) = preview, !images.isEmpty,
+           images.count != updated.pageCount {
             do {
                 let fm = DocumentFileManager.shared
                 if updated.documentType == .image && images.count > 1 {
