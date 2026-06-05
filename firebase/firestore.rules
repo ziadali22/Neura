@@ -9,14 +9,10 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // Per-user encrypted document metadata — only the owning user can access
-    match /users/{uid}/documents/{docId} {
-      allow read, write, delete: if request.auth != null && request.auth.uid == uid;
-    }
-
-    // Per-user encrypted health profile
-    match /users/{uid}/profile/{docId} {
-      allow read, write, delete: if request.auth != null && request.auth.uid == uid;
+    // Each user can read/write only their own subtree:
+    // documents/*, profile/data, preferences/data, and keys/master.
+    match /users/{uid}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
     }
 
     // Append-only public feedback. Authenticated clients may create one doc with
