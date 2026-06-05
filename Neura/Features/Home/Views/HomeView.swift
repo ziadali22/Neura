@@ -5,6 +5,7 @@ struct HomeView: View {
     @StateObject private var subscriptionManager = SubscriptionManager.shared
     @StateObject private var biometricAuth = BiometricAuthManager.shared
     @StateObject private var healthVM = HealthProfileViewModel()
+    @StateObject private var docsViewModel = DocumentsListViewModel()
     @State private var recentDocuments: [Document] = []
     @State private var greetingAppear = false
     @State private var bannerAppear = false
@@ -138,7 +139,9 @@ struct HomeView: View {
                     DocumentViewerView(document: document, onDelete: {
                         selectedDocument = nil
                         loadRecentDocuments()
-                    }, onRename: { _ in
+                    }, onEdit: { metadata, preview in
+                        docsViewModel.loadDocuments()
+                        docsViewModel.updateDocument(document, metadata: metadata, preview: preview)
                         loadRecentDocuments()
                     })
                 }

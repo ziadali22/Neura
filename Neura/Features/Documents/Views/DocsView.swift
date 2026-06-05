@@ -153,8 +153,8 @@ struct DocsView: View {
         .navigationDestination(for: Document.self) { document in
             DocumentViewerView(document: document, onDelete: {
                 viewModel.deleteDocument(document)
-            }, onRename: { newName in
-                viewModel.renameDocument(document, to: newName)
+            }, onEdit: { metadata, preview in
+                viewModel.updateDocument(document, metadata: metadata, preview: preview)
             })
         }
         .navigationDestination(for: CustomFolder.self) { folder in
