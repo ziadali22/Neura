@@ -2,17 +2,28 @@ import SwiftUI
 import PDFKit
 
 struct DocumentViewerView: View {
-    let document: Document
     let onDelete: () -> Void
-    var onRename: ((String) -> Void)?
+    var onEdit: ((DocumentMetadata, DocumentPreviewContent) -> Void)?
+
+    @State private var document: Document
+    @State private var showEditSheet = false
+    @State private var editPreview: DocumentPreviewContent?
+    @State private var isPreparingEdit = false
+    @State private var contentRefreshID = UUID()
+
+    init(document: Document,
+         onDelete: @escaping () -> Void,
+         onEdit: ((DocumentMetadata, DocumentPreviewContent) -> Void)? = nil) {
+        _document = State(initialValue: document)
+        self.onDelete = onDelete
+        self.onEdit = onEdit
+    }
 
     @Environment(\.dismiss) private var dismiss
     @State private var showDeleteConfirmation = false
     @State private var showInfo = false
     @State private var showShareQR = false
     @State private var showPaywall = false
-    @State private var showRename = false
-    @State private var renameText = ""
     @State private var appear = false
     @StateObject private var subscriptionManager = SubscriptionManager.shared
 
@@ -46,7 +57,19 @@ struct DocumentViewerView: View {
                         .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 4)
                 }
             }
+            .id(contentRefreshID)
             .opacity(appear ? 1 : 0)
+        }
+        .overlay {
+            if isPreparingEdit {
+                ZStack {
+                    Color.black.opacity(0.15).ignoresSafeArea()
+                    ProgressView()
+                        .padding(20)
+                        .background(Color.surfaceWhite)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                }
+            }
         }
         .background(Color.backgroundPrimary)
         .navigationBarBackButtonHidden(true)
@@ -61,20 +84,18 @@ struct DocumentViewerView: View {
         } message: {
             Text(L10n.Documents.Viewer.deleteMessage)
         }
-        .alert(L10n.Documents.Viewer.renameTitle, isPresented: $showRename) {
-            TextField(L10n.Documents.Viewer.renamePlaceholder, text: $renameText)
-            Button(L10n.Common.cancel, role: .cancel) {}
-            Button(L10n.Common.save) {
-                let trimmed = renameText.trimmingCharacters(in: .whitespacesAndNewlines)
-                if !trimmed.isEmpty {
-                    onRename?(trimmed)
-                }
-            }
-        } message: {
-            Text(L10n.Documents.Viewer.renameMessage)
-        }
         .sheet(isPresented: $showInfo) {
             documentInfoSheet
+        }
+        .sheet(isPresented: $showEditSheet) {
+            if let preview = editPreview {
+                DocumentMetadataView(
+                    preview: preview,
+                    editingDocument: document
+                ) { metadata, updatedPreview in
+                    applyEdit(metadata: metadata, preview: updatedPreview)
+                }
+            }
         }
         .sheet(isPresented: $showShareQR) {
             if let vm = makeShareViewModel() {
@@ -114,10 +135,9 @@ private extension DocumentViewerView {
 
             Menu {
                 Button {
-                    renameText = document.name
-                    showRename = true
+                    startEdit()
                 } label: {
-                    Label(L10n.Common.rename, systemImage: "pencil")
+                    Label(L10n.Common.edit, systemImage: "pencil")
                 }
 
                 Button { showInfo = true } label: {
@@ -427,6 +447,55 @@ private extension DocumentViewerView {
            let rootViewController = windowScene.windows.first?.rootViewController {
             rootViewController.present(activityVC, animated: true)
         }
+    }
+
+    // MARK: Edit
+
+    func startEdit() {
+        switch document.documentType {
+        case .pdf:
+            // Imported PDF -> metadata only, read-only file row.
+            editPreview = .importedFile(document.fileURL)
+            showEditSheet = true
+        case .image:
+            if let image = try? DocumentFileManager.shared.loadImage(url: document.fileURL) {
+                editPreview = .scannedImages([image])
+            } else {
+                editPreview = .importedFile(document.fileURL)
+            }
+            showEditSheet = true
+        case .scan:
+            isPreparingEdit = true
+            let url = document.fileURL
+            DispatchQueue.global(qos: .userInitiated).async {
+                let images = PDFGenerator.shared.renderImages(from: url)
+                DispatchQueue.main.async {
+                    isPreparingEdit = false
+                    // Fall back to metadata-only if rendering failed.
+                    editPreview = images.isEmpty ? .importedFile(url) : .scannedImages(images)
+                    showEditSheet = true
+                }
+            }
+        }
+    }
+
+    func applyEdit(metadata: DocumentMetadata, preview: DocumentPreviewContent) {
+        // Optimistically refresh the local copy so the header/info update now.
+        document.name = metadata.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        document.createdAt = metadata.documentDate
+        document.category = metadata.category
+        document.specialization = metadata.specialization
+        let doctor = metadata.doctorName.trimmingCharacters(in: .whitespacesAndNewlines)
+        document.doctorName = doctor.isEmpty ? nil : doctor
+        let notes = metadata.notes.trimmingCharacters(in: .whitespacesAndNewlines)
+        document.notes = notes.isEmpty ? nil : notes
+        document.tags = metadata.customFolderId.map { [$0.uuidString] }
+
+        // Persist (and re-save file if pages changed) via the ViewModel.
+        onEdit?(metadata, preview)
+
+        // Force the PDF/image view to reload the (possibly overwritten) file.
+        contentRefreshID = UUID()
     }
 }
 
