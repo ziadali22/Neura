@@ -25,6 +25,8 @@ struct DocumentMetadataView: View {
     @Environment(\.dismiss) private var dismiss
     let preview: DocumentPreviewContent
     let onSave: (DocumentMetadata, DocumentPreviewContent) -> Void
+    /// Non-nil when editing an existing document (pre-fills the form).
+    let editingDocument: Document?
 
     @ObservedObject private var folderStore = CustomFolderStore.shared
     @State private var metadata = DocumentMetadata()
@@ -35,6 +37,34 @@ struct DocumentMetadataView: View {
 
     private enum Field: Hashable {
         case name, doctor, notes
+    }
+
+    init(
+        preview: DocumentPreviewContent,
+        editingDocument: Document? = nil,
+        onSave: @escaping (DocumentMetadata, DocumentPreviewContent) -> Void
+    ) {
+        self.preview = preview
+        self.editingDocument = editingDocument
+        self.onSave = onSave
+
+        if let doc = editingDocument {
+            var meta = DocumentMetadata()
+            meta.name = doc.name
+            meta.category = doc.category
+            meta.customFolderId = doc.tags?
+                .compactMap { UUID(uuidString: $0) }
+                .first
+            meta.specialization = doc.specialization ?? .other
+            meta.doctorName = doc.doctorName ?? ""
+            meta.notes = doc.notes ?? ""
+            meta.documentDate = doc.createdAt
+            _metadata = State(initialValue: meta)
+
+            if case .scannedImages(let images) = preview {
+                _scannedImages = State(initialValue: images)
+            }
+        }
     }
 
     var body: some View {
@@ -60,7 +90,7 @@ struct DocumentMetadataView: View {
                 saveButton
             }
             .background(Color.backgroundPrimary)
-            .navigationTitle(L10n.Documents.Metadata.title)
+            .navigationTitle(editingDocument == nil ? L10n.Documents.Metadata.title : L10n.Common.edit)
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(isPresented: $showSpecializationPicker) {
                 SpecializationPickerView(selected: $metadata.specialization)
@@ -79,6 +109,7 @@ struct DocumentMetadataView: View {
                 }
             }
             .onAppear {
+                guard editingDocument == nil else { return }
                 if case .scannedImages(let images) = preview {
                     scannedImages = images
                 }
