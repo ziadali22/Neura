@@ -384,6 +384,67 @@ final class DocumentsListViewModel: ObservableObject {
         SyncQueueManager.shared.enqueueMetadataUpdate(documents[index])
     }
 
+    // MARK: - Update (edit metadata and pages)
+
+    func updateDocument(_ document: Document,
+                        metadata: DocumentMetadata,
+                        preview: DocumentPreviewContent) {
+        guard let index = documents.firstIndex(where: { $0.id == document.id }) else { return }
+        var updated = documents[index]
+
+        // Apply metadata.
+        updated.name = metadata.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        updated.createdAt = metadata.documentDate
+        updated.category = metadata.category
+        updated.specialization = metadata.specialization
+        let doctor = metadata.doctorName.trimmingCharacters(in: .whitespacesAndNewlines)
+        updated.doctorName = doctor.isEmpty ? nil : doctor
+        let notes = metadata.notes.trimmingCharacters(in: .whitespacesAndNewlines)
+        updated.notes = notes.isEmpty ? nil : notes
+        updated.tags = metadata.customFolderId.map { [$0.uuidString] }
+
+        var fileBytesChanged = false
+
+        // Re-save the file in place when pages were supplied (scans/images only).
+        if case .scannedImages(let images) = preview, !images.isEmpty {
+            do {
+                let fm = DocumentFileManager.shared
+                if updated.documentType == .image && images.count > 1 {
+                    // Single image gained pages -> becomes a multi-page PDF.
+                    let url = try fm.promoteImageToPDF(from: images, documentID: updated.id)
+                    updated = Document(
+                        id: updated.id,
+                        name: updated.name,
+                        fileURL: url,
+                        createdAt: updated.createdAt,
+                        documentType: .scan,
+                        category: updated.category,
+                        specialization: updated.specialization,
+                        doctorName: updated.doctorName,
+                        notes: updated.notes,
+                        tags: updated.tags
+                    )
+                } else if updated.documentType == .image {
+                    try fm.replaceImage(images[0], documentID: updated.id)
+                } else {
+                    try fm.replacePDF(from: images, documentID: updated.id)
+                }
+                fileBytesChanged = true
+            } catch {
+                errorMessage = "Failed to update document: \(error.localizedDescription)"
+                return
+            }
+        }
+
+        documents[index] = updated
+        persistMetadata()
+        SyncQueueManager.shared.enqueueMetadataUpdate(updated)
+        if fileBytesChanged {
+            SyncQueueManager.shared.enqueueUpload(updated)
+        }
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+    }
+
     // MARK: - Delete
 
     func deleteDocument(_ document: Document) {
