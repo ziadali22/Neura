@@ -201,6 +201,8 @@
 "home.completeProfile" = "أكمل ملفك الشخصي";
 "home.uploadLimit.remainingFormat" = "%@ رفع مستند مجاني متبقٍ";
 "home.uploadLimit.upgrade" = "جرّب Neura Pro لإزالة الحد";
+"home.uploadLimit.reachedTitle" = "أزِل حد الرفع";
+"home.uploadLimit.reachedSubtitle" = "ارفع أكبر عدد تريده من المستندات";
 "home.cardBackground.title" = "خلفية البطاقة";
 "home.cardBackground.upload" = "رفع";
 "home.cardBackground.yourPhotos" = "صورك";
@@ -402,6 +404,7 @@
 "profile.deleteAccount" = "حذف الحساب";
 "profile.logOutMessage" = "هل أنت متأكد أنك تريد تسجيل الخروج؟";
 "profile.deleteAccountMessage" = "لا يمكن التراجع عن هذا الإجراء. ستُحذف جميع بياناتك نهائياً.";
+"profile.deletingAccount" = "جارٍ حذف حسابك…";
 "profile.biometricLockFormat" = "قفل %@";
 "profile.biometricUnavailableSubtitle" = "قم بإعداد القياسات الحيوية على الجهاز أولاً";
 "profile.biometricUnavailableTitle" = "القياسات الحيوية غير متاحة";
@@ -411,6 +414,14 @@
 "profile.pro.getTitle" = "احصل على Neura Pro";
 "profile.pro.getSubtitle" = "مستندات طبية غير محدودة.\nشاركها مع أطبائك في أي وقت.";
 "profile.pro.upgrade" = "الترقية إلى Pro";
+"profile.subscriptionDetail.description" = "مستندات غير محدودة، مشاركة فورية وآمنة، وملف شخصي يخصك وحدك.";
+"profile.subscriptionDetail.periodMonthly" = "شهري";
+"profile.subscriptionDetail.periodYearly" = "سنوي";
+"profile.subscriptionDetail.perMonth" = "/ شهر";
+"profile.subscriptionDetail.perYear" = "/ سنة";
+"profile.subscriptionDetail.planTitleFormat" = "Neura Pro · %@";
+"profile.subscriptionDetail.renewsOnFormat" = "يتجدد في %@";
+"profile.subscriptionDetail.expiresOnFormat" = "ينتهي في %@";
 
 // MARK: - Paywall
 "paywall.title" = "Neura Pro";

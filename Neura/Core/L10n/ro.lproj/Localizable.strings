@@ -201,6 +201,8 @@
 "home.completeProfile" = "Completează-ți profilul";
 "home.uploadLimit.remainingFormat" = "%@ încărcări gratuite rămase";
 "home.uploadLimit.upgrade" = "Încearcă Neura Pro pentru a elimina limita";
+"home.uploadLimit.reachedTitle" = "Elimină limita de încărcare";
+"home.uploadLimit.reachedSubtitle" = "Încarcă oricâte documente dorești";
 "home.cardBackground.title" = "Fundal card";
 "home.cardBackground.upload" = "Încarcă";
 "home.cardBackground.yourPhotos" = "Fotografiile tale";
@@ -402,6 +404,7 @@
 "profile.deleteAccount" = "Șterge contul";
 "profile.logOutMessage" = "Ești sigur că vrei să te deconectezi?";
 "profile.deleteAccountMessage" = "Această acțiune nu poate fi anulată. Toate datele tale vor fi șterse permanent.";
+"profile.deletingAccount" = "Se șterge contul…";
 "profile.biometricLockFormat" = "Blocare cu %@";
 "profile.biometricUnavailableSubtitle" = "Configurează mai întâi biometria dispozitivului";
 "profile.biometricUnavailableTitle" = "Biometria nu este disponibilă";
@@ -411,6 +414,14 @@
 "profile.pro.getTitle" = "Obține Neura Pro";
 "profile.pro.getSubtitle" = "Documente medicale nelimitate.\nDistribuie-le medicilor oricând.";
 "profile.pro.upgrade" = "Upgradează la Pro";
+"profile.subscriptionDetail.description" = "Documente nelimitate, partajare instantanee și sigură și un profil cu adevărat al tău.";
+"profile.subscriptionDetail.periodMonthly" = "Lunar";
+"profile.subscriptionDetail.periodYearly" = "Anual";
+"profile.subscriptionDetail.perMonth" = "/ lună";
+"profile.subscriptionDetail.perYear" = "/ an";
+"profile.subscriptionDetail.planTitleFormat" = "Neura Pro · %@";
+"profile.subscriptionDetail.renewsOnFormat" = "Se reînnoiește pe %@";
+"profile.subscriptionDetail.expiresOnFormat" = "Expiră pe %@";
 
 // MARK: - Paywall
 "paywall.title" = "Neura Pro";

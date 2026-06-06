@@ -11,6 +11,28 @@ struct CustomFolder: Identifiable, Codable, Hashable {
         self.id = id
         self.name = name
     }
+
+    /// SF Symbols assigned to custom folders so each one looks distinct.
+    static let iconPalette: [String] = [
+        "heart.fill", "cross.case.fill", "pills.fill", "stethoscope",
+        "bandage.fill", "waveform.path.ecg", "lungs.fill", "eye.fill",
+        "drop.fill", "syringe.fill", "brain.head.profile", "facemask.fill",
+        "allergens", "bolt.heart.fill", "staroflife.fill", "cross.fill"
+    ]
+
+    /// A symbol derived from the folder's id — stable across launches (UUID
+    /// bytes, not Swift's per-process `hashValue`) yet varied per folder.
+    var iconSymbol: String {
+        let b = id.uuid
+        let seed = Int(b.0) &+ Int(b.4) &+ Int(b.8) &+ Int(b.12) &+ Int(b.15)
+        return Self.iconPalette[seed % Self.iconPalette.count]
+    }
+
+    /// Stable index used to pick a tint colour for the icon (see the grid card).
+    var colorSeed: Int {
+        let b = id.uuid
+        return Int(b.1) &+ Int(b.5) &+ Int(b.9) &+ Int(b.13)
+    }
 }
 
 // MARK: - Custom Folder Store

@@ -85,6 +85,10 @@ struct NeuraApp: App {
             .onAppear {
                 scheduleProfileNotificationIfNeeded()
             }
+            .task {
+                // Start the StoreKit transaction listener and reconcile Pro entitlement.
+                SubscriptionManager.shared.start()
+            }
             .onOpenURL { url in
                 GIDSignIn.sharedInstance.handle(url)
             }

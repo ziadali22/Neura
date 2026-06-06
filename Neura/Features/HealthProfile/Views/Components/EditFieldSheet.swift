@@ -6,19 +6,35 @@ struct EditFieldSheet: View {
     let keyboardType: UIKeyboardType
     @State private var value: String
     let onSave: (String) -> Void
+    let onDelete: (() -> Void)?
     @Environment(\.dismiss) private var dismiss
     @FocusState private var isFocused: Bool
 
-    init(fieldName: String, value: String, keyboardType: UIKeyboardType = .default, onSave: @escaping (String) -> Void) {
+    init(fieldName: String, value: String, keyboardType: UIKeyboardType = .default, onDelete: (() -> Void)? = nil, onSave: @escaping (String) -> Void) {
         self.fieldName = fieldName
         self.keyboardType = keyboardType
         self._value = State(initialValue: value)
+        self.onDelete = onDelete
         self.onSave = onSave
     }
 
     var body: some View {
         VStack(spacing: 0) {
             HStack {
+                if let onDelete {
+                    Button(role: .destructive) {
+                        onDelete()
+                        dismiss()
+                    } label: {
+                        Image(systemName: "trash")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(Color.red)
+                            .frame(width: 36, height: 36)
+                            .background(Color.surfaceWhite)
+                            .clipShape(Circle())
+                    }
+                }
+
                 Spacer()
                 Button {
                     onSave(value.trimmingCharacters(in: .whitespaces))

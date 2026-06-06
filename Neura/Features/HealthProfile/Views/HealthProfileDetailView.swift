@@ -39,6 +39,12 @@ struct HealthProfileDetailView: View {
         .navigationDestination(isPresented: $navigateToEdit) {
             HealthProfileView()
         }
+        .onChange(of: navigateToEdit) { _, isEditing in
+            // The edit screen uses a separate view model that persists changes to
+            // disk. Reload from disk on return so edits reflect immediately instead
+            // of only after the detail view is recreated.
+            if !isEditing { viewModel.reload() }
+        }
         .sheet(isPresented: $showHealthReport) {
             HealthReportSheet()
                 .presentationDetents([.height(650)])
@@ -113,7 +119,7 @@ private extension HealthProfileDetailView {
             ("My Number",           data.myPhoneNumber),
             ("Emergency Contact",   data.emergencyContactName),
             ("Emergency Number",    data.emergencyContactNumber),
-        ]
+        ] + data.customFields.map { (label: $0.label, value: $0.value) }
 
         return VStack(alignment: .leading, spacing: 0) {
             Text("General Data")

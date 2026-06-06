@@ -222,6 +222,7 @@ final class DocumentsListViewModel: ObservableObject {
     }
 
     func startScanning() {
+        guard ensureCanUpload() else { return }
         showSourcePicker = false
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             self.showScanner = true
@@ -229,6 +230,7 @@ final class DocumentsListViewModel: ObservableObject {
     }
 
     func startPhotoUpload() {
+        guard ensureCanUpload() else { return }
         showSourcePicker = false
         let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
         switch status {
@@ -258,10 +260,24 @@ final class DocumentsListViewModel: ObservableObject {
     }
 
     func startFileImport() {
+        guard ensureCanUpload() else { return }
         showSourcePicker = false
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             self.showFileImporter = true
         }
+    }
+
+    /// Authoritative upload gate for every source (scan / photo / file). Entry points
+    /// (the FAB and `showAddOptions`) gate too, but this is the single chokepoint that
+    /// guarantees a free user never exceeds the limit. Returns false (and shows the
+    /// paywall) when the limit is reached.
+    private func ensureCanUpload() -> Bool {
+        guard SubscriptionManager.shared.canUpload else {
+            showSourcePicker = false
+            showPaywall = true
+            return false
+        }
+        return true
     }
 
     // MARK: - Handle Scanner Result
@@ -328,13 +344,16 @@ final class DocumentsListViewModel: ObservableObject {
 
             do {
                 var document: Document
+                let source: String
 
                 switch preview {
                 case .scannedImages(let images):
                     document = try fm.savePDF(from: images, name: metadata.name)
+                    source = "scan"
 
                 case .importedFile(let url):
                     document = try fm.importFile(from: url, name: metadata.name)
+                    source = "import"
                 }
 
                 // Apply metadata
@@ -359,6 +378,11 @@ final class DocumentsListViewModel: ObservableObject {
                     self.pendingPreview = nil
                     self.selectedPhotoItem = nil
                     SubscriptionManager.shared.recordUpload()
+
+                    // Value Moment: the user successfully added a health document.
+                    // Only the source is tracked — never the medical document type (PII).
+                    AnalyticsManager.shared.track("document_saved", properties: ["source": source])
+
                     UINotificationFeedbackGenerator().notificationOccurred(.success)
 
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
@@ -460,6 +484,7 @@ final class DocumentsListViewModel: ObservableObject {
             documents.removeAll { $0.id == document.id }
             persistMetadata()
             SyncQueueManager.shared.enqueueDelete(document.id)
+            SubscriptionManager.shared.recordDeletion()
         } catch {
             errorMessage = "Failed to delete: \(error.localizedDescription)"
         }

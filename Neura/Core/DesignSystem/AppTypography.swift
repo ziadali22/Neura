@@ -10,19 +10,16 @@ private enum Estedad {
     /// Flip to `true` to switch the entire app to SF Pro system font.
     static let useSFPro = false
 
-    static let light     = "Estedad-Regular"
     static let regular   = "Estedad-Regular"
     static let medium    = "Estedad-Medium"
-    static let bold      = "Estedad-SemiBold"
-    static let extraBold = "Estedad-Bold"
+    static let bold      = "Estedad-Bold"
+    static let semibold  = "Estedad-SemiBold"
 
     static func font(_ name: String, size: CGFloat) -> Font {
         guard !useSFPro else {
             let weight: Font.Weight = switch name {
-            case extraBold: .bold
             case bold:      .semibold
             case medium:    .medium
-            case light:     .light
             default:        .regular
             }
             return .system(size: size, weight: weight, design: .default)
@@ -38,13 +35,14 @@ extension Font {
     // MARK: Display
 
     /// 42pt ExtraBold - hero text, profile names
-    static let displayArt = Estedad.font(Estedad.extraBold, size: 42)
+    static let displayArt = Estedad.font(Estedad.bold, size: 42)
 
     /// 32pt ExtraBold - smaller art display
-    static let displayArtS = Estedad.font(Estedad.extraBold, size: 32)
+    static let displayArtS = Estedad.font(Estedad.bold, size: 32)
 
     /// 32pt Bold - large screen titles
     static let displayXL = Estedad.font(Estedad.bold, size: 32)
+    static let displaySemi = Estedad.font(Estedad.semibold, size: 32)
 
     /// 28pt Bold - section headers
     static let displayL = Estedad.font(Estedad.bold, size: 28)

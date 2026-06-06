@@ -22,6 +22,8 @@ final class AuthService: ObservableObject {
         // currentUser is available synchronously from Firebase's persisted cache
         currentUser = Auth.auth().currentUser
         if let uid = currentUser?.uid {
+            // Re-tie analytics to the logged-in user on every app launch.
+            AnalyticsManager.shared.identify(uid)
             restoreCloudData(for: uid)
         }
         stateListener = Auth.auth().addStateDidChangeListener { [weak self] _, user in
@@ -75,6 +77,7 @@ final class AuthService: ObservableObject {
     func signOut() {
         try? Auth.auth().signOut()
         KeychainManager.shared.clearKey()
+        AnalyticsManager.shared.reset()
         currentUser = nil
     }
 
@@ -93,6 +96,7 @@ final class AuthService: ObservableObject {
 
         try await user.delete()
         KeychainManager.shared.clearKey()
+        AnalyticsManager.shared.reset()
         currentUser = nil
     }
 
@@ -132,6 +136,9 @@ final class AuthService: ObservableObject {
     // MARK: - Private
 
     private func onSignInSuccess(uid: String) {
+        // Tie all subsequent events to this user; keyed on the Firebase UID
+        // (a stable primary key) — never email.
+        AnalyticsManager.shared.identify(uid)
         restoreCloudData(for: uid)
     }
 

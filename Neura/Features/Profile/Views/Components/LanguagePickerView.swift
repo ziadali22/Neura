@@ -8,9 +8,13 @@ struct LanguagePickerView: View {
             VStack(spacing: 10) {
                 ForEach(AppLanguage.allCases) { language in
                     Button {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                            languageManager.setLanguage(language)
-                        }
+                        // Do NOT wrap this in withAnimation: changing the language
+                        // re-applies \.locale / \.layoutDirection to the whole app at the
+                        // NeuraApp root, which animates an app-wide re-layout. Because the
+                        // tab bar lives in a bottom safeAreaInset and is hidden while this
+                        // picker (a pushed detail view) is on screen, that interrupted spring
+                        // leaves the bar stuck shifted up after navigating back.
+                        languageManager.setLanguage(language)
                     } label: {
                         HStack(spacing: 14) {
                             Text(language.displayName)

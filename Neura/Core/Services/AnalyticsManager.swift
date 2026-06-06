@@ -10,10 +10,9 @@ final class AnalyticsManager {
     static let shared = AnalyticsManager()
 
     /// Mixpanel project token.
-    /// TODO: replace with the real Mixpanel token before shipping.
     private let token = "51e98df5764628442010f4f052c2f40a"
 
-    private let placeholderToken = "51e98df5764628442010f4f052c2f40a"
+    private let placeholderToken = "YOUR_MIXPANEL_TOKEN"
     private var isInitialized = false
 
     private init() {}

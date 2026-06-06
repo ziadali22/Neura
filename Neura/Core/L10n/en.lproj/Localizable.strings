@@ -206,6 +206,8 @@
 "home.completeProfile" = "Complete your profile";
 "home.uploadLimit.remainingFormat" = "%@ free Documents Uploads left";
 "home.uploadLimit.upgrade" = "Try Neura Pro to remove limit";
+"home.uploadLimit.reachedTitle" = "Remove your upload limit";
+"home.uploadLimit.reachedSubtitle" = "Upload as many documents as you want";
 "home.cardBackground.title" = "Card Background";
 "home.cardBackground.upload" = "Upload";
 "home.cardBackground.yourPhotos" = "Your Photos";
@@ -407,6 +409,7 @@
 "profile.deleteAccount" = "Delete Account";
 "profile.logOutMessage" = "Are you sure you want to log out?";
 "profile.deleteAccountMessage" = "This action cannot be undone. All your data will be permanently deleted.";
+"profile.deletingAccount" = "Deleting your account…";
 "profile.biometricLockFormat" = "%@ Lock";
 "profile.biometricUnavailableSubtitle" = "Set up device biometrics first";
 "profile.biometricUnavailableTitle" = "Biometrics unavailable";
@@ -416,6 +419,14 @@
 "profile.pro.getTitle" = "Get Neura Pro";
 "profile.pro.getSubtitle" = "Unlimited medical documents.\nShare them with doctors anytime.";
 "profile.pro.upgrade" = "Upgrade to Pro";
+"profile.subscriptionDetail.description" = "Unlimited documents, share instantly and securely, and a profile that's truly yours.";
+"profile.subscriptionDetail.periodMonthly" = "Monthly";
+"profile.subscriptionDetail.periodYearly" = "Yearly";
+"profile.subscriptionDetail.perMonth" = "/ month";
+"profile.subscriptionDetail.perYear" = "/ year";
+"profile.subscriptionDetail.planTitleFormat" = "Neura Pro · %@";
+"profile.subscriptionDetail.renewsOnFormat" = "Renews on %@";
+"profile.subscriptionDetail.expiresOnFormat" = "Expires on %@";
 
 // MARK: - Paywall
 "paywall.title" = "Neura Pro";

@@ -1,4 +1,5 @@
 import SwiftUI
+import StoreKit
 
 struct PaywallView: View {
     @ObservedObject var subscriptionManager: SubscriptionManager
@@ -6,6 +7,9 @@ struct PaywallView: View {
     @State private var currentSlide = 0
     @State private var scrollID: Int? = 0
     @State private var selectedPlan: Plan = .yearly
+    @State private var isPurchasing = false
+    @State private var isRestoring = false
+    @State private var alertMessage: String?
 
     // MARK: - Plan Model
 
@@ -19,21 +23,49 @@ struct PaywallView: View {
             }
         }
 
-        var price: String {
+        /// App Store Connect product identifier this plan maps to.
+        var productID: String {
             switch self {
-            case .monthly: return "$4.99/month"
-            case .yearly:  return "$49.99/year"
+            case .monthly: return SubscriptionManager.Product_ID.monthly
+            case .yearly:  return SubscriptionManager.Product_ID.annual
             }
         }
 
-        var perMonth: String? {
+        /// Period suffix appended to the localized price (e.g. "/month").
+        var periodSuffix: String {
             switch self {
-            case .yearly:  return "only $4.16/month"
-            case .monthly: return nil
+            case .monthly: return "/month"
+            case .yearly:  return "/year"
             }
         }
 
         var isBestValue: Bool { self == .yearly }
+    }
+
+    // MARK: - Pricing helpers (live from StoreKit, with graceful fallback)
+
+    private func product(for plan: Plan) -> Product? {
+        subscriptionManager.product(for: plan.productID)
+    }
+
+    /// True while the selected plan's product is still being fetched from StoreKit —
+    /// drives the CTA spinner so an unloaded button reads as "loading", not "broken".
+    private var isPreparingProducts: Bool {
+        product(for: selectedPlan) == nil && subscriptionManager.isLoadingProducts
+    }
+
+    private func priceText(for plan: Plan) -> String {
+        guard let product = product(for: plan) else {
+            return plan == .yearly ? "$49.99/year" : "$3.99/month"
+        }
+        return product.displayPrice + plan.periodSuffix
+    }
+
+    /// "only $4.16/month" derived from the annual price; nil for the monthly plan.
+    private func perMonthText(for plan: Plan) -> String? {
+        guard plan == .yearly, let product = product(for: plan) else { return nil }
+        let perMonth = product.price / 12
+        return "only " + perMonth.formatted(product.priceFormatStyle) + "/month"
     }
 
     // MARK: - Slide Model
@@ -68,16 +100,30 @@ struct PaywallView: View {
 
                 Spacer(minLength: 16)
 
-                VStack(spacing: 24) {
+                VStack(spacing: 20) {
                     plansRow
                     VStack(spacing: 12) {
                         ctaButton
                         cancelLabel
                     }
+                    legalFooter
                 }
                 .padding(.horizontal, 20)
-                .padding(.bottom, 32)
+                .padding(.bottom, 24)
             }
+        }
+        .task { await subscriptionManager.loadProducts() }
+        .onAppear { AnalyticsManager.shared.track("paywall_viewed") }
+        .alert(
+            "Neura Pro",
+            isPresented: Binding(
+                get: { alertMessage != nil },
+                set: { if !$0 { alertMessage = nil } }
+            )
+        ) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(alertMessage ?? "")
         }
     }
 
@@ -102,13 +148,20 @@ struct PaywallView: View {
     private var topBar: some View {
         HStack(alignment: .top) {
             Button {
-                subscriptionManager.restorePurchase()
-                dismiss()
+                Task { await restore() }
             } label: {
-                Text("Restore")
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundStyle(Color.textPrimary.opacity(0.7))
+                Group {
+                    if isRestoring {
+                        ProgressView()
+                            .tint(Color.textPrimary.opacity(0.7))
+                    } else {
+                        Text("Restore")
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundStyle(Color.textPrimary.opacity(0.7))
+                    }
+                }
             }
+            .disabled(isRestoring || isPurchasing)
 
             Spacer()
 
@@ -184,7 +237,12 @@ struct PaywallView: View {
     private var plansRow: some View {
         HStack(alignment: .top, spacing: 12) {
             ForEach(Plan.allCases, id: \.title) { plan in
-                PlanCard(plan: plan, isSelected: selectedPlan == plan) {
+                PlanCard(
+                    plan: plan,
+                    priceText: priceText(for: plan),
+                    perMonthText: perMonthText(for: plan),
+                    isSelected: selectedPlan == plan
+                ) {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                         selectedPlan = plan
                     }
@@ -199,18 +257,26 @@ struct PaywallView: View {
 
     private var ctaButton: some View {
         Button {
-            subscriptionManager.upgradeToPro()
-            dismiss()
+            Task { await purchase() }
         } label: {
-            Text("Get Neura Pro")
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 17)
-                .background(Color.black)
-                .clipShape(Capsule())
+            Group {
+                if isPurchasing || isPreparingProducts {
+                    ProgressView()
+                        .tint(.white)
+                } else {
+                    Text("Get Neura Pro")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(.white)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 17)
+            .background(Color.black)
+            .clipShape(Capsule())
         }
         .buttonStyle(ScaleButtonStyle())
+        .disabled(isPurchasing || isRestoring || product(for: selectedPlan) == nil)
+        .opacity(product(for: selectedPlan) == nil && !isPreparingProducts ? 0.6 : 1)
     }
 
     // MARK: - Cancel Label
@@ -219,6 +285,69 @@ struct PaywallView: View {
         Text("Cancel anytime")
             .font(.system(size: 13))
             .foregroundStyle(Color.black.opacity(0.4))
+    }
+
+    // MARK: - Legal Footer
+
+    private static let termsURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
+    private static let privacyURL = URL(string: "https://myneura.org/privacy")!
+
+    private var renewalDisclosure: String {
+        let price = priceText(for: selectedPlan)
+        let period = selectedPlan == .yearly ? "year" : "month"
+        return "Subscription is \(price). It automatically renews each \(period) unless cancelled at least 24 hours before the end of the current period. Payment is charged to your Apple Account. Manage or cancel anytime in your App Store settings."
+    }
+
+    private var legalFooter: some View {
+        VStack(spacing: 8) {
+            Text(renewalDisclosure)
+                .font(.system(size: 10))
+                .foregroundStyle(Color.black.opacity(0.4))
+                .multilineTextAlignment(.center)
+                .lineSpacing(1)
+
+            HStack(spacing: 6) {
+                Link("Terms of Use", destination: Self.termsURL)
+                Text("·").foregroundStyle(Color.black.opacity(0.3))
+                Link("Privacy Policy", destination: Self.privacyURL)
+            }
+            .font(.system(size: 11, weight: .medium))
+            .tint(Color.black.opacity(0.55))
+        }
+        .padding(.horizontal, 8)
+    }
+
+    // MARK: - Purchase / Restore
+
+    @MainActor
+    private func purchase() async {
+        guard let product = product(for: selectedPlan), !isPurchasing else { return }
+        isPurchasing = true
+        defer { isPurchasing = false }
+
+        switch await subscriptionManager.purchase(product) {
+        case .success:
+            dismiss()
+        case .pending:
+            alertMessage = "Your purchase is pending approval. You'll get access once it's confirmed."
+        case .cancelled:
+            break
+        case .failed:
+            alertMessage = "Something went wrong with your purchase. Please try again."
+        }
+    }
+
+    @MainActor
+    private func restore() async {
+        guard !isRestoring else { return }
+        isRestoring = true
+        defer { isRestoring = false }
+
+        if await subscriptionManager.restore() {
+            dismiss()
+        } else {
+            alertMessage = "No active subscription found to restore."
+        }
     }
 }
 
@@ -256,6 +385,8 @@ private struct SlideView: View {
 
 private struct PlanCard: View {
     let plan: PaywallView.Plan
+    let priceText: String
+    let perMonthText: String?
     let isSelected: Bool
     let onTap: () -> Void
 
@@ -281,15 +412,15 @@ private struct PlanCard: View {
                 .font(.system(size: 18, weight: .bold))
                 .foregroundStyle(Color.textPrimary)
 
-            Text(plan.price)
+            Text(priceText)
                 .font(.system(size: 15, weight: .medium))
                 .foregroundStyle(Color.textPrimary)
 
             // Invisible sublabel placeholder for monthly — preserves height
-            Text(plan.perMonth ?? " ")
+            Text(perMonthText ?? " ")
                 .font(.system(size: 12))
                 .foregroundStyle(Color.textSecondary)
-                .opacity(plan.perMonth != nil ? 1 : 0)
+                .opacity(perMonthText != nil ? 1 : 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .padding(.horizontal, 16)

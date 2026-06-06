@@ -10,6 +10,11 @@ struct GeneralDataSheet: View {
     @State private var datePickerField: GeneralFieldInfo?
     @State private var optionPickerField: GeneralFieldInfo?
     @State private var wheelPickerField: GeneralFieldInfo?
+    @State private var editingCustomField: HealthProfile.GeneralData.CustomField?
+
+    // Add custom field
+    @State private var showAddFieldAlert = false
+    @State private var newFieldName = ""
 
     var body: some View {
         VStack(spacing: 0) {
@@ -37,6 +42,10 @@ struct GeneralDataSheet: View {
 
                     ForEach(fields) { field in
                         fieldRow(field)
+                    }
+
+                    ForEach(viewModel.profile.generalData.customFields) { field in
+                        customFieldRow(field)
                     }
 
                     addFieldButton
@@ -81,6 +90,27 @@ struct GeneralDataSheet: View {
                 viewModel.updateGeneralField(field.keyPath, value: newValue)
             }
             .presentationDragIndicator(.hidden)
+        }
+        // Custom field editor (edit value or delete the whole field)
+        .sheet(item: $editingCustomField) { field in
+            EditFieldSheet(
+                fieldName: field.label,
+                value: field.value,
+                onDelete: { viewModel.removeGeneralCustomField(id: field.id) }
+            ) { newValue in
+                viewModel.updateGeneralCustomField(id: field.id, value: newValue)
+            }
+            .presentationDragIndicator(.hidden)
+        }
+        .alert("Add Field", isPresented: $showAddFieldAlert) {
+            TextField("Field name", text: $newFieldName)
+            Button(L10n.Common.add) {
+                viewModel.addGeneralCustomField(label: newFieldName)
+                newFieldName = ""
+            }
+            Button(L10n.Common.cancel, role: .cancel) { newFieldName = "" }
+        } message: {
+            Text("Add your own field, e.g. \"Primary Doctor\" or \"Allergies Card\".")
         }
     }
 
@@ -146,6 +176,39 @@ private extension GeneralDataSheet {
         .buttonStyle(ScaleButtonStyle())
     }
 
+    func customFieldRow(_ field: HealthProfile.GeneralData.CustomField) -> some View {
+        Button { editingCustomField = field } label: {
+            HStack {
+                Text(field.label)
+                    .font(.bodyL)
+                    .foregroundColor(.textPrimary)
+
+                Spacer()
+
+                if field.value.isEmpty {
+                    HStack(spacing: 4) {
+                        Text("Add")
+                            .font(.bodyL)
+                            .foregroundColor(.textTertiary)
+                        Image(systemName: "plus")
+                            .font(.system(size: 14))
+                            .foregroundColor(.textTertiary)
+                    }
+                } else {
+                    Text(field.value)
+                        .font(.statLabel)
+                        .foregroundColor(.textSecondary)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .background(Color.surfaceWhite)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 4)
+        }
+        .buttonStyle(ScaleButtonStyle())
+    }
+
     func open(_ field: GeneralFieldInfo) {
         switch field.kind {
         case .text:
@@ -161,7 +224,8 @@ private extension GeneralDataSheet {
 
     var addFieldButton: some View {
         Button {
-            // TODO: Support custom general data fields
+            newFieldName = ""
+            showAddFieldAlert = true
         } label: {
             HStack {
                 Text("Add Field")

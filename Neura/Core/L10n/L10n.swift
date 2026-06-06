@@ -263,6 +263,8 @@ enum L10n {
                 "home.uploadLimit.remainingFormat".l10n(args: [text])
             }
             static var upgrade: String { "home.uploadLimit.upgrade".l10n() }
+            static var reachedTitle: String { "home.uploadLimit.reachedTitle".l10n() }
+            static var reachedSubtitle: String { "home.uploadLimit.reachedSubtitle".l10n() }
         }
 
         enum CardBackground {
@@ -528,6 +530,7 @@ enum L10n {
         static var deleteAccount: String { "profile.deleteAccount".l10n() }
         static var logOutMessage: String { "profile.logOutMessage".l10n() }
         static var deleteAccountMessage: String { "profile.deleteAccountMessage".l10n() }
+        static var deletingAccount: String { "profile.deletingAccount".l10n() }
         static func biometricLock(_ biometricLabel: String) -> String {
             "profile.biometricLockFormat".l10n(args: [biometricLabel])
         }
@@ -541,6 +544,23 @@ enum L10n {
             static var getTitle: String { "profile.pro.getTitle".l10n() }
             static var getSubtitle: String { "profile.pro.getSubtitle".l10n() }
             static var upgrade: String { "profile.pro.upgrade".l10n() }
+        }
+
+        enum Subscription {
+            static var description: String { "profile.subscriptionDetail.description".l10n() }
+            static var periodMonthly: String { "profile.subscriptionDetail.periodMonthly".l10n() }
+            static var periodYearly: String { "profile.subscriptionDetail.periodYearly".l10n() }
+            static var perMonth: String { "profile.subscriptionDetail.perMonth".l10n() }
+            static var perYear: String { "profile.subscriptionDetail.perYear".l10n() }
+            static func planTitle(_ period: String) -> String {
+                "profile.subscriptionDetail.planTitleFormat".l10n(args: [period])
+            }
+            static func renewsOn(_ date: String) -> String {
+                "profile.subscriptionDetail.renewsOnFormat".l10n(args: [date])
+            }
+            static func expiresOn(_ date: String) -> String {
+                "profile.subscriptionDetail.expiresOnFormat".l10n(args: [date])
+            }
         }
     }
 

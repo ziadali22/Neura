@@ -184,7 +184,12 @@ final class OnboardingViewModel: ObservableObject {
             do {
                 try await AuthService.shared.signInWithApple()
                 await checkReturningUser()
-                isReturningUser ? finalize() : advance()
+                if isReturningUser {
+                    finalize()
+                } else {
+                    AnalyticsManager.shared.track("sign_up_completed", properties: ["method": "apple"])
+                    advance()
+                }
             } catch {
                 if !isCancellation(error) { authError = error.localizedDescription }
             }
@@ -200,7 +205,12 @@ final class OnboardingViewModel: ObservableObject {
             do {
                 try await AuthService.shared.signInWithGoogle()
                 await checkReturningUser()
-                isReturningUser ? finalize() : advance()
+                if isReturningUser {
+                    finalize()
+                } else {
+                    AnalyticsManager.shared.track("sign_up_completed", properties: ["method": "google"])
+                    advance()
+                }
             } catch {
                 if !isCancellation(error) { authError = error.localizedDescription }
             }

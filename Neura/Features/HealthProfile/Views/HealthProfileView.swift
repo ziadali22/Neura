@@ -7,6 +7,10 @@ struct HealthProfileView: View {
     @State private var selectedSectionID: UUID?
     @State private var showAddSection = false
     @State private var newSectionTitle = ""
+    @State private var isEditing = false
+    @State private var sectionPendingDelete: HealthProfile.HealthSection?
+    @State private var sectionToRename: HealthProfile.HealthSection?
+    @State private var renameText = ""
 
     // MARK: - General Data Progress
 
@@ -27,12 +31,7 @@ struct HealthProfileView: View {
                     generalDataRow
 
                     ForEach(viewModel.profile.sections) { section in
-                        SettingsRow(
-                            icon: iconForSection(section.title),
-                            title: section.title
-                        ) {
-                            selectedSectionID = section.id
-                        }
+                        sectionRow(section)
                     }
 
                     addFieldButton
@@ -67,6 +66,51 @@ struct HealthProfileView: View {
             }
             Button("Cancel", role: .cancel) { newSectionTitle = "" }
         }
+        .alert("Rename Field", isPresented: Binding(
+            get: { sectionToRename != nil },
+            set: { if !$0 { sectionToRename = nil } }
+        )) {
+            TextField("Field name", text: $renameText)
+            Button("Save") {
+                let trimmed = renameText.trimmingCharacters(in: .whitespaces)
+                if let section = sectionToRename, !trimmed.isEmpty {
+                    viewModel.renameSection(id: section.id, title: trimmed)
+                }
+                sectionToRename = nil
+            }
+            Button("Cancel", role: .cancel) { sectionToRename = nil }
+        }
+        .confirmationDialog(
+            "Delete \"\(sectionPendingDelete?.title ?? "")\"?",
+            isPresented: Binding(
+                get: { sectionPendingDelete != nil },
+                set: { if !$0 { sectionPendingDelete = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                if let section = sectionPendingDelete {
+                    withAnimation {
+                        viewModel.removeSection(id: section.id)
+                    }
+                    if !hasCustomSections { isEditing = false }
+                }
+                sectionPendingDelete = nil
+            }
+            Button("Cancel", role: .cancel) { sectionPendingDelete = nil }
+        } message: {
+            Text("This will remove the field and all of its entries.")
+        }
+    }
+
+    // MARK: - Custom Sections
+
+    private func isCustomSection(_ section: HealthProfile.HealthSection) -> Bool {
+        !HealthProfile.defaultSectionTitles.contains(section.title)
+    }
+
+    private var hasCustomSections: Bool {
+        viewModel.profile.sections.contains { isCustomSection($0) }
     }
 
     private func iconForSection(_ title: String) -> String {
@@ -158,11 +202,55 @@ private extension HealthProfileView {
             Text("Health Profile")
                 .font(.headingS)
                 .foregroundColor(.textPrimary)
+
+            if hasCustomSections {
+                Button {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                        isEditing.toggle()
+                    }
+                } label: {
+                    Text(isEditing ? "Done" : "Edit")
+                        .font(.bodyL)
+                        .foregroundColor(.accent)
+                }
+                .frame(maxWidth: .infinity, alignment: .trailing)
+            }
         }
         .padding(.horizontal, 20)
         .padding(.top, 12)
         .padding(.bottom, 8)
-        
+
+    }
+
+    @ViewBuilder
+    func sectionRow(_ section: HealthProfile.HealthSection) -> some View {
+        let editable = isEditing && isCustomSection(section)
+
+        HStack(spacing: 12) {
+            if editable {
+                Button {
+                    sectionPendingDelete = section
+                } label: {
+                    Image(systemName: "minus.circle.fill")
+                        .font(.system(size: 22))
+                        .foregroundStyle(Color.red)
+                }
+                .transition(.move(edge: .leading).combined(with: .opacity))
+            }
+
+            SettingsRow(
+                icon: iconForSection(section.title),
+                title: section.title,
+                showChevron: !editable
+            ) {
+                if editable {
+                    renameText = section.title
+                    sectionToRename = section
+                } else if !isEditing {
+                    selectedSectionID = section.id
+                }
+            }
+        }
     }
 
     var addFieldButton: some View {

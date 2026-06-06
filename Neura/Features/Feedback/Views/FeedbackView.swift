@@ -62,6 +62,7 @@ private extension FeedbackView {
                 .font(.system(size: 13, weight: .medium))
                 .foregroundColor(.textSecondary)
             content()
+                .shadow(color: .black.opacity(0.10), radius: 20, x: 0, y: -4)
         }
     }
 

@@ -37,6 +37,26 @@ final class HealthProfileViewModel: ObservableObject {
         save()
     }
 
+    // MARK: - Custom General Fields
+
+    func addGeneralCustomField(label: String) {
+        let trimmed = label.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return }
+        profile.generalData.customFields.append(.init(label: trimmed))
+        save()
+    }
+
+    func updateGeneralCustomField(id: UUID, value: String) {
+        guard let index = profile.generalData.customFields.firstIndex(where: { $0.id == id }) else { return }
+        profile.generalData.customFields[index].value = value
+        save()
+    }
+
+    func removeGeneralCustomField(id: UUID) {
+        profile.generalData.customFields.removeAll { $0.id == id }
+        save()
+    }
+
     // MARK: - Sections
 
     func addEntry(to sectionID: UUID, text: String, field1: String = "", field2: String = "", notes: String = "") {
@@ -68,6 +88,12 @@ final class HealthProfileViewModel: ObservableObject {
 
     func removeSection(id: UUID) {
         profile.sections.removeAll { $0.id == id }
+        save()
+    }
+
+    func renameSection(id: UUID, title: String) {
+        guard let index = profile.sections.firstIndex(where: { $0.id == id }) else { return }
+        profile.sections[index].title = title
         save()
     }
 
@@ -223,6 +249,9 @@ final class HealthProfileViewModel: ObservableObject {
                 ("Emergency Contact", profile.generalData.emergencyContactName),
                 ("Emergency Number",  profile.generalData.emergencyContactNumber)
             ].filter { !$1.isEmpty }
+            + profile.generalData.customFields
+                .map { ($0.label, $0.value) }
+                .filter { !$1.isEmpty }
 
             let cardVPad: CGFloat = 16
             let secH: CGFloat = 34

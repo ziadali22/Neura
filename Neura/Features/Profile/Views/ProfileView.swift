@@ -6,6 +6,7 @@ struct ProfileView: View {
     @StateObject private var biometricAuth = BiometricAuthManager.shared
     @State private var showLogOutAlert = false
     @State private var showDeleteAlert = false
+    @State private var isDeleting = false
     @State private var showPaywall = false
     @State private var showBiometricUnavailableAlert = false
     @State private var showFeedback = false
@@ -39,7 +40,7 @@ struct ProfileView: View {
                                 router.push(.healthProfile)
                             }
                             SettingsRow(icon: "sub", title: L10n.Profile.subscription) {
-                                showPaywall = true
+                                handleSubscriptionTap()
                             }
                             BiometricLockRow(
                                 icon: biometricAuth.biometricIcon,
@@ -134,6 +135,8 @@ struct ProfileView: View {
                     HealthProfileView()
                 case .language:
                     LanguagePickerView()
+                case .subscription:
+                    SubscriptionCommunityView()
                 }
             }
         }
@@ -165,6 +168,10 @@ struct ProfileView: View {
             withAnimation(.spring(response: 0.7, dampingFraction: 0.8).delay(0.1)) {
                 contentAppear = true
             }
+        }
+        .overlay {
+            LoadingOverlayView(isLoading: isDeleting, message: L10n.Profile.deletingAccount)
+                .animation(.easeInOut(duration: 0.2), value: isDeleting)
         }
     }
 }
@@ -241,10 +248,14 @@ private extension ProfileView {
     }
 
     func handleDeleteAccount() {
+        isDeleting = true
         Task {
             clearLocalUserData()
             // Delete Firebase Auth account (Phase 4: also delete Storage/Firestore data via Cloud Function)
             try? await AuthService.shared.deleteAccount()
+            // On success AuthService publishes isSignedIn=false and the app swaps to
+            // OnboardingView; reset here so the overlay clears if deletion failed.
+            isDeleting = false
         }
     }
 
@@ -256,6 +267,14 @@ private extension ProfileView {
 
         Task {
             _ = await biometricAuth.setBiometricLockEnabled(enabled)
+        }
+    }
+
+    func handleSubscriptionTap() {
+        if subscriptionManager.isPro {
+            router.push(.subscription)
+        } else {
+            showPaywall = true
         }
     }
 

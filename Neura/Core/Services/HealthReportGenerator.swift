@@ -171,6 +171,7 @@ final class HealthReportGenerator {
             ("Emergency Contact", gd.emergencyContactName),
             ("Emergency Number", gd.emergencyContactNumber),
         ].filter { !$1.isEmpty }
+            + gd.customFields.map { ($0.label, $0.value) }.filter { !$1.isEmpty }
 
         if !fields.isEmpty {
             drawSubsectionHeader("General Data")

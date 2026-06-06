@@ -47,7 +47,7 @@ struct HomeView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     // MARK: - Greeting
                     Text(greeting)
-                        .font(.displayXL)
+                        .font(.displaySemi)
                         .foregroundStyle(Color.textPrimary)
                         .padding(.horizontal, 20)
                         .padding(.top, 24)
@@ -56,7 +56,9 @@ struct HomeView: View {
                         .animation(.spring(response: 0.6, dampingFraction: 0.8), value: greetingAppear)
 
                     // MARK: - Upload Limit Banner
-                    if !subscriptionManager.isPro && !subscriptionManager.canUpload {
+                    // Shown for all free users from install onward; the banner itself
+                    // swaps to an upsell once the upload limit is reached.
+                    if !subscriptionManager.isPro {
                         UploadLimitBanner(
                             subscriptionManager: subscriptionManager,
                             onTap: { showPaywall = true }
@@ -137,6 +139,8 @@ struct HomeView: View {
             .sheet(item: $selectedDocument) { document in
                 NavigationStack {
                     DocumentViewerView(document: document, onDelete: {
+                        docsViewModel.loadDocuments()
+                        docsViewModel.deleteDocument(document)
                         selectedDocument = nil
                         loadRecentDocuments()
                     }, onEdit: { metadata, preview in
