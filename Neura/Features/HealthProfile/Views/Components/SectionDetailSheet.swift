@@ -72,7 +72,7 @@ private extension SectionDetailSheet {
     var navBar: some View {
         ZStack {
             Button { dismiss() } label: {
-                Image(systemName: "chevron.left")
+                Image(systemName: "chevron.backward")
                     .font(.system(size: 18, weight: .medium))
                     .foregroundColor(.textPrimary)
                     .frame(width: 40, height: 40)
@@ -82,7 +82,7 @@ private extension SectionDetailSheet {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            Text(section?.title ?? "")
+            Text(section?.localizedTitle ?? "")
                 .font(.headingS)
                 .foregroundColor(.textPrimary)
         }
@@ -99,11 +99,11 @@ private extension SectionDetailSheet {
                 .font(.system(size: 44))
                 .foregroundColor(.textTertiary.opacity(0.5))
 
-            Text("No entries yet")
+            Text(L10n.HealthProfile.noEntries)
                 .font(.headingS)
                 .foregroundColor(.textPrimary)
 
-            Text("Tap the button below to add one")
+            Text(L10n.HealthProfile.noEntriesSubtitle)
                 .font(.bodyS)
                 .foregroundColor(.textTertiary)
 
@@ -129,7 +129,7 @@ private extension SectionDetailSheet {
                     detailRow(config.field2Label, value: entry.field2)
                 }
 
-                detailRow("Notes", value: entry.notes.isEmpty ? "-" : entry.notes)
+                detailRow(L10n.HealthProfile.notes, value: entry.notes.isEmpty ? "-" : entry.notes)
             }
             .padding(20)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -156,7 +156,7 @@ private extension SectionDetailSheet {
             showAddEntry = true
         } label: {
             HStack(spacing: 8) {
-                Text("Add")
+                Text(L10n.Common.add)
                     .font(.headingS)
                 Image(systemName: "plus")
                     .font(.system(size: 16, weight: .semibold))

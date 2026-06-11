@@ -8,11 +8,6 @@ struct ShareDocumentSheet: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Drag indicator
-            Capsule()
-                .fill(Color.textTertiary.opacity(0.3))
-                .frame(width: 36, height: 5)
-                .padding(.top, 10)
 
             ZStack {
                 switch viewModel.state {

@@ -70,7 +70,6 @@ struct DashboardView: View {
         .task(id: scenePhase) {
             guard scenePhase == .active else { return }
             SyncQueueManager.shared.drainPending()
-            await requestTrackingAfterSettling()
         }
         .task {
             guard !hasSeenCoachmark else { return }
@@ -116,7 +115,8 @@ private extension DashboardView {
             // Use at least 34pt safe area bottom as fallback (common iPhone home-indicator height)
             let safeBottom = max(geo.safeAreaInsets.bottom, 34)
             let fabCenterX = geo.size.width - 48
-            let fabCenterY = geo.size.height - safeBottom - 44
+            // FAB centre above the screen bottom = safeBottom + bar bottom padding (-8) + half FAB (28) = safeBottom + 20
+            let fabCenterY = geo.size.height - safeBottom - 20
             let spotR: CGFloat = 38
 
             ZStack {
@@ -144,7 +144,7 @@ private extension DashboardView {
                 DocumentCoachmarkCallout()
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
                     .padding(.trailing, 20)
-                    .padding(.bottom, safeBottom + 110)
+                    .padding(.bottom, safeBottom + 86)
                     .allowsHitTesting(false)
             }
         }
@@ -173,16 +173,6 @@ private struct SpotlightPassthroughShape: Shape {
                     startAngle: .zero, endAngle: .init(degrees: 360), clockwise: true)
         path.closeSubpath()
         return path
-    }
-}
-
-// MARK: - ATT
-
-private extension DashboardView {
-    func requestTrackingAfterSettling() async {
-        // Give the dashboard/splash transition a moment before the system dialog appears.
-        try? await Task.sleep(for: .seconds(2))
-        await ATTrackingService.requestIfNeeded()
     }
 }
 

@@ -7,11 +7,13 @@ struct ProfileView: View {
     @State private var showLogOutAlert = false
     @State private var showDeleteAlert = false
     @State private var isDeleting = false
+    @State private var showDeleteError = false
+    @State private var deleteErrorMessage = ""
     @State private var showPaywall = false
     @State private var showBiometricUnavailableAlert = false
     @State private var showFeedback = false
-    @State private var titleAppear = false
-    @State private var contentAppear = false
+    @State private var titleAppear = true
+    @State private var contentAppear = true
 
     var body: some View {
         NavigationStack(path: $router.path) {
@@ -163,11 +165,10 @@ struct ProfileView: View {
         } message: {
             Text(L10n.Profile.biometricUnavailableMessage)
         }
-        .onAppear {
-            titleAppear = true
-            withAnimation(.spring(response: 0.7, dampingFraction: 0.8).delay(0.1)) {
-                contentAppear = true
-            }
+        .alert(L10n.Profile.deleteAccountErrorTitle, isPresented: $showDeleteError) {
+            Button(L10n.Common.ok, role: .cancel) {}
+        } message: {
+            Text(deleteErrorMessage.isEmpty ? L10n.Profile.deleteAccountErrorMessage : deleteErrorMessage)
         }
         .overlay {
             LoadingOverlayView(isLoading: isDeleting, message: L10n.Profile.deletingAccount)
@@ -250,12 +251,22 @@ private extension ProfileView {
     func handleDeleteAccount() {
         isDeleting = true
         Task {
-            clearLocalUserData()
-            // Delete Firebase Auth account (Phase 4: also delete Storage/Firestore data via Cloud Function)
-            try? await AuthService.shared.deleteAccount()
-            // On success AuthService publishes isSignedIn=false and the app swaps to
-            // OnboardingView; reset here so the overlay clears if deletion failed.
-            isDeleting = false
+            do {
+                // Delete the Firebase Auth account first (reauthenticating if Firebase
+                // requires a recent login). Only wipe local data once the account is
+                // actually gone — otherwise a failed/cancelled deletion would strand the
+                // user in Home with all their data erased.
+                try await AuthService.shared.deleteAccount()
+                clearLocalUserData()
+                // deleteAccount() published currentUser = nil, so NeuraApp has already
+                // swapped to OnboardingView; this view (and its overlay) tears down with it.
+            } catch {
+                // Deletion failed (e.g. the user cancelled reauthentication). Keep all
+                // local data intact and tell them, instead of silently clearing the loader.
+                isDeleting = false
+                deleteErrorMessage = error.localizedDescription
+                showDeleteError = true
+            }
         }
     }
 

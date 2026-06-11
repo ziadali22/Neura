@@ -137,6 +137,11 @@
 "onboarding.healthKit.privacyNote" = "You control what Neura reads. Data stays on your device and is never shared.";
 "onboarding.healthKit.connect" = "Connect Apple Health";
 
+// MARK: - Onboarding Notifications
+"onboarding.notifications.title" = "Stay updated";
+"onboarding.notifications.subtitle" = "Get reminders to keep your health profile up to date.";
+"onboarding.notifications.allow" = "Allow notifications";
+
 // MARK: - Onboarding Health Data
 "onboarding.healthData.title" = "We found your data";
 "onboarding.healthData.subtitle" = "Here's what we pulled from Apple Health:";
@@ -218,6 +223,9 @@
 "home.shareHealth.title" = "Share your Health Profile";
 "home.shareHealth.subtitle" = "Give instant access to your essential medical summary — skip explanations, get care faster.";
 "home.shareHealth.share" = "Share";
+"home.appUpdate.title" = "Update Available";
+"home.appUpdate.subtitleFormat" = "Version %@ is now available with the latest improvements.";
+"home.appUpdate.updateNow" = "Update Now";
 
 // MARK: - Emergency
 "emergency.title" = "Emergency Card";
@@ -246,6 +254,8 @@
 "documents.importFile" = "Import File";
 "documents.deleteAlertTitleFormat" = "Delete %d Document(s)?";
 "documents.selectedCountFormat" = "%d Items";
+"documents.noneSelected" = "None Selected";
+"documents.selectedFormat" = "%d Selected";
 "documents.newFolderMessage" = "Enter a name for your new folder.";
 "documents.photoAccess.title" = "Photos Access Required";
 "documents.photoAccess.openSettings" = "Open Settings";
@@ -291,6 +301,13 @@
 "documents.section.thisMonth" = "This Month";
 
 // MARK: - Documents Category
+"documents.category.name.bloodTests" = "Blood Tests";
+"documents.category.name.medicalLetter" = "Medical Letter";
+"documents.category.name.consultations" = "Consultations";
+"documents.category.name.prescriptions" = "Prescriptions";
+"documents.category.name.hospitalization" = "Hospitalization";
+"documents.category.name.vaccination" = "Vaccination";
+"documents.category.name.imaging" = "Imaging";
 "documents.category.noDocumentsYet" = "No Documents Yet";
 "documents.category.searchFormat" = "Search in %@";
 "documents.category.emptyDescriptionFormat" = "Scan or upload a document and tag it as %@.";
@@ -385,6 +402,83 @@
 "healthProfile.report.feature4Subtitle" = "Professional layout ready for your doctor";
 "healthProfile.updatedFormat" = "Updated %@";
 "healthProfile.valueLabel" = "Value";
+"healthProfile.field.name" = "Name";
+"healthProfile.field.myNumber" = "My Number";
+"healthProfile.field.emergencyNumber" = "Emergency Number";
+"healthProfile.renameFieldTitle" = "Rename Field";
+"healthProfile.removeFieldMessage" = "This will remove the field and all of its entries.";
+"healthProfile.fieldNamePlaceholder" = "Field name";
+"healthProfile.addFieldMessage" = "Add your own field, e.g. \"Primary Doctor\" or \"Allergies Card\".";
+"healthProfile.notes" = "Notes";
+"healthProfile.fieldsFilledFormat" = "%d/%d filled";
+"healthProfile.deleteSectionFormat" = "Delete \"%@\"?";
+
+"healthProfile.section.knownConditions" = "Known Conditions";
+"healthProfile.section.medications" = "Medication & Supplements";
+"healthProfile.section.allergies" = "Allergies";
+"healthProfile.section.symptoms" = "Reported Symptoms";
+"healthProfile.section.familyHistory" = "Family History";
+
+"healthProfile.option.male" = "Male";
+"healthProfile.option.female" = "Female";
+"healthProfile.option.preferNotToSay" = "Prefer not to say";
+"healthProfile.option.insured" = "Insured";
+"healthProfile.option.uninsured" = "Uninsured";
+"healthProfile.option.partiallyInsured" = "Partially Insured";
+
+"healthProfile.entry.allergy.add" = "Add Allergy";
+"healthProfile.entry.allergy.delete" = "Delete Allergy";
+"healthProfile.entry.allergy.name" = "Allergy Name";
+"healthProfile.entry.allergy.namePlaceholder" = "E.g. peanuts";
+"healthProfile.entry.allergy.field1" = "Symptoms";
+"healthProfile.entry.allergy.field1Placeholder" = "E.g. swelling, rash";
+"healthProfile.entry.allergy.field2" = "Treatment";
+"healthProfile.entry.allergy.field2Placeholder" = "E.g. antihistamine, EpiPen";
+
+"healthProfile.entry.medication.add" = "Add Medication";
+"healthProfile.entry.medication.delete" = "Delete Medication";
+"healthProfile.entry.medication.name" = "Medication Name";
+"healthProfile.entry.medication.namePlaceholder" = "E.g. Vitamin D";
+"healthProfile.entry.medication.field1" = "Dosage";
+"healthProfile.entry.medication.field1Placeholder" = "E.g. 1000 IU";
+"healthProfile.entry.medication.field2" = "Frequency";
+"healthProfile.entry.medication.field2Placeholder" = "E.g. daily";
+
+"healthProfile.entry.condition.add" = "Add Condition";
+"healthProfile.entry.condition.delete" = "Delete Condition";
+"healthProfile.entry.condition.name" = "Condition Name";
+"healthProfile.entry.condition.namePlaceholder" = "E.g. diabetes";
+"healthProfile.entry.condition.field1" = "Diagnosed";
+"healthProfile.entry.condition.field1Placeholder" = "E.g. since 2020";
+"healthProfile.entry.condition.field2" = "Treatment";
+"healthProfile.entry.condition.field2Placeholder" = "E.g. insulin therapy";
+
+"healthProfile.entry.symptom.add" = "Add Symptom";
+"healthProfile.entry.symptom.delete" = "Delete Symptom";
+"healthProfile.entry.symptom.name" = "Symptom Name";
+"healthProfile.entry.symptom.namePlaceholder" = "E.g. persistent fatigue";
+"healthProfile.entry.symptom.field1" = "Severity";
+"healthProfile.entry.symptom.field1Placeholder" = "E.g. moderate";
+"healthProfile.entry.symptom.field2" = "Duration";
+"healthProfile.entry.symptom.field2Placeholder" = "E.g. 3 months";
+
+"healthProfile.entry.family.add" = "Add Family History";
+"healthProfile.entry.family.delete" = "Delete Family History";
+"healthProfile.entry.family.name" = "Condition";
+"healthProfile.entry.family.namePlaceholder" = "E.g. hypertension";
+"healthProfile.entry.family.field1" = "Relation";
+"healthProfile.entry.family.field1Placeholder" = "E.g. mother";
+"healthProfile.entry.family.field2" = "Details";
+"healthProfile.entry.family.field2Placeholder" = "E.g. diagnosed at 50";
+
+"healthProfile.entry.default.add" = "Add Entry";
+"healthProfile.entry.default.delete" = "Delete Entry";
+"healthProfile.entry.default.name" = "Name";
+"healthProfile.entry.default.namePlaceholder" = "Enter name";
+"healthProfile.entry.default.field1" = "Details";
+"healthProfile.entry.default.field1Placeholder" = "Enter details";
+"healthProfile.entry.default.field2" = "Additional Info";
+"healthProfile.entry.default.field2Placeholder" = "Enter info";
 
 // MARK: - Profile
 "profile.title" = "Profile";
@@ -410,6 +504,8 @@
 "profile.logOutMessage" = "Are you sure you want to log out?";
 "profile.deleteAccountMessage" = "This action cannot be undone. All your data will be permanently deleted.";
 "profile.deletingAccount" = "Deleting your account…";
+"profile.deleteAccountErrorTitle" = "Couldn't delete account";
+"profile.deleteAccountErrorMessage" = "We couldn't delete your account. Please try again.";
 "profile.biometricLockFormat" = "%@ Lock";
 "profile.biometricUnavailableSubtitle" = "Set up device biometrics first";
 "profile.biometricUnavailableTitle" = "Biometrics unavailable";
@@ -432,7 +528,31 @@
 "paywall.title" = "Neura Pro";
 "paywall.subtitle" = "Unlock unlimited document uploads\nand premium features";
 "paywall.continueFormat" = "Continue with %@";
-"paywall.restore" = "Restore Purchase";
+"paywall.restore" = "Restore";
+"paywall.getPro" = "Get Neura Pro";
+"paywall.cancelAnytime" = "Cancel anytime";
+"paywall.bestValue" = "BEST VALUE";
+"paywall.planMonthly" = "Monthly";
+"paywall.planYearly" = "Yearly";
+"paywall.perMonthSuffix" = "/month";
+"paywall.perYearSuffix" = "/year";
+"paywall.periodMonth" = "month";
+"paywall.periodYear" = "year";
+"paywall.perMonthOnlyFormat" = "only %@/month";
+"paywall.termsOfUse" = "Terms of Use";
+"paywall.privacyPolicy" = "Privacy Policy";
+"paywall.renewalDisclosureFormat" = "Subscription is %@. It automatically renews each %@ unless cancelled at least 24 hours before the end of the current period. Payment is charged to your Apple Account. Manage or cancel anytime in your App Store settings.";
+"paywall.purchasePending" = "Your purchase is pending approval. You'll get access once it's confirmed.";
+"paywall.purchaseFailed" = "Something went wrong with your purchase. Please try again.";
+"paywall.restoreNone" = "No active subscription found to restore.";
+"paywall.slide1.title" = "All your records with you";
+"paywall.slide1.subtitle" = "No more digging before a visit.";
+"paywall.slide2.title" = "Upload in seconds";
+"paywall.slide2.subtitle" = "Scan or upload anything, anytime.";
+"paywall.slide3.title" = "Share with your doctors";
+"paywall.slide3.subtitle" = "Never explain your history from scratch again.";
+"paywall.slide4.title" = "Your card, your style";
+"paywall.slide4.subtitle" = "Only you see it. Make it personal.";
 
 // MARK: - Coachmark
 "coachmark.documentUpload.title" = "Add your first document";

@@ -35,7 +35,7 @@ struct GeneralDataSheet: View {
 
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("General Data")
+                    Text(L10n.HealthProfile.generalData)
                         .font(.displayXL)
                         .foregroundColor(.textPrimary)
                         .padding(.bottom, 8)
@@ -102,15 +102,15 @@ struct GeneralDataSheet: View {
             }
             .presentationDragIndicator(.hidden)
         }
-        .alert("Add Field", isPresented: $showAddFieldAlert) {
-            TextField("Field name", text: $newFieldName)
+        .alert(L10n.HealthProfile.addField, isPresented: $showAddFieldAlert) {
+            TextField(L10n.HealthProfile.fieldNamePlaceholder, text: $newFieldName)
             Button(L10n.Common.add) {
                 viewModel.addGeneralCustomField(label: newFieldName)
                 newFieldName = ""
             }
             Button(L10n.Common.cancel, role: .cancel) { newFieldName = "" }
         } message: {
-            Text("Add your own field, e.g. \"Primary Doctor\" or \"Allergies Card\".")
+            Text(L10n.HealthProfile.addFieldMessage)
         }
     }
 
@@ -119,16 +119,16 @@ struct GeneralDataSheet: View {
     private var fields: [GeneralFieldInfo] {
         let data = viewModel.profile.generalData
         return [
-            .init(label: "Name",             keyPath: \.fullName,        value: data.fullName,        kind: .text),
-            .init(label: "Date of birth",    keyPath: \.dateOfBirth,     value: data.dateOfBirth,     kind: .date),
-            .init(label: "Gender",           keyPath: \.gender,          value: data.gender,          kind: .options(["Male", "Female", "Prefer not to say"])),
-            .init(label: "Height",           keyPath: \.height,          value: data.height,          kind: .wheel(WheelPickerSheet.heightValues)),
-            .init(label: "Weight",           keyPath: \.weight,          value: data.weight,          kind: .wheel(WheelPickerSheet.weightValues)),
-            .init(label: "Insurance Status",    keyPath: \.insuranceStatus,       value: data.insuranceStatus,       kind: .options(["Insured", "Uninsured", "Partially Insured"])),
-            .init(label: "Blood Type",          keyPath: \.bloodType,             value: data.bloodType,             kind: .options(["A+", "A−", "B+", "B−", "AB+", "AB−", "O+", "O−"])),
-            .init(label: "My Number",           keyPath: \.myPhoneNumber,         value: data.myPhoneNumber,         kind: .text, keyboardType: .phonePad),
-            .init(label: "Emergency Contact",   keyPath: \.emergencyContactName,  value: data.emergencyContactName,  kind: .text),
-            .init(label: "Emergency Number",    keyPath: \.emergencyContactNumber, value: data.emergencyContactNumber, kind: .text, keyboardType: .phonePad),
+            .init(label: L10n.HealthProfile.fieldName,        keyPath: \.fullName,        value: data.fullName,        kind: .text),
+            .init(label: L10n.HealthProfile.dateOfBirth,      keyPath: \.dateOfBirth,     value: data.dateOfBirth,     kind: .date),
+            .init(label: L10n.HealthProfile.gender,           keyPath: \.gender,          value: data.gender,          kind: .options(["Male", "Female", "Prefer not to say"])),
+            .init(label: L10n.HealthProfile.height,           keyPath: \.height,          value: data.height,          kind: .wheel(WheelPickerSheet.heightValues)),
+            .init(label: L10n.HealthProfile.weight,           keyPath: \.weight,          value: data.weight,          kind: .wheel(WheelPickerSheet.weightValues)),
+            .init(label: L10n.HealthProfile.insuranceStatus,  keyPath: \.insuranceStatus,       value: data.insuranceStatus,       kind: .options(["Insured", "Uninsured", "Partially Insured"])),
+            .init(label: L10n.HealthProfile.bloodType,        keyPath: \.bloodType,             value: data.bloodType,             kind: .options(["A+", "A−", "B+", "B−", "AB+", "AB−", "O+", "O−"])),
+            .init(label: L10n.HealthProfile.myNumber,         keyPath: \.myPhoneNumber,         value: data.myPhoneNumber,         kind: .text, keyboardType: .phonePad),
+            .init(label: L10n.HealthProfile.emergencyContact, keyPath: \.emergencyContactName,  value: data.emergencyContactName,  kind: .text),
+            .init(label: L10n.HealthProfile.emergencyNumber,  keyPath: \.emergencyContactNumber, value: data.emergencyContactNumber, kind: .text, keyboardType: .phonePad),
         ]
     }
 }
@@ -147,7 +147,7 @@ private extension GeneralDataSheet {
 
                 if field.value.isEmpty {
                     HStack(spacing: 4) {
-                        Text("Add")
+                        Text(L10n.Common.add)
                             .font(.bodyL)
                             .foregroundColor(.textTertiary)
                         Image(systemName: "plus")
@@ -156,7 +156,7 @@ private extension GeneralDataSheet {
                     }
                 } else {
                     HStack(spacing: 6) {
-                        Text(field.value)
+                        Text(HealthOption.localized(field.value))
                             .font(.statLabel)
                             .foregroundColor(.textSecondary)
                         if field.kind != .text {
@@ -187,7 +187,7 @@ private extension GeneralDataSheet {
 
                 if field.value.isEmpty {
                     HStack(spacing: 4) {
-                        Text("Add")
+                        Text(L10n.Common.add)
                             .font(.bodyL)
                             .foregroundColor(.textTertiary)
                         Image(systemName: "plus")
@@ -228,7 +228,7 @@ private extension GeneralDataSheet {
             showAddFieldAlert = true
         } label: {
             HStack {
-                Text("Add Field")
+                Text(L10n.HealthProfile.addField)
                     .font(.system(size: 18, weight: .medium))
                     .foregroundColor(.textPrimary)
                 Spacer()

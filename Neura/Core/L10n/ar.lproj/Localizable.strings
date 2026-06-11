@@ -132,6 +132,11 @@
 "onboarding.healthKit.privacyNote" = "أنت من يتحكم فيما يقرأه Neura. تبقى البيانات على جهازك ولا تُشارَك أبداً.";
 "onboarding.healthKit.connect" = "ربط Apple Health";
 
+// MARK: - Onboarding Notifications
+"onboarding.notifications.title" = "ابقَ على اطلاع";
+"onboarding.notifications.subtitle" = "احصل على تذكيرات للحفاظ على ملفك الصحي محدثاً.";
+"onboarding.notifications.allow" = "السماح بالإشعارات";
+
 // MARK: - Onboarding Health Data
 "onboarding.healthData.title" = "وجدنا بياناتك";
 "onboarding.healthData.subtitle" = "إليك ما جلبناه من Apple Health:";
@@ -213,6 +218,9 @@
 "home.shareHealth.title" = "شارك ملفك الصحي";
 "home.shareHealth.subtitle" = "أعطِ وصولاً فورياً إلى ملخصك الطبي الأساسي — تخطَّ الشرح واحصل على الرعاية بسرعة.";
 "home.shareHealth.share" = "مشاركة";
+"home.appUpdate.title" = "تحديث متوفر";
+"home.appUpdate.subtitleFormat" = "الإصدار %@ متوفر الآن مع أحدث التحسينات.";
+"home.appUpdate.updateNow" = "تحديث الآن";
 
 // MARK: - Emergency
 "emergency.title" = "بطاقة الطوارئ";
@@ -241,6 +249,8 @@
 "documents.importFile" = "استيراد ملف";
 "documents.deleteAlertTitleFormat" = "حذف %d مستند(ات)؟";
 "documents.selectedCountFormat" = "%d عنصر";
+"documents.noneSelected" = "لم يتم التحديد";
+"documents.selectedFormat" = "%d محدد";
 "documents.newFolderMessage" = "أدخل اسماً لمجلدك الجديد.";
 "documents.photoAccess.title" = "الوصول إلى الصور مطلوب";
 "documents.photoAccess.openSettings" = "فتح الإعدادات";
@@ -286,6 +296,13 @@
 "documents.section.thisMonth" = "هذا الشهر";
 
 // MARK: - Documents Category
+"documents.category.name.bloodTests" = "فحوصات الدم";
+"documents.category.name.medicalLetter" = "خطاب طبي";
+"documents.category.name.consultations" = "الاستشارات";
+"documents.category.name.prescriptions" = "الوصفات الطبية";
+"documents.category.name.hospitalization" = "الإقامة في المستشفى";
+"documents.category.name.vaccination" = "التطعيمات";
+"documents.category.name.imaging" = "التصوير الطبي";
 "documents.category.noDocumentsYet" = "لا توجد مستندات بعد";
 "documents.category.searchFormat" = "البحث في %@";
 "documents.category.emptyDescriptionFormat" = "قم بمسح أو رفع مستند ووضع علامة %@ عليه.";
@@ -380,6 +397,83 @@
 "healthProfile.report.feature4Subtitle" = "تنسيق احترافي جاهز لطبيبك";
 "healthProfile.updatedFormat" = "تم التحديث %@";
 "healthProfile.valueLabel" = "القيمة";
+"healthProfile.field.name" = "الاسم";
+"healthProfile.field.myNumber" = "رقمي";
+"healthProfile.field.emergencyNumber" = "رقم الطوارئ";
+"healthProfile.renameFieldTitle" = "إعادة تسمية الحقل";
+"healthProfile.removeFieldMessage" = "سيؤدي هذا إلى إزالة الحقل وكل مدخلاته.";
+"healthProfile.fieldNamePlaceholder" = "اسم الحقل";
+"healthProfile.addFieldMessage" = "أضف حقلك الخاص، مثل \"الطبيب الأساسي\" أو \"بطاقة الحساسية\".";
+"healthProfile.notes" = "ملاحظات";
+"healthProfile.fieldsFilledFormat" = "%d/%d مكتمل";
+"healthProfile.deleteSectionFormat" = "حذف \"%@\"؟";
+
+"healthProfile.section.knownConditions" = "الحالات المعروفة";
+"healthProfile.section.medications" = "الأدوية والمكمّلات";
+"healthProfile.section.allergies" = "الحساسيات";
+"healthProfile.section.symptoms" = "الأعراض المُبلَّغ عنها";
+"healthProfile.section.familyHistory" = "التاريخ العائلي";
+
+"healthProfile.option.male" = "ذكر";
+"healthProfile.option.female" = "أنثى";
+"healthProfile.option.preferNotToSay" = "أفضّل عدم الإفصاح";
+"healthProfile.option.insured" = "مؤمَّن";
+"healthProfile.option.uninsured" = "غير مؤمَّن";
+"healthProfile.option.partiallyInsured" = "مؤمَّن جزئياً";
+
+"healthProfile.entry.allergy.add" = "إضافة حساسية";
+"healthProfile.entry.allergy.delete" = "حذف الحساسية";
+"healthProfile.entry.allergy.name" = "اسم الحساسية";
+"healthProfile.entry.allergy.namePlaceholder" = "مثال: الفول السوداني";
+"healthProfile.entry.allergy.field1" = "الأعراض";
+"healthProfile.entry.allergy.field1Placeholder" = "مثال: تورّم، طفح جلدي";
+"healthProfile.entry.allergy.field2" = "العلاج";
+"healthProfile.entry.allergy.field2Placeholder" = "مثال: مضاد هيستامين، حاقن إبينفرين";
+
+"healthProfile.entry.medication.add" = "إضافة دواء";
+"healthProfile.entry.medication.delete" = "حذف الدواء";
+"healthProfile.entry.medication.name" = "اسم الدواء";
+"healthProfile.entry.medication.namePlaceholder" = "مثال: فيتامين د";
+"healthProfile.entry.medication.field1" = "الجرعة";
+"healthProfile.entry.medication.field1Placeholder" = "مثال: 1000 وحدة دولية";
+"healthProfile.entry.medication.field2" = "التكرار";
+"healthProfile.entry.medication.field2Placeholder" = "مثال: يومياً";
+
+"healthProfile.entry.condition.add" = "إضافة حالة";
+"healthProfile.entry.condition.delete" = "حذف الحالة";
+"healthProfile.entry.condition.name" = "اسم الحالة";
+"healthProfile.entry.condition.namePlaceholder" = "مثال: السكري";
+"healthProfile.entry.condition.field1" = "تاريخ التشخيص";
+"healthProfile.entry.condition.field1Placeholder" = "مثال: منذ 2020";
+"healthProfile.entry.condition.field2" = "العلاج";
+"healthProfile.entry.condition.field2Placeholder" = "مثال: العلاج بالإنسولين";
+
+"healthProfile.entry.symptom.add" = "إضافة عرَض";
+"healthProfile.entry.symptom.delete" = "حذف العرَض";
+"healthProfile.entry.symptom.name" = "اسم العرَض";
+"healthProfile.entry.symptom.namePlaceholder" = "مثال: إرهاق مستمر";
+"healthProfile.entry.symptom.field1" = "الشدّة";
+"healthProfile.entry.symptom.field1Placeholder" = "مثال: متوسطة";
+"healthProfile.entry.symptom.field2" = "المدة";
+"healthProfile.entry.symptom.field2Placeholder" = "مثال: 3 أشهر";
+
+"healthProfile.entry.family.add" = "إضافة تاريخ عائلي";
+"healthProfile.entry.family.delete" = "حذف التاريخ العائلي";
+"healthProfile.entry.family.name" = "الحالة";
+"healthProfile.entry.family.namePlaceholder" = "مثال: ارتفاع ضغط الدم";
+"healthProfile.entry.family.field1" = "صلة القرابة";
+"healthProfile.entry.family.field1Placeholder" = "مثال: الأم";
+"healthProfile.entry.family.field2" = "التفاصيل";
+"healthProfile.entry.family.field2Placeholder" = "مثال: شُخِّص في سن الخمسين";
+
+"healthProfile.entry.default.add" = "إضافة مدخل";
+"healthProfile.entry.default.delete" = "حذف المدخل";
+"healthProfile.entry.default.name" = "الاسم";
+"healthProfile.entry.default.namePlaceholder" = "أدخل الاسم";
+"healthProfile.entry.default.field1" = "التفاصيل";
+"healthProfile.entry.default.field1Placeholder" = "أدخل التفاصيل";
+"healthProfile.entry.default.field2" = "معلومات إضافية";
+"healthProfile.entry.default.field2Placeholder" = "أدخل المعلومات";
 
 // MARK: - Profile
 "profile.title" = "الملف الشخصي";
@@ -405,6 +499,8 @@
 "profile.logOutMessage" = "هل أنت متأكد أنك تريد تسجيل الخروج؟";
 "profile.deleteAccountMessage" = "لا يمكن التراجع عن هذا الإجراء. ستُحذف جميع بياناتك نهائياً.";
 "profile.deletingAccount" = "جارٍ حذف حسابك…";
+"profile.deleteAccountErrorTitle" = "تعذّر حذف الحساب";
+"profile.deleteAccountErrorMessage" = "تعذّر حذف حسابك. يرجى المحاولة مرة أخرى.";
 "profile.biometricLockFormat" = "قفل %@";
 "profile.biometricUnavailableSubtitle" = "قم بإعداد القياسات الحيوية على الجهاز أولاً";
 "profile.biometricUnavailableTitle" = "القياسات الحيوية غير متاحة";
@@ -427,7 +523,31 @@
 "paywall.title" = "Neura Pro";
 "paywall.subtitle" = "افتح رفع مستندات غير محدود\nوميزات متميزة";
 "paywall.continueFormat" = "المتابعة مع %@";
-"paywall.restore" = "استعادة الشراء";
+"paywall.restore" = "استعادة";
+"paywall.getPro" = "احصل على Neura Pro";
+"paywall.cancelAnytime" = "ألغِ في أي وقت";
+"paywall.bestValue" = "الأفضل قيمة";
+"paywall.planMonthly" = "شهري";
+"paywall.planYearly" = "سنوي";
+"paywall.perMonthSuffix" = "/شهر";
+"paywall.perYearSuffix" = "/سنة";
+"paywall.periodMonth" = "شهر";
+"paywall.periodYear" = "سنة";
+"paywall.perMonthOnlyFormat" = "%@/شهر فقط";
+"paywall.termsOfUse" = "شروط الاستخدام";
+"paywall.privacyPolicy" = "سياسة الخصوصية";
+"paywall.renewalDisclosureFormat" = "الاشتراك بقيمة %@. يتجدّد تلقائياً كل %@ ما لم يتم إلغاؤه قبل 24 ساعة على الأقل من نهاية الفترة الحالية. يُخصم المبلغ من حساب Apple الخاص بك. يمكنك الإدارة أو الإلغاء في أي وقت من إعدادات App Store.";
+"paywall.purchasePending" = "عملية الشراء قيد الموافقة. ستحصل على الوصول بمجرد تأكيدها.";
+"paywall.purchaseFailed" = "حدث خطأ ما أثناء عملية الشراء. يرجى المحاولة مرة أخرى.";
+"paywall.restoreNone" = "لم يتم العثور على اشتراك نشط لاستعادته.";
+"paywall.slide1.title" = "كل سجلاتك معك";
+"paywall.slide1.subtitle" = "لا مزيد من البحث قبل أي زيارة.";
+"paywall.slide2.title" = "ارفع في ثوانٍ";
+"paywall.slide2.subtitle" = "امسح أو ارفع أي شيء، في أي وقت.";
+"paywall.slide3.title" = "شارك مع أطبائك";
+"paywall.slide3.subtitle" = "لن تشرح تاريخك المرضي من البداية مرة أخرى.";
+"paywall.slide4.title" = "بطاقتك، بأسلوبك";
+"paywall.slide4.subtitle" = "أنت وحدك من يراها. اجعلها شخصية.";
 
 // MARK: - Coachmark
 "coachmark.documentUpload.title" = "أضف وثيقتك الأولى";

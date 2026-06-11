@@ -52,7 +52,7 @@ struct OnboardingView: View {
             // Back + Skip buttons — left and right aligned
             HStack {
                 if viewModel.currentStep != .stopSearching {
-                    Button("Back", systemImage: "chevron.left") {
+                    Button("Back", systemImage: "chevron.backward") {
                         HapticManager.light()
                         viewModel.goBack()
                     }
@@ -120,6 +120,7 @@ struct OnboardingView: View {
             case .healthData:      OnboardingHealthDataStep(viewModel: viewModel)
             case .medical:         OnboardingMedicalStep(viewModel: viewModel)
             case .documents:       OnboardingDocumentsStep(viewModel: viewModel)
+            case .notifications:   OnboardingNotificationsStep(viewModel: viewModel)
             case .calculating:     OnboardingCalculatingStep(viewModel: viewModel)
             }
         }

@@ -51,13 +51,14 @@ struct OnboardingHealthKitStep: View {
             }
             .scrollIndicators(.hidden)
 
+            // Per App Review 5.1.1(iv): once this priming message is shown, the user must
+            // always proceed to the system HealthKit prompt. No "Not now" / skip exit here —
+            // declining happens in the system permission dialog itself.
             OnboardingContinueButton(
                 action: viewModel.requestHealthKit,
                 title: L10n.Onboarding.HealthKit.connect,
                 isLoading: viewModel.healthKitStatus == .requesting,
-                leadingIcon: "heart.fill",
-                secondaryTitle: L10n.Common.notNow,
-                secondaryAction: viewModel.skip
+                leadingIcon: "heart.fill"
             )
             .opacity(appeared ? 1 : 0)
         }

@@ -53,7 +53,7 @@ struct OptionPickerSheet: View {
                                 }
                             } label: {
                                 HStack {
-                                    Text(option)
+                                    Text(HealthOption.localized(option))
                                         .font(.BodyML)
                                         .foregroundStyle(Color.textPrimary)
                                     Spacer()

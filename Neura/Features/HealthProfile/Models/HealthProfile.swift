@@ -83,6 +83,21 @@ struct HealthProfile: Codable {
         var title: String
         var entries: [Entry]
 
+        /// Display title. Localizes the built-in section titles while leaving
+        /// user-created titles untouched. The stored `title` always stays English
+        /// so `forSection` matching, Codable round-trips, and `defaultSectionTitles`
+        /// continue to work regardless of the active language.
+        var localizedTitle: String {
+            switch title {
+            case "Known Conditions":        return L10n.HealthProfile.Section.knownConditions
+            case "Medication & Supplements": return L10n.HealthProfile.Section.medications
+            case "Allergies":               return L10n.HealthProfile.Section.allergies
+            case "Reported Symptoms":       return L10n.HealthProfile.Section.symptoms
+            case "Family History":          return L10n.HealthProfile.Section.familyHistory
+            default:                        return title
+            }
+        }
+
         struct Entry: Identifiable, Codable, Hashable {
             var id: UUID
             var text: String
@@ -189,6 +204,7 @@ struct HealthProfile: Codable {
 
 struct SectionFieldConfig {
     let addTitle: String
+    let deleteTitle: String
     let nameLabel: String
     let namePlaceholder: String
     let field1Label: String
@@ -196,68 +212,97 @@ struct SectionFieldConfig {
     let field2Label: String
     let field2Placeholder: String
 
+    /// Matches on the canonical (English) section title — callers always pass the
+    /// stored `title`, never `localizedTitle`, so matching is language-independent.
     static func forSection(_ title: String) -> SectionFieldConfig {
+        typealias E = L10n.HealthProfile.Entry
         switch title.lowercased() {
         case let t where t.contains("allerg"):
             return .init(
-                addTitle: "Add Allergy",
-                nameLabel: "Allergy Name",
-                namePlaceholder: "E.g. peanuts",
-                field1Label: "Symptoms",
-                field1Placeholder: "E.g. swelling, rash",
-                field2Label: "Treatment",
-                field2Placeholder: "E.g. antihistamine, EpiPen"
+                addTitle: E.addAllergy,
+                deleteTitle: E.deleteAllergy,
+                nameLabel: E.allergyName,
+                namePlaceholder: E.allergyNamePlaceholder,
+                field1Label: E.allergySymptoms,
+                field1Placeholder: E.allergySymptomsPlaceholder,
+                field2Label: E.allergyTreatment,
+                field2Placeholder: E.allergyTreatmentPlaceholder
             )
         case let t where t.contains("medication") || t.contains("supplement"):
             return .init(
-                addTitle: "Add Medication",
-                nameLabel: "Medication Name",
-                namePlaceholder: "E.g. Vitamin D",
-                field1Label: "Dosage",
-                field1Placeholder: "E.g. 1000 IU",
-                field2Label: "Frequency",
-                field2Placeholder: "E.g. daily"
+                addTitle: E.addMedication,
+                deleteTitle: E.deleteMedication,
+                nameLabel: E.medicationName,
+                namePlaceholder: E.medicationNamePlaceholder,
+                field1Label: E.medicationDosage,
+                field1Placeholder: E.medicationDosagePlaceholder,
+                field2Label: E.medicationFrequency,
+                field2Placeholder: E.medicationFrequencyPlaceholder
             )
         case let t where t.contains("condition"):
             return .init(
-                addTitle: "Add Condition",
-                nameLabel: "Condition Name",
-                namePlaceholder: "E.g. diabetes",
-                field1Label: "Diagnosed",
-                field1Placeholder: "E.g. since 2020",
-                field2Label: "Treatment",
-                field2Placeholder: "E.g. insulin therapy"
+                addTitle: E.addCondition,
+                deleteTitle: E.deleteCondition,
+                nameLabel: E.conditionName,
+                namePlaceholder: E.conditionNamePlaceholder,
+                field1Label: E.conditionDiagnosed,
+                field1Placeholder: E.conditionDiagnosedPlaceholder,
+                field2Label: E.conditionTreatment,
+                field2Placeholder: E.conditionTreatmentPlaceholder
             )
         case let t where t.contains("symptom"):
             return .init(
-                addTitle: "Add Symptom",
-                nameLabel: "Symptom Name",
-                namePlaceholder: "E.g. persistent fatigue",
-                field1Label: "Severity",
-                field1Placeholder: "E.g. moderate",
-                field2Label: "Duration",
-                field2Placeholder: "E.g. 3 months"
+                addTitle: E.addSymptom,
+                deleteTitle: E.deleteSymptom,
+                nameLabel: E.symptomName,
+                namePlaceholder: E.symptomNamePlaceholder,
+                field1Label: E.symptomSeverity,
+                field1Placeholder: E.symptomSeverityPlaceholder,
+                field2Label: E.symptomDuration,
+                field2Placeholder: E.symptomDurationPlaceholder
             )
         case let t where t.contains("family"):
             return .init(
-                addTitle: "Add Family History",
-                nameLabel: "Condition",
-                namePlaceholder: "E.g. hypertension",
-                field1Label: "Relation",
-                field1Placeholder: "E.g. mother",
-                field2Label: "Details",
-                field2Placeholder: "E.g. diagnosed at 50"
+                addTitle: E.addFamily,
+                deleteTitle: E.deleteFamily,
+                nameLabel: E.familyCondition,
+                namePlaceholder: E.familyConditionPlaceholder,
+                field1Label: E.familyRelation,
+                field1Placeholder: E.familyRelationPlaceholder,
+                field2Label: E.familyDetails,
+                field2Placeholder: E.familyDetailsPlaceholder
             )
         default:
             return .init(
-                addTitle: "Add Entry",
-                nameLabel: "Name",
-                namePlaceholder: "Enter name",
-                field1Label: "Details",
-                field1Placeholder: "Enter details",
-                field2Label: "Additional Info",
-                field2Placeholder: "Enter info"
+                addTitle: E.addEntry,
+                deleteTitle: E.deleteEntry,
+                nameLabel: E.defaultName,
+                namePlaceholder: E.defaultNamePlaceholder,
+                field1Label: E.defaultDetails,
+                field1Placeholder: E.defaultDetailsPlaceholder,
+                field2Label: E.defaultInfo,
+                field2Placeholder: E.defaultInfoPlaceholder
             )
+        }
+    }
+}
+
+// MARK: - Health Option Localization
+
+/// Localizes the canonical (English) picker option values for *display only*.
+/// The stored value always remains the English canonical string, so persistence
+/// and any matching stay stable. Unknown values (blood types, custom text) pass
+/// through unchanged.
+enum HealthOption {
+    static func localized(_ canonical: String) -> String {
+        switch canonical {
+        case "Male":              return L10n.HealthProfile.Option.male
+        case "Female":            return L10n.HealthProfile.Option.female
+        case "Prefer not to say": return L10n.HealthProfile.Option.preferNotToSay
+        case "Insured":           return L10n.HealthProfile.Option.insured
+        case "Uninsured":         return L10n.HealthProfile.Option.uninsured
+        case "Partially Insured": return L10n.HealthProfile.Option.partiallyInsured
+        default:                  return canonical
         }
     }
 }

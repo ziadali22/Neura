@@ -167,7 +167,7 @@ private struct FolderDocumentRow: View {
 
             Spacer(minLength: 4)
 
-            Image(systemName: "chevron.right")
+            Image(systemName: "chevron.forward")
                 .font(.system(size: 10, weight: .semibold))
                 .foregroundStyle(Color.textTertiary)
                 .accessibilityHidden(true)

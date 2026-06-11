@@ -18,8 +18,8 @@ struct PaywallView: View {
 
         var title: String {
             switch self {
-            case .monthly: return "Monthly"
-            case .yearly:  return "Yearly"
+            case .monthly: return L10n.Paywall.planMonthly
+            case .yearly:  return L10n.Paywall.planYearly
             }
         }
 
@@ -34,8 +34,8 @@ struct PaywallView: View {
         /// Period suffix appended to the localized price (e.g. "/month").
         var periodSuffix: String {
             switch self {
-            case .monthly: return "/month"
-            case .yearly:  return "/year"
+            case .monthly: return L10n.Paywall.perMonthSuffix
+            case .yearly:  return L10n.Paywall.perYearSuffix
             }
         }
 
@@ -54,18 +54,28 @@ struct PaywallView: View {
         product(for: selectedPlan) == nil && subscriptionManager.isLoadingProducts
     }
 
+    /// Placeholder prices shown only until StoreKit products finish loading.
+    private static let fallbackAnnualPrice: Decimal = 49.99
+    private static let fallbackMonthlyPrice: Decimal = 3.99
+
     private func priceText(for plan: Plan) -> String {
         guard let product = product(for: plan) else {
-            return plan == .yearly ? "$49.99/year" : "$3.99/month"
+            return (plan == .yearly ? "$49.99" : "$3.99") + plan.periodSuffix
         }
         return product.displayPrice + plan.periodSuffix
     }
 
-    /// "only $4.16/month" derived from the annual price; nil for the monthly plan.
+    /// "only $4.16/month" — the annual price divided by 12. Yearly plan only.
+    /// Uses the live StoreKit price when loaded, otherwise the placeholder annual price
+    /// so the subtitle stays visible before products arrive.
     private func perMonthText(for plan: Plan) -> String? {
-        guard plan == .yearly, let product = product(for: plan) else { return nil }
-        let perMonth = product.price / 12
-        return "only " + perMonth.formatted(product.priceFormatStyle) + "/month"
+        guard plan == .yearly else { return nil }
+        if let product = product(for: plan) {
+            let perMonth = product.price / 12
+            return L10n.Paywall.perMonthOnly(perMonth.formatted(product.priceFormatStyle))
+        }
+        let perMonth = Self.fallbackAnnualPrice / 12
+        return L10n.Paywall.perMonthOnly(perMonth.formatted(.currency(code: "USD").precision(.fractionLength(2))))
     }
 
     // MARK: - Slide Model
@@ -77,10 +87,10 @@ struct PaywallView: View {
     }
 
     private let slides: [Slide] = [
-        Slide(image: "mockup",  title: "All your records with you",   subtitle: "No more digging before a visit."),
-        Slide(image: "scan",    title: "Upload in seconds",           subtitle: "Scan or upload anything, anytime."),
-        Slide(image: "doctors", title: "Share with your doctors",     subtitle: "Never explain your history from scratch again."),
-        Slide(image: "cards",   title: "Your card, your style",       subtitle: "Only you see it. Make it personal."),
+        Slide(image: "mockup",  title: L10n.Paywall.Slide.title1, subtitle: L10n.Paywall.Slide.subtitle1),
+        Slide(image: "scan",    title: L10n.Paywall.Slide.title2, subtitle: L10n.Paywall.Slide.subtitle2),
+        Slide(image: "doctors", title: L10n.Paywall.Slide.title3, subtitle: L10n.Paywall.Slide.subtitle3),
+        Slide(image: "cards",   title: L10n.Paywall.Slide.title4, subtitle: L10n.Paywall.Slide.subtitle4),
     ]
 
     // MARK: - Body
@@ -115,13 +125,13 @@ struct PaywallView: View {
         .task { await subscriptionManager.loadProducts() }
         .onAppear { AnalyticsManager.shared.track("paywall_viewed") }
         .alert(
-            "Neura Pro",
+            L10n.Common.neura,
             isPresented: Binding(
                 get: { alertMessage != nil },
                 set: { if !$0 { alertMessage = nil } }
             )
         ) {
-            Button("OK", role: .cancel) {}
+            Button(L10n.Common.ok, role: .cancel) {}
         } message: {
             Text(alertMessage ?? "")
         }
@@ -155,7 +165,7 @@ struct PaywallView: View {
                         ProgressView()
                             .tint(Color.textPrimary.opacity(0.7))
                     } else {
-                        Text("Restore")
+                        Text(L10n.Paywall.restore)
                             .font(.system(size: 15, weight: .medium))
                             .foregroundStyle(Color.textPrimary.opacity(0.7))
                     }
@@ -170,7 +180,7 @@ struct PaywallView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(height: 24)
-                Text("Get Neura Pro")
+                Text(L10n.Paywall.getPro)
                     .font(.system(size: 18, weight: .medium))
             }
 
@@ -264,7 +274,7 @@ struct PaywallView: View {
                     ProgressView()
                         .tint(.white)
                 } else {
-                    Text("Get Neura Pro")
+                    Text(L10n.Paywall.getPro)
                         .font(.system(size: 17, weight: .semibold))
                         .foregroundStyle(.white)
                 }
@@ -282,7 +292,7 @@ struct PaywallView: View {
     // MARK: - Cancel Label
 
     private var cancelLabel: some View {
-        Text("Cancel anytime")
+        Text(L10n.Paywall.cancelAnytime)
             .font(.system(size: 13))
             .foregroundStyle(Color.black.opacity(0.4))
     }
@@ -294,8 +304,8 @@ struct PaywallView: View {
 
     private var renewalDisclosure: String {
         let price = priceText(for: selectedPlan)
-        let period = selectedPlan == .yearly ? "year" : "month"
-        return "Subscription is \(price). It automatically renews each \(period) unless cancelled at least 24 hours before the end of the current period. Payment is charged to your Apple Account. Manage or cancel anytime in your App Store settings."
+        let period = selectedPlan == .yearly ? L10n.Paywall.periodYear : L10n.Paywall.periodMonth
+        return L10n.Paywall.renewalDisclosure(price, period)
     }
 
     private var legalFooter: some View {
@@ -307,9 +317,9 @@ struct PaywallView: View {
                 .lineSpacing(1)
 
             HStack(spacing: 6) {
-                Link("Terms of Use", destination: Self.termsURL)
+                Link(L10n.Paywall.termsOfUse, destination: Self.termsURL)
                 Text("·").foregroundStyle(Color.black.opacity(0.3))
-                Link("Privacy Policy", destination: Self.privacyURL)
+                Link(L10n.Paywall.privacyPolicy, destination: Self.privacyURL)
             }
             .font(.system(size: 11, weight: .medium))
             .tint(Color.black.opacity(0.55))
@@ -329,11 +339,11 @@ struct PaywallView: View {
         case .success:
             dismiss()
         case .pending:
-            alertMessage = "Your purchase is pending approval. You'll get access once it's confirmed."
+            alertMessage = L10n.Paywall.purchasePending
         case .cancelled:
             break
         case .failed:
-            alertMessage = "Something went wrong with your purchase. Please try again."
+            alertMessage = L10n.Paywall.purchaseFailed
         }
     }
 
@@ -346,7 +356,7 @@ struct PaywallView: View {
         if await subscriptionManager.restore() {
             dismiss()
         } else {
-            alertMessage = "No active subscription found to restore."
+            alertMessage = L10n.Paywall.restoreNone
         }
     }
 }
@@ -403,7 +413,7 @@ private struct PlanCard: View {
     private var cardBody: some View {
         VStack(alignment: .leading, spacing: 6) {
             // Invisible badge-height placeholder keeps both cards equal height
-            Text("BEST VALUE")
+            Text(L10n.Paywall.bestValue)
                 .font(.system(size: 13, weight: .bold))
                 .opacity(0)
                 .padding(.vertical, 4)
@@ -437,7 +447,7 @@ private struct PlanCard: View {
     }
 
     private var bestValueBadge: some View {
-        Text("BEST VALUE")
+        Text(L10n.Paywall.bestValue)
             .font(.system(size: 13, weight: .bold))
             .foregroundStyle(.white)
             .padding(.horizontal, 14)

@@ -64,6 +64,11 @@ struct NeuraApp: App {
                         .environment(\.locale, languageManager.locale)
                         .environment(\.layoutDirection, languageManager.layoutDirection)
                         .environment(languageManager)
+                        // Force a full rebuild on language change so an already-instantiated
+                        // view tree adopts the new layout direction (RTL/LTR) immediately —
+                        // a live \.layoutDirection environment change alone does not retro-flip
+                        // an existing tree, only a fresh build does.
+                        .id(languageManager.currentLanguage)
                 } else {
                     OnboardingView(onComplete: {
                         showSplash = true
@@ -74,6 +79,7 @@ struct NeuraApp: App {
                     .environment(\.locale, languageManager.locale)
                     .environment(\.layoutDirection, languageManager.layoutDirection)
                     .environment(languageManager)
+                    .id(languageManager.currentLanguage)
                 }
 
                 if showSplash {
@@ -83,7 +89,12 @@ struct NeuraApp: App {
                 }
             }
             .onAppear {
-                scheduleProfileNotificationIfNeeded()
+                // Defer notification scheduling/permission until onboarding has finished.
+                // A fresh install asks for permission in the dedicated "Stay updated"
+                // onboarding step, so prompting here at launch would preempt it.
+                if hasCompletedOnboarding {
+                    scheduleProfileNotificationIfNeeded()
+                }
             }
             .task {
                 // Start the StoreKit transaction listener and reconcile Pro entitlement.

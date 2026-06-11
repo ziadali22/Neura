@@ -37,7 +37,7 @@ struct SettingsRow: View {
                 Spacer()
 
                 if showChevron {
-                    Image(systemName: "chevron.right")
+                    Image(systemName: "chevron.forward")
                         .font(.system(size: 14))
                         .foregroundStyle(Color.textTertiary)
                 }

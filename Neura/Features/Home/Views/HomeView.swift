@@ -4,14 +4,15 @@ struct HomeView: View {
     @EnvironmentObject private var router: HomeRouter
     @StateObject private var subscriptionManager = SubscriptionManager.shared
     @StateObject private var biometricAuth = BiometricAuthManager.shared
+    @StateObject private var updateChecker = AppUpdateChecker.shared
     @StateObject private var healthVM = HealthProfileViewModel()
     @StateObject private var docsViewModel = DocumentsListViewModel()
     @State private var recentDocuments: [Document] = []
-    @State private var greetingAppear = false
-    @State private var bannerAppear = false
-    @State private var profileCardAppear = false
-    @State private var completeCardAppear = false
-    @State private var recentAppear = false
+    @State private var greetingAppear = true
+    @State private var bannerAppear = true
+    @State private var profileCardAppear = true
+    @State private var completeCardAppear = true
+    @State private var recentAppear = true
     @State private var showShareSheet = false
     @State private var showPaywall = false
     @State private var showBackgroundPicker = false
@@ -136,6 +137,11 @@ struct HomeView: View {
             .fullScreenCover(isPresented: $showPaywall) {
                 PaywallView(subscriptionManager: subscriptionManager)
             }
+            .sheet(item: $updateChecker.availableUpdate) { update in
+                AppUpdateSheet(update: update)
+                    .presentationDetents([.medium])
+                    .presentationCornerRadius(32)
+            }
             .sheet(item: $selectedDocument) { document in
                 NavigationStack {
                     DocumentViewerView(document: document, onDelete: {
@@ -152,7 +158,7 @@ struct HomeView: View {
             }
             .onAppear {
                 loadRecentDocuments()
-                animateEntrance()
+                Task { await updateChecker.checkForUpdate() }
             }
             .onChange(of: router.path) {
                 if router.path.isEmpty {
@@ -192,22 +198,6 @@ struct HomeView: View {
             .sorted { $0.createdAt > $1.createdAt }
     }
 
-    // MARK: - Animations
-
-    private func animateEntrance() {
-        greetingAppear = true
-        bannerAppear = true
-
-        withAnimation(.spring(response: 0.7, dampingFraction: 0.8).delay(0.1)) {
-            profileCardAppear = true
-        }
-        withAnimation(.spring(response: 0.7, dampingFraction: 0.8).delay(0.2)) {
-            completeCardAppear = true
-        }
-        withAnimation(.easeOut(duration: 0.5).delay(0.3)) {
-            recentAppear = true
-        }
-    }
 }
 
 // MARK: - Recent Documents Section

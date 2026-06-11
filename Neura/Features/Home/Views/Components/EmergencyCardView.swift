@@ -54,7 +54,7 @@ private extension EmergencyCardView {
     var navBar: some View {
         HStack {
             Button { dismiss() } label: {
-                Image(systemName: "chevron.left")
+                Image(systemName: "chevron.backward")
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.textPrimary)
                     .frame(width: 40, height: 40)

@@ -132,6 +132,11 @@
 "onboarding.healthKit.privacyNote" = "Tu controlezi ce citește Neura. Datele rămân pe dispozitivul tău și nu sunt partajate niciodată.";
 "onboarding.healthKit.connect" = "Conectează Apple Health";
 
+// MARK: - Onboarding Notifications
+"onboarding.notifications.title" = "Rămâi la curent";
+"onboarding.notifications.subtitle" = "Primește memento-uri ca să-ți menții profilul de sănătate actualizat.";
+"onboarding.notifications.allow" = "Permite notificările";
+
 // MARK: - Onboarding Health Data
 "onboarding.healthData.title" = "Am găsit datele tale";
 "onboarding.healthData.subtitle" = "Iată ce am preluat din Apple Health:";
@@ -213,6 +218,9 @@
 "home.shareHealth.title" = "Distribuie profilul tău de sănătate";
 "home.shareHealth.subtitle" = "Oferă acces instant la rezumatul tău medical esențial — sari peste explicații, primește îngrijire mai rapid.";
 "home.shareHealth.share" = "Distribuie";
+"home.appUpdate.title" = "Actualizare disponibilă";
+"home.appUpdate.subtitleFormat" = "Versiunea %@ este acum disponibilă cu cele mai noi îmbunătățiri.";
+"home.appUpdate.updateNow" = "Actualizează acum";
 
 // MARK: - Emergency
 "emergency.title" = "Card de urgență";
@@ -241,6 +249,8 @@
 "documents.importFile" = "Importă fișier";
 "documents.deleteAlertTitleFormat" = "Șterge %d document(e)?";
 "documents.selectedCountFormat" = "%d elemente";
+"documents.noneSelected" = "Niciunul selectat";
+"documents.selectedFormat" = "%d selectate";
 "documents.newFolderMessage" = "Introdu un nume pentru noul dosar.";
 "documents.photoAccess.title" = "Acces la poze necesar";
 "documents.photoAccess.openSettings" = "Deschide Setări";
@@ -286,6 +296,13 @@
 "documents.section.thisMonth" = "Luna aceasta";
 
 // MARK: - Documents Category
+"documents.category.name.bloodTests" = "Analize de sânge";
+"documents.category.name.medicalLetter" = "Scrisoare medicală";
+"documents.category.name.consultations" = "Consultații";
+"documents.category.name.prescriptions" = "Rețete";
+"documents.category.name.hospitalization" = "Spitalizare";
+"documents.category.name.vaccination" = "Vaccinare";
+"documents.category.name.imaging" = "Imagistică";
 "documents.category.noDocumentsYet" = "Niciun document încă";
 "documents.category.searchFormat" = "Caută în %@";
 "documents.category.emptyDescriptionFormat" = "Scanează sau încarcă un document și etichetează-l ca %@.";
@@ -380,6 +397,83 @@
 "healthProfile.report.feature4Subtitle" = "Format profesional gata pentru medicul tău";
 "healthProfile.updatedFormat" = "Actualizat %@";
 "healthProfile.valueLabel" = "Valoare";
+"healthProfile.field.name" = "Nume";
+"healthProfile.field.myNumber" = "Numărul meu";
+"healthProfile.field.emergencyNumber" = "Număr de urgență";
+"healthProfile.renameFieldTitle" = "Redenumește câmpul";
+"healthProfile.removeFieldMessage" = "Aceasta va elimina câmpul și toate intrările sale.";
+"healthProfile.fieldNamePlaceholder" = "Nume câmp";
+"healthProfile.addFieldMessage" = "Adaugă propriul câmp, ex. \"Medic principal\" sau \"Card alergii\".";
+"healthProfile.notes" = "Note";
+"healthProfile.fieldsFilledFormat" = "%d/%d completate";
+"healthProfile.deleteSectionFormat" = "Ștergi \"%@\"?";
+
+"healthProfile.section.knownConditions" = "Afecțiuni cunoscute";
+"healthProfile.section.medications" = "Medicamente și suplimente";
+"healthProfile.section.allergies" = "Alergii";
+"healthProfile.section.symptoms" = "Simptome raportate";
+"healthProfile.section.familyHistory" = "Istoric familial";
+
+"healthProfile.option.male" = "Masculin";
+"healthProfile.option.female" = "Feminin";
+"healthProfile.option.preferNotToSay" = "Prefer să nu spun";
+"healthProfile.option.insured" = "Asigurat";
+"healthProfile.option.uninsured" = "Neasigurat";
+"healthProfile.option.partiallyInsured" = "Parțial asigurat";
+
+"healthProfile.entry.allergy.add" = "Adaugă alergie";
+"healthProfile.entry.allergy.delete" = "Șterge alergia";
+"healthProfile.entry.allergy.name" = "Nume alergie";
+"healthProfile.entry.allergy.namePlaceholder" = "Ex. arahide";
+"healthProfile.entry.allergy.field1" = "Simptome";
+"healthProfile.entry.allergy.field1Placeholder" = "Ex. umflături, erupție";
+"healthProfile.entry.allergy.field2" = "Tratament";
+"healthProfile.entry.allergy.field2Placeholder" = "Ex. antihistaminic, EpiPen";
+
+"healthProfile.entry.medication.add" = "Adaugă medicament";
+"healthProfile.entry.medication.delete" = "Șterge medicamentul";
+"healthProfile.entry.medication.name" = "Nume medicament";
+"healthProfile.entry.medication.namePlaceholder" = "Ex. Vitamina D";
+"healthProfile.entry.medication.field1" = "Doză";
+"healthProfile.entry.medication.field1Placeholder" = "Ex. 1000 UI";
+"healthProfile.entry.medication.field2" = "Frecvență";
+"healthProfile.entry.medication.field2Placeholder" = "Ex. zilnic";
+
+"healthProfile.entry.condition.add" = "Adaugă afecțiune";
+"healthProfile.entry.condition.delete" = "Șterge afecțiunea";
+"healthProfile.entry.condition.name" = "Nume afecțiune";
+"healthProfile.entry.condition.namePlaceholder" = "Ex. diabet";
+"healthProfile.entry.condition.field1" = "Diagnosticat";
+"healthProfile.entry.condition.field1Placeholder" = "Ex. din 2020";
+"healthProfile.entry.condition.field2" = "Tratament";
+"healthProfile.entry.condition.field2Placeholder" = "Ex. terapie cu insulină";
+
+"healthProfile.entry.symptom.add" = "Adaugă simptom";
+"healthProfile.entry.symptom.delete" = "Șterge simptomul";
+"healthProfile.entry.symptom.name" = "Nume simptom";
+"healthProfile.entry.symptom.namePlaceholder" = "Ex. oboseală persistentă";
+"healthProfile.entry.symptom.field1" = "Severitate";
+"healthProfile.entry.symptom.field1Placeholder" = "Ex. moderată";
+"healthProfile.entry.symptom.field2" = "Durată";
+"healthProfile.entry.symptom.field2Placeholder" = "Ex. 3 luni";
+
+"healthProfile.entry.family.add" = "Adaugă istoric familial";
+"healthProfile.entry.family.delete" = "Șterge istoricul familial";
+"healthProfile.entry.family.name" = "Afecțiune";
+"healthProfile.entry.family.namePlaceholder" = "Ex. hipertensiune";
+"healthProfile.entry.family.field1" = "Relație";
+"healthProfile.entry.family.field1Placeholder" = "Ex. mamă";
+"healthProfile.entry.family.field2" = "Detalii";
+"healthProfile.entry.family.field2Placeholder" = "Ex. diagnosticat la 50 de ani";
+
+"healthProfile.entry.default.add" = "Adaugă intrare";
+"healthProfile.entry.default.delete" = "Șterge intrarea";
+"healthProfile.entry.default.name" = "Nume";
+"healthProfile.entry.default.namePlaceholder" = "Introdu numele";
+"healthProfile.entry.default.field1" = "Detalii";
+"healthProfile.entry.default.field1Placeholder" = "Introdu detalii";
+"healthProfile.entry.default.field2" = "Informații suplimentare";
+"healthProfile.entry.default.field2Placeholder" = "Introdu informații";
 
 // MARK: - Profile
 "profile.title" = "Profil";
@@ -405,6 +499,8 @@
 "profile.logOutMessage" = "Ești sigur că vrei să te deconectezi?";
 "profile.deleteAccountMessage" = "Această acțiune nu poate fi anulată. Toate datele tale vor fi șterse permanent.";
 "profile.deletingAccount" = "Se șterge contul…";
+"profile.deleteAccountErrorTitle" = "Contul nu a putut fi șters";
+"profile.deleteAccountErrorMessage" = "Nu am putut șterge contul tău. Te rugăm să încerci din nou.";
 "profile.biometricLockFormat" = "Blocare cu %@";
 "profile.biometricUnavailableSubtitle" = "Configurează mai întâi biometria dispozitivului";
 "profile.biometricUnavailableTitle" = "Biometria nu este disponibilă";
@@ -427,7 +523,31 @@
 "paywall.title" = "Neura Pro";
 "paywall.subtitle" = "Deblochează încărcări nelimitate\nși funcții premium";
 "paywall.continueFormat" = "Continuă cu %@";
-"paywall.restore" = "Restaurează achiziția";
+"paywall.restore" = "Restaurează";
+"paywall.getPro" = "Obține Neura Pro";
+"paywall.cancelAnytime" = "Anulează oricând";
+"paywall.bestValue" = "CEA MAI BUNĂ OFERTĂ";
+"paywall.planMonthly" = "Lunar";
+"paywall.planYearly" = "Anual";
+"paywall.perMonthSuffix" = "/lună";
+"paywall.perYearSuffix" = "/an";
+"paywall.periodMonth" = "lună";
+"paywall.periodYear" = "an";
+"paywall.perMonthOnlyFormat" = "doar %@/lună";
+"paywall.termsOfUse" = "Termeni de utilizare";
+"paywall.privacyPolicy" = "Politica de confidențialitate";
+"paywall.renewalDisclosureFormat" = "Abonamentul este %@. Se reînnoiește automat în fiecare %@, dacă nu este anulat cu cel puțin 24 de ore înainte de sfârșitul perioadei curente. Plata este debitată din contul tău Apple. Gestionează sau anulează oricând din setările App Store.";
+"paywall.purchasePending" = "Achiziția ta așteaptă aprobarea. Vei primi acces după confirmare.";
+"paywall.purchaseFailed" = "Ceva nu a mers bine la achiziție. Te rugăm să încerci din nou.";
+"paywall.restoreNone" = "Nu s-a găsit niciun abonament activ de restaurat.";
+"paywall.slide1.title" = "Toate documentele cu tine";
+"paywall.slide1.subtitle" = "Gata cu căutările înainte de o vizită.";
+"paywall.slide2.title" = "Încarcă în câteva secunde";
+"paywall.slide2.subtitle" = "Scanează sau încarcă orice, oricând.";
+"paywall.slide3.title" = "Partajează cu medicii tăi";
+"paywall.slide3.subtitle" = "Nu mai explica istoricul de la zero.";
+"paywall.slide4.title" = "Cardul tău, stilul tău";
+"paywall.slide4.subtitle" = "Doar tu îl vezi. Personalizează-l.";
 
 // MARK: - Coachmark
 "coachmark.documentUpload.title" = "Adaugă primul tău document";

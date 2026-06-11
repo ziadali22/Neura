@@ -33,8 +33,8 @@ struct DocsFilesView: View {
     private var selectedCountRow: some View {
         HStack {
             Text(selectedDocuments.isEmpty
-                 ? "None Selected"
-                 : "\(selectedDocuments.count) Selected")
+                 ? L10n.Documents.noneSelected
+                 : L10n.Documents.selected(selectedDocuments.count))
                 .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(Color.textSecondary)
             Spacer()
@@ -51,7 +51,7 @@ struct DocsFilesView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "line.3.horizontal.decrease")
                         .font(.system(size: 14, weight: .medium))
-                    Text("Filter")
+                    Text(L10n.Documents.Filter.button)
                         .font(.labelM)
                     if viewModel.activeFilterCount > 0 {
                         Text("\(viewModel.activeFilterCount)")
@@ -97,7 +97,7 @@ struct DocsFilesView: View {
                     isSelecting = true
                 }
             } label: {
-                Text("Select")
+                Text(L10n.Documents.select)
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(Color.textSecondary)
             }
@@ -113,12 +113,12 @@ struct DocsFilesView: View {
         let sections = viewModel.groupedDocuments
         if sections.isEmpty {
             ContentUnavailableView(
-                viewModel.activeFilterCount > 0 ? "No Matching Documents" : "No Documents",
+                viewModel.activeFilterCount > 0 ? L10n.Documents.noMatchingTitle : L10n.Documents.noDocumentsTitle,
                 systemImage: viewModel.activeFilterCount > 0 ? "doc.text.magnifyingglass" : "doc.badge.plus",
                 description: Text(
                     viewModel.activeFilterCount > 0
-                        ? "Try adjusting your filters."
-                        : "Scan or upload your first medical document."
+                        ? L10n.Documents.noMatchingMessage
+                        : L10n.Documents.noDocumentsMessage
                 )
             )
         } else {

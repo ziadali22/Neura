@@ -98,7 +98,8 @@ final class OnboardingViewModel: ObservableObject {
         case .location:         return .biometrics
         case .biometrics:       return .healthKit
         case .healthKit:        return .profileCard
-        case .profileCard:      return .calculating
+        case .profileCard:      return .notifications
+        case .notifications:    return .calculating
         case .calculating:      return .calculating // sentinel — caller handles completion
         // Retained but off-flow steps
         case .recordsLocation:  return .documentScan
@@ -127,7 +128,8 @@ final class OnboardingViewModel: ObservableObject {
         case .biometrics:       return .location
         case .healthKit:        return .biometrics
         case .profileCard:      return .healthKit
-        case .calculating:      return .profileCard
+        case .notifications:    return .profileCard
+        case .calculating:      return .notifications
         // Retained but off-flow steps
         case .recordsLocation:  return .statistics
         case .medicalAreas:     return .privacySecurity
@@ -155,6 +157,17 @@ final class OnboardingViewModel: ObservableObject {
             case .unavailable:
                 healthKitStatus = .unavailable
             }
+            advance()
+        }
+    }
+
+    // MARK: - Notifications
+
+    /// Requests notification permission for the "Stay updated" step, then advances
+    /// regardless of the user's choice. "Not now" calls `skip()` and never prompts.
+    func requestNotifications() {
+        Task {
+            await ProfileNotificationManager.shared.requestAuthorization()
             advance()
         }
     }

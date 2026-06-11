@@ -44,7 +44,7 @@ private struct LegacyDocumentRow: View {
 
             Spacer()
 
-            Image(systemName: "chevron.right")
+            Image(systemName: "chevron.forward")
                 .font(.system(size: 14))
                 .foregroundColor(.textTertiary)
         }

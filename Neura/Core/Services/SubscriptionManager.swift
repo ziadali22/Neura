@@ -135,8 +135,15 @@ final class SubscriptionManager: ObservableObject {
                 let rhs = Product_ID.all.firstIndex(of: $1.id) ?? .max
                 return lhs < rhs
             }
+            let returned = Set(loaded.map(\.id))
+            let missing = Product_ID.all.filter { !returned.contains($0) }
+            print("🛒 [StoreKit] requested \(Product_ID.all), got \(loaded.map(\.id)). Missing: \(missing)")
+            if !missing.isEmpty {
+                print("🛒 [StoreKit] Missing IDs returned nothing — check: .storekit config selected in scheme (simulator), or Paid Apps Agreement active + product status ≥ Ready to Submit + exact ID spelling (device/sandbox).")
+            }
         } catch {
             self.products = []
+            print("🛒 [StoreKit] Product.products threw: \(error)")
         }
     }
 

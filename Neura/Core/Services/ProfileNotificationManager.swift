@@ -22,6 +22,23 @@ final class ProfileNotificationManager {
 
     // MARK: - Public API
 
+    /// Requests notification authorization. Used by the onboarding "Stay updated" step so
+    /// the system prompt appears there rather than at launch. Safe to call when the status
+    /// is already determined — it simply reports the existing decision without re-prompting.
+    /// - Returns: `true` if notifications are authorized after the call.
+    @discardableResult
+    func requestAuthorization() async -> Bool {
+        let settings = await center.notificationSettings()
+        switch settings.authorizationStatus {
+        case .notDetermined:
+            return (try? await center.requestAuthorization(options: [.alert, .sound, .badge])) ?? false
+        case .authorized, .provisional, .ephemeral:
+            return true
+        default:
+            return false
+        }
+    }
+
     /// Call this after every profile save. Handles permission, scheduling, and cancellation.
     func requestPermissionAndScheduleIfNeeded(filledCount: Int, total: Int) {
         if filledCount >= total {

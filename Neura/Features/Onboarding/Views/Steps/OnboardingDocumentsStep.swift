@@ -135,7 +135,7 @@ private struct SingleDocCard: View {
 
             Spacer()
 
-            Image(systemName: "chevron.right")
+            Image(systemName: "chevron.forward")
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(Color.textTertiary)
         }

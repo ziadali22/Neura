@@ -8,6 +8,8 @@ struct LottieView: UIViewRepresentable {
     let name: String
     var loopMode: LottieLoopMode = .playOnce
     var contentMode: UIView.ContentMode = .scaleAspectFit
+    /// Playback rate multiplier. `1` is the authored speed; `> 1` plays faster.
+    var animationSpeed: CGFloat = 1
     /// Called once when a `.playOnce` animation finishes playing.
     var onComplete: () -> Void = {}
 
@@ -16,6 +18,7 @@ struct LottieView: UIViewRepresentable {
         let animationView = LottieAnimationView(name: name)
         animationView.loopMode = loopMode
         animationView.contentMode = contentMode
+        animationView.animationSpeed = animationSpeed
         animationView.backgroundBehavior = .pauseAndRestore
         animationView.translatesAutoresizingMaskIntoConstraints = false
         container.addSubview(animationView)

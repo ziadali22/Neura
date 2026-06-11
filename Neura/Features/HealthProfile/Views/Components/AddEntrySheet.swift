@@ -59,10 +59,10 @@ struct AddEntrySheet: View {
                             .onSubmit { focusedField = .notes }
                     }
 
-                    fieldSection("Notes (Optional)") {
+                    fieldSection(L10n.HealthProfile.notesOptional) {
                         ZStack(alignment: .topLeading) {
                             if notes.isEmpty {
-                                Text("Additional details")
+                                Text(L10n.HealthProfile.additionalDetails)
                                     .font(.bodyL)
                                     .foregroundColor(.textTertiary)
                                     .padding(.top, 8)
@@ -85,7 +85,7 @@ struct AddEntrySheet: View {
                             HStack(spacing: 8) {
                                 Image(systemName: "trash")
                                     .font(.system(size: 14))
-                                Text("Delete \(config.addTitle.replacingOccurrences(of: "Add ", with: ""))")
+                                Text(config.deleteTitle)
                                     .font(.bodyL)
                             }
                             .foregroundColor(.red)
@@ -103,7 +103,7 @@ struct AddEntrySheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") { dismiss() }
+                    Button(L10n.Common.cancel) { dismiss() }
                         .foregroundColor(.textPrimary)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -122,19 +122,19 @@ struct AddEntrySheet: View {
                 ToolbarItem(placement: .keyboard) {
                     HStack {
                         Spacer()
-                        Button("Done") { focusedField = nil }
+                        Button(L10n.Common.done) { focusedField = nil }
                             .fontWeight(.medium)
                     }
                 }
             }
-            .alert("Are you sure?", isPresented: $showDeleteConfirmation) {
-                Button("Cancel", role: .cancel) {}
-                Button("Delete", role: .destructive) {
+            .alert(L10n.Common.areYouSure, isPresented: $showDeleteConfirmation) {
+                Button(L10n.Common.cancel, role: .cancel) {}
+                Button(L10n.Common.delete, role: .destructive) {
                     onDelete?()
                     dismiss()
                 }
             } message: {
-                Text("This action cannot be undone.")
+                Text(L10n.Common.thisActionCannotBeUndone)
             }
             .onAppear {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {

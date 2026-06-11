@@ -62,7 +62,7 @@ private extension HealthProfileDetailView {
     var navBar: some View {
         ZStack {
             Button { dismiss() } label: {
-                Image(systemName: "chevron.left")
+                Image(systemName: "chevron.backward")
                     .font(.system(size: 18, weight: .medium))
                     .foregroundColor(.textPrimary)
                     .frame(width: 40, height: 40)
@@ -73,7 +73,7 @@ private extension HealthProfileDetailView {
             .frame(maxWidth: .infinity, alignment: .leading)
 
             VStack(spacing: 2) {
-                Text("Health Profile")
+                Text(L10n.HealthProfile.title)
                     .font(.headingS)
                     .foregroundColor(.textPrimary)
 
@@ -101,7 +101,10 @@ private extension HealthProfileDetailView {
     var updatedLabel: String {
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .full
-        return "Updated \(formatter.localizedString(for: viewModel.profile.lastUpdated, relativeTo: Date()))"
+        // Use the in-app language, not the device locale, so the relative date
+        // ("2 months ago") matches the rest of the localized UI.
+        formatter.locale = LanguageManager.shared.locale
+        return L10n.HealthProfile.updatedFormat(formatter.localizedString(for: viewModel.profile.lastUpdated, relativeTo: Date()))
     }
 
     // MARK: General Data
@@ -109,20 +112,20 @@ private extension HealthProfileDetailView {
     var generalDataCard: some View {
         let data = viewModel.profile.generalData
         let fields: [(label: String, value: String)] = [
-            ("Full Name",           data.fullName),
-            ("Date of Birth",       data.dateOfBirth),
-            ("Gender",              data.gender),
-            ("Height",              data.height),
-            ("Weight",              data.weight),
-            ("Blood Type",          data.bloodType),
-            ("Insurance Status",    data.insuranceStatus),
-            ("My Number",           data.myPhoneNumber),
-            ("Emergency Contact",   data.emergencyContactName),
-            ("Emergency Number",    data.emergencyContactNumber),
+            (L10n.HealthProfile.fullName,         data.fullName),
+            (L10n.HealthProfile.dateOfBirth,      data.dateOfBirth),
+            (L10n.HealthProfile.gender,           HealthOption.localized(data.gender)),
+            (L10n.HealthProfile.height,           data.height),
+            (L10n.HealthProfile.weight,           data.weight),
+            (L10n.HealthProfile.bloodType,        data.bloodType),
+            (L10n.HealthProfile.insuranceStatus,  HealthOption.localized(data.insuranceStatus)),
+            (L10n.HealthProfile.myNumber,         data.myPhoneNumber),
+            (L10n.HealthProfile.emergencyContact, data.emergencyContactName),
+            (L10n.HealthProfile.emergencyNumber,  data.emergencyContactNumber),
         ] + data.customFields.map { (label: $0.label, value: $0.value) }
 
         return VStack(alignment: .leading, spacing: 0) {
-            Text("General Data")
+            Text(L10n.HealthProfile.generalData)
                 .font(.system(size: 20, weight: .bold))
                 .foregroundColor(.textPrimary)
                 .padding(.bottom, 16)
@@ -160,12 +163,12 @@ private extension HealthProfileDetailView {
 
     func sectionCard(_ section: HealthProfile.HealthSection) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(section.title)
+            Text(section.localizedTitle)
                 .font(.system(size: 20, weight: .bold))
                 .foregroundColor(.textPrimary)
 
             if section.entries.isEmpty {
-                Text("No entries yet")
+                Text(L10n.HealthProfile.noEntries)
                     .font(.bodyS)
                     .foregroundColor(.textTertiary)
             } else {
@@ -230,7 +233,7 @@ private extension HealthProfileDetailView {
                     ProgressView().tint(.white)
                 } else {
                     HStack(spacing: 10) {
-                        Text("Share")
+                        Text(L10n.Common.share)
                             .font(.headingS)
                             .foregroundColor(.white)
                         Image(systemName: "square.and.arrow.up")

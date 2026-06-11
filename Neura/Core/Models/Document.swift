@@ -32,7 +32,15 @@ enum DocumentCategory: String, Codable, CaseIterable, Identifiable {
     var id: String { rawValue }
 
     var localizedName: String {
-        String(localized: String.LocalizationValue(rawValue))
+        switch self {
+        case .bloodTests: return L10n.Documents.Category.bloodTests
+        case .medicalLetter: return L10n.Documents.Category.medicalLetter
+        case .consultations: return L10n.Documents.Category.consultations
+        case .prescriptions: return L10n.Documents.Category.prescriptions
+        case .hospitalization: return L10n.Documents.Category.hospitalization
+        case .vaccination: return L10n.Documents.Category.vaccination
+        case .imaging: return L10n.Documents.Category.imaging
+        }
     }
 
     var icon: String {

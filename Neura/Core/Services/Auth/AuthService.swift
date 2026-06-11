@@ -38,12 +38,7 @@ final class AuthService: ObservableObject {
     // MARK: - Sign In with Apple
 
     func signInWithApple() async throws {
-        let result = try await AppleSignInHandler.shared.signIn()
-        let credential = OAuthProvider.appleCredential(
-            withIDToken: result.idToken,
-            rawNonce: result.nonce,
-            fullName: result.fullName
-        )
+        let credential = try await appleCredential()
         let authResult = try await Auth.auth().signIn(with: credential)
         onSignInSuccess(uid: authResult.user.uid)
     }
@@ -51,23 +46,7 @@ final class AuthService: ObservableObject {
     // MARK: - Sign In with Google
 
     func signInWithGoogle() async throws {
-        guard let scene = UIApplication.shared.connectedScenes
-                .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
-              let rootVC = scene.keyWindow?.rootViewController else {
-            throw AuthError.noRootViewController
-        }
-        var presentingVC = rootVC
-        while let presented = presentingVC.presentedViewController {
-            presentingVC = presented
-        }
-        let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: presentingVC)
-        guard let idToken = result.user.idToken?.tokenString else {
-            throw AuthError.missingToken
-        }
-        let credential = GoogleAuthProvider.credential(
-            withIDToken: idToken,
-            accessToken: result.user.accessToken.tokenString
-        )
+        let credential = try await googleCredential()
         let authResult = try await Auth.auth().signIn(with: credential)
         onSignInSuccess(uid: authResult.user.uid)
     }
@@ -94,7 +73,16 @@ final class AuthService: ObservableObject {
             _ = try? await URLSession.shared.data(for: req)
         }
 
-        try await user.delete()
+        do {
+            try await user.delete()
+        } catch let error as NSError where error.code == AuthErrorCode.requiresRecentLogin.rawValue {
+            // Account deletion is security-sensitive: Firebase rejects it unless the user
+            // signed in recently. Reauthenticate with their provider, then retry once so
+            // the account is actually removed from Firebase rather than silently left behind.
+            let credential = try await reauthCredential(for: user)
+            try await user.reauthenticate(with: credential)
+            try await user.delete()
+        }
         KeychainManager.shared.clearKey()
         AnalyticsManager.shared.reset()
         currentUser = nil
@@ -135,6 +123,47 @@ final class AuthService: ObservableObject {
 
     // MARK: - Private
 
+    // MARK: - Credentials
+
+    private func appleCredential() async throws -> AuthCredential {
+        let result = try await AppleSignInHandler.shared.signIn()
+        return OAuthProvider.appleCredential(
+            withIDToken: result.idToken,
+            rawNonce: result.nonce,
+            fullName: result.fullName
+        )
+    }
+
+    private func googleCredential() async throws -> AuthCredential {
+        guard let scene = UIApplication.shared.connectedScenes
+                .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
+              let rootVC = scene.keyWindow?.rootViewController else {
+            throw AuthError.noRootViewController
+        }
+        var presentingVC = rootVC
+        while let presented = presentingVC.presentedViewController {
+            presentingVC = presented
+        }
+        let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: presentingVC)
+        guard let idToken = result.user.idToken?.tokenString else {
+            throw AuthError.missingToken
+        }
+        return GoogleAuthProvider.credential(
+            withIDToken: idToken,
+            accessToken: result.user.accessToken.tokenString
+        )
+    }
+
+    /// Obtains a fresh credential from the user's original sign-in provider so a
+    /// security-sensitive operation (e.g. account deletion) can reauthenticate.
+    private func reauthCredential(for user: FirebaseAuth.User) async throws -> AuthCredential {
+        switch user.providerData.first?.providerID {
+        case "google.com": return try await googleCredential()
+        case "apple.com":  return try await appleCredential()
+        default:           throw AuthError.unsupportedReauthProvider
+        }
+    }
+
     private func onSignInSuccess(uid: String) {
         // Tie all subsequent events to this user; keyed on the Firebase UID
         // (a stable primary key) — never email.
@@ -161,11 +190,13 @@ final class AuthService: ObservableObject {
 enum AuthError: LocalizedError {
     case noRootViewController
     case missingToken
+    case unsupportedReauthProvider
 
     var errorDescription: String? {
         switch self {
-        case .noRootViewController: return "Unable to present sign-in screen."
-        case .missingToken:         return "Sign-in failed: missing authentication token."
+        case .noRootViewController:      return "Unable to present sign-in screen."
+        case .missingToken:              return "Sign-in failed: missing authentication token."
+        case .unsupportedReauthProvider: return "Unable to re-verify your identity for this account."
         }
     }
 }

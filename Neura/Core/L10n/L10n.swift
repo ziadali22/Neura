@@ -168,6 +168,12 @@ enum L10n {
             static var connect: String { "onboarding.healthKit.connect".l10n() }
         }
 
+        enum Notifications {
+            static var title: String { "onboarding.notifications.title".l10n() }
+            static var subtitle: String { "onboarding.notifications.subtitle".l10n() }
+            static var allow: String { "onboarding.notifications.allow".l10n() }
+        }
+
         enum HealthData {
             static var title: String { "onboarding.healthData.title".l10n() }
             static var subtitle: String { "onboarding.healthData.subtitle".l10n() }
@@ -280,6 +286,14 @@ enum L10n {
             static var subtitle: String { "home.shareHealth.subtitle".l10n() }
             static var share: String { "home.shareHealth.share".l10n() }
         }
+
+        enum AppUpdate {
+            static var title: String { "home.appUpdate.title".l10n() }
+            static func subtitle(_ version: String) -> String {
+                "home.appUpdate.subtitleFormat".l10n(args: [version])
+            }
+            static var updateNow: String { "home.appUpdate.updateNow".l10n() }
+        }
     }
 
     // MARK: - Emergency
@@ -321,6 +335,10 @@ enum L10n {
         }
         static func selectedCount(_ count: Int) -> String {
             "documents.selectedCountFormat".l10n(args: [count])
+        }
+        static var noneSelected: String { "documents.noneSelected".l10n() }
+        static func selected(_ count: Int) -> String {
+            "documents.selectedFormat".l10n(args: [count])
         }
         static var newFolderMessage: String { "documents.newFolderMessage".l10n() }
 
@@ -377,6 +395,15 @@ enum L10n {
         }
 
         enum Category {
+            // Folder / category display names
+            static var bloodTests: String { "documents.category.name.bloodTests".l10n() }
+            static var medicalLetter: String { "documents.category.name.medicalLetter".l10n() }
+            static var consultations: String { "documents.category.name.consultations".l10n() }
+            static var prescriptions: String { "documents.category.name.prescriptions".l10n() }
+            static var hospitalization: String { "documents.category.name.hospitalization".l10n() }
+            static var vaccination: String { "documents.category.name.vaccination".l10n() }
+            static var imaging: String { "documents.category.name.imaging".l10n() }
+
             static var noDocumentsYet: String { "documents.category.noDocumentsYet".l10n() }
             static func searchFormat(_ category: String) -> String { "documents.category.searchFormat".l10n(args: [category]) }
             static func emptyDescriptionFormat(_ category: String) -> String { "documents.category.emptyDescriptionFormat".l10n(args: [category]) }
@@ -481,6 +508,100 @@ enum L10n {
         }
         static var valueLabel: String { "healthProfile.valueLabel".l10n() }
 
+        // Field labels not already covered above
+        static var fieldName: String { "healthProfile.field.name".l10n() }
+        static var myNumber: String { "healthProfile.field.myNumber".l10n() }
+        static var emergencyNumber: String { "healthProfile.field.emergencyNumber".l10n() }
+
+        // Add / rename custom field & section
+        static var renameFieldTitle: String { "healthProfile.renameFieldTitle".l10n() }
+        static var removeFieldMessage: String { "healthProfile.removeFieldMessage".l10n() }
+        static var fieldNamePlaceholder: String { "healthProfile.fieldNamePlaceholder".l10n() }
+        static var addFieldMessage: String { "healthProfile.addFieldMessage".l10n() }
+        static var notes: String { "healthProfile.notes".l10n() }
+        static func fieldsFilled(_ filled: Int, _ total: Int) -> String {
+            "healthProfile.fieldsFilledFormat".l10n(args: [filled, total])
+        }
+        static func deleteSection(_ name: String) -> String {
+            "healthProfile.deleteSectionFormat".l10n(args: [name])
+        }
+
+        // Built-in section titles (stored value stays English; localized only at render)
+        enum Section {
+            static var knownConditions: String { "healthProfile.section.knownConditions".l10n() }
+            static var medications: String { "healthProfile.section.medications".l10n() }
+            static var allergies: String { "healthProfile.section.allergies".l10n() }
+            static var symptoms: String { "healthProfile.section.symptoms".l10n() }
+            static var familyHistory: String { "healthProfile.section.familyHistory".l10n() }
+        }
+
+        // Picker option values (stored value stays English; localized only at render)
+        enum Option {
+            static var male: String { "healthProfile.option.male".l10n() }
+            static var female: String { "healthProfile.option.female".l10n() }
+            static var preferNotToSay: String { "healthProfile.option.preferNotToSay".l10n() }
+            static var insured: String { "healthProfile.option.insured".l10n() }
+            static var uninsured: String { "healthProfile.option.uninsured".l10n() }
+            static var partiallyInsured: String { "healthProfile.option.partiallyInsured".l10n() }
+        }
+
+        // Per-section entry form labels & placeholders
+        enum Entry {
+            static var addAllergy: String { "healthProfile.entry.allergy.add".l10n() }
+            static var deleteAllergy: String { "healthProfile.entry.allergy.delete".l10n() }
+            static var allergyName: String { "healthProfile.entry.allergy.name".l10n() }
+            static var allergyNamePlaceholder: String { "healthProfile.entry.allergy.namePlaceholder".l10n() }
+            static var allergySymptoms: String { "healthProfile.entry.allergy.field1".l10n() }
+            static var allergySymptomsPlaceholder: String { "healthProfile.entry.allergy.field1Placeholder".l10n() }
+            static var allergyTreatment: String { "healthProfile.entry.allergy.field2".l10n() }
+            static var allergyTreatmentPlaceholder: String { "healthProfile.entry.allergy.field2Placeholder".l10n() }
+
+            static var addMedication: String { "healthProfile.entry.medication.add".l10n() }
+            static var deleteMedication: String { "healthProfile.entry.medication.delete".l10n() }
+            static var medicationName: String { "healthProfile.entry.medication.name".l10n() }
+            static var medicationNamePlaceholder: String { "healthProfile.entry.medication.namePlaceholder".l10n() }
+            static var medicationDosage: String { "healthProfile.entry.medication.field1".l10n() }
+            static var medicationDosagePlaceholder: String { "healthProfile.entry.medication.field1Placeholder".l10n() }
+            static var medicationFrequency: String { "healthProfile.entry.medication.field2".l10n() }
+            static var medicationFrequencyPlaceholder: String { "healthProfile.entry.medication.field2Placeholder".l10n() }
+
+            static var addCondition: String { "healthProfile.entry.condition.add".l10n() }
+            static var deleteCondition: String { "healthProfile.entry.condition.delete".l10n() }
+            static var conditionName: String { "healthProfile.entry.condition.name".l10n() }
+            static var conditionNamePlaceholder: String { "healthProfile.entry.condition.namePlaceholder".l10n() }
+            static var conditionDiagnosed: String { "healthProfile.entry.condition.field1".l10n() }
+            static var conditionDiagnosedPlaceholder: String { "healthProfile.entry.condition.field1Placeholder".l10n() }
+            static var conditionTreatment: String { "healthProfile.entry.condition.field2".l10n() }
+            static var conditionTreatmentPlaceholder: String { "healthProfile.entry.condition.field2Placeholder".l10n() }
+
+            static var addSymptom: String { "healthProfile.entry.symptom.add".l10n() }
+            static var deleteSymptom: String { "healthProfile.entry.symptom.delete".l10n() }
+            static var symptomName: String { "healthProfile.entry.symptom.name".l10n() }
+            static var symptomNamePlaceholder: String { "healthProfile.entry.symptom.namePlaceholder".l10n() }
+            static var symptomSeverity: String { "healthProfile.entry.symptom.field1".l10n() }
+            static var symptomSeverityPlaceholder: String { "healthProfile.entry.symptom.field1Placeholder".l10n() }
+            static var symptomDuration: String { "healthProfile.entry.symptom.field2".l10n() }
+            static var symptomDurationPlaceholder: String { "healthProfile.entry.symptom.field2Placeholder".l10n() }
+
+            static var addFamily: String { "healthProfile.entry.family.add".l10n() }
+            static var deleteFamily: String { "healthProfile.entry.family.delete".l10n() }
+            static var familyCondition: String { "healthProfile.entry.family.name".l10n() }
+            static var familyConditionPlaceholder: String { "healthProfile.entry.family.namePlaceholder".l10n() }
+            static var familyRelation: String { "healthProfile.entry.family.field1".l10n() }
+            static var familyRelationPlaceholder: String { "healthProfile.entry.family.field1Placeholder".l10n() }
+            static var familyDetails: String { "healthProfile.entry.family.field2".l10n() }
+            static var familyDetailsPlaceholder: String { "healthProfile.entry.family.field2Placeholder".l10n() }
+
+            static var addEntry: String { "healthProfile.entry.default.add".l10n() }
+            static var deleteEntry: String { "healthProfile.entry.default.delete".l10n() }
+            static var defaultName: String { "healthProfile.entry.default.name".l10n() }
+            static var defaultNamePlaceholder: String { "healthProfile.entry.default.namePlaceholder".l10n() }
+            static var defaultDetails: String { "healthProfile.entry.default.field1".l10n() }
+            static var defaultDetailsPlaceholder: String { "healthProfile.entry.default.field1Placeholder".l10n() }
+            static var defaultInfo: String { "healthProfile.entry.default.field2".l10n() }
+            static var defaultInfoPlaceholder: String { "healthProfile.entry.default.field2Placeholder".l10n() }
+        }
+
         enum Report {
             static var title: String { "healthProfile.report.title".l10n() }
             static var subtitle: String { "healthProfile.report.subtitle".l10n() }
@@ -531,6 +652,8 @@ enum L10n {
         static var logOutMessage: String { "profile.logOutMessage".l10n() }
         static var deleteAccountMessage: String { "profile.deleteAccountMessage".l10n() }
         static var deletingAccount: String { "profile.deletingAccount".l10n() }
+        static var deleteAccountErrorTitle: String { "profile.deleteAccountErrorTitle".l10n() }
+        static var deleteAccountErrorMessage: String { "profile.deleteAccountErrorMessage".l10n() }
         static func biometricLock(_ biometricLabel: String) -> String {
             "profile.biometricLockFormat".l10n(args: [biometricLabel])
         }
@@ -572,6 +695,38 @@ enum L10n {
             "paywall.continueFormat".l10n(args: [plan])
         }
         static var restore: String { "paywall.restore".l10n() }
+
+        static var getPro: String { "paywall.getPro".l10n() }
+        static var cancelAnytime: String { "paywall.cancelAnytime".l10n() }
+        static var bestValue: String { "paywall.bestValue".l10n() }
+        static var planMonthly: String { "paywall.planMonthly".l10n() }
+        static var planYearly: String { "paywall.planYearly".l10n() }
+        static var perMonthSuffix: String { "paywall.perMonthSuffix".l10n() }
+        static var perYearSuffix: String { "paywall.perYearSuffix".l10n() }
+        static var periodMonth: String { "paywall.periodMonth".l10n() }
+        static var periodYear: String { "paywall.periodYear".l10n() }
+        static func perMonthOnly(_ price: String) -> String {
+            "paywall.perMonthOnlyFormat".l10n(args: [price])
+        }
+        static var termsOfUse: String { "paywall.termsOfUse".l10n() }
+        static var privacyPolicy: String { "paywall.privacyPolicy".l10n() }
+        static func renewalDisclosure(_ price: String, _ period: String) -> String {
+            "paywall.renewalDisclosureFormat".l10n(args: [price, period])
+        }
+        static var purchasePending: String { "paywall.purchasePending".l10n() }
+        static var purchaseFailed: String { "paywall.purchaseFailed".l10n() }
+        static var restoreNone: String { "paywall.restoreNone".l10n() }
+
+        enum Slide {
+            static var title1: String { "paywall.slide1.title".l10n() }
+            static var subtitle1: String { "paywall.slide1.subtitle".l10n() }
+            static var title2: String { "paywall.slide2.title".l10n() }
+            static var subtitle2: String { "paywall.slide2.subtitle".l10n() }
+            static var title3: String { "paywall.slide3.title".l10n() }
+            static var subtitle3: String { "paywall.slide3.subtitle".l10n() }
+            static var title4: String { "paywall.slide4.title".l10n() }
+            static var subtitle4: String { "paywall.slide4.subtitle".l10n() }
+        }
     }
 }
 // swiftlint:enable type_body_length file_length

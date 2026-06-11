@@ -57,38 +57,38 @@ struct HealthProfileView: View {
                     .presentationDragIndicator(.hidden)
             }
         }
-        .alert("Add Section", isPresented: $showAddSection) {
-            TextField("Section title", text: $newSectionTitle)
-            Button("Add") {
+        .alert(L10n.HealthProfile.addSection, isPresented: $showAddSection) {
+            TextField(L10n.HealthProfile.sectionTitlePlaceholder, text: $newSectionTitle)
+            Button(L10n.Common.add) {
                 guard !newSectionTitle.trimmingCharacters(in: .whitespaces).isEmpty else { return }
                 viewModel.addSection(title: newSectionTitle.trimmingCharacters(in: .whitespaces))
                 newSectionTitle = ""
             }
-            Button("Cancel", role: .cancel) { newSectionTitle = "" }
+            Button(L10n.Common.cancel, role: .cancel) { newSectionTitle = "" }
         }
-        .alert("Rename Field", isPresented: Binding(
+        .alert(L10n.HealthProfile.renameFieldTitle, isPresented: Binding(
             get: { sectionToRename != nil },
             set: { if !$0 { sectionToRename = nil } }
         )) {
-            TextField("Field name", text: $renameText)
-            Button("Save") {
+            TextField(L10n.HealthProfile.fieldNamePlaceholder, text: $renameText)
+            Button(L10n.Common.save) {
                 let trimmed = renameText.trimmingCharacters(in: .whitespaces)
                 if let section = sectionToRename, !trimmed.isEmpty {
                     viewModel.renameSection(id: section.id, title: trimmed)
                 }
                 sectionToRename = nil
             }
-            Button("Cancel", role: .cancel) { sectionToRename = nil }
+            Button(L10n.Common.cancel, role: .cancel) { sectionToRename = nil }
         }
         .confirmationDialog(
-            "Delete \"\(sectionPendingDelete?.title ?? "")\"?",
+            L10n.HealthProfile.deleteSection(sectionPendingDelete?.localizedTitle ?? ""),
             isPresented: Binding(
                 get: { sectionPendingDelete != nil },
                 set: { if !$0 { sectionPendingDelete = nil } }
             ),
             titleVisibility: .visible
         ) {
-            Button("Delete", role: .destructive) {
+            Button(L10n.Common.delete, role: .destructive) {
                 if let section = sectionPendingDelete {
                     withAnimation {
                         viewModel.removeSection(id: section.id)
@@ -97,9 +97,9 @@ struct HealthProfileView: View {
                 }
                 sectionPendingDelete = nil
             }
-            Button("Cancel", role: .cancel) { sectionPendingDelete = nil }
+            Button(L10n.Common.cancel, role: .cancel) { sectionPendingDelete = nil }
         } message: {
-            Text("This will remove the field and all of its entries.")
+            Text(L10n.HealthProfile.removeFieldMessage)
         }
     }
 
@@ -141,13 +141,13 @@ private extension HealthProfileView {
                     .frame(width: 24, height: 24)
 
                 VStack(alignment: .leading, spacing: isComplete ? 0 : 6) {
-                    Text("General Data")
+                    Text(L10n.HealthProfile.generalData)
                         .font(.statLabel)
                         .foregroundStyle(Color.textPrimary)
 
                     if !isComplete {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("\(filledCount)/\(totalCount) filled")
+                            Text(L10n.HealthProfile.fieldsFilled(filledCount, totalCount))
                                 .font(.system(size: 12))
                                 .foregroundStyle(Color.textSecondary)
 
@@ -170,7 +170,7 @@ private extension HealthProfileView {
 
                 Spacer()
 
-                Image(systemName: "chevron.right")
+                Image(systemName: "chevron.forward")
                     .font(.system(size: 14))
                     .foregroundStyle(Color.textTertiary)
             }
@@ -189,7 +189,7 @@ private extension HealthProfileView {
     var navBar: some View {
         ZStack {
             Button { dismiss() } label: {
-                Image(systemName: "chevron.left")
+                Image(systemName: "chevron.backward")
                     .font(.system(size: 18, weight: .medium))
                     .foregroundColor(.textPrimary)
                     .frame(width: 40, height: 40)
@@ -199,7 +199,7 @@ private extension HealthProfileView {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            Text("Health Profile")
+            Text(L10n.HealthProfile.title)
                 .font(.headingS)
                 .foregroundColor(.textPrimary)
 
@@ -209,7 +209,7 @@ private extension HealthProfileView {
                         isEditing.toggle()
                     }
                 } label: {
-                    Text(isEditing ? "Done" : "Edit")
+                    Text(isEditing ? L10n.Common.done : L10n.Common.edit)
                         .font(.bodyL)
                         .foregroundColor(.accent)
                 }
@@ -240,7 +240,7 @@ private extension HealthProfileView {
 
             SettingsRow(
                 icon: iconForSection(section.title),
-                title: section.title,
+                title: section.localizedTitle,
                 showChevron: !editable
             ) {
                 if editable {
@@ -259,7 +259,7 @@ private extension HealthProfileView {
             showAddSection = true
         } label: {
             HStack {
-                Text("Add Field")
+                Text(L10n.HealthProfile.addField)
                     .font(.system(size: 18, weight: .medium))
                     .foregroundColor(.textPrimary)
 

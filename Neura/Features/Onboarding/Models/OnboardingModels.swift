@@ -15,7 +15,7 @@ enum OnboardingStep: Int, CaseIterable, Hashable {
     case medicalAreas
     case profile, location, profileCardIntro, profileCard
     case emergency, biometrics, emergencyCard
-    case healthKit, healthData, medical, documents, calculating
+    case healthKit, healthData, medical, documents, notifications, calculating
 
     /// Whether the top bar (back button + progress) is visible.
     var showsTopBar: Bool {
@@ -26,9 +26,11 @@ enum OnboardingStep: Int, CaseIterable, Hashable {
     }
 
     /// Whether the skip button is shown in the top bar.
+    /// `.healthKit` is intentionally non-skippable: once its priming message is shown,
+    /// the user must always proceed to the system HealthKit prompt (App Review 5.1.1(iv)).
     var isSkippable: Bool {
         switch self {
-        case .welcome: return false
+        case .welcome, .notifications, .healthKit: return false
         default: return showsTopBar
         }
     }
@@ -37,7 +39,8 @@ enum OnboardingStep: Int, CaseIterable, Hashable {
     var showsProgressBar: Bool {
         switch self {
         case .stopSearching, .storeAndShare, .statistics, .documentScan,
-             .profileCardIntro, .qrShare, .privacySecurity, .welcome, .calculating:
+             .profileCardIntro, .qrShare, .privacySecurity, .welcome,
+             .notifications, .calculating:
             return false
         default: return true
         }
@@ -53,7 +56,8 @@ enum OnboardingStep: Int, CaseIterable, Hashable {
     static let analyticsFlow: [OnboardingStep] = [
         .stopSearching, .storeAndShare, .statistics, .documentScan,
         .profileCardIntro, .qrShare, .privacySecurity, .welcome,
-        .profile, .location, .biometrics, .healthKit, .profileCard
+        .profile, .location, .biometrics, .healthKit, .profileCard,
+        .notifications
     ]
 
     /// 1-based position in the visible flow, or `nil` for steps that aren't tracked
