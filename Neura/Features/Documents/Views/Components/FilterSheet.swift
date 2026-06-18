@@ -259,7 +259,7 @@ private struct FilterSpecializationChip: View {
                 .clipShape(Circle())
                 .accessibilityHidden(true)
 
-            Text(specialization.rawValue)
+            Text(specialization.localizedName)
                 .font(.labelM)
                 .foregroundStyle(isSelected ? .white : Color.textPrimary)
                 .lineLimit(1)
@@ -279,7 +279,7 @@ private struct FilterSpecializationChip: View {
             }
         }
         .accessibilityLabel(
-            Text("\(specialization.rawValue)\(isSelected ? ", selected" : "")")
+            Text("\(specialization.localizedName)\(isSelected ? ", selected" : "")")
         )
     }
 }

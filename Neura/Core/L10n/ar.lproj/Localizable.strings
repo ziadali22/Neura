@@ -432,3 +432,31 @@
 // MARK: - Coachmark
 "coachmark.documentUpload.title" = "أضف وثيقتك الأولى";
 "coachmark.documentUpload.subtitle" = "اضغط + لمسح ضوئي أو رفع صورة أو استيراد ملف.";
+
+// MARK: - Document Categories, Types & Specializations
+"Blood Tests" = "تحاليل الدم";
+"Medical Letter" = "خطاب طبي";
+"Consultations" = "الاستشارات";
+"Prescriptions" = "الوصفات الطبية";
+"Hospitalization" = "الاستشفاء";
+"Vaccination" = "تطعيم";
+"Imaging" = "التصوير الطبي";
+"Other" = "أخرى";
+"Scan" = "مسح";
+"PDF" = "PDF";
+"Image" = "صورة";
+"Cardiology" = "أمراض القلب";
+"Dermatology" = "الأمراض الجلدية";
+"Dentistry" = "طب الأسنان";
+"Endocrinology" = "الغدد الصماء";
+"Gastroenterology" = "أمراض الجهاز الهضمي";
+"General Medicine" = "الطب العام";
+"Gynaecology" = "أمراض النساء";
+"Neurology" = "الأعصاب";
+"Oncology" = "الأورام";
+"Ophthalmology" = "طب العيون";
+"Orthopaedics" = "جراحة العظام";
+"Pulmonology" = "أمراض الرئة";
+"Psychiatry" = "الطب النفسي";
+"Surgery" = "الجراحة";
+"Urology" = "المسالك البولية";

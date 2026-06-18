@@ -1,6 +1,7 @@
 import Foundation
 import PDFKit
 import SwiftUI
+import L10n_swift
 
 // MARK: - Document Type
 
@@ -9,11 +10,12 @@ enum DocumentType: String, Codable {
     case pdf
     case image
 
+    /// Resolved via L10n_swift so it follows the in-app language toggle.
     var localizedName: String {
         switch self {
-        case .scan: return String(localized: "Scan")
-        case .pdf: return String(localized: "PDF")
-        case .image: return String(localized: "Image")
+        case .scan: return "Scan".l10n()
+        case .pdf: return "PDF".l10n()
+        case .image: return "Image".l10n()
         }
     }
 }
@@ -31,8 +33,9 @@ enum DocumentCategory: String, Codable, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
+    /// Resolved via L10n_swift so it follows the in-app language toggle.
     var localizedName: String {
-        String(localized: String.LocalizationValue(rawValue))
+        rawValue.l10n()
     }
 
     var icon: String {
@@ -108,6 +111,11 @@ enum MedicalSpecialization: String, Codable, CaseIterable, Identifiable {
     case other           = "Other"
 
     var id: String { rawValue }
+
+    /// Resolved via L10n_swift so it follows the in-app language toggle.
+    var localizedName: String {
+        rawValue.l10n()
+    }
 
     var icon: String {
         switch self {

@@ -432,3 +432,31 @@
 // MARK: - Coachmark
 "coachmark.documentUpload.title" = "Adaugă primul tău document";
 "coachmark.documentUpload.subtitle" = "Apasă + pentru a scana, a încărca o fotografie sau a importa un fișier.";
+
+// MARK: - Document Categories, Types & Specializations
+"Blood Tests" = "Analize de Sânge";
+"Medical Letter" = "Scrisoare Medicală";
+"Consultations" = "Consultații";
+"Prescriptions" = "Rețete";
+"Hospitalization" = "Spitalizare";
+"Vaccination" = "Vaccinare";
+"Imaging" = "Imagistică";
+"Other" = "Altele";
+"Scan" = "Scanare";
+"PDF" = "PDF";
+"Image" = "Imagine";
+"Cardiology" = "Cardiologie";
+"Dermatology" = "Dermatologie";
+"Dentistry" = "Stomatologie";
+"Endocrinology" = "Endocrinologie";
+"Gastroenterology" = "Gastroenterologie";
+"General Medicine" = "Medicină generală";
+"Gynaecology" = "Ginecologie";
+"Neurology" = "Neurologie";
+"Oncology" = "Oncologie";
+"Ophthalmology" = "Oftalmologie";
+"Orthopaedics" = "Ortopedie";
+"Pulmonology" = "Pneumologie";
+"Psychiatry" = "Psihiatrie";
+"Surgery" = "Chirurgie";
+"Urology" = "Urologie";

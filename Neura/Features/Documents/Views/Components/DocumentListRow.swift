@@ -98,7 +98,7 @@ struct DocumentListRow: View {
         var parts: [String] = []
         parts.append(document.createdAt.formatted(date: .numeric, time: .omitted))
         if let spec = document.specialization, spec != .other {
-            parts.append(spec.rawValue)
+            parts.append(spec.localizedName)
         }
         if let doctor = document.doctorName, !doctor.isEmpty {
             parts.append("Dr. \(doctor)")

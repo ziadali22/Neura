@@ -437,3 +437,31 @@
 // MARK: - Coachmark
 "coachmark.documentUpload.title" = "Add your first document";
 "coachmark.documentUpload.subtitle" = "Tap + to scan, upload a photo, or import a file.";
+
+// MARK: - Document Categories, Types & Specializations
+"Blood Tests" = "Blood Tests";
+"Medical Letter" = "Medical Letter";
+"Consultations" = "Consultations";
+"Prescriptions" = "Prescriptions";
+"Hospitalization" = "Hospitalization";
+"Vaccination" = "Vaccination";
+"Imaging" = "Imaging";
+"Other" = "Other";
+"Scan" = "Scan";
+"PDF" = "PDF";
+"Image" = "Image";
+"Cardiology" = "Cardiology";
+"Dermatology" = "Dermatology";
+"Dentistry" = "Dentistry";
+"Endocrinology" = "Endocrinology";
+"Gastroenterology" = "Gastroenterology";
+"General Medicine" = "General Medicine";
+"Gynaecology" = "Gynaecology";
+"Neurology" = "Neurology";
+"Oncology" = "Oncology";
+"Ophthalmology" = "Ophthalmology";
+"Orthopaedics" = "Orthopaedics";
+"Pulmonology" = "Pulmonology";
+"Psychiatry" = "Psychiatry";
+"Surgery" = "Surgery";
+"Urology" = "Urology";

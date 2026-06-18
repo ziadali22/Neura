@@ -312,7 +312,7 @@ struct DocumentMetadataView: View {
                 showSpecializationPicker = true
             } label: {
                 HStack {
-                    Text(metadata.specialization.rawValue)
+                    Text(metadata.specialization.localizedName)
                         .font(.bodyL)
                         .foregroundColor(.textPrimary)
 
@@ -529,7 +529,7 @@ private struct SpecializationPickerView: View {
                                 .foregroundStyle(Color.textSecondary)
                                 .frame(width: 28, alignment: .center)
 
-                            Text(spec.rawValue)
+                            Text(spec.localizedName)
                                 .font(.bodyL)
                                 .foregroundStyle(Color.textPrimary)
 
