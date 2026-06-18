@@ -37,18 +37,31 @@ final class AuthService: ObservableObject {
 
     // MARK: - Sign In with Apple
 
-    func signInWithApple() async throws {
-        let credential = try await appleCredential()
+    /// Returns the user's display name as provided by Apple, if any. Apple only supplies
+    /// `fullName` on the *first* authorization for an Apple ID (nil on re-auth), so callers
+    /// must treat a nil result as "not provided" — never require the user to re-enter it.
+    @discardableResult
+    func signInWithApple() async throws -> String? {
+        let result = try await AppleSignInHandler.shared.signIn()
+        let credential = OAuthProvider.appleCredential(
+            withIDToken: result.idToken,
+            rawNonce: result.nonce,
+            fullName: result.fullName
+        )
         let authResult = try await Auth.auth().signIn(with: credential)
         onSignInSuccess(uid: authResult.user.uid)
+        return Self.displayName(from: result.fullName)
     }
 
     // MARK: - Sign In with Google
 
-    func signInWithGoogle() async throws {
-        let credential = try await googleCredential()
+    /// Returns the user's display name as provided by Google, if any.
+    @discardableResult
+    func signInWithGoogle() async throws -> String? {
+        let (credential, name) = try await googleSignInResult()
         let authResult = try await Auth.auth().signIn(with: credential)
         onSignInSuccess(uid: authResult.user.uid)
+        return name
     }
 
     // MARK: - Sign Out
@@ -134,7 +147,9 @@ final class AuthService: ObservableObject {
         )
     }
 
-    private func googleCredential() async throws -> AuthCredential {
+    /// Presents Google Sign-In and returns both the Firebase credential and the user's
+    /// display name (if Google provides one).
+    private func googleSignInResult() async throws -> (credential: AuthCredential, name: String?) {
         guard let scene = UIApplication.shared.connectedScenes
                 .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
               let rootVC = scene.keyWindow?.rootViewController else {
@@ -148,10 +163,25 @@ final class AuthService: ObservableObject {
         guard let idToken = result.user.idToken?.tokenString else {
             throw AuthError.missingToken
         }
-        return GoogleAuthProvider.credential(
+        let credential = GoogleAuthProvider.credential(
             withIDToken: idToken,
             accessToken: result.user.accessToken.tokenString
         )
+        let name = result.user.profile?.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        return (credential, (name?.isEmpty == false) ? name : nil)
+    }
+
+    private func googleCredential() async throws -> AuthCredential {
+        try await googleSignInResult().credential
+    }
+
+    /// Formats Apple's `PersonNameComponents` into a display string, returning nil if empty.
+    private static func displayName(from components: PersonNameComponents?) -> String? {
+        guard let components else { return nil }
+        let name = PersonNameComponentsFormatter()
+            .string(from: components)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        return name.isEmpty ? nil : name
     }
 
     /// Obtains a fresh credential from the user's original sign-in provider so a

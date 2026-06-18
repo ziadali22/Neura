@@ -15,6 +15,21 @@ struct ProfileView: View {
     @State private var titleAppear = true
     @State private var contentAppear = true
 
+    // Legal links, reachable by all users (incl. free tier) outside the paywall (App Review 5.1.1 / 5.1.2).
+    private static let privacyURL = URL(string: "https://myneura.org/privacy")!
+    private static let termsURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
+
+    private var legalFooter: some View {
+        HStack(spacing: 6) {
+            Link(L10n.Paywall.privacyPolicy, destination: Self.privacyURL)
+            Text("·").foregroundStyle(Color.textTertiary)
+            Link(L10n.Paywall.termsOfUse, destination: Self.termsURL)
+        }
+        .font(.system(size: 13, weight: .medium))
+        .tint(Color.textSecondary)
+        .frame(maxWidth: .infinity, alignment: .center)
+    }
+
     var body: some View {
         NavigationStack(path: $router.path) {
             ScrollView {
@@ -119,6 +134,9 @@ struct ProfileView: View {
 //                                showDeleteAlert = true
 //                            }
 //                        }
+
+                        legalFooter
+                            .padding(.top, 8)
                     }
                     .opacity(contentAppear ? 1 : 0)
                     .offset(y: contentAppear ? 0 : 20)

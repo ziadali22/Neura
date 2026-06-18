@@ -195,7 +195,8 @@ final class OnboardingViewModel: ObservableObject {
         authError = nil
         Task {
             do {
-                try await AuthService.shared.signInWithApple()
+                let providerName = try await AuthService.shared.signInWithApple()
+                applyProviderName(providerName)
                 await checkReturningUser()
                 if isReturningUser {
                     finalize()
@@ -216,7 +217,8 @@ final class OnboardingViewModel: ObservableObject {
         authError = nil
         Task {
             do {
-                try await AuthService.shared.signInWithGoogle()
+                let providerName = try await AuthService.shared.signInWithGoogle()
+                applyProviderName(providerName)
                 await checkReturningUser()
                 if isReturningUser {
                     finalize()
@@ -229,6 +231,15 @@ final class OnboardingViewModel: ObservableObject {
             }
             isSigningIn = false
         }
+    }
+
+    /// Pre-fills the profile name with the name supplied by Sign in with Apple/Google so the
+    /// user is never required to re-enter it (App Review 4 / Sign in with Apple). Only fills
+    /// when the provider gave a name and the user hasn't already typed one.
+    private func applyProviderName(_ name: String?) {
+        guard let name, !name.isEmpty,
+              state.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        state.name = name
     }
 
     private func checkReturningUser() async {

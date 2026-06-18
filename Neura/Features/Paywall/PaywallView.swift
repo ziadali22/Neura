@@ -98,28 +98,42 @@ struct PaywallView: View {
     var body: some View {
         ZStack(alignment: .top) {
             background
-            VStack(spacing: 0) {
-                topBar
-                Spacer(minLength: 16)
-                VStack(spacing: 8) {
-                    carousel
-                        .frame(height: 360)
-                    pageDots
-                }
-                .padding(.bottom, 8)
+            GeometryReader { geo in
+                // Scrollable so all content (plans, CTA, legal links) stays reachable when
+                // vertical space is constrained — e.g. iPad landscape or a resized iPadOS 26
+                // window, where the previous fixed layout cut off the button and legal text.
+                ScrollView {
+                    VStack(spacing: 0) {
+                        Spacer(minLength: 16)
+                        VStack(spacing: 8) {
+                            carousel
+                                // Carousel shrinks on short screens instead of pushing the
+                                // CTA off-screen; capped on tall ones so it doesn't dominate.
+                                .frame(height: min(360, max(200, geo.size.height * 0.42)))
+                            pageDots
+                        }
+                        .padding(.bottom, 8)
 
-                Spacer(minLength: 16)
+                        Spacer(minLength: 16)
 
-                VStack(spacing: 20) {
-                    plansRow
-                    VStack(spacing: 12) {
-                        ctaButton
-                        cancelLabel
+                        VStack(spacing: 20) {
+                            plansRow
+                            VStack(spacing: 12) {
+                                ctaButton
+                                cancelLabel
+                            }
+                            legalFooter
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 24)
                     }
-                    legalFooter
+                    // Cap width on iPad and center; fill the viewport on tall screens so
+                    // spacers distribute naturally, scroll on short ones.
+                    .frame(maxWidth: 520)
+                    .frame(maxWidth: .infinity, minHeight: max(0, geo.size.height - 64))
                 }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 24)
+                .scrollBounceBehavior(.basedOnSize)
+                .safeAreaInset(edge: .top, spacing: 0) { topBar }
             }
         }
         .task { await subscriptionManager.loadProducts() }
