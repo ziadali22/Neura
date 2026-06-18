@@ -5,6 +5,7 @@ import SwiftUI
 struct DocumentMetadata {
     var name: String = ""
     var category: DocumentCategory?
+    var customFolderId: UUID?
     var specialization: MedicalSpecialization = .other
     var doctorName: String = ""
     var notes: String = ""
@@ -24,16 +25,46 @@ struct DocumentMetadataView: View {
     @Environment(\.dismiss) private var dismiss
     let preview: DocumentPreviewContent
     let onSave: (DocumentMetadata, DocumentPreviewContent) -> Void
+    /// Non-nil when editing an existing document (pre-fills the form).
+    let editingDocument: Document?
 
+    @ObservedObject private var folderStore = CustomFolderStore.shared
     @State private var metadata = DocumentMetadata()
     @State private var scannedImages: [UIImage] = []
     @State private var showScanner = false
-    @State private var showDatePicker = false
     @State private var showSpecializationPicker = false
     @FocusState private var focusedField: Field?
 
     private enum Field: Hashable {
         case name, doctor, notes
+    }
+
+    init(
+        preview: DocumentPreviewContent,
+        editingDocument: Document? = nil,
+        onSave: @escaping (DocumentMetadata, DocumentPreviewContent) -> Void
+    ) {
+        self.preview = preview
+        self.editingDocument = editingDocument
+        self.onSave = onSave
+
+        if let doc = editingDocument {
+            var meta = DocumentMetadata()
+            meta.name = doc.name
+            meta.category = doc.category
+            meta.customFolderId = doc.tags?
+                .compactMap { UUID(uuidString: $0) }
+                .first
+            meta.specialization = doc.specialization ?? .other
+            meta.doctorName = doc.doctorName ?? ""
+            meta.notes = doc.notes ?? ""
+            meta.documentDate = doc.createdAt
+            _metadata = State(initialValue: meta)
+
+            if case .scannedImages(let images) = preview {
+                _scannedImages = State(initialValue: images)
+            }
+        }
     }
 
     var body: some View {
@@ -59,25 +90,26 @@ struct DocumentMetadataView: View {
                 saveButton
             }
             .background(Color.backgroundPrimary)
-            .navigationTitle("Document Details")
+            .navigationTitle(editingDocument == nil ? L10n.Documents.Metadata.title : L10n.Common.edit)
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(isPresented: $showSpecializationPicker) {
                 SpecializationPickerView(selected: $metadata.specialization)
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") { dismiss() }
+                    Button(L10n.Common.cancel) { dismiss() }
                         .foregroundColor(.textPrimary)
                 }
                 ToolbarItem(placement: .keyboard) {
                     HStack {
                         Spacer()
-                        Button("Done") { focusedField = nil }
+                        Button(L10n.Common.done) { focusedField = nil }
                             .fontWeight(.medium)
                     }
                 }
             }
             .onAppear {
+                guard editingDocument == nil else { return }
                 if case .scannedImages(let images) = preview {
                     scannedImages = images
                 }
@@ -197,7 +229,7 @@ struct DocumentMetadataView: View {
 
     private var categorySection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Category")
+            Text(L10n.Documents.Metadata.category)
                 .font(.headingXS)
                 .foregroundColor(.textPrimary)
 
@@ -206,43 +238,39 @@ struct DocumentMetadataView: View {
                     Button {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                             metadata.category = (metadata.category == cat) ? nil : cat
+                            metadata.customFolderId = nil
                         }
                     } label: {
-                        HStack(spacing: 8) {
-                            ZStack {
-//                                Circle()
-//                                    .fill(cat.color.opacity(0.15))
-//                                    .frame(width: 28, height: 28)
+                        categoryChip(
+                            icon: {
+                                Image(cat.gridIcon)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 28, height: 28)
+                            },
+                            label: cat.localizedName,
+                            isSelected: metadata.category == cat
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
 
-                                if let asset = cat.assetIcon {
-                                    Image(asset)
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                        .frame(width: 28, height: 28)
-                                } else {
-                                    Image(systemName: cat.icon)
-                                        .font(.system(size: 16))
-                                        .foregroundColor(cat.color)
-                                }
-                            }
-
-                            Text(cat.localizedName)
-                                .font(.bodyS)
-                                .lineLimit(1)
+                ForEach(folderStore.folders) { folder in
+                    Button {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                            metadata.customFolderId = (metadata.customFolderId == folder.id) ? nil : folder.id
+                            metadata.category = nil
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 12)
-                        .background(
-                            metadata.category == cat
-                            ? Color.surfaceDark
-                            : Color.surfaceWhite
+                    } label: {
+                        categoryChip(
+                            icon: {
+                                Image(systemName: "folder.fill")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(.accent)
+                            },
+                            label: folder.name,
+                            isSelected: metadata.customFolderId == folder.id
                         )
-                        .foregroundColor(
-                            metadata.category == cat ? .white : .textPrimary
-                        )
-                        .cornerRadius(12)
-                        .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
                     }
                     .buttonStyle(.plain)
                 }
@@ -250,11 +278,32 @@ struct DocumentMetadataView: View {
         }
     }
 
+    @ViewBuilder
+    private func categoryChip<Icon: View>(
+        @ViewBuilder icon: () -> Icon,
+        label: String,
+        isSelected: Bool
+    ) -> some View {
+        HStack(spacing: 8) {
+            icon()
+            Text(label)
+                .font(.bodyS)
+                .lineLimit(1)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(isSelected ? Color.surfaceDark : Color.surfaceWhite)
+        .foregroundColor(isSelected ? .white : .textPrimary)
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
+    }
+
     // MARK: - Specialization Section
 
     private var specializationSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Specialization")
+            Text(L10n.Documents.Metadata.specialization)
                 .font(.headingXS)
                 .foregroundColor(.textPrimary)
 
@@ -285,63 +334,39 @@ struct DocumentMetadataView: View {
 
     private var dateSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Document Date")
+            Text(L10n.Documents.Metadata.date)
                 .font(.headingXS)
                 .foregroundColor(.textPrimary)
 
-            Button {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                    showDatePicker.toggle()
-                }
-                focusedField = nil
-            } label: {
-                HStack {
-                    Text(dateDisplayText)
-                        .font(.bodyL)
-                        .foregroundColor(.textPrimary)
+            HStack {
+                Text(L10n.Documents.Metadata.date)
+                    .font(.bodyL)
+                    .foregroundColor(.textPrimary)
 
-                    Spacer()
+                Spacer()
 
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 14))
-                        .foregroundColor(.textTertiary)
-                        .rotationEffect(.degrees(showDatePicker ? 90 : 0))
-                }
-                .padding(16)
-                .background(Color.surfaceWhite)
-                .cornerRadius(14)
-                .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
-            }
-
-            if showDatePicker {
                 DatePicker(
                     "",
                     selection: $metadata.documentDate,
                     in: ...Date(),
                     displayedComponents: .date
                 )
-                .datePickerStyle(.graphical)
-                .tint(.accent)
+                .datePickerStyle(.compact)
                 .labelsHidden()
-                .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .top)))
+                .tint(.accent)
             }
+            .padding(16)
+            .background(Color.surfaceWhite)
+            .cornerRadius(14)
+            .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
         }
-    }
-
-    private var dateDisplayText: String {
-        if Calendar.current.isDateInToday(metadata.documentDate) {
-            return "Today"
-        }
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d, yyyy"
-        return formatter.string(from: metadata.documentDate)
     }
 
     // MARK: - Name Section
 
     private var nameSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Document Name")
+            Text(L10n.Documents.Metadata.name)
                 .font(.headingXS)
                 .foregroundColor(.textPrimary)
 
@@ -362,7 +387,7 @@ struct DocumentMetadataView: View {
 
     private var doctorSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Doctor Name")
+            Text(L10n.Documents.Metadata.doctor)
                 .font(.headingXS)
                 .foregroundColor(.textPrimary)
 
@@ -383,13 +408,13 @@ struct DocumentMetadataView: View {
 
     private var notesSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Notes")
+            Text(L10n.Documents.Metadata.notes)
                 .font(.headingXS)
                 .foregroundColor(.textPrimary)
 
             ZStack(alignment: .topLeading) {
                 if metadata.notes.isEmpty {
-                    Text("Additional details about this document")
+                    Text(L10n.Documents.Metadata.notesPlaceholder)
                         .font(.bodyL)
                         .foregroundColor(.textTertiary)
                         .padding(.top, 8)
@@ -412,7 +437,7 @@ struct DocumentMetadataView: View {
 
     private var saveButton: some View {
         Button { save() } label: {
-            Text("Save Document")
+            Text(L10n.Documents.Metadata.save)
                 .font(.buttonL)
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
@@ -545,7 +570,7 @@ private struct SpecializationPickerView: View {
             .padding(.vertical, 12)
         }
         .background(Color.backgroundPrimary)
-        .navigationTitle("Specialization")
+        .navigationTitle(L10n.Documents.Metadata.specializationTitle)
         .navigationBarTitleDisplayMode(.inline)
     }
 }

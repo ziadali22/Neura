@@ -11,8 +11,11 @@ final class AppCoordinator: ObservableObject {
         case docs = 2
     }
 
+    enum AddDocumentAction { case scan, photo, file }
+
     @Published var selectedTab: Tab = .home
-    @Published var showAddDocument = false
+    @Published var showAddMenu = false
+    @Published var pendingAddAction: AddDocumentAction? = nil
     @Published var isInDetailView = false
     @Published var isSelectingDocs = false
 
@@ -25,7 +28,11 @@ final class AppCoordinator: ObservableObject {
     init() {
         homeRouter.$path
             .combineLatest(profileRouter.$path)
-            .map { home, profile in !home.isEmpty || !profile.isEmpty }
+            .combineLatest(docsRouter.$path)
+            .map { homePlusProfile, docs in
+                let (home, profile) = homePlusProfile
+                return !home.isEmpty || !profile.isEmpty || !docs.isEmpty
+            }
             .assign(to: &$isInDetailView)
     }
 }
@@ -35,9 +42,11 @@ final class AppCoordinator: ObservableObject {
 enum ProfileRoute: Hashable {
     case healthProfile
     case language
+    case subscription
 }
 
 enum HomeRoute: Hashable {
+    case healthProfile
     case healthProfileDetail
     case emergencyCard
 }

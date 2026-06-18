@@ -49,13 +49,13 @@ private struct FilterSheetHeader: View {
 
     var body: some View {
         HStack(alignment: .center) {
-            Text("Filters")
+            Text(L10n.Documents.Filter.title)
                 .font(.headingL)
                 .foregroundStyle(Color.textPrimary)
 
             Spacer()
 
-            Button("Close", systemImage: "xmark", action: onDismiss)
+            Button(L10n.Common.close, systemImage: "xmark", action: onDismiss)
                 .labelStyle(.iconOnly)
                 .font(.system(size: 11, weight: .bold))
                 .foregroundStyle(Color.textSecondary)
@@ -79,7 +79,7 @@ private struct FilterOrderSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            FilterSectionTitle("Order")
+            FilterSectionTitle(L10n.Documents.Filter.order)
 
             HStack(spacing: 8) {
                 ForEach(DocumentSortOption.allCases) { option in
@@ -127,7 +127,7 @@ private struct FilterCategorySection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            FilterSectionTitle("Category")
+            FilterSectionTitle(L10n.Documents.Filter.category)
 
             LazyVGrid(
                 columns: [GridItem(.flexible()), GridItem(.flexible())],
@@ -215,7 +215,7 @@ private struct FilterSpecializationSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            FilterSectionTitle("Specialization")
+            FilterSectionTitle(L10n.Documents.Filter.specialization)
 
             LazyVGrid(
                 columns: [GridItem(.flexible()), GridItem(.flexible())],
@@ -306,7 +306,7 @@ private struct FilterSheetBottomBar: View {
 
     var body: some View {
         HStack(spacing: 16) {
-            Button("Clear all", action: onClear)
+            Button(L10n.Documents.Filter.clearAll, action: onClear)
                 .font(.labelM)
                 .foregroundStyle(Color.textSecondary)
                 .frame(minHeight: 50)
@@ -314,7 +314,7 @@ private struct FilterSheetBottomBar: View {
             Spacer()
 
             Button(action: onApply) {
-                Text("See ^[\(resultCount) result](inflect: true)")
+                Text(L10n.Documents.Filter.result(resultCount))
                     .font(.buttonM)
                     .foregroundStyle(.white)
                     .padding(.horizontal, 28)
@@ -336,9 +336,9 @@ private struct FilterSheetBottomBar: View {
 private extension DocumentSortOption {
     var chipLabel: String {
         switch self {
-        case .newest: "Newest"
-        case .oldest: "Oldest"
-        case .name:   "Name A–Z"
+        case .newest: L10n.Documents.Filter.newest
+        case .oldest: L10n.Documents.Filter.oldest
+        case .name:   L10n.Documents.Filter.nameAZ
         }
     }
 }

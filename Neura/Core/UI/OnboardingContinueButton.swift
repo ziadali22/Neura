@@ -24,7 +24,10 @@ struct OnboardingContinueButton: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            Button(action: action) {
+            Button {
+                HapticManager.medium()
+                action()
+            } label: {
                 HStack(spacing: 8) {
                     if isLoading {
                         ProgressView().tint(.white)
@@ -51,9 +54,14 @@ struct OnboardingContinueButton: View {
             .animation(.easeInOut(duration: 0.2), value: isLoading)
 
             if let secondary = secondaryTitle {
-                Button(secondary, action: secondaryAction ?? action)
-                    .font(.bodyL)
-                    .foregroundStyle(Color.textTertiary)
+                Button {
+                    HapticManager.light()
+                    (secondaryAction ?? action)()
+                } label: {
+                    Text(secondary)
+                        .font(.bodyL)
+                        .foregroundStyle(Color.textTertiary)
+                }
             }
         }
         .padding(.horizontal, 24)

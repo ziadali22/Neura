@@ -2,6 +2,13 @@ import SwiftUI
 import PhotosUI
 import Combine
 
+// MARK: - Display Mode
+
+enum DocsDisplayMode {
+    case folders
+    case files
+}
+
 // MARK: - Sort Option
 
 enum DocumentSortOption: String, CaseIterable, Identifiable {
@@ -20,6 +27,7 @@ enum DocumentSortOption: String, CaseIterable, Identifiable {
 final class DocumentsListViewModel: ObservableObject {
     @Published var documents: [Document] = []
     @Published var searchText = ""
+    @Published var displayMode: DocsDisplayMode = .folders
 
     // Filtering & Sorting
     @Published var selectedCategoryFilter: DocumentCategory?
@@ -38,6 +46,7 @@ final class DocumentsListViewModel: ObservableObject {
     // Photo picker
     @Published var showPhotoPicker = false
     @Published var selectedPhotoItem: PhotosPickerItem?
+    @Published var showPhotoPermissionAlert = false
 
     // File importer
     @Published var showFileImporter = false
@@ -97,6 +106,11 @@ final class DocumentsListViewModel: ObservableObject {
         return result
     }
 
+    // All documents sorted newest-first (no category/specialisation filter applied).
+    var allFilesSorted: [Document] {
+        documents.sorted { $0.createdAt > $1.createdAt }
+    }
+
     // MARK: - Grouped by Date
 
     struct DateSection: Identifiable {
@@ -143,10 +157,10 @@ final class DocumentsListViewModel: ObservableObject {
         }
 
         var sections: [DateSection] = []
-        if !todayDocs.isEmpty { sections.append(.init(id: "today", title: "Today", documents: todayDocs)) }
-        if !yesterdayDocs.isEmpty { sections.append(.init(id: "yesterday", title: "Yesterday", documents: yesterdayDocs)) }
-        if !thisWeekDocs.isEmpty { sections.append(.init(id: "week", title: "This Week", documents: thisWeekDocs)) }
-        if !thisMonthDocs.isEmpty { sections.append(.init(id: "month", title: "This Month", documents: thisMonthDocs)) }
+        if !todayDocs.isEmpty { sections.append(.init(id: "today", title: L10n.Documents.Section.today, documents: todayDocs)) }
+        if !yesterdayDocs.isEmpty { sections.append(.init(id: "yesterday", title: L10n.Documents.Section.yesterday, documents: yesterdayDocs)) }
+        if !thisWeekDocs.isEmpty { sections.append(.init(id: "week", title: L10n.Documents.Section.thisWeek, documents: thisWeekDocs)) }
+        if !thisMonthDocs.isEmpty { sections.append(.init(id: "month", title: L10n.Documents.Section.thisMonth, documents: thisMonthDocs)) }
 
         for (month, monthDocs) in olderByMonth.sorted(by: { $0.value.first!.createdAt > $1.value.first!.createdAt }) {
             sections.append(.init(id: month, title: month, documents: monthDocs))
@@ -171,6 +185,23 @@ final class DocumentsListViewModel: ObservableObject {
         sortOption = .newest
     }
 
+    // MARK: - Subscription Lock
+
+    /// The IDs of documents that are inaccessible because the subscription has expired.
+    /// The 3 oldest documents (first uploaded) always remain accessible.
+    var lockedDocumentIDs: Set<UUID> {
+        guard SubscriptionManager.shared.hasExpiredSubscription else { return [] }
+        let accessibleIDs = Set(documents
+            .sorted { $0.createdAt < $1.createdAt }
+            .prefix(3)
+            .map(\.id))
+        return Set(documents.map(\.id)).subtracting(accessibleIDs)
+    }
+
+    func isLocked(_ document: Document) -> Bool {
+        lockedDocumentIDs.contains(document.id)
+    }
+
     // MARK: - Load
 
     func loadDocuments() {
@@ -191,6 +222,7 @@ final class DocumentsListViewModel: ObservableObject {
     }
 
     func startScanning() {
+        guard ensureCanUpload() else { return }
         showSourcePicker = false
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             self.showScanner = true
@@ -198,17 +230,54 @@ final class DocumentsListViewModel: ObservableObject {
     }
 
     func startPhotoUpload() {
+        guard ensureCanUpload() else { return }
         showSourcePicker = false
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            self.showPhotoPicker = true
+        let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+        switch status {
+        case .authorized, .limited:
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                self.showPhotoPicker = true
+            }
+        case .notDetermined:
+            PHPhotoLibrary.requestAuthorization(for: .readWrite) { [weak self] granted in
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    if granted == .authorized || granted == .limited {
+                        self?.showPhotoPicker = true
+                    } else {
+                        self?.showPhotoPermissionAlert = true
+                    }
+                }
+            }
+        case .denied, .restricted:
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                self.showPhotoPermissionAlert = true
+            }
+        @unknown default:
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                self.showPhotoPicker = true
+            }
         }
     }
 
     func startFileImport() {
+        guard ensureCanUpload() else { return }
         showSourcePicker = false
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             self.showFileImporter = true
         }
+    }
+
+    /// Authoritative upload gate for every source (scan / photo / file). Entry points
+    /// (the FAB and `showAddOptions`) gate too, but this is the single chokepoint that
+    /// guarantees a free user never exceeds the limit. Returns false (and shows the
+    /// paywall) when the limit is reached.
+    private func ensureCanUpload() -> Bool {
+        guard SubscriptionManager.shared.canUpload else {
+            showSourcePicker = false
+            showPaywall = true
+            return false
+        }
+        return true
     }
 
     // MARK: - Handle Scanner Result
@@ -275,13 +344,16 @@ final class DocumentsListViewModel: ObservableObject {
 
             do {
                 var document: Document
+                let source: String
 
                 switch preview {
                 case .scannedImages(let images):
                     document = try fm.savePDF(from: images, name: metadata.name)
+                    source = "scan"
 
                 case .importedFile(let url):
                     document = try fm.importFile(from: url, name: metadata.name)
+                    source = "import"
                 }
 
                 // Apply metadata
@@ -290,6 +362,9 @@ final class DocumentsListViewModel: ObservableObject {
                 document.specialization = metadata.specialization
                 if !metadata.doctorName.isEmpty { document.doctorName = metadata.doctorName }
                 if !metadata.notes.isEmpty { document.notes = metadata.notes }
+                if let folderId = metadata.customFolderId {
+                    document.tags = (document.tags ?? []) + [folderId.uuidString]
+                }
 
                 await MainActor.run {
                     guard !self.documents.contains(where: { $0.id == document.id }) else {
@@ -303,6 +378,11 @@ final class DocumentsListViewModel: ObservableObject {
                     self.pendingPreview = nil
                     self.selectedPhotoItem = nil
                     SubscriptionManager.shared.recordUpload()
+
+                    // Value Moment: the user successfully added a health document.
+                    // Only the source is tracked — never the medical document type (PII).
+                    AnalyticsManager.shared.track("document_saved", properties: ["source": source])
+
                     UINotificationFeedbackGenerator().notificationOccurred(.success)
 
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
@@ -328,6 +408,74 @@ final class DocumentsListViewModel: ObservableObject {
         SyncQueueManager.shared.enqueueMetadataUpdate(documents[index])
     }
 
+    // MARK: - Update (edit metadata and pages)
+
+    func updateDocument(_ document: Document,
+                        metadata: DocumentMetadata,
+                        preview: DocumentPreviewContent) {
+        guard let index = documents.firstIndex(where: { $0.id == document.id }) else { return }
+        var updated = documents[index]
+
+        // Apply metadata.
+        updated.name = metadata.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        updated.createdAt = metadata.documentDate
+        updated.category = metadata.category
+        updated.specialization = metadata.specialization
+        let doctor = metadata.doctorName.trimmingCharacters(in: .whitespacesAndNewlines)
+        updated.doctorName = doctor.isEmpty ? nil : doctor
+        let notes = metadata.notes.trimmingCharacters(in: .whitespacesAndNewlines)
+        updated.notes = notes.isEmpty ? nil : notes
+        updated.tags = metadata.customFolderId.map { [$0.uuidString] }
+
+        var fileBytesChanged = false
+
+        // Re-save the file ONLY when the page count actually changed. A
+        // metadata-only edit (e.g. rename) must stay lossless — re-rasterizing
+        // the PDF/image on every save would degrade legibility. `pageCount` is
+        // the PDF page count for scans/PDFs and 1 for single images, so an
+        // unchanged count means no add/remove happened and we skip the rewrite.
+        // Limitation: replacing a page with a fresh scan at the same count is
+        // not detected (camera-only, rare).
+        if case .scannedImages(let images) = preview, !images.isEmpty,
+           images.count != updated.pageCount {
+            do {
+                let fm = DocumentFileManager.shared
+                if updated.documentType == .image && images.count > 1 {
+                    // Single image gained pages -> becomes a multi-page PDF.
+                    let url = try fm.promoteImageToPDF(from: images, documentID: updated.id)
+                    updated = Document(
+                        id: updated.id,
+                        name: updated.name,
+                        fileURL: url,
+                        createdAt: updated.createdAt,
+                        documentType: .scan,
+                        category: updated.category,
+                        specialization: updated.specialization,
+                        doctorName: updated.doctorName,
+                        notes: updated.notes,
+                        tags: updated.tags
+                    )
+                } else if updated.documentType == .image {
+                    try fm.replaceImage(images[0], documentID: updated.id)
+                } else {
+                    try fm.replacePDF(from: images, documentID: updated.id)
+                }
+                fileBytesChanged = true
+            } catch {
+                errorMessage = "Failed to update document: \(error.localizedDescription)"
+                return
+            }
+        }
+
+        documents[index] = updated
+        persistMetadata()
+        SyncQueueManager.shared.enqueueMetadataUpdate(updated)
+        if fileBytesChanged {
+            SyncQueueManager.shared.enqueueUpload(updated)
+        }
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+    }
+
     // MARK: - Delete
 
     func deleteDocument(_ document: Document) {
@@ -335,6 +483,8 @@ final class DocumentsListViewModel: ObservableObject {
             try fileManager.deleteDocument(document)
             documents.removeAll { $0.id == document.id }
             persistMetadata()
+            SyncQueueManager.shared.enqueueDelete(document.id)
+            SubscriptionManager.shared.recordDeletion()
         } catch {
             errorMessage = "Failed to delete: \(error.localizedDescription)"
         }

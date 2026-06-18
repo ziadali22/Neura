@@ -28,7 +28,6 @@ enum DocumentCategory: String, Codable, CaseIterable, Identifiable {
     case hospitalization = "Hospitalization"
     case vaccination = "Vaccination"
     case imaging = "Imaging"
-    case other = "Other"
 
     var id: String { rawValue }
 
@@ -45,21 +44,33 @@ enum DocumentCategory: String, Codable, CaseIterable, Identifiable {
         case .hospitalization: return "bed.double.fill"
         case .vaccination: return "syringe.fill"
         case .imaging: return "waveform.path.ecg"
-        case .other: return "doc.fill"
         }
     }
 
-    /// Custom asset icon name from Assets.xcassets/Docs, nil if SF Symbol only.
+    /// Icon shown on the main folders grid (large card thumbnail).
+    var gridIcon: String {
+        switch self {
+        case .bloodTests:      return "blood"
+        case .consultations:   return "consultations"
+        case .hospitalization: return "hopitalIcon"
+        case .imaging:         return "invistigation"
+        case .medicalLetter:   return "medicalLetter"
+        case .prescriptions:   return "prespections"
+        case .vaccination:     return "vaccinationIcon"
+        }
+    }
+
+    /// Icon used inside folder views (expandable card header, detail header).
+    /// Falls back to the SF Symbol if no asset is available.
     var assetIcon: String? {
         switch self {
-        case .bloodTests: return "Blood"
-        case .medicalLetter: return "Letter"
-        case .consultations: return "Consultation"
-        case .prescriptions: return "Prescriptions"
-        case .hospitalization: return "Hospitalisation"
-        case .vaccination: return "Vaccination"
-        case .imaging: return "Investigationspdf"
-        default: return nil
+        case .bloodTests:      return "BloodTest"
+        case .consultations:   return "consultation"
+        case .prescriptions:   return "medicine"
+        case .hospitalization: return "hospital"
+        case .vaccination:     return "Vaccination"
+        case .imaging:         return "imaging"
+        case .medicalLetter:   return "Email"
         }
     }
 
@@ -72,7 +83,6 @@ enum DocumentCategory: String, Codable, CaseIterable, Identifiable {
         case .hospitalization: return Color(hex: "536B78")
         case .vaccination: return Color(hex: "2ECC71")
         case .imaging: return Color(hex: "1ABC9C")
-        case .other: return Color(hex: "95A5A6")
         }
     }
 }

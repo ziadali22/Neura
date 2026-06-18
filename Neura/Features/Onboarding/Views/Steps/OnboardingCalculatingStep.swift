@@ -48,7 +48,7 @@ struct OnboardingCalculatingStep: View {
 
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(isComplete ? completionTitle : "Building your\nNeura profile…")
+            Text(isComplete ? completionTitle : L10n.Onboarding.Calculating.building)
                 .font(.displayL)
                 .foregroundStyle(Color.textPrimary)
                 .contentTransition(.opacity)
@@ -57,7 +57,7 @@ struct OnboardingCalculatingStep: View {
                     value: isComplete
                 )
 
-            Text(isComplete ? "Welcome to a healthier you." : "Personalising your experience…")
+            Text(isComplete ? L10n.Onboarding.Calculating.welcome : L10n.Onboarding.Calculating.personalizing)
                 .font(.bodyS)
                 .foregroundStyle(Color.textTertiary)
                 .contentTransition(.opacity)
@@ -78,7 +78,7 @@ struct OnboardingCalculatingStep: View {
         let first = viewModel.state.name
             .components(separatedBy: " ")
             .first ?? ""
-        return first.isEmpty ? "You're all set!" : "You're all set, \(first)!"
+        return first.isEmpty ? L10n.Onboarding.Calculating.allSet : L10n.Onboarding.Calculating.allSetName(first)
     }
 
     // MARK: - Item list
@@ -117,7 +117,7 @@ struct OnboardingCalculatingStep: View {
             }
             .frame(height: 3)
 
-            Text("\(revealedCount) of \(items.count) configured")
+            Text(L10n.Onboarding.Calculating.progress(revealedCount, items.count))
                 .font(.captionS)
                 .foregroundStyle(Color.textTertiary)
         }
@@ -186,32 +186,32 @@ struct OnboardingCalculatingStep: View {
             .components(separatedBy: " ")
             .first ?? viewModel.state.name
         if !firstName.isEmpty {
-            result.append(.init(icon: "person.fill", label: "Profile created for \(firstName)"))
+            result.append(.init(icon: "person.fill", label: L10n.Onboarding.Calculating.profileCreated(firstName)))
         }
 
         let areaCount = viewModel.state.medicalAreas.count
         if areaCount > 0 {
             let label = areaCount == 1
-                ? "1 medical area tracked"
-                : "\(areaCount) medical areas tracked"
+                ? L10n.Onboarding.Calculating.medicalAreaSingle
+                : L10n.Onboarding.Calculating.medicalAreas(areaCount)
             result.append(.init(icon: "stethoscope", label: label))
         }
 
         let hasContact = !viewModel.state.emergencyContactName.isEmpty
             || !viewModel.state.emergencyContactPhone.isEmpty
         if hasContact {
-            result.append(.init(icon: "staroflife.fill", label: "Emergency contact saved"))
+            result.append(.init(icon: "staroflife.fill", label: L10n.Onboarding.Calculating.emergencyContact))
         }
 
         if viewModel.healthKitStatus == .authorized {
-            result.append(.init(icon: "heart.fill", label: "Apple Health connected"))
+            result.append(.init(icon: "heart.fill", label: L10n.Onboarding.Calculating.healthConnected))
         }
 
         let entryCount = countEntries(viewModel.state)
         if entryCount > 0 {
             let label = entryCount == 1
-                ? "1 health entry added"
-                : "\(entryCount) health entries added"
+                ? L10n.Onboarding.Calculating.healthEntrySingle
+                : L10n.Onboarding.Calculating.healthEntries(entryCount)
             result.append(.init(icon: "cross.case.fill", label: label))
         }
 
@@ -222,7 +222,7 @@ struct OnboardingCalculatingStep: View {
             result.append(.init(icon: "location.fill", label: locationParts.joined(separator: ", ")))
         }
 
-        result.append(.init(icon: "rectangle.on.rectangle.angled", label: "Health card ready"))
+        result.append(.init(icon: "rectangle.on.rectangle.angled", label: L10n.Onboarding.Calculating.healthCardReady))
 
         return result
     }

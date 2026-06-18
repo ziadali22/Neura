@@ -13,31 +13,37 @@ struct Column: Identifiable, Hashable {
 
     // MARK: - Presets
 
-    static let scan = Column(
-        position: 0,
-        title: "Scan",
-        subtitle: "Point at any document",
-        icon: "doc.viewfinder",
-        accentColor: Color(hex:"ff8d29"),
-        documentName: "BloodTest_March.pdf"
-    )
+    static var scan: Column {
+        Column(
+            position: 0,
+            title: L10n.Onboarding.Scanning.scanLabel,
+            subtitle: L10n.Onboarding.Scanning.scanSubtitleText,
+            icon: "doc.viewfinder",
+            accentColor: Color(hex:"ff8d29"),
+            documentName: "BloodTest_March.pdf"
+        )
+    }
 
-    static let organize = Column(
-        position: 1,
-        title: "Organize",
-        subtitle: "Auto-categorized by type",
-        icon: "folder.fill",
-        accentColor: Color(hex:"0088ff"),
-        documentName: "Prescription_2026.pdf"
-    )
+    static var organize: Column {
+        Column(
+            position: 1,
+            title: L10n.Onboarding.Scanning.organizeLabel,
+            subtitle: L10n.Onboarding.Scanning.organizeSubtitle,
+            icon: "folder.fill",
+            accentColor: Color(hex:"0088ff"),
+            documentName: "Prescription_2026.pdf"
+        )
+    }
 
-    static let share = Column(
-        position: 2,
-        title: "Share",
-        subtitle: "Send to your doctor instantly",
-        icon: "square.and.arrow.up",
-        accentColor: Color(hex:"34c759"),
-        documentName: "ConsultationNote.pdf",
-        isCompleted: true
-    )
+    static var share: Column {
+        Column(
+            position: 2,
+            title: L10n.Onboarding.Scanning.shareLabel,
+            subtitle: L10n.Onboarding.Scanning.shareSubtitleText,
+            icon: "square.and.arrow.up",
+            accentColor: Color(hex:"34c759"),
+            documentName: "ConsultationNote.pdf",
+            isCompleted: true
+        )
+    }
 }

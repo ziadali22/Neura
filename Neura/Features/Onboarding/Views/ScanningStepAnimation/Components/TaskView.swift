@@ -73,12 +73,12 @@ struct TaskView: View {
                 Circle()
                     .fill(column.accentColor)
                     .frame(width: 5, height: 5)
-                Text("Scanning…")
+                Text(L10n.Onboarding.Scanning.scanning)
                     .font(.captionS)
                     .foregroundStyle(column.accentColor)
             }
         case 1:
-            Text("Blood Test")
+            Text(L10n.Onboarding.Scanning.bloodTest)
                 .font(.captionS)
                 .foregroundStyle(column.accentColor)
                 .padding(.horizontal, 6)
@@ -90,7 +90,7 @@ struct TaskView: View {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 11))
                     .foregroundStyle(column.accentColor)
-                Text("Ready to share")
+                Text(L10n.Onboarding.Scanning.readyToShare)
                     .font(.captionS)
                     .foregroundStyle(column.accentColor)
             }

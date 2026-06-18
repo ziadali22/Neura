@@ -2,17 +2,28 @@ import SwiftUI
 import PDFKit
 
 struct DocumentViewerView: View {
-    let document: Document
     let onDelete: () -> Void
-    var onRename: ((String) -> Void)?
+    var onEdit: ((DocumentMetadata, DocumentPreviewContent) -> Void)?
+
+    @State private var document: Document
+    @State private var showEditSheet = false
+    @State private var editPreview: DocumentPreviewContent?
+    @State private var isPreparingEdit = false
+    @State private var contentRefreshID = UUID()
+
+    init(document: Document,
+         onDelete: @escaping () -> Void,
+         onEdit: ((DocumentMetadata, DocumentPreviewContent) -> Void)? = nil) {
+        _document = State(initialValue: document)
+        self.onDelete = onDelete
+        self.onEdit = onEdit
+    }
 
     @Environment(\.dismiss) private var dismiss
     @State private var showDeleteConfirmation = false
     @State private var showInfo = false
     @State private var showShareQR = false
     @State private var showPaywall = false
-    @State private var showRename = false
-    @State private var renameText = ""
     @State private var appear = false
     @StateObject private var subscriptionManager = SubscriptionManager.shared
 
@@ -46,45 +57,53 @@ struct DocumentViewerView: View {
                         .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 4)
                 }
             }
+            .id(contentRefreshID)
             .opacity(appear ? 1 : 0)
+        }
+        .overlay {
+            if isPreparingEdit {
+                ZStack {
+                    Color.black.opacity(0.15).ignoresSafeArea()
+                    ProgressView()
+                        .padding(20)
+                        .background(Color.surfaceWhite)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                }
+            }
         }
         .background(Color.backgroundPrimary)
         .navigationBarBackButtonHidden(true)
         .navigationBarHidden(true)
         .toolbar(.hidden, for: .tabBar)
-        .alert("Delete Document", isPresented: $showDeleteConfirmation) {
-            Button("Cancel", role: .cancel) {}
-            Button("Delete", role: .destructive) {
+        .alert(L10n.Documents.Viewer.deleteTitle, isPresented: $showDeleteConfirmation) {
+            Button(L10n.Common.cancel, role: .cancel) {}
+            Button(L10n.Common.delete, role: .destructive) {
                 onDelete()
                 dismiss()
             }
         } message: {
-            Text("Are you sure you want to delete this document? This action cannot be undone.")
-        }
-        .alert("Rename Document", isPresented: $showRename) {
-            TextField("Document name", text: $renameText)
-            Button("Cancel", role: .cancel) {}
-            Button("Save") {
-                let trimmed = renameText.trimmingCharacters(in: .whitespacesAndNewlines)
-                if !trimmed.isEmpty {
-                    onRename?(trimmed)
-                }
-            }
-        } message: {
-            Text("Enter a new name for this document.")
+            Text(L10n.Documents.Viewer.deleteMessage)
         }
         .sheet(isPresented: $showInfo) {
             documentInfoSheet
+        }
+        .sheet(isPresented: $showEditSheet) {
+            if let preview = editPreview {
+                DocumentMetadataView(
+                    preview: preview,
+                    editingDocument: document
+                ) { metadata, updatedPreview in
+                    applyEdit(metadata: metadata, preview: updatedPreview)
+                }
+            }
         }
         .sheet(isPresented: $showShareQR) {
             if let vm = makeShareViewModel() {
                 ShareDocumentSheet(viewModel: vm, documentName: document.name)
             }
         }
-        .sheet(isPresented: $showPaywall) {
+        .fullScreenCover(isPresented: $showPaywall) {
             PaywallView(subscriptionManager: subscriptionManager)
-                .presentationDetents([.large])
-                .presentationDragIndicator(.visible)
         }
         .onAppear {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) {
@@ -116,20 +135,19 @@ private extension DocumentViewerView {
 
             Menu {
                 Button {
-                    renameText = document.name
-                    showRename = true
+                    startEdit()
                 } label: {
-                    Label("Rename", systemImage: "pencil")
+                    Label(L10n.Common.edit, systemImage: "pencil")
                 }
 
                 Button { showInfo = true } label: {
-                    Label("Info", systemImage: "info.circle")
+                    Label(L10n.Common.info, systemImage: "info.circle")
                 }
 
                 Button {
                     shareDocument()
                 } label: {
-                    Label("Share", systemImage: "square.and.arrow.up")
+                    Label(L10n.Documents.Viewer.share, systemImage: "square.and.arrow.up")
                 }
                 .disabled(!document.fileExists)
 
@@ -140,7 +158,7 @@ private extension DocumentViewerView {
                         showPaywall = true
                     }
                 } label: {
-                    Label("Share via QR", systemImage: "qrcode")
+                    Label(L10n.Documents.Viewer.shareQR, systemImage: "qrcode")
                 }
                 .disabled(!document.fileExists)
 
@@ -149,7 +167,7 @@ private extension DocumentViewerView {
                 Button(role: .destructive) {
                     showDeleteConfirmation = true
                 } label: {
-                    Label("Delete", systemImage: "trash")
+                    Label(L10n.Common.delete, systemImage: "trash")
                 }
             } label: {
                 Image(systemName: "ellipsis")
@@ -173,21 +191,10 @@ private extension DocumentViewerView {
             HStack(spacing: 12) {
                 // Category icon
                 if let category = document.category {
-                    if let assetIcon = category.assetIcon {
-                        Image(assetIcon)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 36, height: 36)
-                    } else {
-                        ZStack {
-                            Circle()
-                                .fill(category.color.opacity(0.12))
-                                .frame(width: 36, height: 36)
-                            Image(systemName: category.icon)
-                                .font(.system(size: 15))
-                                .foregroundColor(category.color)
-                        }
-                    }
+                    Image(category.gridIcon)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 36, height: 36)
                 }
 
                 VStack(alignment: .leading, spacing: 2) {
@@ -215,7 +222,7 @@ private extension DocumentViewerView {
                             Text("·")
                                 .font(.captionS)
                                 .foregroundColor(.textTertiary)
-                            Text("\(document.pageCount) pages")
+                            Text(L10n.Documents.Viewer.pagesCount(document.pageCount))
                                 .font(.captionS)
                                 .foregroundColor(.textTertiary)
                         }
@@ -247,11 +254,11 @@ private extension DocumentViewerView {
                 VStack(spacing: 16) {
                     // Document details card
                     VStack(spacing: 0) {
-                        infoRow("Name", value: document.name, isFirst: true)
-                        infoRow(String(localized: "Type"), value: document.documentType.localizedName)
-                        infoRow("Date", value: formattedDate)
+                        infoRow(L10n.Documents.Viewer.name, value: document.name, isFirst: true)
+                        infoRow(L10n.Documents.Viewer.type, value: document.documentType.localizedName)
+                        infoRow(L10n.Documents.Viewer.date, value: formattedDate)
                         if document.isPDF {
-                            infoRow("Pages", value: "\(document.pageCount)", isLast: true)
+                            infoRow(L10n.Documents.Viewer.pages, value: "\(document.pageCount)", isLast: true)
                         }
                     }
                     .background(Color.surfaceWhite)
@@ -269,7 +276,7 @@ private extension DocumentViewerView {
                             }
 
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("Category")
+                                Text(L10n.Documents.Viewer.category)
                                     .font(.captionS)
                                     .foregroundColor(.textTertiary)
                                 Text(category.localizedName)
@@ -296,7 +303,7 @@ private extension DocumentViewerView {
                             }
 
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("Doctor")
+                                Text(L10n.Documents.Viewer.doctor)
                                     .font(.captionS)
                                     .foregroundColor(.textTertiary)
                                 Text(doctor)
@@ -313,7 +320,7 @@ private extension DocumentViewerView {
 
                     if let notes = document.notes, !notes.isEmpty {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Notes")
+                            Text(L10n.Documents.Viewer.notes)
                                 .font(.captionS)
                                 .foregroundColor(.textTertiary)
                             Text(notes)
@@ -328,7 +335,7 @@ private extension DocumentViewerView {
 
                     if let tags = document.tags, !tags.isEmpty {
                         VStack(alignment: .leading, spacing: 10) {
-                            Text("Tags")
+                            Text(L10n.Documents.Viewer.tags)
                                 .font(.captionS)
                                 .foregroundColor(.textTertiary)
                             FlowTagsView(tags: tags)
@@ -344,11 +351,11 @@ private extension DocumentViewerView {
                 .padding(.bottom, 40)
             }
             .background(Color.backgroundPrimary)
-            .navigationTitle("Document Info")
+            .navigationTitle(L10n.Documents.Viewer.infoTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") { showInfo = false }
+                    Button(L10n.Common.done) { showInfo = false }
                         .font(.buttonM)
                         .foregroundColor(.accent)
                 }
@@ -401,17 +408,18 @@ private extension DocumentViewerView {
             }
 
             VStack(spacing: 6) {
-                Text("File Not Found")
+                Text(L10n.Documents.Viewer.fileNotFound)
                     .font(.headingS)
                     .foregroundColor(.textPrimary)
 
-                Text("The document file could not be located.\nIt may have been moved or deleted.")
-                    .font(.bodyS)
+                Text(L10n.Documents.Viewer.fileNotFoundMessage)
+                    .font(.body)
                     .foregroundColor(.textSecondary)
                     .multilineTextAlignment(.center)
                     .lineSpacing(3)
             }
         }
+        .padding(.horizontal, 32)
     }
 
     // MARK: Share via QR
@@ -439,6 +447,75 @@ private extension DocumentViewerView {
            let rootViewController = windowScene.windows.first?.rootViewController {
             rootViewController.present(activityVC, animated: true)
         }
+    }
+
+    // MARK: Edit
+
+    func startEdit() {
+        switch document.documentType {
+        case .pdf:
+            // Imported PDF -> metadata only, read-only file row.
+            editPreview = .importedFile(document.fileURL)
+            showEditSheet = true
+        case .image:
+            if let image = try? DocumentFileManager.shared.loadImage(url: document.fileURL) {
+                editPreview = .scannedImages([image])
+            } else {
+                editPreview = .importedFile(document.fileURL)
+            }
+            showEditSheet = true
+        case .scan:
+            isPreparingEdit = true
+            let url = document.fileURL
+            DispatchQueue.global(qos: .userInitiated).async {
+                let images = PDFGenerator.shared.renderImages(from: url)
+                DispatchQueue.main.async {
+                    isPreparingEdit = false
+                    // Fall back to metadata-only if rendering failed.
+                    editPreview = images.isEmpty ? .importedFile(url) : .scannedImages(images)
+                    showEditSheet = true
+                }
+            }
+        }
+    }
+
+    func applyEdit(metadata: DocumentMetadata, preview: DocumentPreviewContent) {
+        // Optimistically refresh the local copy so the header/info update now.
+        document.name = metadata.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        document.createdAt = metadata.documentDate
+        document.category = metadata.category
+        document.specialization = metadata.specialization
+        let doctor = metadata.doctorName.trimmingCharacters(in: .whitespacesAndNewlines)
+        document.doctorName = doctor.isEmpty ? nil : doctor
+        let notes = metadata.notes.trimmingCharacters(in: .whitespacesAndNewlines)
+        document.notes = notes.isEmpty ? nil : notes
+        document.tags = metadata.customFolderId.map { [$0.uuidString] }
+
+        // A single image that gained pages is promoted to a multi-page PDF on
+        // disk (the .jpg is deleted, a .pdf is written). Rebuild the local copy
+        // so the open viewer points at the new .pdf instead of the deleted file.
+        if document.documentType == .image,
+           case .scannedImages(let images) = preview, images.count > 1 {
+            let pdfURL = DocumentFileManager.shared.resolveURL(for: "\(document.id.uuidString).pdf")
+            document = Document(
+                id: document.id,
+                name: document.name,
+                fileURL: pdfURL,
+                createdAt: document.createdAt,
+                documentType: .scan,
+                category: document.category,
+                specialization: document.specialization,
+                doctorName: document.doctorName,
+                notes: document.notes,
+                tags: document.tags
+            )
+        }
+
+        // Persist (and re-save file if pages changed) via the ViewModel.
+        onEdit?(metadata, preview)
+
+        // Force the PDF/image view to reload the (possibly overwritten) file.
+        contentRefreshID = UUID()
     }
 }
 
@@ -519,7 +596,7 @@ private struct ImageDocumentView: View {
                     ProgressView()
                         .controlSize(.large)
                         .tint(.accent)
-                    Text("Loading document...")
+                    Text(L10n.Documents.Viewer.loading)
                         .font(.captionS)
                         .foregroundColor(.textTertiary)
                 }

@@ -34,8 +34,25 @@ final class KeychainManager {
 
     var currentKey: SymmetricKey? { cachedKey }
 
+    /// Loads from cache or Keychain without creating a new key if absent.
+    func tryLoadKey(for uid: String) -> SymmetricKey? {
+        if let cached = cachedKey { return cached }
+        if let key = loadKey(for: uid) {
+            cachedKey = key
+            return key
+        }
+        return nil
+    }
+
     func clearKey() {
         cachedKey = nil
+    }
+
+    /// Persists a key to the (synchronizable) Keychain and the in-memory cache,
+    /// overwriting any existing entry. Used to cache a key downloaded from Firestore.
+    func store(_ key: SymmetricKey, for uid: String) {
+        saveKey(key, for: uid)
+        cachedKey = key
     }
 
     // MARK: - Keychain Read

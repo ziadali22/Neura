@@ -80,6 +80,7 @@ actor DocumentSyncService {
     /// Downloads and decrypts all documents from the cloud, saves missing files to disk,
     /// and returns the full list. Skips files that already exist locally.
     func downloadAll(uid: String, key: SymmetricKey) async throws -> [Document] {
+        SyncLog.info("Downloading all documents for restore")
         let snapshot = try await Firestore.firestore()
             .collection("users").document(uid)
             .collection("documents")
@@ -129,6 +130,7 @@ actor DocumentSyncService {
             restored.append(doc)
         }
 
+        SyncLog.success("downloadAll fetched \(restored.count) document(s)")
         return restored
     }
 }

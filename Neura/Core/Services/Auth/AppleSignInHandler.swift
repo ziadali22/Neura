@@ -102,6 +102,6 @@ extension AppleSignInHandler: ASAuthorizationControllerPresentationContextProvid
     func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
         UIApplication.shared.connectedScenes
             .compactMap { $0 as? UIWindowScene }
-            .first?.windows.first ?? ASPresentationAnchor()
+            .first(where: { $0.activationState == .foregroundActive })?.keyWindow ?? ASPresentationAnchor()
     }
 }

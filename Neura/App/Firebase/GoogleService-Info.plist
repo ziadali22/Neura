@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>683610948880-966ba9au8l5b2qdf6rpohv76603jfq5k.apps.googleusercontent.com</string>
+	<string>683610948880-067gasavre5v76iu2a5am6ta8frpdv29.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.683610948880-966ba9au8l5b2qdf6rpohv76603jfq5k</string>
+	<string>com.googleusercontent.apps.683610948880-067gasavre5v76iu2a5am6ta8frpdv29</string>
 	<key>API_KEY</key>
 	<string>AIzaSyDj0YX_sV7vIXaq68rgj-B2tmpyYlVCGms</string>
 	<key>GCM_SENDER_ID</key>
@@ -13,7 +13,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.NeuraA</string>
+	<string>com.Neura.health</string>
 	<key>PROJECT_ID</key>
 	<string>neura-42024</string>
 	<key>STORAGE_BUCKET</key>
@@ -29,6 +29,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:683610948880:ios:b8d0af0abe308d50e91195</string>
+	<string>1:683610948880:ios:9e6d5d631edec09be91195</string>
 </dict>
 </plist>

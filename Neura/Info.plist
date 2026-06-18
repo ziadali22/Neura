@@ -2,6 +2,25 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>Neura uses this permission to measure campaign performance and improve the app. Your medical data is never used for tracking.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Neura reads your health data (height, weight, date of birth, and biological sex) to pre-fill your health profile.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Neura does not write health data. This key is required by the App Store when HealthKit is linked.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Neura uses your location to pre-fill your city and country in your health profile.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Neura uses your camera to scan and save medical documents.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Neura accesses your photo library so you can upload images of your medical documents.</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Almarai-Light.ttf</string>
+		<string>Almarai-Regular.ttf</string>
+		<string>Almarai-Bold.ttf</string>
+		<string>Almarai-ExtraBold.ttf</string>
+	</array>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -9,7 +28,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.683610948880-966ba9au8l5b2qdf6rpohv76603jfq5k</string>
+				<string>com.googleusercontent.apps.683610948880-067gasavre5v76iu2a5am6ta8frpdv29</string>
 			</array>
 		</dict>
 	</array>

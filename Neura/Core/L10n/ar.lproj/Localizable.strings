@@ -1,0 +1,434 @@
+// MARK: - Common
+"common.neura" = "Neura";
+"common.cancel" = "إلغاء";
+"common.done" = "تم";
+"common.save" = "حفظ";
+"common.close" = "إغلاق";
+"common.delete" = "حذف";
+"common.share" = "مشاركة";
+"common.add" = "إضافة";
+"common.edit" = "تعديل";
+"common.rename" = "إعادة تسمية";
+"common.info" = "معلومات";
+"common.retry" = "إعادة المحاولة";
+"common.back" = "رجوع";
+"common.notes" = "ملاحظات";
+"common.optional" = "اختياري";
+"common.notNow" = "ليس الآن";
+"common.maybeLater" = "ربما لاحقاً";
+"common.skipForNow" = "تخطي الآن";
+"common.thisActionCannotBeUndone" = "لا يمكن التراجع عن هذا الإجراء.";
+"common.areYouSure" = "هل أنت متأكد؟";
+"common.select" = "تحديد";
+"common.deselect" = "إلغاء التحديد";
+"common.saving" = "جارٍ حفظ المستند...";
+"common.loading" = "جارٍ التحميل...";
+"common.skip" = "تخطي";
+"common.create" = "إنشاء";
+"common.error" = "خطأ";
+"common.ok" = "حسناً";
+
+// MARK: - Onboarding Welcome
+"onboarding.welcome.title" = "مرحباً بك في Neura";
+"onboarding.welcome.subtitle" = "خزّن سجلاتك الطبية ونظّمها وشاركها في مكان واحد آمن.";
+"onboarding.welcome.continueApple" = "المتابعة عبر Apple";
+"onboarding.welcome.continueGoogle" = "المتابعة عبر Google";
+"onboarding.welcome.encrypted" = "تشفير من طرف إلى طرف";
+
+// MARK: - Onboarding Store & Share
+"onboarding.storeAndShare.title" = "يبدو مألوفاً؟";
+"onboarding.storeAndShare.subtitle" = "لا مزيد من التخبط في البحث عن الإجابات.";
+"onboarding.storeAndShare.q1" = "ما الأدوية التي تتناولها؟";
+"onboarding.storeAndShare.q2" = "هل لديك أي حساسية؟";
+"onboarding.storeAndShare.q3" = "متى كانت آخر مرة أجريت فيها تحليل دم؟";
+"onboarding.storeAndShare.q4" = "هل نتائج التحليل معك الآن؟";
+"onboarding.storeAndShare.q5" = "هل تعاني من أي أمراض مزمنة؟";
+
+// MARK: - Onboarding Records Location
+"onboarding.recordsLocation.title" = "أين تحتفظ عادةً بسجلاتك الطبية؟";
+"onboarding.recordsLocation.email" = "البريد الإلكتروني";
+"onboarding.recordsLocation.whatsapp" = "واتساب";
+"onboarding.recordsLocation.folder" = "مجلدات على هاتفي";
+"onboarding.recordsLocation.shelf" = "رف أو خزانة";
+"onboarding.recordsLocation.everywhere" = "في كل مكان";
+
+// MARK: - Onboarding Statistics
+"onboarding.statistics.number" = "١٢ مليون";
+"onboarding.statistics.body" = "حالة تشخيص خاطئ كل عام. معظمها كان يمكن تفاديه لو امتلك الأطباء الصورة الكاملة";
+
+// MARK: - Onboarding Document Scan
+"onboarding.documentScan.title" = "امسح، نظّم\nوشارك سجلاتك";
+"onboarding.documentScan.subtitle" = "وجّه كاميرتك نحو أي مستند طبي وسيقوم Neura بحفظه لك تلقائياً.";
+
+// MARK: - Onboarding Privacy
+"onboarding.privacy.title" = "بياناتك الصحية\nخاصة وآمنة";
+"onboarding.privacy.subtitle" = "مستنداتك مشفّرة ومحفوظة بأمان. أنت فقط من يتحكم في ما تشاركه.";
+
+// MARK: - Onboarding Medical Areas
+"onboarding.medicalAreas.title" = "ما المجالات الطبية\nذات الصلة بك؟";
+"onboarding.medicalAreas.subtitle" = "اختر بعضها لتنظيم سجلاتك الطبية. يمكنك تغيير ذلك في أي وقت.";
+
+// MARK: - Onboarding Profile
+"onboarding.profile.title" = "أنشئ\nملفك الصحي";
+"onboarding.profile.subtitle" = "الأساسيات فقط — يمكنك إضافة المزيد لاحقاً.";
+"onboarding.profile.fullName" = "الاسم الكامل";
+"onboarding.profile.fullNamePlaceholder" = "اسمك الكامل";
+"onboarding.profile.dateOfBirth" = "تاريخ الميلاد";
+"onboarding.profile.day" = "يوم";
+"onboarding.profile.month" = "شهر";
+"onboarding.profile.year" = "سنة";
+
+// MARK: - Onboarding Location
+"onboarding.location.title" = "أين تقيم\nحالياً؟";
+"onboarding.location.subtitle" = "يظهر موقعك على بطاقة ملفك الصحي.";
+"onboarding.location.city" = "المدينة";
+"onboarding.location.cityPlaceholder" = "مثال: الرياض";
+"onboarding.location.country" = "الدولة";
+"onboarding.location.countryPlaceholder" = "مثال: المملكة العربية السعودية";
+
+// MARK: - Onboarding Profile Card
+"onboarding.profileCardIntro.title" = "تعرّف على بطاقتك الصحية";
+"onboarding.profileCardIntro.subtitle" = "كل ما يحتاجه الطبيب لمعرفته عنك في مكان واحد، جاهز للمشاركة في ثوانٍ.";
+"onboarding.profileCard.title" = "بطاقة ملفك الشخصي";
+"onboarding.profileCard.subtitle" = "هكذا يظهر ملفك على شاشتك الرئيسية. أنت فقط من يراه — لا يُشارَك مع الأطباء أبداً.";
+"onboarding.profileCard.useThisCard" = "استخدم هذه البطاقة";
+"onboarding.profileCard.yourCity" = "مدينتك";
+
+// MARK: - Onboarding Emergency
+"onboarding.emergency.title" = "أنشئ\nbطاقتك الطارئة";
+"onboarding.emergency.subtitle" = "يمكن للمسعفين الاطلاع على هذه المعلومات في حالات الطوارئ.";
+"onboarding.emergency.contactName" = "اسم جهة اتصال الطوارئ";
+"onboarding.emergency.contactNamePlaceholder" = "مثال: سارة أحمد";
+"onboarding.emergency.phone" = "رقم الهاتف";
+"onboarding.emergency.phonePlaceholder" = "+966 5XX XXX XXXX";
+"onboarding.emergency.bloodType" = "فصيلة الدم (اختياري)";
+"onboarding.emergency.yourNamePlaceholder" = "اسمك";
+"onboarding.emergency.contactPlaceholder" = "جهة اتصال الطوارئ";
+"onboarding.emergency.bloodTypePlaceholder" = "فصيلة الدم";
+
+// MARK: - Onboarding Biometrics
+"onboarding.biometrics.title" = "احمِ\nملفك الصحي";
+"onboarding.biometrics.subtitleFormat" = "استخدم %@ لقفل ملفك حتى تكون أنت وحدك من يصل إليه.";
+"onboarding.biometrics.enableFormat" = "تفعيل %@";
+
+// MARK: - Onboarding Emergency Card
+"onboarding.emergencyCard.title" = "بطاقتك الطارئة\nجاهزة";
+"onboarding.emergencyCard.subtitle" = "يمكن للأطباء والمسعفين الوصول إليها فوراً.";
+"onboarding.emergencyCard.nameLabel" = "الاسم";
+"onboarding.emergencyCard.emergencyContactLabel" = "جهة اتصال الطوارئ";
+"onboarding.emergencyCard.bloodTypeLabel" = "فصيلة الدم";
+"onboarding.emergencyCard.notSet" = "غير محدد";
+"onboarding.emergencyCard.poweredBy" = "مدعوم بواسطة";
+
+// MARK: - Onboarding Health Kit
+"onboarding.healthKit.title" = "اتصل بـ\nApple Health";
+"onboarding.healthKit.subtitle" = "امأ ملفك الصحي تلقائياً دون الحاجة للكتابة.";
+"onboarding.healthKit.importHeight" = "استيراد طولك";
+"onboarding.healthKit.importHeightSub" = "يُسحب من Apple Health تلقائياً";
+"onboarding.healthKit.importWeight" = "استيراد وزنك";
+"onboarding.healthKit.importWeightSub" = "يبقى محدثاً بآخر قراءة";
+"onboarding.healthKit.importSex" = "استيراد الجنس البيولوجي";
+"onboarding.healthKit.importSexSub" = "يُستخدم للسياق الطبي في التقارير";
+"onboarding.healthKit.privacyNote" = "أنت من يتحكم فيما يقرأه Neura. تبقى البيانات على جهازك ولا تُشارَك أبداً.";
+"onboarding.healthKit.connect" = "ربط Apple Health";
+
+// MARK: - Onboarding Health Data
+"onboarding.healthData.title" = "وجدنا بياناتك";
+"onboarding.healthData.subtitle" = "إليك ما جلبناه من Apple Health:";
+"onboarding.healthData.height" = "الطول";
+"onboarding.healthData.weight" = "الوزن";
+"onboarding.healthData.biologicalSex" = "الجنس البيولوجي";
+"onboarding.healthData.useThisData" = "استخدم هذه البيانات";
+"onboarding.healthData.enterManually" = "إدخال يدوي بدلاً من ذلك";
+
+// MARK: - Onboarding Medical
+"onboarding.medical.title" = "تاريخك\nالصحي";
+"onboarding.medical.subtitle" = "أضف بعض المدخلات للبدء — يمكنك التعديل لاحقاً دائماً.";
+"onboarding.medical.medications" = "الأدوية";
+"onboarding.medical.medicationsPlaceholder" = "مثال: فيتامين د، أسبرين (افصل بينها بفواصل)";
+"onboarding.medical.allergies" = "الحساسيات";
+"onboarding.medical.allergiesPlaceholder" = "مثال: الفول السوداني، البنسلين";
+"onboarding.medical.conditions" = "الحالات المرضية";
+"onboarding.medical.conditionsPlaceholder" = "مثال: ارتفاع ضغط الدم، السكري";
+
+// MARK: - Onboarding Documents
+"onboarding.documents.title" = "سجلاتك،\nدائماً في متناول يدك";
+"onboarding.documents.subtitle" = "أضف الوصفات الطبية ونتائج المختبر والتقارير. Neura ينظّم كل شيء ويجعله جاهزاً للمشاركة.";
+"onboarding.documents.scanTitle" = "مسح في ثوانٍ";
+"onboarding.documents.scanSubtitle" = "وجّه كاميرتك وسيرتّب Neura الملف تلقائياً.";
+"onboarding.documents.categorizeTitle" = "تصنيف تلقائي";
+"onboarding.documents.categorizeSubtitle" = "المستندات مرتبة حسب النوع لتجدها بسرعة.";
+"onboarding.documents.qrTitle" = "مشاركة عبر رمز QR";
+"onboarding.documents.qrSubtitle" = "أنشئ رابطاً آمناً لطبيبك بنقرة واحدة.";
+
+// MARK: - Onboarding Goals
+"onboarding.goals.title" = "لماذا ستستخدم\nNeura؟";
+"onboarding.goals.subtitle" = "اختر كل ما ينطبق";
+
+// MARK: - Onboarding Calculating
+"onboarding.calculating.building" = "جارٍ بناء\nملفك في Neura…";
+"onboarding.calculating.personalizing" = "نخصّص تجربتك…";
+"onboarding.calculating.allSet" = "كل شيء جاهز!";
+"onboarding.calculating.allSetNameFormat" = "كل شيء جاهز، %@!";
+"onboarding.calculating.welcome" = "مرحباً بك في حياة صحية أفضل.";
+"onboarding.calculating.profileCreatedFormat" = "تم إنشاء الملف لـ %@";
+"onboarding.calculating.medicalAreaSingle" = "تم تتبع مجال طبي واحد";
+"onboarding.calculating.medicalAreaFormat" = "تم تتبع %d مجالات طبية";
+"onboarding.calculating.emergencyContact" = "تم حفظ جهة اتصال الطوارئ";
+"onboarding.calculating.healthConnected" = "تم ربط Apple Health";
+"onboarding.calculating.healthEntrySingle" = "تم إضافة مدخل صحي واحد";
+"onboarding.calculating.healthEntryFormat" = "تم إضافة %d مدخلات صحية";
+"onboarding.calculating.healthCardReady" = "البطاقة الصحية جاهزة";
+"onboarding.calculating.progressFormat" = "%d من %d تم ضبطها";
+"onboarding.scanning.scanLabel" = "مسح";
+"onboarding.scanning.scanSubtitleText" = "صوّب نحو أي مستند";
+"onboarding.scanning.organizeLabel" = "تنظيم";
+"onboarding.scanning.organizeSubtitle" = "تصنيف تلقائي حسب النوع";
+"onboarding.scanning.shareLabel" = "مشاركة";
+"onboarding.scanning.shareSubtitleText" = "أرسل إلى طبيبك فوراً";
+"onboarding.scanning.scanning" = "جارٍ المسح…";
+"onboarding.scanning.bloodTest" = "فحص الدم";
+"onboarding.scanning.readyToShare" = "جاهز للمشاركة";
+
+// MARK: - Home
+"home.greeting.morning" = "صباح الخير";
+"home.greeting.afternoon" = "مساء الخير";
+"home.greeting.evening" = "مساء النور";
+"home.recent" = "الأخيرة";
+"home.empty" = "لا يوجد شيء هنا بعد — امسح مستنداً أو ارفعه.";
+"home.customizeCard" = "تخصيص البطاقة";
+"home.shareHealthProfile" = "مشاركة الملف الصحي";
+"home.completeProfile" = "أكمل ملفك الشخصي";
+"home.uploadLimit.remainingFormat" = "%@ رفع مستند مجاني متبقٍ";
+"home.uploadLimit.upgrade" = "جرّب Neura Pro لإزالة الحد";
+"home.uploadLimit.reachedTitle" = "أزِل حد الرفع";
+"home.uploadLimit.reachedSubtitle" = "ارفع أكبر عدد تريده من المستندات";
+"home.cardBackground.title" = "خلفية البطاقة";
+"home.cardBackground.upload" = "رفع";
+"home.cardBackground.yourPhotos" = "صورك";
+"home.cardBackground.presets" = "القوالب الجاهزة";
+"home.cardBackground.gradients" = "التدرجات";
+
+// MARK: - Home Share Health
+"home.shareHealth.title" = "شارك ملفك الصحي";
+"home.shareHealth.subtitle" = "أعطِ وصولاً فورياً إلى ملخصك الطبي الأساسي — تخطَّ الشرح واحصل على الرعاية بسرعة.";
+"home.shareHealth.share" = "مشاركة";
+
+// MARK: - Emergency
+"emergency.title" = "بطاقة الطوارئ";
+"emergency.subtitle" = "وصول سريع إلى المعلومات الصحية الحيوية";
+"emergency.inCaseOf" = "في حالة";
+"emergency.emergency" = "الطوارئ";
+"emergency.poweredBy" = "مدعوم بواسطة";
+"emergency.callContact" = "الاتصال بجهة الطوارئ";
+"emergency.share" = "مشاركة";
+
+// MARK: - Documents
+"documents.title" = "المستندات";
+"documents.deselectAll" = "إلغاء تحديد الكل";
+"documents.selectAll" = "تحديد الكل";
+"documents.done" = "تم";
+"documents.select" = "تحديد";
+"documents.searchPlaceholder" = "البحث في المستندات";
+"documents.countFormat" = "%d مستند";
+"documents.noMatchingTitle" = "لا توجد مستندات مطابقة";
+"documents.noDocumentsTitle" = "لا توجد مستندات";
+"documents.noMatchingMessage" = "جرّب تعديل الفلاتر.";
+"documents.noDocumentsMessage" = "امسح أو ارفع أول مستند طبي لك.";
+"documents.addDocument" = "إضافة مستند";
+"documents.scan" = "مسح المستند";
+"documents.uploadPhotos" = "رفع من الصور";
+"documents.importFile" = "استيراد ملف";
+"documents.deleteAlertTitleFormat" = "حذف %d مستند(ات)؟";
+"documents.selectedCountFormat" = "%d عنصر";
+"documents.newFolderMessage" = "أدخل اسماً لمجلدك الجديد.";
+"documents.photoAccess.title" = "الوصول إلى الصور مطلوب";
+"documents.photoAccess.openSettings" = "فتح الإعدادات";
+"documents.photoAccess.message" = "يحتاج Neura إلى الوصول إلى مكتبة صورك لرفع الصور. يُرجى السماح بالوصول من الإعدادات.";
+"documents.filter.title" = "الفلاتر";
+"documents.filter.button" = "فلتر";
+"documents.filter.order" = "الترتيب";
+"documents.filter.category" = "الفئة";
+"documents.filter.specialization" = "التخصص";
+"documents.filter.clearAll" = "مسح الكل";
+"documents.filter.resultFormat" = "عرض %d نتيجة";
+"documents.filter.newest" = "الأحدث";
+"documents.filter.oldest" = "الأقدم";
+"documents.filter.nameAZ" = "الاسم أ–ي";
+"documents.viewer.rename" = "إعادة التسمية";
+"documents.viewer.info" = "معلومات";
+"documents.viewer.share" = "مشاركة";
+"documents.viewer.shareQR" = "مشاركة عبر رمز QR";
+"documents.viewer.delete" = "حذف";
+"documents.viewer.infoTitle" = "معلومات المستند";
+"documents.viewer.fileNotFound" = "الملف غير موجود";
+"documents.viewer.fileNotFoundMessage" = "تعذّر تحديد موقع ملف المستند. ربما تم نقله أو حذفه.";
+"documents.viewer.loading" = "جارٍ تحميل المستند...";
+"documents.viewer.deleteTitle" = "حذف المستند";
+"documents.viewer.deleteMessage" = "هل أنت متأكد أنك تريد حذف هذا المستند؟ لا يمكن التراجع عن هذا الإجراء.";
+"documents.viewer.renameTitle" = "إعادة تسمية المستند";
+"documents.viewer.renamePlaceholder" = "اسم المستند";
+"documents.viewer.renameMessage" = "أدخل اسمًا جديدًا لهذا المستند.";
+"documents.viewer.pagesCountFormat" = "%d صفحات";
+"documents.viewer.name" = "الاسم";
+"documents.viewer.date" = "التاريخ";
+"documents.viewer.pages" = "الصفحات";
+"documents.viewer.type" = "النوع";
+"documents.viewer.category" = "الفئة";
+"documents.viewer.doctor" = "الطبيب";
+"documents.viewer.notes" = "الملاحظات";
+"documents.viewer.tags" = "الوسوم";
+
+// MARK: - Documents Sections
+"documents.section.today" = "اليوم";
+"documents.section.yesterday" = "أمس";
+"documents.section.thisWeek" = "هذا الأسبوع";
+"documents.section.thisMonth" = "هذا الشهر";
+
+// MARK: - Documents Category
+"documents.category.noDocumentsYet" = "لا توجد مستندات بعد";
+"documents.category.searchFormat" = "البحث في %@";
+"documents.category.emptyDescriptionFormat" = "قم بمسح أو رفع مستند ووضع علامة %@ عليه.";
+"documents.category.scanFirst" = "امسح مستندك الأول للبدء";
+"documents.category.addNewFile" = "إضافة ملف جديد";
+"documents.category.newFolder" = "مجلد جديد";
+
+// MARK: - Documents Folder
+"documents.folder.renameTitle" = "إعادة تسمية المجلد";
+"documents.folder.namePlaceholder" = "اسم المجلد";
+"documents.folder.noDocuments" = "لا توجد مستندات";
+"documents.folder.emptyDescriptionFormat" = "قم بمسح أو رفع مستند وتعيينه إلى %@.";
+
+// MARK: - Add Document Sheet Subtitles
+"documents.addDocument.scanSubtitle" = "استخدم الكاميرا لمسح الصفحات";
+"documents.addDocument.photoSubtitle" = "اختر صورة من مكتبتك";
+"documents.addDocument.fileSubtitle" = "اختر ملف PDF أو صورة";
+
+// MARK: - Documents Category Picker
+"documents.categoryPicker.title" = "اختر الفئة";
+"documents.categoryPicker.subtitle" = "اختر مكان حفظ المستند الممسوح";
+"documents.categoryPicker.documentCountFormat" = "%d مستند";
+"documents.naming.title" = "سمّ ملفك";
+"documents.naming.scannedPagesFormat" = "تم مسح %d صفحة";
+"documents.naming.pageFormat" = "صفحة %d";
+"documents.naming.fileName" = "اسم الملف";
+"documents.naming.fileNamePlaceholder" = "أدخل اسم الملف";
+"documents.naming.savingToFormat" = "حفظ في %@";
+"documents.naming.saveFile" = "حفظ الملف";
+"documents.metadata.title" = "تفاصيل المستند";
+"documents.metadata.category" = "الفئة";
+"documents.metadata.specialization" = "التخصص";
+"documents.metadata.date" = "تاريخ المستند";
+"documents.metadata.name" = "اسم المستند";
+"documents.metadata.doctor" = "اسم الطبيب";
+"documents.metadata.notes" = "ملاحظات";
+"documents.metadata.notesPlaceholder" = "تفاصيل إضافية حول هذا المستند";
+"documents.metadata.save" = "حفظ المستند";
+"documents.metadata.specializationTitle" = "التخصص";
+
+// MARK: - QR Sharing
+"qr.uploading" = "جارٍ رفع المستند";
+"qr.scanCode" = "امسح رمز QR لفتح المستند";
+"qr.copyLink" = "نسخ الرابط";
+"qr.expired" = "انتهت صلاحية الرابط";
+"qr.expiredMessage" = "انتهت صلاحية رابط المشاركة لأسباب أمنية.";
+"qr.generateNew" = "إنشاء رابط جديد";
+"qr.failed" = "فشل الرفع";
+"qr.retry" = "إعادة المحاولة";
+
+// MARK: - Health Profile
+"healthProfile.title" = "الملف الصحي";
+"healthProfile.generalData" = "البيانات العامة";
+"healthProfile.addField" = "إضافة حقل";
+"healthProfile.addSection" = "إضافة قسم";
+"healthProfile.sectionTitlePlaceholder" = "عنوان القسم";
+"healthProfile.fullName" = "الاسم الكامل";
+"healthProfile.dateOfBirth" = "تاريخ الميلاد";
+"healthProfile.gender" = "الجنس";
+"healthProfile.height" = "الطول";
+"healthProfile.weight" = "الوزن";
+"healthProfile.insuranceStatus" = "حالة التأمين";
+"healthProfile.bloodType" = "فصيلة الدم";
+"healthProfile.emergencyContact" = "جهة اتصال الطوارئ";
+"healthProfile.addName" = "أضف الاسم";
+"healthProfile.addDate" = "أضف التاريخ";
+"healthProfile.addGender" = "أضف الجنس";
+"healthProfile.addHeight" = "أضف الطول";
+"healthProfile.addWeight" = "أضف الوزن";
+"healthProfile.selectBloodType" = "اختر";
+"healthProfile.addStatus" = "أضف الحالة";
+"healthProfile.addContact" = "أضف جهة الاتصال";
+"healthProfile.addHealthInfo" = "إضافة معلومات صحية";
+"healthProfile.notesOptional" = "ملاحظات (اختياري)";
+"healthProfile.additionalDetails" = "تفاصيل إضافية";
+"healthProfile.noEntries" = "لا توجد مدخلات بعد";
+"healthProfile.noEntriesSubtitle" = "اضغط الزر أدناه لإضافة مدخل";
+"healthProfile.editFormat" = "تعديل %@";
+"healthProfile.deleteFormat" = "حذف %@";
+"healthProfile.report.title" = "التقرير الصحي";
+"healthProfile.report.subtitle" = "ملف PDF شامل يجمع ملفك الصحي\nومستنداتك وجدولك الزمني";
+"healthProfile.report.whatsIncluded" = "ما المتضمَّن";
+"healthProfile.report.generating" = "جارٍ الإنشاء...";
+"healthProfile.report.generate" = "إنشاء التقرير";
+"healthProfile.report.feature1Title" = "الملف الصحي";
+"healthProfile.report.feature1Subtitle" = "بيانات عامة، حالات، أدوية والمزيد";
+"healthProfile.report.feature2Title" = "قائمة المستندات";
+"healthProfile.report.feature2Subtitle" = "جميع المستندات مجمّعة حسب الفئة";
+"healthProfile.report.feature3Title" = "الجدول الزمني الصحي";
+"healthProfile.report.feature3Subtitle" = "عرض زمني لجميع الأحداث الصحية";
+"healthProfile.report.feature4Title" = "تقرير احترافي";
+"healthProfile.report.feature4Subtitle" = "تنسيق احترافي جاهز لطبيبك";
+"healthProfile.updatedFormat" = "تم التحديث %@";
+"healthProfile.valueLabel" = "القيمة";
+
+// MARK: - Profile
+"profile.title" = "الملف الشخصي";
+"profile.section.profile" = "الملف الشخصي";
+"profile.section.preferences" = "التفضيلات";
+"profile.section.support" = "الدعم";
+"profile.section.account" = "الحساب";
+"profile.healthProfile" = "الملف الصحي";
+"profile.subscription" = "الاشتراك";
+"profile.security" = "الأمان";
+"profile.language" = "اللغة";
+"profile.feedback" = "ملاحظات";
+"profile.feedback.title" = "إرسال ملاحظات";
+"profile.feedback.emailLabel" = "البريد الإلكتروني";
+"profile.feedback.emailPlaceholder" = "your@email.com";
+"profile.feedback.messageLabel" = "ملاحظاتك";
+"profile.feedback.messagePlaceholder" = "أخبرنا برأيك في التطبيق…";
+"profile.feedback.submit" = "إرسال";
+"profile.feedback.errorMessage" = "حدث خطأ ما. يرجى المحاولة مرة أخرى.";
+"profile.contactUs" = "اتصل بنا";
+"profile.logOut" = "تسجيل الخروج";
+"profile.deleteAccount" = "حذف الحساب";
+"profile.logOutMessage" = "هل أنت متأكد أنك تريد تسجيل الخروج؟";
+"profile.deleteAccountMessage" = "لا يمكن التراجع عن هذا الإجراء. ستُحذف جميع بياناتك نهائياً.";
+"profile.deletingAccount" = "جارٍ حذف حسابك…";
+"profile.biometricLockFormat" = "قفل %@";
+"profile.biometricUnavailableSubtitle" = "قم بإعداد القياسات الحيوية على الجهاز أولاً";
+"profile.biometricUnavailableTitle" = "القياسات الحيوية غير متاحة";
+"profile.biometricUnavailableMessage" = "قم بإعداد Face ID أو Touch ID من الإعدادات، ثم عُد إلى Neura لتفعيل هذا القفل.";
+"profile.pro.title" = "Neura Pro";
+"profile.pro.unlimitedAccess" = "لديك وصول غير محدود.\nشكراً لدعمك!";
+"profile.pro.getTitle" = "احصل على Neura Pro";
+"profile.pro.getSubtitle" = "مستندات طبية غير محدودة.\nشاركها مع أطبائك في أي وقت.";
+"profile.pro.upgrade" = "الترقية إلى Pro";
+"profile.subscriptionDetail.description" = "مستندات غير محدودة، مشاركة فورية وآمنة، وملف شخصي يخصك وحدك.";
+"profile.subscriptionDetail.periodMonthly" = "شهري";
+"profile.subscriptionDetail.periodYearly" = "سنوي";
+"profile.subscriptionDetail.perMonth" = "/ شهر";
+"profile.subscriptionDetail.perYear" = "/ سنة";
+"profile.subscriptionDetail.planTitleFormat" = "Neura Pro · %@";
+"profile.subscriptionDetail.renewsOnFormat" = "يتجدد في %@";
+"profile.subscriptionDetail.expiresOnFormat" = "ينتهي في %@";
+
+// MARK: - Paywall
+"paywall.title" = "Neura Pro";
+"paywall.subtitle" = "افتح رفع مستندات غير محدود\nوميزات متميزة";
+"paywall.continueFormat" = "المتابعة مع %@";
+"paywall.restore" = "استعادة الشراء";
+
+// MARK: - Coachmark
+"coachmark.documentUpload.title" = "أضف وثيقتك الأولى";
+"coachmark.documentUpload.subtitle" = "اضغط + لمسح ضوئي أو رفع صورة أو استيراد ملف.";

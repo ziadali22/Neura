@@ -11,10 +11,10 @@ struct OnboardingGoalsStep: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 28) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("What will you\nuse Neura for?")
+                        Text(L10n.Onboarding.Goals.title)
                             .font(.displayL)
                             .foregroundStyle(Color.textPrimary)
-                        Text("Select all that apply")
+                        Text(L10n.Onboarding.Goals.subtitle)
                             .font(.bodyL)
                             .foregroundStyle(Color.textSecondary)
                     }

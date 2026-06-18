@@ -1,4 +1,5 @@
 import SwiftUI
+import L10n_swift
 
 enum AppLanguage: String, CaseIterable, Identifiable {
     case english = "en"
@@ -32,7 +33,9 @@ final class LanguageManager {
 
     private init() {
         let stored = UserDefaults.standard.string(forKey: "app_language") ?? "en"
-        currentLanguage = AppLanguage(rawValue: stored) ?? .english
+        let language = AppLanguage(rawValue: stored) ?? .english
+        currentLanguage = language
+        L10n_swift.L10n.shared.language = language.rawValue
     }
 
     var locale: Locale {
@@ -46,5 +49,6 @@ final class LanguageManager {
     func setLanguage(_ language: AppLanguage) {
         UserDefaults.standard.set(language.rawValue, forKey: "app_language")
         currentLanguage = language
+        L10n_swift.L10n.shared.language = language.rawValue
     }
 }

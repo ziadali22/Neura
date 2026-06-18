@@ -5,34 +5,62 @@ import SwiftUI
 
 enum OnboardingStep: Int, CaseIterable, Hashable {
     case welcome
+    case stopSearching
     case storeAndShare
+    case qrShare
+    case statistics
+    case recordsLocation
     case documentScan
     case privacySecurity
     case medicalAreas
-    case profile, location, profileCard
+    case profile, location, profileCardIntro, profileCard
     case emergency, biometrics, emergencyCard
     case healthKit, healthData, medical, documents, calculating
 
     /// Whether the top bar (back button + progress) is visible.
     var showsTopBar: Bool {
         switch self {
-        case .welcome, .calculating: return false
+        case .stopSearching, .calculating: return false
         default: return true
+        }
+    }
+
+    /// Whether the skip button is shown in the top bar.
+    var isSkippable: Bool {
+        switch self {
+        case .welcome: return false
+        default: return showsTopBar
         }
     }
 
     /// Whether the centered progress pill is shown within the top bar.
     var showsProgressBar: Bool {
         switch self {
-        case .welcome, .storeAndShare, .documentScan, .privacySecurity, .calculating: return false
+        case .stopSearching, .storeAndShare, .statistics, .documentScan,
+             .profileCardIntro, .qrShare, .privacySecurity, .welcome, .calculating:
+            return false
         default: return true
         }
     }
 
     static let progressTracked: [OnboardingStep] = [
-        .medicalAreas, .profile, .location, .profileCard, .emergency,
-        .biometrics, .emergencyCard, .healthKit, .medical, .documents
+        .profile, .location, .biometrics, .healthKit, .profileCard
     ]
+
+    /// The active flow in the order users see it — the source of truth for analytics
+    /// screen numbers. Keep in sync with `OnboardingViewModel.nextStep(after:)`.
+    /// Off-flow/retired steps are intentionally absent (they fire no analytics).
+    static let analyticsFlow: [OnboardingStep] = [
+        .stopSearching, .storeAndShare, .statistics, .documentScan,
+        .profileCardIntro, .qrShare, .privacySecurity, .welcome,
+        .profile, .location, .biometrics, .healthKit, .profileCard
+    ]
+
+    /// 1-based position in the visible flow, or `nil` for steps that aren't tracked
+    /// (e.g. `.calculating` and off-flow steps).
+    var analyticsScreenNumber: Int? {
+        OnboardingStep.analyticsFlow.firstIndex(of: self).map { $0 + 1 }
+    }
 }
 
 // MARK: - Profile enums

@@ -11,11 +11,11 @@ struct OnboardingCardStep: View {
                 VStack(spacing: 24) {
                     // Header
                     VStack(spacing: 8) {
-                        Text("Your emergency\ncard is ready")
+                        Text(L10n.Onboarding.EmergencyCard.title)
                             .font(.displayL)
                             .foregroundStyle(Color.textPrimary)
                             .multilineTextAlignment(.center)
-                        Text("Doctors and first responders can access this instantly.")
+                        Text(L10n.Onboarding.EmergencyCard.subtitle)
                             .font(.bodyL)
                             .foregroundStyle(Color.textSecondary)
                             .multilineTextAlignment(.center)
@@ -53,9 +53,9 @@ struct OnboardingCardStep: View {
                                startPoint: .topLeading, endPoint: .bottomTrailing)
                 HStack {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("IN CASE OF").font(.labelM).fontWeight(.bold).tracking(2)
+                        Text(L10n.Emergency.inCaseOf).font(.labelM).fontWeight(.bold).tracking(2)
                             .foregroundStyle(.white.opacity(0.7))
-                        Text("EMERGENCY").font(.system(size: 26, weight: .heavy)).tracking(1)
+                        Text(L10n.Emergency.emergency).font(.system(size: 26, weight: .heavy)).tracking(1)
                             .foregroundStyle(.white)
                     }
                     Spacer()
@@ -70,19 +70,19 @@ struct OnboardingCardStep: View {
 
             // Body
             VStack(spacing: 0) {
-                cardBodyRow("person.fill", "Name", state.name.isEmpty ? "Not set" : state.name)
+                cardBodyRow("person.fill", L10n.Onboarding.EmergencyCard.nameLabel, state.name.isEmpty ? L10n.Onboarding.EmergencyCard.notSet : state.name)
                 Divider().padding(.leading, 56)
-                cardBodyRow("phone.fill", "Emergency Contact",
-                            state.emergencyContactPhone.isEmpty ? "Not set" : state.emergencyContactPhone)
+                cardBodyRow("phone.fill", L10n.Onboarding.EmergencyCard.emergencyContactLabel,
+                            state.emergencyContactPhone.isEmpty ? L10n.Onboarding.EmergencyCard.notSet : state.emergencyContactPhone)
                 Divider().padding(.leading, 56)
-                cardBodyRow("drop.fill", "Blood Type", state.bloodType?.rawValue ?? "Not set")
+                cardBodyRow("drop.fill", L10n.Onboarding.EmergencyCard.bloodTypeLabel, state.bloodType?.rawValue ?? L10n.Onboarding.EmergencyCard.notSet)
                 Divider().padding(.leading, 56)
 
                 // Neura branding footer
                 HStack(spacing: 8) {
                     Circle().fill(Color.accent).frame(width: 5, height: 5)
-                    Text("Powered by").font(.captionS).foregroundStyle(Color.textTertiary)
-                    Text("Neura").font(.captionS).fontWeight(.bold).foregroundStyle(Color.accent)
+                    Text(L10n.Onboarding.EmergencyCard.poweredBy).font(.captionS).foregroundStyle(Color.textTertiary)
+                    Text(L10n.Common.neura).font(.captionS).fontWeight(.bold).foregroundStyle(Color.accent)
                 }
                 .padding(.vertical, 12)
             }

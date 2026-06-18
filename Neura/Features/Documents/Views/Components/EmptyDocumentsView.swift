@@ -20,11 +20,11 @@ struct EmptyDocumentsView: View {
                 }
 
             VStack(spacing: 8) {
-                Text("You have 0 medical documents.")
+                Text(L10n.Documents.noDocumentsMessage)
                     .font(.system(size: 17, weight: .semibold))
                     .multilineTextAlignment(.center)
 
-                Text("Add from your library, or scan\nthe document.")
+                Text(L10n.Documents.noDocumentsMessage)
                     .font(.system(size: 17))
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -33,7 +33,7 @@ struct EmptyDocumentsView: View {
 
             Button(action: onAddDocument) {
                 HStack(spacing: 8) {
-                    Text("Add document")
+                    Text(L10n.Documents.addDocument)
                         .font(.system(size: 17, weight: .semibold))
 
                     Image(systemName: "plus")

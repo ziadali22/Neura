@@ -1,7 +1,9 @@
 import Foundation
 import FirebaseAuth
+import FirebaseFirestore
 import GoogleSignIn
 import UIKit
+import CryptoKit
 import Combine
 
 // MARK: - Auth Service
@@ -19,6 +21,11 @@ final class AuthService: ObservableObject {
     private init() {
         // currentUser is available synchronously from Firebase's persisted cache
         currentUser = Auth.auth().currentUser
+        if let uid = currentUser?.uid {
+            // Re-tie analytics to the logged-in user on every app launch.
+            AnalyticsManager.shared.identify(uid)
+            restoreCloudData(for: uid)
+        }
         stateListener = Auth.auth().addStateDidChangeListener { [weak self] _, user in
             Task { @MainActor in self?.currentUser = user }
         }
@@ -44,11 +51,16 @@ final class AuthService: ObservableObject {
     // MARK: - Sign In with Google
 
     func signInWithGoogle() async throws {
-        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let rootVC = scene.windows.first?.rootViewController else {
+        guard let scene = UIApplication.shared.connectedScenes
+                .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
+              let rootVC = scene.keyWindow?.rootViewController else {
             throw AuthError.noRootViewController
         }
-        let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: rootVC)
+        var presentingVC = rootVC
+        while let presented = presentingVC.presentedViewController {
+            presentingVC = presented
+        }
+        let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: presentingVC)
         guard let idToken = result.user.idToken?.tokenString else {
             throw AuthError.missingToken
         }
@@ -65,6 +77,7 @@ final class AuthService: ObservableObject {
     func signOut() {
         try? Auth.auth().signOut()
         KeychainManager.shared.clearKey()
+        AnalyticsManager.shared.reset()
         currentUser = nil
     }
 
@@ -83,14 +96,63 @@ final class AuthService: ObservableObject {
 
         try await user.delete()
         KeychainManager.shared.clearKey()
+        AnalyticsManager.shared.reset()
         currentUser = nil
+    }
+
+    // MARK: - Cloud Existence Check
+
+    /// Returns true if this uid already has any private cloud data in Firestore.
+    /// Used during onboarding to detect returning users without decrypting anything.
+    func hasExistingCloudData(uid: String) async -> Bool {
+        let database = Firestore.firestore()
+        let userDocument = database.collection("users").document(uid)
+
+        async let profileSnapshot = userDocument
+            .collection("profile").document("data")
+            .getDocument()
+
+        async let preferencesSnapshot = userDocument
+            .collection("preferences").document("data")
+            .getDocument()
+
+        async let documentsSnapshot = userDocument
+            .collection("documents")
+            .limit(to: 1)
+            .getDocuments()
+
+        do {
+            let (profile, preferences, documents) = try await (
+                profileSnapshot,
+                preferencesSnapshot,
+                documentsSnapshot
+            )
+            return profile.exists || preferences.exists || !documents.documents.isEmpty
+        } catch {
+            return false
+        }
     }
 
     // MARK: - Private
 
     private func onSignInSuccess(uid: String) {
-        let key = KeychainManager.shared.loadOrCreateKey(for: uid)
-        SyncQueueManager.shared.performInitialRestore(uid: uid, key: key)
+        // Tie all subsequent events to this user; keyed on the Firebase UID
+        // (a stable primary key) — never email.
+        AnalyticsManager.shared.identify(uid)
+        restoreCloudData(for: uid)
+    }
+
+    private func restoreCloudData(for uid: String) {
+        Task {
+            guard let key = await EncryptionKeyService.shared.resolveKey(uid: uid) else {
+                SyncLog.info("Key unavailable (offline); deferring restore and sync")
+                return
+            }
+            // Key is now cached in KeychainManager. Pull cloud data down, then push
+            // anything that failed to upload previously.
+            SyncQueueManager.shared.performInitialRestore(uid: uid, key: key)
+            SyncQueueManager.shared.drainPending()
+        }
     }
 }
 

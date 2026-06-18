@@ -3,9 +3,13 @@ import SwiftUI
 struct ProfileView: View {
     @EnvironmentObject private var router: ProfileRouter
     @StateObject private var subscriptionManager = SubscriptionManager.shared
+    @StateObject private var biometricAuth = BiometricAuthManager.shared
     @State private var showLogOutAlert = false
     @State private var showDeleteAlert = false
+    @State private var isDeleting = false
     @State private var showPaywall = false
+    @State private var showBiometricUnavailableAlert = false
+    @State private var showFeedback = false
     @State private var titleAppear = false
     @State private var contentAppear = false
 
@@ -13,7 +17,7 @@ struct ProfileView: View {
         NavigationStack(path: $router.path) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    Text("Profile")
+                    Text(L10n.Profile.title)
                         .font(.displayXL)
                         .foregroundStyle(Color.textPrimary)
                         .padding(.top, 24)
@@ -24,58 +28,95 @@ struct ProfileView: View {
 
                     VStack(alignment: .leading, spacing: 0) {
                         // Neura Pro
-                        NeuraProCard()
-                            .padding(.bottom, 20)
+                        if !subscriptionManager.isPro {
+                            NeuraProCard()
+                                .padding(.bottom, 20)
+                        }
 
                         // Profile section
-                        ProfileSectionHeader(title: "Profile")
+//                        ProfileSectionHeader(title: L10n.Profile.Section.profile)
                         VStack(spacing: 11) {
-                            SettingsRow(icon: "profile", title: "Health Profile") {
+                            SettingsRow(icon: "profile", title: L10n.Profile.healthProfile) {
                                 router.push(.healthProfile)
                             }
-                            SettingsRow(icon: "sub", title: "Subscription") {
-                                showPaywall = true
+                            SettingsRow(icon: "sub", title: L10n.Profile.subscription) {
+                                handleSubscriptionTap()
                             }
-                        }
-                        .padding(.bottom, 20)
-
-                        // Preferences section
-                        ProfileSectionHeader(title: "Preferences")
-                        VStack(spacing: 11) {
-                            SettingsRow(icon: "sec", title: "Security")
-                            SettingsRow(icon: "lan", title: String(localized: "Language")) {
+                            BiometricLockRow(
+                                icon: biometricAuth.biometricIcon,
+                                title: L10n.Profile.biometricLock(biometricAuth.biometricLabel),
+                                unavailableSubtitle: L10n.Profile.biometricUnavailableSubtitle,
+                                isOn: biometricAuth.isBiometricLockEnabled,
+                                isAvailable: biometricAuth.isBiometricAvailable,
+                                onChange: handleBiometricToggle
+                            )
+                            SettingsRow(icon: "lan", title: L10n.Profile.language) {
                                 router.push(.language)
                             }
-                        }
-                        .padding(.bottom, 20)
+                            SettingsRow(icon: "fav", title: L10n.Profile.feedback) {
+                                showFeedback = true
+                            }
+                            SettingsRow(icon: "Instagram", title: L10n.Profile.contactUs) {
+                                if let url = URL(string: "https://www.instagram.com/myneura?igsh=MXd4YTVxb3p6amdxbw==") {
+                                    UIApplication.shared.open(url)
+                                }
+                            }
 
-                        // Support section
-                        ProfileSectionHeader(title: "Support")
-                        VStack(spacing: 11) {
-                            SettingsRow(icon: "fav", title: "Feedback")
-                            SettingsRow(icon: "fav", title: "Contact Us")
-                        }
-                        .padding(.bottom, 20)
-
-                        // Account section
-                        ProfileSectionHeader(title: "Account")
-                        VStack(spacing: 11) {
                             SettingsRow(
                                 icon: "logout",
-                                title: "Log Out",
+                                title: L10n.Profile.logOut,
                                 showChevron: false
                             ) {
                                 showLogOutAlert = true
                             }
                             SettingsRow(
                                 icon: "delete",
-                                title: "Delete Account",
+                                title: L10n.Profile.deleteAccount,
                                 style: .destructive,
                                 showChevron: false
                             ) {
                                 showDeleteAlert = true
                             }
                         }
+                        .padding(.bottom, 20)
+
+                        // Preferences section
+//                        ProfileSectionHeader(title: L10n.Profile.Section.preferences)
+//                        VStack(spacing: 11) {
+//                            SettingsRow(icon: "sec", title: L10n.Profile.security)
+//                            SettingsRow(icon: "lan", title: L10n.Profile.language) {
+//                                router.push(.language)
+//                            }
+//                        }
+//                        .padding(.bottom, 20)
+
+                        // Support section
+//                        ProfileSectionHeader(title: L10n.Profile.Section.support)
+//                        VStack(spacing: 11) {
+//                            SettingsRow(icon: "fav", title: L10n.Profile.feedback)
+//                            SettingsRow(icon: "Instagram", title: L10n.Profile.contactUs)
+//                        }
+//                        .padding(.bottom, 20)
+
+                        // Account section
+//                        ProfileSectionHeader(title: L10n.Profile.Section.account)
+//                        VStack(spacing: 11) {
+//                            SettingsRow(
+//                                icon: "logout",
+//                                title: L10n.Profile.logOut,
+//                                showChevron: false
+//                            ) {
+//                                showLogOutAlert = true
+//                            }
+//                            SettingsRow(
+//                                icon: "delete",
+//                                title: L10n.Profile.deleteAccount,
+//                                style: .destructive,
+//                                showChevron: false
+//                            ) {
+//                                showDeleteAlert = true
+//                            }
+//                        }
                     }
                     .opacity(contentAppear ? 1 : 0)
                     .offset(y: contentAppear ? 0 : 20)
@@ -94,31 +135,43 @@ struct ProfileView: View {
                     HealthProfileView()
                 case .language:
                     LanguagePickerView()
+                case .subscription:
+                    SubscriptionCommunityView()
                 }
             }
         }
-        .sheet(isPresented: $showPaywall) {
+        .fullScreenCover(isPresented: $showPaywall) {
             PaywallView(subscriptionManager: subscriptionManager)
-                .presentationDetents([.large])
-                .presentationDragIndicator(.visible)
         }
-        .alert("Log Out", isPresented: $showLogOutAlert) {
-            Button("Log Out", role: .destructive, action: handleLogOut)
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("Are you sure you want to log out?")
+        .sheet(isPresented: $showFeedback) {
+            FeedbackView()
         }
-        .alert("Delete Account", isPresented: $showDeleteAlert) {
-            Button("Delete", role: .destructive, action: handleDeleteAccount)
-            Button("Cancel", role: .cancel) {}
+        .alert(L10n.Profile.logOut, isPresented: $showLogOutAlert) {
+            Button(L10n.Profile.logOut, role: .destructive, action: handleLogOut)
+            Button(L10n.Common.cancel, role: .cancel) {}
         } message: {
-            Text("This action cannot be undone. All your data will be permanently deleted.")
+            Text(L10n.Profile.logOutMessage)
+        }
+        .alert(L10n.Profile.deleteAccount, isPresented: $showDeleteAlert) {
+            Button(L10n.Common.delete, role: .destructive, action: handleDeleteAccount)
+            Button(L10n.Common.cancel, role: .cancel) {}
+        } message: {
+            Text(L10n.Profile.deleteAccountMessage)
+        }
+        .alert(L10n.Profile.biometricUnavailableTitle, isPresented: $showBiometricUnavailableAlert) {
+            Button(L10n.Common.ok, role: .cancel) {}
+        } message: {
+            Text(L10n.Profile.biometricUnavailableMessage)
         }
         .onAppear {
             titleAppear = true
             withAnimation(.spring(response: 0.7, dampingFraction: 0.8).delay(0.1)) {
                 contentAppear = true
             }
+        }
+        .overlay {
+            LoadingOverlayView(isLoading: isDeleting, message: L10n.Profile.deletingAccount)
+                .animation(.easeInOut(duration: 0.2), value: isDeleting)
         }
     }
 }
@@ -139,30 +192,105 @@ private struct ProfileSectionHeader: View {
     }
 }
 
+private struct BiometricLockRow: View {
+    let icon: String
+    let title: String
+    let unavailableSubtitle: String
+    let isOn: Bool
+    let isAvailable: Bool
+    let onChange: (Bool) -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 20))
+                .foregroundStyle(isAvailable ? Color.textPrimary : Color.textTertiary)
+                .frame(width: 24, height: 24)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.statLabel)
+                    .foregroundStyle(isAvailable ? Color.textPrimary : Color.textTertiary)
+
+                if !isAvailable {
+                    Text(unavailableSubtitle)
+                        .font(.captionS)
+                        .foregroundStyle(Color.textTertiary)
+                }
+            }
+
+            Spacer()
+
+            Toggle(title, isOn: Binding(
+                get: { isOn },
+                set: { onChange($0) }
+            ))
+            .labelsHidden()
+            .tint(Color.accent)
+            .disabled(!isAvailable)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .background(Color.surfaceWhite)
+        .clipShape(.rect(cornerRadius: 16))
+        .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 4)
+    }
+}
+
 // MARK: - Actions
 
 private extension ProfileView {
     func handleLogOut() {
-        // Clear all local user data
-        let keys = ["health_profile_data", "hasCompletedOnboarding",
-                    "user_location", "onboarding_medical_areas",
-                    "neura_document_upload_count", "neura_share_count", "neura_is_pro"]
-        keys.forEach { UserDefaults.standard.removeObject(forKey: $0) }
+        clearLocalUserData()
         // Sign out from Firebase — AuthService publishes isSignedIn=false,
         // which causes NeuraApp to switch back to OnboardingView.
         AuthService.shared.signOut()
     }
 
     func handleDeleteAccount() {
+        isDeleting = true
         Task {
-            // Clear local data first
-            let keys = ["health_profile_data", "hasCompletedOnboarding",
-                        "user_location", "onboarding_medical_areas",
-                        "neura_document_upload_count", "neura_share_count", "neura_is_pro"]
-            keys.forEach { UserDefaults.standard.removeObject(forKey: $0) }
+            clearLocalUserData()
             // Delete Firebase Auth account (Phase 4: also delete Storage/Firestore data via Cloud Function)
             try? await AuthService.shared.deleteAccount()
+            // On success AuthService publishes isSignedIn=false and the app swaps to
+            // OnboardingView; reset here so the overlay clears if deletion failed.
+            isDeleting = false
         }
+    }
+
+    func handleBiometricToggle(_ enabled: Bool) {
+        guard biometricAuth.isBiometricAvailable else {
+            showBiometricUnavailableAlert = true
+            return
+        }
+
+        Task {
+            _ = await biometricAuth.setBiometricLockEnabled(enabled)
+        }
+    }
+
+    func handleSubscriptionTap() {
+        if subscriptionManager.isPro {
+            router.push(.subscription)
+        } else {
+            showPaywall = true
+        }
+    }
+
+    func clearLocalUserData() {
+        let keys = [
+            "health_profile_data",
+            "hasCompletedOnboarding",
+            "user_location",
+            "onboarding_medical_areas",
+            "neura_biometric_lock_enabled",
+            "neura_document_upload_count",
+            "neura_share_count",
+            "neura_is_pro"
+        ]
+        keys.forEach { UserDefaults.standard.removeObject(forKey: $0) }
+        try? DocumentFileManager.shared.deleteAllLocalDocuments()
     }
 }
 

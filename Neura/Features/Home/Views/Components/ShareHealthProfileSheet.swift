@@ -1,16 +1,35 @@
 import SwiftUI
 
 struct ShareHealthProfileSheet: View {
+    let autoStart: Bool
+
     @Environment(\.dismiss) private var dismiss
     @StateObject private var profileVM = HealthProfileViewModel()
 
     @State private var shareViewModel: ShareDocumentViewModel?
     @State private var isGeneratingPDF = false
 
+    init(autoStart: Bool = false) {
+        self.autoStart = autoStart
+    }
+
     var body: some View {
         ZStack(alignment: .topTrailing) {
             if let shareVM = shareViewModel {
                 ShareDocumentSheet(viewModel: shareVM, documentName: "Health Profile")
+            } else if autoStart {
+                VStack {
+                    Spacer()
+                    ProgressView()
+                        .scaleEffect(1.5)
+                        .tint(Color.accent)
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                closeButton
+                    .padding(.top, 14)
+                    .padding(.trailing, 20)
             } else {
                 VStack(spacing: 0) {
                     Spacer()
@@ -36,6 +55,9 @@ struct ShareHealthProfileSheet: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.backgroundModal)
+        .onAppear {
+            if autoStart { generateAndShare() }
+        }
     }
 
     // MARK: - Close Button
@@ -64,12 +86,12 @@ struct ShareHealthProfileSheet: View {
 
     private var shareInfoSection: some View {
         VStack(spacing: 12) {
-            Text("Share your Health Profile")
+            Text(L10n.Home.ShareHealth.title)
                 .font(.headingL)
                 .foregroundColor(.textPrimary)
                 .multilineTextAlignment(.center)
 
-            Text("Give instant access to your essential medical summary — skip explanations, get care faster.")
+            Text(L10n.Home.ShareHealth.subtitle)
                 .font(.bodyL)
                 .foregroundColor(.textPrimary)
                 .multilineTextAlignment(.center)
@@ -89,7 +111,7 @@ struct ShareHealthProfileSheet: View {
                     ProgressView()
                         .tint(.white)
                 } else {
-                    Text("Share")
+                    Text(L10n.Home.ShareHealth.share)
                         .font(.headingS)
                         .foregroundColor(.white)
 
@@ -110,6 +132,7 @@ struct ShareHealthProfileSheet: View {
 
     private func generateAndShare() {
         isGeneratingPDF = true
+        UserDefaults.standard.set(true, forKey: "neura_has_shared_health_profile")
 
         Task.detached(priority: .userInitiated) {
             guard let pdfURL = await profileVM.generatePDF(),

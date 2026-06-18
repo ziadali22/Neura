@@ -108,18 +108,11 @@ private struct FolderCardHeader: View {
         )
     }
 
-    @ViewBuilder
     private var categoryIcon: some View {
-        if let assetName = category.assetIcon {
-            Image(assetName)
-                .resizable()
-                .scaledToFit()
-                .padding(10)
-        } else {
-            Image(systemName: category.icon)
-                .font(.headingL)
-                .foregroundStyle(category.color)
-        }
+        Image(category.gridIcon)
+            .resizable()
+            .scaledToFit()
+            .padding(10)
     }
 }
 
@@ -198,7 +191,7 @@ private struct FolderCardEmptyState: View {
             Divider()
                 .padding(.horizontal, 16)
 
-            Text("No documents yet")
+            Text(L10n.Documents.Category.noDocumentsYet)
                 .font(.captionS)
                 .foregroundStyle(Color.textTertiary)
                 .padding(16)
