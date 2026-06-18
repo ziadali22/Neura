@@ -28,7 +28,7 @@ struct OnboardingProfileCardStep: View {
         case (false, false): return "\(city), \(country)"
         case (false, true):  return city
         case (true, false):  return country
-        case (true, true):   return "Your City"
+        case (true, true):   return L10n.Onboarding.ProfileCard.yourCity
         }
     }
 
@@ -58,10 +58,10 @@ struct OnboardingProfileCardStep: View {
 private extension OnboardingProfileCardStep {
     var header: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Your profile card")
+            Text(L10n.Onboarding.ProfileCard.title)
                 .font(.displayL)
                 .foregroundStyle(Color.textPrimary)
-            Text("This is how your profile appears on your home screen. Only you can see it — never shared with doctors.")
+            Text(L10n.Onboarding.ProfileCard.subtitle)
                 .font(.bodyL)
                 .foregroundStyle(Color.textSecondary)
         }
@@ -75,7 +75,7 @@ private extension OnboardingProfileCardStep {
 
     var carousel: some View {
         ScrollView(.horizontal) {
-            LazyHStack(spacing: 16) {
+            LazyHStack(spacing: 12) {
                 ForEach(presets) { bg in
                     SecureProfileCard(
                         name: displayName,
@@ -83,11 +83,11 @@ private extension OnboardingProfileCardStep {
                         background: bg
                     )
                     .allowsHitTesting(false)
-                    .containerRelativeFrame(.horizontal) { width, _ in width - 80 }
+                    .containerRelativeFrame(.horizontal) { width, _ in width - 88 }
                     .scrollTransition { content, phase in
                         content
-                            .scaleEffect(phase.isIdentity ? 1 : 0.88)
-                            .opacity(phase.isIdentity ? 1 : 0.65)
+                            .scaleEffect(phase.isIdentity ? 1 : 0.93)
+                            .opacity(phase.isIdentity ? 1 : 0.78)
                     }
                     .id(bg.id)
                 }
@@ -119,7 +119,7 @@ private extension OnboardingProfileCardStep {
     }
 
     var useButton: some View {
-        OnboardingContinueButton(action: confirmCard, title: "Use this card")
+        OnboardingContinueButton(action: confirmCard, title: L10n.Onboarding.ProfileCard.useThisCard)
             .opacity(buttonAppeared ? 1 : 0)
             .offset(y: buttonAppeared ? 0 : 16)
     }

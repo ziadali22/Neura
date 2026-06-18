@@ -13,9 +13,25 @@ struct HealthProfile: Codable {
         var weight: String
         var bloodType: String
         var insuranceStatus: String
-        var emergencyContact: String
+        var myPhoneNumber: String
+        var emergencyContactName: String
+        var emergencyContactNumber: String
+        /// User-added fields beyond the built-in ones (label + value).
+        var customFields: [CustomField]
 
-        init(fullName: String, dateOfBirth: String, gender: String, height: String, weight: String, bloodType: String, insuranceStatus: String, emergencyContact: String = "") {
+        struct CustomField: Identifiable, Codable, Hashable {
+            var id: UUID
+            var label: String
+            var value: String
+
+            init(id: UUID = UUID(), label: String, value: String = "") {
+                self.id = id
+                self.label = label
+                self.value = value
+            }
+        }
+
+        init(fullName: String, dateOfBirth: String, gender: String, height: String, weight: String, bloodType: String, insuranceStatus: String, myPhoneNumber: String = "", emergencyContactName: String = "", emergencyContactNumber: String = "", customFields: [CustomField] = []) {
             self.fullName = fullName
             self.dateOfBirth = dateOfBirth
             self.gender = gender
@@ -23,7 +39,10 @@ struct HealthProfile: Codable {
             self.weight = weight
             self.bloodType = bloodType
             self.insuranceStatus = insuranceStatus
-            self.emergencyContact = emergencyContact
+            self.myPhoneNumber = myPhoneNumber
+            self.emergencyContactName = emergencyContactName
+            self.emergencyContactNumber = emergencyContactNumber
+            self.customFields = customFields
         }
 
         init(from decoder: Decoder) throws {
@@ -35,7 +54,27 @@ struct HealthProfile: Codable {
             weight = try container.decode(String.self, forKey: .weight)
             bloodType = try container.decode(String.self, forKey: .bloodType)
             insuranceStatus = try container.decode(String.self, forKey: .insuranceStatus)
-            emergencyContact = try container.decodeIfPresent(String.self, forKey: .emergencyContact) ?? ""
+            myPhoneNumber = try container.decodeIfPresent(String.self, forKey: .myPhoneNumber) ?? ""
+            emergencyContactName = try container.decodeIfPresent(String.self, forKey: .emergencyContactName) ?? ""
+            // Backward-compatible: profiles saved before custom fields existed
+            // have no `customFields` key — default to empty rather than throwing.
+            customFields = try container.decodeIfPresent([CustomField].self, forKey: .customFields) ?? []
+            // Migrate old single emergencyContact field into emergencyContactNumber
+            if let number = try container.decodeIfPresent(String.self, forKey: .emergencyContactNumber) {
+                emergencyContactNumber = number
+            } else {
+                let legacy = try decoder.container(keyedBy: LegacyCodingKeys.self)
+                emergencyContactNumber = try legacy.decodeIfPresent(String.self, forKey: .emergencyContact) ?? ""
+            }
+        }
+
+        private enum CodingKeys: String, CodingKey {
+            case fullName, dateOfBirth, gender, height, weight, bloodType, insuranceStatus
+            case myPhoneNumber, emergencyContactName, emergencyContactNumber, customFields
+        }
+
+        private enum LegacyCodingKeys: String, CodingKey {
+            case emergencyContact
         }
     }
 
@@ -43,6 +82,21 @@ struct HealthProfile: Codable {
         var id: UUID
         var title: String
         var entries: [Entry]
+
+        /// Display title. Localizes the built-in section titles while leaving
+        /// user-created titles untouched. The stored `title` always stays English
+        /// so `forSection` matching, Codable round-trips, and `defaultSectionTitles`
+        /// continue to work regardless of the active language.
+        var localizedTitle: String {
+            switch title {
+            case "Known Conditions":        return L10n.HealthProfile.Section.knownConditions
+            case "Medication & Supplements": return L10n.HealthProfile.Section.medications
+            case "Allergies":               return L10n.HealthProfile.Section.allergies
+            case "Reported Symptoms":       return L10n.HealthProfile.Section.symptoms
+            case "Family History":          return L10n.HealthProfile.Section.familyHistory
+            default:                        return title
+            }
+        }
 
         struct Entry: Identifiable, Codable, Hashable {
             var id: UUID
@@ -85,7 +139,10 @@ struct HealthProfile: Codable {
             height: "",
             weight: "",
             bloodType: "",
-            insuranceStatus: ""
+            insuranceStatus: "",
+            myPhoneNumber: "",
+            emergencyContactName: "",
+            emergencyContactNumber: ""
         ),
         sections: [
             HealthSection(title: "Known Conditions"),
@@ -97,6 +154,12 @@ struct HealthProfile: Codable {
         lastUpdated: Date()
     )
 
+    /// Titles of the built-in sections present in a fresh profile. Used to tell
+    /// user-added sections (deletable) apart from the defaults (locked).
+    static var defaultSectionTitles: Set<String> {
+        Set(HealthProfile.default.sections.map(\.title))
+    }
+
     static let sample = HealthProfile(
         generalData: GeneralData(
             fullName: "Elena Rossi",
@@ -105,7 +168,10 @@ struct HealthProfile: Codable {
             height: "1,65m",
             weight: "54kg",
             bloodType: "",
-            insuranceStatus: "Insured"
+            insuranceStatus: "Insured",
+            myPhoneNumber: "",
+            emergencyContactName: "",
+            emergencyContactNumber: ""
         ),
         sections: [
             HealthSection(title: "Known Conditions", entries: [
@@ -138,6 +204,7 @@ struct HealthProfile: Codable {
 
 struct SectionFieldConfig {
     let addTitle: String
+    let deleteTitle: String
     let nameLabel: String
     let namePlaceholder: String
     let field1Label: String
@@ -145,68 +212,97 @@ struct SectionFieldConfig {
     let field2Label: String
     let field2Placeholder: String
 
+    /// Matches on the canonical (English) section title — callers always pass the
+    /// stored `title`, never `localizedTitle`, so matching is language-independent.
     static func forSection(_ title: String) -> SectionFieldConfig {
+        typealias E = L10n.HealthProfile.Entry
         switch title.lowercased() {
         case let t where t.contains("allerg"):
             return .init(
-                addTitle: "Add Allergy",
-                nameLabel: "Allergy Name",
-                namePlaceholder: "E.g. peanuts",
-                field1Label: "Symptoms",
-                field1Placeholder: "E.g. swelling, rash",
-                field2Label: "Treatment",
-                field2Placeholder: "E.g. antihistamine, EpiPen"
+                addTitle: E.addAllergy,
+                deleteTitle: E.deleteAllergy,
+                nameLabel: E.allergyName,
+                namePlaceholder: E.allergyNamePlaceholder,
+                field1Label: E.allergySymptoms,
+                field1Placeholder: E.allergySymptomsPlaceholder,
+                field2Label: E.allergyTreatment,
+                field2Placeholder: E.allergyTreatmentPlaceholder
             )
         case let t where t.contains("medication") || t.contains("supplement"):
             return .init(
-                addTitle: "Add Medication",
-                nameLabel: "Medication Name",
-                namePlaceholder: "E.g. Vitamin D",
-                field1Label: "Dosage",
-                field1Placeholder: "E.g. 1000 IU",
-                field2Label: "Frequency",
-                field2Placeholder: "E.g. daily"
+                addTitle: E.addMedication,
+                deleteTitle: E.deleteMedication,
+                nameLabel: E.medicationName,
+                namePlaceholder: E.medicationNamePlaceholder,
+                field1Label: E.medicationDosage,
+                field1Placeholder: E.medicationDosagePlaceholder,
+                field2Label: E.medicationFrequency,
+                field2Placeholder: E.medicationFrequencyPlaceholder
             )
         case let t where t.contains("condition"):
             return .init(
-                addTitle: "Add Condition",
-                nameLabel: "Condition Name",
-                namePlaceholder: "E.g. diabetes",
-                field1Label: "Diagnosed",
-                field1Placeholder: "E.g. since 2020",
-                field2Label: "Treatment",
-                field2Placeholder: "E.g. insulin therapy"
+                addTitle: E.addCondition,
+                deleteTitle: E.deleteCondition,
+                nameLabel: E.conditionName,
+                namePlaceholder: E.conditionNamePlaceholder,
+                field1Label: E.conditionDiagnosed,
+                field1Placeholder: E.conditionDiagnosedPlaceholder,
+                field2Label: E.conditionTreatment,
+                field2Placeholder: E.conditionTreatmentPlaceholder
             )
         case let t where t.contains("symptom"):
             return .init(
-                addTitle: "Add Symptom",
-                nameLabel: "Symptom Name",
-                namePlaceholder: "E.g. persistent fatigue",
-                field1Label: "Severity",
-                field1Placeholder: "E.g. moderate",
-                field2Label: "Duration",
-                field2Placeholder: "E.g. 3 months"
+                addTitle: E.addSymptom,
+                deleteTitle: E.deleteSymptom,
+                nameLabel: E.symptomName,
+                namePlaceholder: E.symptomNamePlaceholder,
+                field1Label: E.symptomSeverity,
+                field1Placeholder: E.symptomSeverityPlaceholder,
+                field2Label: E.symptomDuration,
+                field2Placeholder: E.symptomDurationPlaceholder
             )
         case let t where t.contains("family"):
             return .init(
-                addTitle: "Add Family History",
-                nameLabel: "Condition",
-                namePlaceholder: "E.g. hypertension",
-                field1Label: "Relation",
-                field1Placeholder: "E.g. mother",
-                field2Label: "Details",
-                field2Placeholder: "E.g. diagnosed at 50"
+                addTitle: E.addFamily,
+                deleteTitle: E.deleteFamily,
+                nameLabel: E.familyCondition,
+                namePlaceholder: E.familyConditionPlaceholder,
+                field1Label: E.familyRelation,
+                field1Placeholder: E.familyRelationPlaceholder,
+                field2Label: E.familyDetails,
+                field2Placeholder: E.familyDetailsPlaceholder
             )
         default:
             return .init(
-                addTitle: "Add Entry",
-                nameLabel: "Name",
-                namePlaceholder: "Enter name",
-                field1Label: "Details",
-                field1Placeholder: "Enter details",
-                field2Label: "Additional Info",
-                field2Placeholder: "Enter info"
+                addTitle: E.addEntry,
+                deleteTitle: E.deleteEntry,
+                nameLabel: E.defaultName,
+                namePlaceholder: E.defaultNamePlaceholder,
+                field1Label: E.defaultDetails,
+                field1Placeholder: E.defaultDetailsPlaceholder,
+                field2Label: E.defaultInfo,
+                field2Placeholder: E.defaultInfoPlaceholder
             )
+        }
+    }
+}
+
+// MARK: - Health Option Localization
+
+/// Localizes the canonical (English) picker option values for *display only*.
+/// The stored value always remains the English canonical string, so persistence
+/// and any matching stay stable. Unknown values (blood types, custom text) pass
+/// through unchanged.
+enum HealthOption {
+    static func localized(_ canonical: String) -> String {
+        switch canonical {
+        case "Male":              return L10n.HealthProfile.Option.male
+        case "Female":            return L10n.HealthProfile.Option.female
+        case "Prefer not to say": return L10n.HealthProfile.Option.preferNotToSay
+        case "Insured":           return L10n.HealthProfile.Option.insured
+        case "Uninsured":         return L10n.HealthProfile.Option.uninsured
+        case "Partially Insured": return L10n.HealthProfile.Option.partiallyInsured
+        default:                  return canonical
         }
     }
 }

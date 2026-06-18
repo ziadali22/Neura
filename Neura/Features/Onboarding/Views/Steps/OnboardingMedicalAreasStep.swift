@@ -10,11 +10,11 @@ struct OnboardingMedicalAreasStep: View {
                 VStack(alignment: .leading, spacing: 24) {
                     // Header
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Which medical areas\nare relevant to you?")
+                        Text(L10n.Onboarding.MedicalAreas.title)
                             .font(.displayL)
                             .foregroundStyle(Color.textPrimary)
 
-                        Text("Select a few to organize your medical records. You can change this anytime.")
+                        Text(L10n.Onboarding.MedicalAreas.subtitle)
                             .font(.bodyL)
                             .foregroundStyle(Color.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -88,6 +88,7 @@ struct OnboardingMedicalAreasStep: View {
             .padding(.vertical, 16)
             .background(Color.surfaceWhite)
             .clipShape(.rect(cornerRadius: 12))
+            .shadow(color: .black.opacity(0.10), radius: 24, x: 0, y: 8)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(area.rawValue)

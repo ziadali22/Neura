@@ -31,13 +31,13 @@ struct SettingsRow: View {
                     .frame(width: 24, height: 24)
 
                 Text(title)
-                    .font(.bodyL)
+                    .font(.statLabel)
                     .foregroundStyle(style == .destructive ? Color.red : Color.textPrimary)
 
                 Spacer()
 
                 if showChevron {
-                    Image(systemName: "chevron.right")
+                    Image(systemName: "chevron.forward")
                         .font(.system(size: 14))
                         .foregroundStyle(Color.textTertiary)
                 }
@@ -46,6 +46,7 @@ struct SettingsRow: View {
             .padding(.vertical, 14)
             .background(Color.surfaceWhite)
             .clipShape(.rect(cornerRadius: 16))
+            .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 4)
         }
         .buttonStyle(ScaleButtonStyle())
     }

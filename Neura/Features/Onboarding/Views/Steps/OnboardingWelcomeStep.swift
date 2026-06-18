@@ -2,9 +2,6 @@ import SwiftUI
 
 struct OnboardingWelcomeStep: View {
     @ObservedObject var viewModel: OnboardingViewModel
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var appeared = false
-    @State private var showError = false
     @State private var loadingProvider: AuthProvider?
 
     enum AuthProvider { case apple, google }
@@ -20,8 +17,6 @@ struct OnboardingWelcomeStep: View {
                 .aspectRatio(contentMode: .fill)
                 .foregroundStyle(.white)
                 .frame(width: 96, height: 96)
-                .scaleEffect(appeared ? 1 : 0.7)
-                .opacity(appeared ? 1 : 0)
 
             Spacer()
             Spacer()
@@ -30,12 +25,12 @@ struct OnboardingWelcomeStep: View {
             VStack(spacing: 0) {
                 // Title + subtitle
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Welcome to Neura")
+                    Text(L10n.Onboarding.Welcome.title)
                         .font(.displayL)
                         .fontWeight(.bold)
                         .foregroundStyle(.white)
 
-                    Text("Store, organize, and share your medical records in one secure place.")
+                    Text(L10n.Onboarding.Welcome.subtitle)
                         .font(.bodyL)
                         .foregroundStyle(.white.opacity(0.8))
                         .fixedSize(horizontal: false, vertical: true)
@@ -43,8 +38,6 @@ struct OnboardingWelcomeStep: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 24)
                 .padding(.bottom, 32)
-                .opacity(appeared ? 1 : 0)
-                .offset(y: appeared ? 0 : 20)
 
                 // Buttons
                 VStack(spacing: 12) {
@@ -58,7 +51,7 @@ struct OnboardingWelcomeStep: View {
                             } else {
                                 Image(systemName: "apple.logo")
                                     .font(.system(size: 20, weight: .medium))
-                                Text("Continue with Apple")
+                                Text(L10n.Onboarding.Welcome.continueApple)
                                     .font(.buttonL)
                             }
                         }
@@ -83,7 +76,7 @@ struct OnboardingWelcomeStep: View {
                                 Image(.googleIcon)
                                     .resizable()
                                     .frame(width: 20, height: 20)
-                                Text("Continue with Google")
+                                Text(L10n.Onboarding.Welcome.continueGoogle)
                                     .font(.buttonL)
                                     .foregroundStyle(Color.textPrimary)
                             }
@@ -109,26 +102,17 @@ struct OnboardingWelcomeStep: View {
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 16)
-                .opacity(appeared ? 1 : 0)
-                .offset(y: appeared ? 0 : 24)
 
                 // Footer
                 HStack(spacing: 6) {
                     Image(systemName: "lock.fill")
                         .font(.system(size: 11))
-                    Text("End-to-end encrypted")
+                    Text(L10n.Onboarding.Welcome.encrypted)
                         .font(.captionS)
                 }
                 .foregroundStyle(.black)
                 .padding(.top, 24)
                 .padding(.bottom, 24)
-                .opacity(appeared ? 1 : 0)
-            }
-        }
-        .task {
-            try? await Task.sleep(for: .milliseconds(200))
-            withAnimation(reduceMotion ? .none : .spring(response: 0.7, dampingFraction: 0.8)) {
-                appeared = true
             }
         }
     }

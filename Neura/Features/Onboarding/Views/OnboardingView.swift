@@ -49,10 +49,11 @@ struct OnboardingView: View {
                 progressBar
             }
 
-            // Back button — left aligned
+            // Back + Skip buttons — left and right aligned
             HStack {
-                if viewModel.currentStep != .welcome {
-                    Button("Back", systemImage: "chevron.left") {
+                if viewModel.currentStep != .stopSearching {
+                    Button("Back", systemImage: "chevron.backward") {
+                        HapticManager.light()
                         viewModel.goBack()
                     }
                     .labelStyle(.iconOnly)
@@ -64,6 +65,14 @@ struct OnboardingView: View {
                     .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
                 }
                 Spacer()
+                if viewModel.currentStep.isSkippable {
+                    Button(L10n.Common.skip) {
+                        HapticManager.light()
+                        viewModel.skip()
+                    }
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(Color.textSecondary)
+                }
             }
         }
     }
@@ -92,13 +101,18 @@ struct OnboardingView: View {
         Group {
             switch viewModel.currentStep {
             case .welcome:         OnboardingWelcomeStep(viewModel: viewModel)
+            case .stopSearching:   OnboardingStopSearchingStep(viewModel: viewModel)
+            case .qrShare:         OnboardingQRShareStep(viewModel: viewModel)
             case .storeAndShare:   OnboardingStoreAndShareStep(viewModel: viewModel)
+            case .statistics:      OnboardingStatisticsStep(viewModel: viewModel)
+            case .recordsLocation: OnboardingRecordsLocationStep(viewModel: viewModel)
             case .documentScan:    OnboardingDocumentScanStep(viewModel: viewModel)
             case .privacySecurity: OnboardingPrivacyStep(viewModel: viewModel)
             case .medicalAreas:    OnboardingMedicalAreasStep(viewModel: viewModel)
             case .profile:         OnboardingProfileStep(viewModel: viewModel)
             case .location:        OnboardingLocationStep(viewModel: viewModel)
-            case .profileCard:     OnboardingProfileCardStep(viewModel: viewModel)
+            case .profileCardIntro: OnboardingProfileCardIntroStep(viewModel: viewModel)
+            case .profileCard:      OnboardingProfileCardStep(viewModel: viewModel)
             case .emergency:       OnboardingEmergencyStep(viewModel: viewModel)
             case .biometrics:      OnboardingBiometricsStep(viewModel: viewModel)
             case .emergencyCard:   OnboardingCardStep(viewModel: viewModel)
@@ -106,6 +120,7 @@ struct OnboardingView: View {
             case .healthData:      OnboardingHealthDataStep(viewModel: viewModel)
             case .medical:         OnboardingMedicalStep(viewModel: viewModel)
             case .documents:       OnboardingDocumentsStep(viewModel: viewModel)
+            case .notifications:   OnboardingNotificationsStep(viewModel: viewModel)
             case .calculating:     OnboardingCalculatingStep(viewModel: viewModel)
             }
         }

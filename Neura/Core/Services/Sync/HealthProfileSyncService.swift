@@ -28,6 +28,7 @@ actor HealthProfileSyncService {
     // MARK: - Download
 
     func download(uid: String, key: SymmetricKey) async throws -> HealthProfile? {
+        SyncLog.info("Downloading health profile")
         let snapshot = try await Firestore.firestore()
             .collection("users").document(uid)
             .collection("profile").document("data")

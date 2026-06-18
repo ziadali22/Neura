@@ -20,18 +20,18 @@ struct EmergencyCardBanner: View {
                 }
 
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("Emergency Card")
+                    Text(L10n.Emergency.title)
                         .font(.headingXS)
                         .foregroundStyle(Color.textPrimary)
 
-                    Text("Quick access to vital health info")
+                    Text(L10n.Emergency.subtitle)
                         .font(.bodyS)
                         .foregroundStyle(Color.textTertiary)
                 }
 
                 Spacer()
 
-                Image(systemName: "chevron.right")
+                Image(systemName: "chevron.forward")
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(Color.textTertiary)
                     .accessibilityHidden(true)

@@ -38,11 +38,11 @@ struct CategoryDetailView: View {
                 .foregroundColor(.textTertiary.opacity(0.5))
                 .padding(.top, 60)
 
-            Text("No Documents Yet")
+            Text(L10n.Documents.Category.noDocumentsYet)
                 .font(.headingS)
                 .foregroundColor(.textPrimary)
 
-            Text("Scan your first document to get started")
+            Text(L10n.Documents.Category.scanFirst)
                 .font(.bodyS)
                 .foregroundColor(.textSecondary)
         }
@@ -81,7 +81,7 @@ struct CategoryDetailView: View {
             HStack(spacing: 12) {
                 Image(systemName: "plus")
                     .font(.system(size: 18, weight: .semibold))
-                Text("Add New File")
+                Text(L10n.Documents.Category.addNewFile)
                     .font(.system(size: 16, weight: .semibold))
             }
             .foregroundColor(.white)
@@ -157,7 +157,7 @@ struct DocumentDetailRow: View {
 
             Spacer()
 
-            Image(systemName: "chevron.right")
+            Image(systemName: "chevron.forward")
                 .font(.system(size: 14))
                 .foregroundColor(.textTertiary)
         }

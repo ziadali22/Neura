@@ -19,21 +19,22 @@ struct SectionDetailSheet: View {
         VStack(spacing: 0) {
             navBar
 
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 12) {
-                    if let section {
-                        if section.entries.isEmpty {
-                            emptyState
-                        } else {
+            if let section, section.entries.isEmpty {
+                emptyState
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 12) {
+                        if let section {
                             ForEach(section.entries) { entry in
                                 entryCard(entry)
                             }
                         }
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 12)
+                    .padding(.bottom, 100)
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 12)
-                .padding(.bottom, 100)
             }
         }
         .background(Color.backgroundPrimary)
@@ -71,16 +72,17 @@ private extension SectionDetailSheet {
     var navBar: some View {
         ZStack {
             Button { dismiss() } label: {
-                Image(systemName: "chevron.left")
+                Image(systemName: "chevron.backward")
                     .font(.system(size: 18, weight: .medium))
                     .foregroundColor(.textPrimary)
                     .frame(width: 40, height: 40)
                     .background(Color.surfaceWhite)
                     .clipShape(Circle())
+                    .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 4)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            Text(section?.title ?? "")
+            Text(section?.localizedTitle ?? "")
                 .font(.headingS)
                 .foregroundColor(.textPrimary)
         }
@@ -91,17 +93,17 @@ private extension SectionDetailSheet {
 
     var emptyState: some View {
         VStack(spacing: 12) {
-            Spacer().frame(height: 60)
+            Spacer()
 
             Image(systemName: "tray")
                 .font(.system(size: 44))
                 .foregroundColor(.textTertiary.opacity(0.5))
 
-            Text("No entries yet")
+            Text(L10n.HealthProfile.noEntries)
                 .font(.headingS)
                 .foregroundColor(.textPrimary)
 
-            Text("Tap the button below to add one")
+            Text(L10n.HealthProfile.noEntriesSubtitle)
                 .font(.bodyS)
                 .foregroundColor(.textTertiary)
 
@@ -127,7 +129,7 @@ private extension SectionDetailSheet {
                     detailRow(config.field2Label, value: entry.field2)
                 }
 
-                detailRow("Notes", value: entry.notes.isEmpty ? "-" : entry.notes)
+                detailRow(L10n.HealthProfile.notes, value: entry.notes.isEmpty ? "-" : entry.notes)
             }
             .padding(20)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -154,7 +156,7 @@ private extension SectionDetailSheet {
             showAddEntry = true
         } label: {
             HStack(spacing: 8) {
-                Text("Add")
+                Text(L10n.Common.add)
                     .font(.headingS)
                 Image(systemName: "plus")
                     .font(.system(size: 16, weight: .semibold))

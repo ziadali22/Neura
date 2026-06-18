@@ -8,7 +8,7 @@ extension Color {
     // MARK: Brand
 
     /// Primary accent color - #FF5A00
-    static let accent = Color(hex: "FF5A00")
+    static let accent = Color(hex: "FF5C00")
 
     // MARK: Backgrounds
 

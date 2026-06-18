@@ -105,6 +105,34 @@ final class DocumentFileManager {
         )
     }
 
+    /// Overwrite the PDF file for an existing document id (no duplicate guard).
+    /// Returns the file URL. Used when editing a scanned document's pages.
+    @discardableResult
+    func replacePDF(from images: [UIImage], documentID: UUID) throws -> URL {
+        guard let pdfDocument = PDFGenerator.shared.generatePDF(from: images) else {
+            throw DocumentFileError.pdfGenerationFailed
+        }
+        let filename = "\(documentID.uuidString).pdf"
+        let fileURL = baseScanDirectory.appendingPathComponent(filename)
+        guard pdfDocument.write(to: fileURL) else {
+            throw DocumentFileError.pdfSaveFailed
+        }
+        return fileURL
+    }
+
+    /// Convert a former single-image document into a multi-page PDF: write the
+    /// new PDF and delete the old JPEG. Returns the new PDF file URL. The caller
+    /// must update the document's `filename` and `documentType` (now `.scan`).
+    @discardableResult
+    func promoteImageToPDF(from images: [UIImage], documentID: UUID) throws -> URL {
+        let pdfURL = try replacePDF(from: images, documentID: documentID)
+        let jpgURL = baseScanDirectory.appendingPathComponent("\(documentID.uuidString).jpg")
+        if fileManager.fileExists(atPath: jpgURL.path) {
+            try? fileManager.removeItem(at: jpgURL)
+        }
+        return pdfURL
+    }
+
     // MARK: - Save Image
 
     func saveImage(_ image: UIImage, name: String, documentID: UUID = UUID()) throws -> Document {
@@ -128,6 +156,19 @@ final class DocumentFileManager {
             createdAt: Date(),
             documentType: .image
         )
+    }
+
+    /// Overwrite the JPEG file for an existing single-image document id
+    /// (no duplicate guard). Returns the file URL.
+    @discardableResult
+    func replaceImage(_ image: UIImage, documentID: UUID) throws -> URL {
+        guard let imageData = image.jpegData(compressionQuality: 0.85) else {
+            throw DocumentFileError.imageConversionFailed
+        }
+        let filename = "\(documentID.uuidString).jpg"
+        let fileURL = baseScanDirectory.appendingPathComponent(filename)
+        try imageData.write(to: fileURL, options: .atomic)
+        return fileURL
     }
 
     // MARK: - Load Document
@@ -204,6 +245,13 @@ final class DocumentFileManager {
     func deleteDocument(_ document: Document) throws {
         guard fileManager.fileExists(atPath: document.fileURL.path) else { return }
         try fileManager.removeItem(at: document.fileURL)
+    }
+
+    func deleteAllLocalDocuments() throws {
+        if fileManager.fileExists(atPath: baseScanDirectory.path) {
+            try fileManager.removeItem(at: baseScanDirectory)
+        }
+        createBaseDirectoryIfNeeded()
     }
 
     // MARK: - Metadata Persistence

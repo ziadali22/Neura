@@ -54,7 +54,7 @@ private extension EmergencyCardView {
     var navBar: some View {
         HStack {
             Button { dismiss() } label: {
-                Image(systemName: "chevron.left")
+                Image(systemName: "chevron.backward")
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.textPrimary)
                     .frame(width: 40, height: 40)
@@ -69,7 +69,7 @@ private extension EmergencyCardView {
                 HStack(spacing: 6) {
                     Image(systemName: "square.and.arrow.up")
                         .font(.system(size: 13, weight: .semibold))
-                    Text("Share")
+                    Text(L10n.Emergency.share)
                         .font(.system(size: 14, weight: .semibold))
                 }
                 .foregroundColor(.textPrimary)
@@ -104,12 +104,12 @@ private extension EmergencyCardView {
 
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("IN CASE OF")
+                        Text(L10n.Emergency.inCaseOf)
                             .font(.system(size: 14, weight: .bold))
                             .tracking(3)
                             .foregroundColor(.white.opacity(0.7))
 
-                        Text("EMERGENCY")
+                        Text(L10n.Emergency.emergency)
                             .font(.system(size: 28, weight: .heavy))
                             .tracking(1)
                             .foregroundColor(.white)
@@ -171,10 +171,10 @@ private extension EmergencyCardView {
                     Circle()
                         .fill(Color.accent)
                         .frame(width: 6, height: 6)
-                    Text("Powered by")
+                    Text(L10n.Emergency.poweredBy)
                         .font(.system(size: 11, weight: .regular))
                         .foregroundColor(.textTertiary)
-                    Text("Neura")
+                    Text(L10n.Common.neura)
                         .font(.system(size: 11, weight: .bold))
                         .foregroundColor(.accent)
                 }
@@ -252,7 +252,7 @@ private extension EmergencyCardView {
             .init(icon: "pill.fill", label: "Medications", value: entriesText(for: "medication", or: "supplement"), iconColor: Color(hex: "8B5CF6")),
             .init(icon: "heart.text.clipboard", label: "Conditions", value: entriesText(for: "condition"), iconColor: Color(hex: "E8392E")),
             .init(icon: "shield.checkered", label: "Insurance", value: gd.insuranceStatus, iconColor: Color(hex: "10B981")),
-            .init(icon: "phone.fill", label: "Emergency Contact", value: gd.emergencyContact, iconColor: Color(hex: "10B981")),
+            .init(icon: "phone.fill", label: "Emergency Contact", value: [gd.emergencyContactName, gd.emergencyContactNumber].filter { !$0.isEmpty }.joined(separator: " · "), iconColor: Color(hex: "10B981")),
         ]
     }
 
@@ -276,7 +276,7 @@ private extension EmergencyCardView {
                     .textCase(.uppercase)
 
                 if field.value.isEmpty {
-                    Text("Not set")
+                    Text(L10n.Onboarding.EmergencyCard.notSet)
                         .font(.system(size: 15))
                         .foregroundColor(.textTertiary)
                         .italic()
@@ -297,7 +297,7 @@ private extension EmergencyCardView {
     // MARK: Quick Actions
 
     var emergencyContactsSection: some View {
-        let contact = viewModel.profile.generalData.emergencyContact
+        let contact = viewModel.profile.generalData.emergencyContactNumber
         return Group {
             if !contact.isEmpty {
                 Button {
@@ -314,7 +314,7 @@ private extension EmergencyCardView {
                         }
 
                         VStack(alignment: .leading, spacing: 3) {
-                            Text("Call Emergency Contact")
+                            Text(L10n.Emergency.callContact)
                                 .font(.system(size: 16, weight: .bold))
                                 .foregroundColor(.textPrimary)
                             Text(contact)
@@ -542,7 +542,7 @@ private extension EmergencyCardView {
             .init(label: "Medications", value: entriesText(for: "medication", or: "supplement")),
             .init(label: "Conditions", value: entriesText(for: "condition")),
             .init(label: "Insurance", value: profile.generalData.insuranceStatus),
-            .init(label: "Emergency Contact", value: profile.generalData.emergencyContact),
+            .init(label: "Emergency Contact", value: [profile.generalData.emergencyContactName, profile.generalData.emergencyContactNumber].filter { !$0.isEmpty }.joined(separator: " · ")),
         ]
     }
 }

@@ -1,8 +1,32 @@
 import SwiftUI
 
 // MARK: - Design System Typography
-// Source: Figma → Neura / Typography (node 244:8109)
-// All styles use SF Pro (system font)
+// Font: Estedad
+// To swap the font app-wide, change the `Estedad` enum below — every token picks it up.
+
+// MARK: - Estedad font names
+
+private enum Estedad {
+    /// Flip to `true` to switch the entire app to SF Pro system font.
+    static let useSFPro = false
+
+    static let regular   = "Estedad-Regular"
+    static let medium    = "Estedad-Medium"
+    static let bold      = "Estedad-Bold"
+    static let semibold  = "Estedad-SemiBold"
+
+    static func font(_ name: String, size: CGFloat) -> Font {
+        guard !useSFPro else {
+            let weight: Font.Weight = switch name {
+            case bold:      .semibold
+            case medium:    .medium
+            default:        .regular
+            }
+            return .system(size: size, weight: weight, design: .default)
+        }
+        return Font.custom(name, size: size)
+    }
+}
 
 // MARK: - Font Tokens
 
@@ -10,58 +34,71 @@ extension Font {
 
     // MARK: Display
 
-    /// 42pt Heavy - hero text, profile names
-    static let displayArt = Font.system(size: 42, weight: .heavy)
+    /// 42pt ExtraBold - hero text, profile names
+    static let displayArt = Estedad.font(Estedad.bold, size: 42)
 
-    /// 32pt Heavy - smaller art display
-    static let displayArtS = Font.system(size: 32, weight: .heavy)
+    /// 32pt ExtraBold - smaller art display
+    static let displayArtS = Estedad.font(Estedad.bold, size: 32)
 
-    /// 32pt Semibold - large screen titles
-    static let displayXL = Font.system(size: 32, weight: .semibold)
+    /// 32pt Bold - large screen titles
+    static let displayXL = Estedad.font(Estedad.bold, size: 32)
+    static let displaySemi = Estedad.font(Estedad.semibold, size: 32)
 
-    /// 28pt Semibold - section headers
-    static let displayL = Font.system(size: 28, weight: .semibold)
+    /// 28pt Bold - section headers
+    static let displayL = Estedad.font(Estedad.bold, size: 28)
 
     // MARK: Heading
 
-    /// 24pt Semibold
-    static let headingL = Font.system(size: 24, weight: .semibold)
+    /// 24pt Bold
+    static let headingL = Estedad.font(Estedad.bold, size: 24)
 
-    /// 20pt Regular
-    static let headingM = Font.system(size: 20, weight: .regular)
+    /// 20pt Medium
+    static let headingM = Estedad.font(Estedad.medium, size: 20)
 
-    /// 18pt Medium
-    static let headingS = Font.system(size: 18, weight: .medium)
+    /// 18pt Bold
+    static let headingS = Estedad.font(Estedad.bold, size: 18)
 
-    /// 16pt Medium
-    static let headingXS = Font.system(size: 16, weight: .medium)
+    /// 16pt Bold
+    static let headingXS = Estedad.font(Estedad.bold, size: 16)
 
     // MARK: Body
 
     /// 16pt Regular - primary body text
-    static let bodyL = Font.system(size: 16, weight: .regular)
+    static let bodyL = Estedad.font(Estedad.regular, size: 16)
+    static let BodyML = Estedad.font(Estedad.medium, size: 16)
 
     /// 14pt Regular - secondary body text
-    static let bodyS = Font.system(size: 14, weight: .regular)
+    static let bodyS = Estedad.font(Estedad.regular, size: 14)
 
     // MARK: Button
 
-    /// 17pt Semibold - primary buttons
-    static let buttonL = Font.system(size: 17, weight: .semibold)
+    /// 17pt Bold - primary buttons
+    static let buttonL = Estedad.font(Estedad.bold, size: 17)
 
-    /// 15pt Semibold - secondary buttons
-    static let buttonM = Font.system(size: 15, weight: .semibold)
+    /// 15pt Bold - secondary buttons
+    static let buttonM = Estedad.font(Estedad.bold, size: 15)
 
     // MARK: Label & Caption
 
     /// 14pt Regular - art labels
-    static let labelArt = Font.system(size: 14, weight: .regular)
+    static let labelArt = Estedad.font(Estedad.regular, size: 14)
 
-    /// 13pt Medium - metadata, tags
-    static let labelM = Font.system(size: 13, weight: .medium)
+    /// 13pt Bold - metadata, tags
+    static let labelM = Estedad.font(Estedad.bold, size: 13)
 
     /// 12pt Regular - timestamps, footnotes
-    static let captionS = Font.system(size: 12, weight: .regular)
+    static let captionS = Estedad.font(Estedad.regular, size: 12)
+
+    // MARK: Stats
+
+    /// 28pt Bold - large stat value (e.g. "170 cm")
+    static let statValue = Estedad.font(Estedad.bold, size: 28)
+
+    /// 16pt Medium - stat label (e.g. "Height")
+    static let statLabel = Estedad.font(Estedad.medium, size: 16)
+
+    /// 13pt Medium - stat sublabel / unit (e.g. "cm", "last updated")
+    static let statUnit = Estedad.font(Estedad.medium, size: 13)
 }
 
 // MARK: - Full Typography Style (includes line height & letter spacing)

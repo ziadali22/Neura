@@ -10,27 +10,23 @@ struct OnboardingHealthKitStep: View {
                 VStack(alignment: .leading, spacing: 32) {
                     // Header
                     VStack(alignment: .leading, spacing: 12) {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(Color(.systemPink).opacity(0.1))
-                                .frame(width: 64, height: 64)
-                            Image(systemName: "heart.fill")
-                                .font(.system(size: 30))
-                                .foregroundStyle(Color(.systemPink))
-                        }
-                        Text("Connect to\nApple Health")
+                        Image("appleHealthIcon")
+                            .resizable()
+                            .frame(width: 64, height: 64)
+                        
+                        Text(L10n.Onboarding.HealthKit.title)
                             .font(.displayL)
                             .foregroundStyle(Color.textPrimary)
-                        Text("Automatically fill in your health profile without typing.")
+                        Text(L10n.Onboarding.HealthKit.subtitle)
                             .font(.bodyL)
                             .foregroundStyle(Color.textSecondary)
                     }
 
                     // Benefits
                     VStack(spacing: 12) {
-                        benefitRow("ruler", "Import your height", "Pulled from Apple Health automatically")
-                        benefitRow("scalemass", "Import your weight", "Stays up to date with your latest reading")
-                        benefitRow("figure.stand", "Import biological sex", "Used for medical context in reports")
+                        benefitRow("HeightIcon", L10n.Onboarding.HealthKit.importHeight, L10n.Onboarding.HealthKit.importHeightSub)
+                        benefitRow("WeightIcon", L10n.Onboarding.HealthKit.importWeight, L10n.Onboarding.HealthKit.importWeightSub)
+                        benefitRow("SexIcon", L10n.Onboarding.HealthKit.importSex, L10n.Onboarding.HealthKit.importSexSub)
                     }
 
                     // Privacy note
@@ -38,7 +34,7 @@ struct OnboardingHealthKitStep: View {
                         Image(systemName: "lock.fill")
                             .font(.system(size: 14))
                             .foregroundStyle(Color.textTertiary)
-                        Text("You control what Neura reads. Data stays on your device and is never shared.")
+                        Text(L10n.Onboarding.HealthKit.privacyNote)
                             .font(.bodyS)
                             .foregroundStyle(Color.textTertiary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -55,13 +51,14 @@ struct OnboardingHealthKitStep: View {
             }
             .scrollIndicators(.hidden)
 
+            // Per App Review 5.1.1(iv): once this priming message is shown, the user must
+            // always proceed to the system HealthKit prompt. No "Not now" / skip exit here —
+            // declining happens in the system permission dialog itself.
             OnboardingContinueButton(
                 action: viewModel.requestHealthKit,
-                title: "Connect Apple Health",
+                title: L10n.Onboarding.HealthKit.connect,
                 isLoading: viewModel.healthKitStatus == .requesting,
-                leadingIcon: "heart.fill",
-                secondaryTitle: "Not now",
-                secondaryAction: viewModel.advance
+                leadingIcon: "heart.fill"
             )
             .opacity(appeared ? 1 : 0)
         }
@@ -73,14 +70,9 @@ struct OnboardingHealthKitStep: View {
 
     private func benefitRow(_ icon: String, _ title: String, _ subtitle: String) -> some View {
         HStack(spacing: 12) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(Color(.systemPink).opacity(0.08))
-                    .frame(width: 38, height: 38)
-                Image(systemName: icon)
-                    .font(.system(size: 16))
-                    .foregroundStyle(Color(.systemPink))
-            }
+            Image(icon)
+                .font(.system(size: 16))
+                .foregroundStyle(Color(.systemPink))
             VStack(alignment: .leading, spacing: 4) {
                 Text(title).font(.headingXS).foregroundStyle(Color.textPrimary)
                 Text(subtitle).font(.bodyS).foregroundStyle(Color.textSecondary)

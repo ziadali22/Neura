@@ -13,37 +13,37 @@ struct OnboardingMedicalStep: View {
                 VStack(alignment: .leading, spacing: 24) {
                     VStack(alignment: .leading, spacing: 8) {
                         HStack(alignment: .top) {
-                            Text("Your health\nhistory")
+                            Text(L10n.Onboarding.Medical.title)
                                 .font(.displayL)
                                 .foregroundStyle(Color.textPrimary)
                             Spacer()
-                            Text("Optional")
-                                .font(.labelM)
-                                .foregroundStyle(Color.textTertiary)
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 5)
-                                .background(Color.surfaceWhite)
-                                .clipShape(Capsule())
-                                .padding(.top, 4)
+//                            Text(L10n.Common.optional)
+//                                .font(.labelM)
+//                                .foregroundStyle(Color.textTertiary)
+//                                .padding(.horizontal, 10)
+//                                .padding(.vertical, 5)
+//                                .background(Color.surfaceWhite)
+//                                .clipShape(Capsule())
+//                                .padding(.top, 4)
                         }
-                        Text("Add a few entries to get started — you can always edit later.")
+                        Text(L10n.Onboarding.Medical.subtitle)
                             .font(.bodyL)
                             .foregroundStyle(Color.textSecondary)
                     }
 
                     VStack(spacing: 16) {
-                        medicalField("pill.fill", "Medications",
-                                    "e.g. Vitamin D, Aspirin (separate with commas)",
+                        medicalField("pill.fill", L10n.Onboarding.Medical.medications,
+                                    L10n.Onboarding.Medical.medicationsPlaceholder,
                                     text: $viewModel.state.medications, field: .medications,
                                     next: .allergies)
 
-                        medicalField("exclamationmark.triangle.fill", "Allergies",
-                                    "e.g. Peanuts, Penicillin",
+                        medicalField("exclamationmark.triangle.fill", L10n.Onboarding.Medical.allergies,
+                                    L10n.Onboarding.Medical.allergiesPlaceholder,
                                     text: $viewModel.state.allergies, field: .allergies,
                                     next: .conditions)
 
-                        medicalField("heart.text.clipboard", "Conditions",
-                                    "e.g. Hypertension, Diabetes",
+                        medicalField("heart.text.clipboard", L10n.Onboarding.Medical.conditions,
+                                    L10n.Onboarding.Medical.conditionsPlaceholder,
                                     text: $viewModel.state.conditions, field: .conditions,
                                     next: nil)
                     }
@@ -57,7 +57,7 @@ struct OnboardingMedicalStep: View {
             .scrollIndicators(.hidden)
             .onTapGesture { focusedField = nil }
 
-            OnboardingContinueButton(action: viewModel.advance, secondaryTitle: "Skip for now")
+            OnboardingContinueButton(action: viewModel.advance, secondaryTitle: L10n.Common.skipForNow)
                 .opacity(appeared ? 1 : 0)
         }
         .task {
@@ -70,9 +70,9 @@ struct OnboardingMedicalStep: View {
                               text: Binding<String>, field: Field, next: Field?) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
-                Image(systemName: icon)
-                    .font(.system(size: 13))
-                    .foregroundStyle(Color.accent)
+//                Image(systemName: icon)
+//                    .font(.system(size: 13))
+//                    .foregroundStyle(Color.accent)
                 Text(label)
                     .font(.headingXS)
                     .foregroundStyle(Color.textPrimary)

@@ -4,46 +4,40 @@ struct DocumentListRow: View {
     let document: Document
     var isSelecting: Bool = false
     var isSelected: Bool = false
+    var isLocked: Bool = false
+    var onUnlock: () -> Void = {}
 
     var body: some View {
+        ZStack {
+            rowContent
+                .blur(radius: isLocked ? 8 : 0)
+                .allowsHitTesting(!isLocked)
+
+            if isLocked {
+                lockedOverlay
+            }
+        }
+        .background(Color.surfaceWhite)
+        .clipShape(.rect(cornerRadius: 16))
+        .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+    }
+
+    // MARK: - Row Content
+
+    private var rowContent: some View {
         HStack(spacing: 14) {
             documentIcon
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(document.name)
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(Color.textPrimary)
                     .lineLimit(1)
 
-                HStack(spacing: 6) {
-                    if let category = document.category {
-                        Text(category.localizedName)
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundStyle(Color.accent)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.accent.opacity(0.1))
-                            .clipShape(.rect(cornerRadius: 4))
-                    }
-
-                    Text(document.createdAt.formatted(date: .abbreviated, time: .omitted))
-                        .font(.system(size: 13))
-                        .foregroundStyle(Color.textTertiary)
-
-                    if document.isPDF && document.pageCount > 1 {
-                        Text("·")
-                            .foregroundStyle(Color.textTertiary)
-                        Text("\(document.pageCount) pages")
-                            .font(.system(size: 13))
-                            .foregroundStyle(Color.textTertiary)
-                    }
-                }
-
-                if let doctor = document.doctorName, !doctor.isEmpty {
-                    Label(doctor, systemImage: "stethoscope")
-                        .font(.system(size: 12))
-                        .foregroundStyle(Color.textTertiary)
-                }
+                Text(subtitleText)
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.textSecondary)
+                    .lineLimit(1)
             }
 
             Spacer()
@@ -51,40 +45,88 @@ struct DocumentListRow: View {
             if isSelecting {
                 selectionIndicator
             } else {
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 13))
+                Image(systemName: "chevron.forward")
+                    .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(Color.textTertiary)
             }
         }
         .padding(14)
-        .background(Color.surfaceWhite)
-        .clipShape(.rect(cornerRadius: 16))
-        .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
     }
 
-    // MARK: - Subviews
+    // MARK: - Locked Overlay
+
+    private var lockedOverlay: some View {
+        HStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(Color.accent.opacity(0.12))
+                    .frame(width: 40, height: 40)
+                Image(systemName: "lock.fill")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(Color.accent)
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Subscription Expired")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Color.textPrimary)
+                Text("Renew your plan to open this file")
+                    .font(.system(size: 12))
+                    .foregroundStyle(Color.textSecondary)
+            }
+
+            Spacer()
+
+            Button(action: onUnlock) {
+                Text("Renew")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(Color.accent)
+                    .clipShape(Capsule())
+            }
+        }
+        .padding(14)
+        .background(.ultraThinMaterial)
+        .clipShape(.rect(cornerRadius: 16))
+    }
+
+    // MARK: - Subtitle
+
+    private var subtitleText: String {
+        var parts: [String] = []
+        parts.append(document.createdAt.formatted(date: .numeric, time: .omitted))
+        if let spec = document.specialization, spec != .other {
+            parts.append(spec.rawValue)
+        }
+        if let doctor = document.doctorName, !doctor.isEmpty {
+            parts.append("Dr. \(doctor)")
+        }
+        return parts.joined(separator: " • ")
+    }
+
+    // MARK: - Icon
 
     private var documentIcon: some View {
         let iconColor = document.category?.color ?? Color.accent
         return ZStack {
-            RoundedRectangle(cornerRadius: 12)
-                .fill(iconColor.opacity(0.12))
-                .frame(width: 44, height: 44)
-
-            if let assetIcon = document.category?.assetIcon {
-                Image(assetIcon)
+            if let gridIcon = document.category?.gridIcon {
+                Image(gridIcon)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 24, height: 24)
+                    .frame(width: 36, height: 36)
                     .accessibilityHidden(true)
             } else {
-                Image(systemName: document.category?.icon ?? (document.isPDF ? "doc.fill" : "photo.fill"))
+                Image(systemName: document.isPDF ? "doc.fill" : "photo.fill")
                     .font(.system(size: 18))
                     .foregroundStyle(iconColor)
                     .accessibilityHidden(true)
             }
         }
     }
+
+    // MARK: - Selection Indicator
 
     private var selectionIndicator: some View {
         ZStack {
@@ -93,12 +135,12 @@ struct DocumentListRow: View {
                     isSelected ? Color.accent : Color.textTertiary.opacity(0.35),
                     lineWidth: 2
                 )
-                .frame(width: 24, height: 24)
+                .frame(width: 26, height: 26)
 
             if isSelected {
                 Circle()
                     .fill(Color.accent)
-                    .frame(width: 24, height: 24)
+                    .frame(width: 26, height: 26)
                     .overlay {
                         Image(systemName: "checkmark")
                             .font(.system(size: 12, weight: .bold))

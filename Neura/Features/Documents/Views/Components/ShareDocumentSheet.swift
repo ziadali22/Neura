@@ -8,11 +8,6 @@ struct ShareDocumentSheet: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Drag indicator
-            Capsule()
-                .fill(Color.textTertiary.opacity(0.3))
-                .frame(width: 36, height: 5)
-                .padding(.top, 10)
 
             ZStack {
                 switch viewModel.state {
@@ -59,7 +54,7 @@ private extension ShareDocumentSheet {
             }
 
             VStack(spacing: 6) {
-                Text("Uploading Document")
+                Text(L10n.QR.uploading)
                     .font(.headingS)
                     .foregroundColor(.textPrimary)
 
@@ -110,7 +105,7 @@ private extension ShareDocumentSheet {
             }
             .foregroundColor(viewModel.isUrgent ? .accent : .textSecondary)
 
-            Text("Scan this QR code to open the document")
+            Text(L10n.QR.scanCode)
                 .font(.captionS)
                 .foregroundColor(.textTertiary)
                 .multilineTextAlignment(.center)
@@ -125,7 +120,7 @@ private extension ShareDocumentSheet {
                 HStack(spacing: 8) {
                     Image(systemName: "doc.on.doc")
                         .font(.system(size: 15))
-                    Text("Copy Link")
+                    Text(L10n.QR.copyLink)
                         .font(.buttonL)
                 }
                 .foregroundColor(.white)
@@ -157,11 +152,11 @@ private extension ShareDocumentSheet {
             }
 
             VStack(spacing: 6) {
-                Text("Link Expired")
+                Text(L10n.QR.expired)
                     .font(.headingS)
                     .foregroundColor(.textPrimary)
 
-                Text("This sharing link has expired for security.\nGenerate a new one to continue sharing.")
+                Text(L10n.QR.expiredMessage)
                     .font(.bodyS)
                     .foregroundColor(.textSecondary)
                     .multilineTextAlignment(.center)
@@ -176,7 +171,7 @@ private extension ShareDocumentSheet {
                 HStack(spacing: 8) {
                     Image(systemName: "arrow.clockwise")
                         .font(.system(size: 15))
-                    Text("Generate New Link")
+                    Text(L10n.QR.generateNew)
                         .font(.buttonL)
                 }
                 .foregroundColor(.white)
@@ -208,7 +203,7 @@ private extension ShareDocumentSheet {
             }
 
             VStack(spacing: 6) {
-                Text("Upload Failed")
+                Text(L10n.QR.failed)
                     .font(.headingS)
                     .foregroundColor(.textPrimary)
 
@@ -227,7 +222,7 @@ private extension ShareDocumentSheet {
                 HStack(spacing: 8) {
                     Image(systemName: "arrow.clockwise")
                         .font(.system(size: 15))
-                    Text("Retry")
+                    Text(L10n.QR.retry)
                         .font(.buttonL)
                 }
                 .foregroundColor(.white)

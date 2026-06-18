@@ -4,13 +4,15 @@ struct HomeView: View {
     @EnvironmentObject private var router: HomeRouter
     @StateObject private var subscriptionManager = SubscriptionManager.shared
     @StateObject private var biometricAuth = BiometricAuthManager.shared
+    @StateObject private var updateChecker = AppUpdateChecker.shared
     @StateObject private var healthVM = HealthProfileViewModel()
+    @StateObject private var docsViewModel = DocumentsListViewModel()
     @State private var recentDocuments: [Document] = []
-    @State private var greetingAppear = false
-    @State private var bannerAppear = false
-    @State private var profileCardAppear = false
-    @State private var completeCardAppear = false
-    @State private var recentAppear = false
+    @State private var greetingAppear = true
+    @State private var bannerAppear = true
+    @State private var profileCardAppear = true
+    @State private var completeCardAppear = true
+    @State private var recentAppear = true
     @State private var showShareSheet = false
     @State private var showPaywall = false
     @State private var showBackgroundPicker = false
@@ -21,13 +23,13 @@ struct HomeView: View {
         let hour = Calendar.current.component(.hour, from: Date())
         let base: String
         switch hour {
-        case 5..<12: base = String(localized: "Good morning")
-        case 12..<18: base = String(localized: "Good afternoon")
-        default: base = String(localized: "Good evening")
+        case 5..<12: base = L10n.Home.Greeting.morning
+        case 12..<18: base = L10n.Home.Greeting.afternoon
+        default: base = L10n.Home.Greeting.evening
         }
         let firstName = healthVM.profile.generalData.fullName
             .components(separatedBy: " ").first ?? ""
-        return firstName.isEmpty ? base : "\(base), \(firstName)"
+        return firstName.isEmpty ? base : "\(base)"
     }
 
     private var formattedCardName: String {
@@ -46,7 +48,7 @@ struct HomeView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     // MARK: - Greeting
                     Text(greeting)
-                        .font(.displayXL)
+                        .font(.displaySemi)
                         .foregroundStyle(Color.textPrimary)
                         .padding(.horizontal, 20)
                         .padding(.top, 24)
@@ -55,7 +57,9 @@ struct HomeView: View {
                         .animation(.spring(response: 0.6, dampingFraction: 0.8), value: greetingAppear)
 
                     // MARK: - Upload Limit Banner
-                    if !subscriptionManager.isPro && !subscriptionManager.canUpload {
+                    // Shown for all free users from install onward; the banner itself
+                    // swaps to an upsell once the upload limit is reached.
+                    if !subscriptionManager.isPro {
                         UploadLimitBanner(
                             subscriptionManager: subscriptionManager,
                             onTap: { showPaywall = true }
@@ -80,7 +84,10 @@ struct HomeView: View {
                         .opacity(profileCardAppear ? 1 : 0)
                         .animation(.spring(response: 0.7, dampingFraction: 0.8), value: profileCardAppear)
 
-                        CompleteProfileCard(onTap: { router.push(.healthProfileDetail) })
+                        CompleteProfileCard(
+                            generalData: healthVM.profile.generalData,
+                            onTap: { router.push(.healthProfile) }
+                        )
                             .offset(y: completeCardAppear ? 0 : 30)
                             .opacity(completeCardAppear ? 1 : 0)
                             .animation(.spring(response: 0.7, dampingFraction: 0.8), value: completeCardAppear)
@@ -109,6 +116,8 @@ struct HomeView: View {
             .background(Color.backgroundPrimary)
             .navigationDestination(for: HomeRoute.self) { route in
                 switch route {
+                case .healthProfile:
+                    HealthProfileView()
                 case .healthProfileDetail:
                     HealthProfileDetailView()
                 case .emergencyCard:
@@ -117,7 +126,7 @@ struct HomeView: View {
             }
             .sheet(isPresented: $showShareSheet) {
                 ShareHealthProfileSheet()
-                    .presentationDetents([.height(525)])
+                    .presentationDetents([.height(490)])
                     .presentationDragIndicator(.visible)
             }
             .sheet(isPresented: $showBackgroundPicker) {
@@ -125,24 +134,43 @@ struct HomeView: View {
                     .presentationDetents([.medium])
                     .presentationDragIndicator(.hidden)
             }
-            .sheet(isPresented: $showPaywall) {
+            .fullScreenCover(isPresented: $showPaywall) {
                 PaywallView(subscriptionManager: subscriptionManager)
-                    .presentationDetents([.large])
-                    .presentationDragIndicator(.visible)
+            }
+            .sheet(item: $updateChecker.availableUpdate) { update in
+                AppUpdateSheet(update: update)
+                    .presentationDetents([.medium])
+                    .presentationCornerRadius(32)
             }
             .sheet(item: $selectedDocument) { document in
                 NavigationStack {
                     DocumentViewerView(document: document, onDelete: {
+                        docsViewModel.loadDocuments()
+                        docsViewModel.deleteDocument(document)
                         selectedDocument = nil
                         loadRecentDocuments()
-                    }, onRename: { _ in
+                    }, onEdit: { metadata, preview in
+                        docsViewModel.loadDocuments()
+                        docsViewModel.updateDocument(document, metadata: metadata, preview: preview)
                         loadRecentDocuments()
                     })
                 }
             }
             .onAppear {
                 loadRecentDocuments()
-                animateEntrance()
+                Task { await updateChecker.checkForUpdate() }
+            }
+            .onChange(of: router.path) {
+                if router.path.isEmpty {
+                    healthVM.reload()
+                    loadRecentDocuments()
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .documentsRestored)) { _ in
+                loadRecentDocuments()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .healthProfileRestored)) { _ in
+                healthVM.reload()
             }
         }
     }
@@ -150,6 +178,11 @@ struct HomeView: View {
     // MARK: - Actions
 
     private func authenticateAndOpenProfile() {
+        guard biometricAuth.isBiometricLockEnabled else {
+            router.push(.healthProfileDetail)
+            return
+        }
+
         Task {
             if await biometricAuth.authenticate() {
                 router.push(.healthProfileDetail)
@@ -165,22 +198,6 @@ struct HomeView: View {
             .sorted { $0.createdAt > $1.createdAt }
     }
 
-    // MARK: - Animations
-
-    private func animateEntrance() {
-        greetingAppear = true
-        bannerAppear = true
-
-        withAnimation(.spring(response: 0.7, dampingFraction: 0.8).delay(0.1)) {
-            profileCardAppear = true
-        }
-        withAnimation(.spring(response: 0.7, dampingFraction: 0.8).delay(0.2)) {
-            completeCardAppear = true
-        }
-        withAnimation(.easeOut(duration: 0.5).delay(0.3)) {
-            recentAppear = true
-        }
-    }
 }
 
 // MARK: - Recent Documents Section
@@ -191,13 +208,13 @@ private struct RecentDocumentsSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Recent")
+            Text(L10n.Home.recent)
                 .font(.headingS)
                 .foregroundStyle(Color.textPrimary)
                 .padding(.horizontal, 20)
 
             if documents.isEmpty {
-                Text("Nothing here yet — scan or upload a document.")
+                Text(L10n.Home.empty)
                     .font(.bodyL)
                     .foregroundStyle(Color.textTertiary)
                     .multilineTextAlignment(.center)
@@ -205,18 +222,14 @@ private struct RecentDocumentsSection: View {
                     .padding(.vertical, 20)
                     .padding(.horizontal, 20)
             } else {
-                VStack(spacing: 0) {
-                    ForEach(Array(documents.prefix(5).enumerated()), id: \.element.id) { index, document in
-                        RecentDocumentRow(document: document) { onDocumentTap(document) }
-
-                        if index < min(documents.count, 5) - 1 {
-                            Divider().padding(.leading, 72)
+                VStack(spacing: 8) {
+                    ForEach(documents.prefix(5)) { document in
+                        Button { onDocumentTap(document) } label: {
+                            DocumentListRow(document: document)
                         }
+                        .buttonStyle(ScaleButtonStyle())
                     }
                 }
-                .background(Color.surfaceWhite)
-                .clipShape(.rect(cornerRadius: 20))
-                .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 3)
                 .padding(.horizontal, 20)
             }
         }

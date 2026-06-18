@@ -1,10 +1,11 @@
 import SwiftUI
 import Combine
 import LocalAuthentication
+import FirebaseAuth
 
 @MainActor
 final class OnboardingViewModel: ObservableObject {
-    @Published var currentStep: OnboardingStep = .welcome
+    @Published var currentStep: OnboardingStep = .stopSearching
     @Published var state = OnboardingState()
     @Published var direction: Int = 1
     @Published var isComplete = false
@@ -12,6 +13,7 @@ final class OnboardingViewModel: ObservableObject {
     // Auth
     @Published var isSigningIn = false
     @Published var authError: String?
+    private var isReturningUser = false
 
     // HealthKit
     @Published var healthKitStatus: HealthKitStatus = .notRequested
@@ -32,7 +34,19 @@ final class OnboardingViewModel: ObservableObject {
 
     // MARK: - Navigation
 
+    /// Moves to the next step via the primary CTA (Continue / grant a permission).
     func advance() {
+        trackStepCompleted(via: .continue)
+        performAdvance()
+    }
+
+    /// Moves to the next step via a skip action (top-bar Skip, or an in-step "Not now").
+    func skip() {
+        trackStepCompleted(via: .skip)
+        performAdvance()
+    }
+
+    private func performAdvance() {
         direction = 1
         let next = nextStep(after: currentStep)
         if next == currentStep {
@@ -52,49 +66,78 @@ final class OnboardingViewModel: ObservableObject {
         }
     }
 
+    // MARK: - Analytics
+
+    private enum CompletionMethod: String {
+        case `continue`, skip
+    }
+
+    /// Fires `onboarding_V{appVersion}_{screen}_completed` for the step being left.
+    /// No-ops for steps with no analytics number (e.g. `.calculating`).
+    private func trackStepCompleted(via method: CompletionMethod) {
+        guard let screen = currentStep.analyticsScreenNumber else { return }
+        let version = AnalyticsManager.shared.appVersion
+        AnalyticsManager.shared.track(
+            "onboarding_V\(version)_\(screen)_completed",
+            properties: ["via": method.rawValue]
+        )
+    }
+
     private func nextStep(after step: OnboardingStep) -> OnboardingStep {
         switch step {
-        case .welcome:         return .storeAndShare
-        case .storeAndShare:   return .documentScan
-        case .documentScan:    return .privacySecurity
-        case .privacySecurity: return .medicalAreas
-        case .medicalAreas:    return .profile
-        case .profile:         return .location
-        case .location:        return .profileCard
-        case .profileCard:     return .emergency
-        case .emergency:       return .biometrics
-        case .biometrics:      return .emergencyCard
-        case .emergencyCard:   return .healthKit
-        case .healthKit:
-            if healthKitStatus == .authorized, healthKitData?.hasAnyData == true { return .healthData }
-            return .medical
-        case .healthData:      return .medical
-        case .medical:         return .documents
-        case .documents:       return .calculating
-        case .calculating:     return .calculating // sentinel — caller handles completion
+        // Active flow
+        case .stopSearching:    return .storeAndShare
+        case .storeAndShare:    return .statistics
+        case .statistics:       return .documentScan
+        case .documentScan:     return .profileCardIntro
+        case .profileCardIntro: return .qrShare
+        case .qrShare:          return .privacySecurity
+        case .privacySecurity:  return .welcome
+        case .welcome:          return .profile
+        case .profile:          return .location
+        case .location:         return .biometrics
+        case .biometrics:       return .healthKit
+        case .healthKit:        return .profileCard
+        case .profileCard:      return .notifications
+        case .notifications:    return .calculating
+        case .calculating:      return .calculating // sentinel — caller handles completion
+        // Retained but off-flow steps
+        case .recordsLocation:  return .documentScan
+        case .medicalAreas:     return .profile
+        case .emergency:        return .biometrics
+        case .emergencyCard:    return .healthKit
+        case .healthData:       return .medical
+        case .medical:          return .documents
+        case .documents:        return .calculating
         }
     }
 
     private func previousStep(before step: OnboardingStep) -> OnboardingStep {
         switch step {
-        case .welcome:         return .welcome
-        case .storeAndShare:   return .welcome
-        case .documentScan:    return .storeAndShare
-        case .privacySecurity: return .documentScan
-        case .medicalAreas:    return .privacySecurity
-        case .profile:         return .medicalAreas
-        case .location:        return .profile
-        case .profileCard:     return .location
-        case .emergency:       return .profileCard
-        case .biometrics:      return .emergency
-        case .emergencyCard:   return .biometrics
-        case .healthKit:       return .emergencyCard
-        case .healthData:      return .healthKit
-        case .medical:
-            if healthKitStatus == .authorized, healthKitData?.hasAnyData == true { return .healthData }
-            return .healthKit
-        case .documents:       return .medical
-        case .calculating:     return .documents
+        // Active flow
+        case .stopSearching:    return .stopSearching // first step
+        case .storeAndShare:    return .stopSearching
+        case .statistics:       return .storeAndShare
+        case .documentScan:     return .statistics
+        case .profileCardIntro: return .documentScan
+        case .qrShare:          return .profileCardIntro
+        case .privacySecurity:  return .qrShare
+        case .welcome:          return .privacySecurity
+        case .profile:          return .welcome
+        case .location:         return .profile
+        case .biometrics:       return .location
+        case .healthKit:        return .biometrics
+        case .profileCard:      return .healthKit
+        case .notifications:    return .profileCard
+        case .calculating:      return .notifications
+        // Retained but off-flow steps
+        case .recordsLocation:  return .statistics
+        case .medicalAreas:     return .privacySecurity
+        case .emergency:        return .profileCard
+        case .emergencyCard:    return .biometrics
+        case .healthData:       return .healthKit
+        case .medical:          return .healthKit
+        case .documents:        return .medical
         }
     }
 
@@ -118,30 +161,30 @@ final class OnboardingViewModel: ObservableObject {
         }
     }
 
+    // MARK: - Notifications
+
+    /// Requests notification permission for the "Stay updated" step, then advances
+    /// regardless of the user's choice. "Not now" calls `skip()` and never prompts.
+    func requestNotifications() {
+        Task {
+            await ProfileNotificationManager.shared.requestAuthorization()
+            advance()
+        }
+    }
+
     // MARK: - Biometrics
 
     func requestBiometrics() async {
-        let context = LAContext()
-        guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil) else {
-            advance(); return
-        }
-        _ = try? await context.evaluatePolicy(
-            .deviceOwnerAuthenticationWithBiometrics,
-            localizedReason: "Protect your health profile"
-        )
+        _ = await BiometricAuthManager.shared.setBiometricLockEnabled(true)
         advance()
     }
 
     var biometricLabel: String {
-        let context = LAContext()
-        guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil) else { return "Passcode" }
-        return context.biometryType == .faceID ? "Face ID" : "Touch ID"
+        BiometricAuthManager.shared.biometricLabel
     }
 
     var biometricIcon: String {
-        let context = LAContext()
-        guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil) else { return "lock.fill" }
-        return context.biometryType == .faceID ? "faceid" : "touchid"
+        BiometricAuthManager.shared.biometricIcon
     }
 
     // MARK: - Auth
@@ -152,8 +195,15 @@ final class OnboardingViewModel: ObservableObject {
         authError = nil
         Task {
             do {
-                try await AuthService.shared.signInWithApple()
-                advance()
+                let providerName = try await AuthService.shared.signInWithApple()
+                applyProviderName(providerName)
+                await checkReturningUser()
+                if isReturningUser {
+                    finalize()
+                } else {
+                    AnalyticsManager.shared.track("sign_up_completed", properties: ["method": "apple"])
+                    advance()
+                }
             } catch {
                 if !isCancellation(error) { authError = error.localizedDescription }
             }
@@ -167,13 +217,34 @@ final class OnboardingViewModel: ObservableObject {
         authError = nil
         Task {
             do {
-                try await AuthService.shared.signInWithGoogle()
-                advance()
+                let providerName = try await AuthService.shared.signInWithGoogle()
+                applyProviderName(providerName)
+                await checkReturningUser()
+                if isReturningUser {
+                    finalize()
+                } else {
+                    AnalyticsManager.shared.track("sign_up_completed", properties: ["method": "google"])
+                    advance()
+                }
             } catch {
                 if !isCancellation(error) { authError = error.localizedDescription }
             }
             isSigningIn = false
         }
+    }
+
+    /// Pre-fills the profile name with the name supplied by Sign in with Apple/Google so the
+    /// user is never required to re-enter it (App Review 4 / Sign in with Apple). Only fills
+    /// when the provider gave a name and the user hasn't already typed one.
+    private func applyProviderName(_ name: String?) {
+        guard let name, !name.isEmpty,
+              state.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        state.name = name
+    }
+
+    private func checkReturningUser() async {
+        guard let uid = AuthService.shared.currentUser?.uid else { return }
+        isReturningUser = await AuthService.shared.hasExistingCloudData(uid: uid)
     }
 
     private func isCancellation(_ error: Error) -> Bool {
@@ -193,6 +264,10 @@ final class OnboardingViewModel: ObservableObject {
     }
 
     private func saveProfile() {
+        // Returning users already have their profile in the cloud; skip overwriting
+        // so performInitialRestore can write the real data without conflict.
+        guard !isReturningUser else { return }
+
         let dob = state.dateOfBirth.map {
             $0.formatted(.dateTime.day().month(.wide).year())
         } ?? ""
@@ -215,7 +290,9 @@ final class OnboardingViewModel: ObservableObject {
             weight: healthKitData?.weight ?? "",
             bloodType: state.bloodType?.rawValue ?? "",
             insuranceStatus: "",
-            emergencyContact: contact
+            myPhoneNumber: "",
+            emergencyContactName: state.emergencyContactName,
+            emergencyContactNumber: state.emergencyContactPhone
         )
 
         var profile = HealthProfile.default
@@ -238,6 +315,9 @@ final class OnboardingViewModel: ObservableObject {
         if let data = try? JSONEncoder().encode(profile) {
             UserDefaults.standard.set(data, forKey: "health_profile_data")
         }
+        // Upload to Firestore so a future reinstall + relogin restores it
+        // (and hasExistingCloudData detects this user as returning).
+        SyncQueueManager.shared.enqueueProfileUpload(profile)
 
         // Persist selected medical areas
         let areas = state.medicalAreas.map(\.rawValue)
@@ -258,5 +338,9 @@ final class OnboardingViewModel: ObservableObject {
         case (true, true):   location = ""
         }
         UserDefaults.standard.set(location, forKey: "user_location")
+
+        // Upload preferences to Firestore so they restore on reinstall.
+        let prefs = UserPreferences(medicalAreas: areas, location: location)
+        SyncQueueManager.shared.enqueuePreferencesUpload(prefs)
     }
 }

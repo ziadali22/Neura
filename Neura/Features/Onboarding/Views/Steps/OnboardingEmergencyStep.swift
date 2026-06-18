@@ -13,10 +13,10 @@ struct OnboardingEmergencyStep: View {
                 VStack(spacing: 24) {
                     // Header
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Set up your\nemergency card")
+                        Text(L10n.Onboarding.Emergency.title)
                             .font(.displayL)
                             .foregroundStyle(Color.textPrimary)
-                        Text("First responders can see this in an emergency.")
+                        Text(L10n.Onboarding.Emergency.subtitle)
                             .font(.bodyL)
                             .foregroundStyle(Color.textSecondary)
                     }
@@ -30,17 +30,17 @@ struct OnboardingEmergencyStep: View {
                     // Form
                     VStack(spacing: 16) {
                         // Contact name
-                        formField("Emergency Contact Name", placeholder: "e.g. Sarah Johnson",
+                        formField(L10n.Onboarding.Emergency.contactName, placeholder: L10n.Onboarding.Emergency.contactNamePlaceholder,
                                   text: $viewModel.state.emergencyContactName, field: .name)
 
                         // Contact phone
-                        formField("Phone Number", placeholder: "+1 555 000 0000",
+                        formField(L10n.Onboarding.Emergency.phone, placeholder: L10n.Onboarding.Emergency.phonePlaceholder,
                                   text: $viewModel.state.emergencyContactPhone, field: .phone)
                             .keyboardType(.phonePad)
 
                         // Blood type
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Blood Type (optional)")
+                            Text(L10n.Onboarding.Emergency.bloodType)
                                 .font(.headingXS)
                                 .foregroundStyle(Color.textPrimary)
                             ScrollView(.horizontal) {
@@ -113,7 +113,7 @@ struct OnboardingEmergencyStep: View {
     private var continueButton: some View {
         OnboardingContinueButton(
             action: viewModel.advance,
-            secondaryTitle: "Skip for now"
+            secondaryTitle: L10n.Common.skipForNow
         )
     }
 }
@@ -131,12 +131,12 @@ private struct MiniEmergencyCard: View {
                                startPoint: .topLeading, endPoint: .bottomTrailing)
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("IN CASE OF")
+                        Text(L10n.Emergency.inCaseOf)
                             .font(.captionS)
                             .fontWeight(.bold)
                             .tracking(2)
                             .foregroundStyle(.white.opacity(0.7))
-                        Text("EMERGENCY")
+                        Text(L10n.Emergency.emergency)
                             .font(.system(size: 20, weight: .heavy))
                             .tracking(1)
                             .foregroundStyle(.white)
@@ -155,14 +155,14 @@ private struct MiniEmergencyCard: View {
 
             // White body
             VStack(spacing: 0) {
-                cardRow("person.fill", state.name.isEmpty ? "Your name" : state.name,
+                cardRow("person.fill", state.name.isEmpty ? L10n.Onboarding.Emergency.yourNamePlaceholder : state.name,
                         isPlaceholder: state.name.isEmpty)
                 Divider().padding(.leading, 44)
                 cardRow("phone.fill",
-                        state.emergencyContactPhone.isEmpty ? "Emergency contact" : state.emergencyContactPhone,
+                        state.emergencyContactPhone.isEmpty ? L10n.Onboarding.Emergency.contactPlaceholder : state.emergencyContactPhone,
                         isPlaceholder: state.emergencyContactPhone.isEmpty)
                 Divider().padding(.leading, 44)
-                cardRow("drop.fill", state.bloodType?.rawValue ?? "Blood type",
+                cardRow("drop.fill", state.bloodType?.rawValue ?? L10n.Onboarding.Emergency.bloodTypePlaceholder,
                         isPlaceholder: state.bloodType == nil)
             }
             .background(.white)

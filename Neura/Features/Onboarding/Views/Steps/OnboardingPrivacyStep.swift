@@ -10,34 +10,36 @@ struct OnboardingPrivacyStep: View {
             Spacer()
 
             // Concentric circles + Lock illustration
-            ZStack {
-                ForEach(0..<3, id: \.self) { i in
-                    Circle()
-                        .stroke(Color.stroke.opacity(0.5 - Double(i) * 0.12), lineWidth: 1)
-                        .frame(
-                            width: CGFloat(160 + i * 80),
-                            height: CGFloat(160 + i * 80)
-                        )
-                }
-
-                Image(.lock)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 120, height: 120)
-                    .scaleEffect(appeared ? 1 : 0.8)
-                    .opacity(appeared ? 1 : 0)
-            }
-            .accessibilityHidden(true)
+//            ZStack {
+//                ForEach(0..<3, id: \.self) { i in
+//                    Circle()
+//                        .stroke(Color.stroke.opacity(0.5 - Double(i) * 0.12), lineWidth: 1)
+//                        .frame(
+//                            width: CGFloat(160 + i * 80),
+//                            height: CGFloat(160 + i * 80)
+//                        )
+//                }
+//
+//
+//            }
+//            .accessibilityHidden(true)
+            
+            Image("lockImage")
+                .resizable()
+                .scaledToFit()
+                .padding(.horizontal, 24)
+                .scaleEffect(appeared ? 1 : 0.8)
+                .opacity(appeared ? 1 : 0)
 
             Spacer()
 
             // Text content
             VStack(alignment: .leading, spacing: 12) {
-                Text("Your health data is\nprivate and secure")
+                Text(L10n.Onboarding.Privacy.title)
                     .font(.displayL)
                     .foregroundStyle(Color.textPrimary)
 
-                Text("Your documents are encrypted and stored securely. Only you control what you share.")
+                Text(L10n.Onboarding.Privacy.subtitle)
                     .font(.bodyL)
                     .foregroundStyle(Color.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)

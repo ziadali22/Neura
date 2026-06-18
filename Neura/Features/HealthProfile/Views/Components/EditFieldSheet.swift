@@ -1,30 +1,48 @@
 import SwiftUI
+import UIKit
 
 struct EditFieldSheet: View {
     let fieldName: String
+    let keyboardType: UIKeyboardType
     @State private var value: String
     let onSave: (String) -> Void
+    let onDelete: (() -> Void)?
     @Environment(\.dismiss) private var dismiss
     @FocusState private var isFocused: Bool
 
-    init(fieldName: String, value: String, onSave: @escaping (String) -> Void) {
+    init(fieldName: String, value: String, keyboardType: UIKeyboardType = .default, onDelete: (() -> Void)? = nil, onSave: @escaping (String) -> Void) {
         self.fieldName = fieldName
+        self.keyboardType = keyboardType
         self._value = State(initialValue: value)
+        self.onDelete = onDelete
         self.onSave = onSave
     }
 
     var body: some View {
         VStack(spacing: 0) {
             HStack {
+                if let onDelete {
+                    Button(role: .destructive) {
+                        onDelete()
+                        dismiss()
+                    } label: {
+                        Image(systemName: "trash")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(Color.red)
+                            .frame(width: 36, height: 36)
+                            .background(Color.surfaceWhite)
+                            .clipShape(Circle())
+                    }
+                }
+
                 Spacer()
                 Button {
-                    let trimmed = value.trimmingCharacters(in: .whitespaces)
-                    onSave(trimmed)
+                    onSave(value.trimmingCharacters(in: .whitespaces))
                     dismiss()
                 } label: {
                     Image(systemName: "checkmark")
                         .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .frame(width: 36, height: 36)
                         .background(Color.accent)
                         .clipShape(Circle())
@@ -34,13 +52,14 @@ struct EditFieldSheet: View {
             .padding(.top, 16)
 
             VStack(alignment: .leading, spacing: 20) {
-                Text("Edit \(fieldName)")
+                Text(L10n.HealthProfile.editFormat(fieldName))
                     .font(.displayXL)
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
 
                 TextField(fieldName, text: $value)
-                    .font(.bodyL)
-                    .foregroundColor(.textPrimary)
+                    .font(.BodyML)
+                    .foregroundStyle(Color.textPrimary)
+                    .keyboardType(keyboardType)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 14)
                     .background(Color.surfaceWhite)
@@ -53,6 +72,7 @@ struct EditFieldSheet: View {
             Spacer()
         }
         .background(Color.backgroundPrimary)
+        .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 4)
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 isFocused = true

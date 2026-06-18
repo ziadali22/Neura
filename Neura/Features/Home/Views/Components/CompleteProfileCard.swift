@@ -1,21 +1,20 @@
 import SwiftUI
 
 struct CompleteProfileCard: View {
-    @StateObject private var viewModel = HealthProfileViewModel()
+    let generalData: HealthProfile.GeneralData
     @State private var arrowBounce = false
 
     var onTap: (() -> Void)?
 
     private var missingFields: [String] {
-        let data = viewModel.profile.generalData
         var fields: [String] = []
-        if data.fullName.isEmpty { fields.append("name") }
-        if data.dateOfBirth.isEmpty { fields.append("date of birth") }
-        if data.gender.isEmpty { fields.append("gender") }
-        if data.height.isEmpty { fields.append("height") }
-        if data.weight.isEmpty { fields.append("weight") }
-        if data.bloodType.isEmpty { fields.append("blood type") }
-        if data.insuranceStatus.isEmpty { fields.append("insurance") }
+        if generalData.fullName.isEmpty { fields.append("name") }
+        if generalData.dateOfBirth.isEmpty { fields.append("date of birth") }
+        if generalData.gender.isEmpty { fields.append("gender") }
+        if generalData.height.isEmpty { fields.append("height") }
+        if generalData.weight.isEmpty { fields.append("weight") }
+        if generalData.bloodType.isEmpty { fields.append("blood type") }
+        if generalData.insuranceStatus.isEmpty { fields.append("insurance") }
         return fields
     }
 
@@ -75,7 +74,7 @@ private struct ProfileCardContent: View {
                         .frame(width: 54, height: 54)
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Complete your profile")
+                        Text(L10n.Home.completeProfile)
                             .font(.headingXS)
                             .foregroundStyle(Color.textPrimary)
 
@@ -86,7 +85,7 @@ private struct ProfileCardContent: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
 
-                    Image(systemName: "chevron.right")
+                    Image(systemName: "chevron.forward")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(.white)
                         .frame(width: 44, height: 44)
@@ -112,6 +111,10 @@ private struct ProfileCardContent: View {
 }
 
 #Preview {
-    CompleteProfileCard(onTap: {})
-        .padding()
+    CompleteProfileCard(generalData: HealthProfile.GeneralData(
+        fullName: "", dateOfBirth: "", gender: "",
+        height: "", weight: "", bloodType: "",
+        insuranceStatus: ""
+    ), onTap: {})
+    .padding()
 }
