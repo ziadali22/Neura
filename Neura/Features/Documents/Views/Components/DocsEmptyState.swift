@@ -16,11 +16,11 @@ struct DocsEmptyState: View {
 
             // Text
             VStack(spacing: 10) {
-                Text("No documents yet")
+                Text(L10n.Documents.Empty.title)
                     .font(.system(size: 22, weight: .bold))
                     .foregroundStyle(Color.textPrimary)
 
-                Text("Add or scan your first medical record.")
+                Text(L10n.Documents.Empty.message)
                     .font(.system(size: 16))
                     .foregroundStyle(Color.textSecondary)
                     .multilineTextAlignment(.center)
@@ -30,7 +30,7 @@ struct DocsEmptyState: View {
 
             // CTA button
             Button(action: onAddDocument) {
-                Text("Add document")
+                Text(L10n.Documents.addDocument)
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(.white)
                     .frame(width: 190)

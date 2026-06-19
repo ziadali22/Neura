@@ -7,7 +7,7 @@ struct DocsSelectionBar: View {
     var body: some View {
         HStack {
             Button(action: onDelete) {
-                Label("Delete", systemImage: "trash")
+                Label(L10n.Common.delete, systemImage: "trash")
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(Color.textPrimary)
                     .padding(.horizontal, 24)
@@ -21,7 +21,7 @@ struct DocsSelectionBar: View {
             Spacer()
 
             Button(action: onShare) {
-                Label("Share", systemImage: "square.and.arrow.up")
+                Label(L10n.Common.share, systemImage: "square.and.arrow.up")
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 24)

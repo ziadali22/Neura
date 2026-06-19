@@ -470,3 +470,14 @@
 "documents.noneSelected" = "Niciun element selectat";
 "documents.selectedFormat" = "%d selectate";
 "documents.category.emptyTitleFormat" = "Fără %@";
+
+// MARK: - Docs tab sweep (empty/locked/folder/metadata)
+"documents.empty.title" = "Niciun document încă";
+"documents.empty.message" = "Adaugă sau scanează primul tău document medical.";
+"documents.locked.title" = "Abonament expirat";
+"documents.locked.message" = "Reînnoiește planul pentru a deschide acest fișier";
+"documents.locked.renew" = "Reînnoiește";
+"documents.folder.deleteTitleFormat" = "Ștergi „%@”?";
+"documents.folder.deleteMessage" = "Folderul va fi eliminat. Documentele tale rămân în siguranță și în categoriile lor.";
+"documents.metadata.namePlaceholder" = "Analiză de sânge";
+"documents.metadata.doctorPlaceholder" = "ex. Dr. Sarah Johnson";

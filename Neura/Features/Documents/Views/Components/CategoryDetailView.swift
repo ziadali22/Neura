@@ -148,7 +148,7 @@ struct DocumentDetailRow: View {
                     if document.pageCount > 1 {
                         Text("·")
                             .foregroundColor(.textTertiary)
-                        Text("\(document.pageCount) pages")
+                        Text(L10n.Documents.Viewer.pagesCount(document.pageCount))
                             .font(.system(size: 14))
                             .foregroundColor(.textTertiary)
                     }

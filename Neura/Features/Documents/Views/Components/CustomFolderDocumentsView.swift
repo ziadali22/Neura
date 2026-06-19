@@ -108,7 +108,7 @@ struct CustomFolderDocumentsView: View {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(Color.textTertiary)
                 .font(.system(size: 15))
-            TextField("Search documents", text: $searchText)
+            TextField(L10n.Documents.searchPlaceholder, text: $searchText)
                 .font(.bodyL)
         }
         .padding(.horizontal, 14)
@@ -145,7 +145,7 @@ struct CustomFolderDocumentsView: View {
             Button {
                 viewModel.showAddOptions()
             } label: {
-                Text("Add document")
+                Text(L10n.Documents.addDocument)
                     .font(.buttonM)
                     .foregroundStyle(.white)
                     .frame(width: 190)

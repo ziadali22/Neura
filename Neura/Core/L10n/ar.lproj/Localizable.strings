@@ -470,3 +470,14 @@
 "documents.noneSelected" = "لم يتم تحديد أي عنصر";
 "documents.selectedFormat" = "%d محدد";
 "documents.category.emptyTitleFormat" = "لا توجد %@";
+
+// MARK: - Docs tab sweep (empty/locked/folder/metadata)
+"documents.empty.title" = "لا توجد مستندات بعد";
+"documents.empty.message" = "أضف أو امسح أول سجل طبي لك.";
+"documents.locked.title" = "انتهى الاشتراك";
+"documents.locked.message" = "جدّد خطتك لفتح هذا الملف";
+"documents.locked.renew" = "تجديد";
+"documents.folder.deleteTitleFormat" = "حذف \"%@\"؟";
+"documents.folder.deleteMessage" = "سيتم حذف المجلد. تبقى مستنداتك آمنة وضمن فئاتها.";
+"documents.metadata.namePlaceholder" = "تحليل دم";
+"documents.metadata.doctorPlaceholder" = "مثال: د. سارة جونسون";

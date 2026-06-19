@@ -335,6 +335,17 @@ enum L10n {
         }
         static var newFolderMessage: String { "documents.newFolderMessage".l10n() }
 
+        enum Empty {
+            static var title: String { "documents.empty.title".l10n() }
+            static var message: String { "documents.empty.message".l10n() }
+        }
+
+        enum Locked {
+            static var title: String { "documents.locked.title".l10n() }
+            static var message: String { "documents.locked.message".l10n() }
+            static var renew: String { "documents.locked.renew".l10n() }
+        }
+
         enum PhotoAccess {
             static var title: String { "documents.photoAccess.title".l10n() }
             static var openSettings: String { "documents.photoAccess.openSettings".l10n() }
@@ -402,6 +413,8 @@ enum L10n {
             static var namePlaceholder: String { "documents.folder.namePlaceholder".l10n() }
             static var noDocuments: String { "documents.folder.noDocuments".l10n() }
             static func emptyDescriptionFormat(_ folder: String) -> String { "documents.folder.emptyDescriptionFormat".l10n(args: [folder]) }
+            static func deleteTitle(_ name: String) -> String { "documents.folder.deleteTitleFormat".l10n(args: [name]) }
+            static var deleteMessage: String { "documents.folder.deleteMessage".l10n() }
         }
 
         enum AddDocument {
@@ -441,6 +454,8 @@ enum L10n {
             static var doctor: String { "documents.metadata.doctor".l10n() }
             static var notes: String { "documents.metadata.notes".l10n() }
             static var notesPlaceholder: String { "documents.metadata.notesPlaceholder".l10n() }
+            static var namePlaceholder: String { "documents.metadata.namePlaceholder".l10n() }
+            static var doctorPlaceholder: String { "documents.metadata.doctorPlaceholder".l10n() }
             static var save: String { "documents.metadata.save".l10n() }
             static var specializationTitle: String { "documents.metadata.specializationTitle".l10n() }
         }

@@ -475,3 +475,14 @@
 "documents.noneSelected" = "None Selected";
 "documents.selectedFormat" = "%d Selected";
 "documents.category.emptyTitleFormat" = "No %@";
+
+// MARK: - Docs tab sweep (empty/locked/folder/metadata)
+"documents.empty.title" = "No documents yet";
+"documents.empty.message" = "Add or scan your first medical record.";
+"documents.locked.title" = "Subscription Expired";
+"documents.locked.message" = "Renew your plan to open this file";
+"documents.locked.renew" = "Renew";
+"documents.folder.deleteTitleFormat" = "Delete \"%@\"?";
+"documents.folder.deleteMessage" = "The folder will be removed. Your documents stay safe and remain in their categories.";
+"documents.metadata.namePlaceholder" = "Blood Test";
+"documents.metadata.doctorPlaceholder" = "e.g. Dr. Sarah Johnson";

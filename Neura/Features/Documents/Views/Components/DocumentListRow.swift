@@ -67,10 +67,10 @@ struct DocumentListRow: View {
             }
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("Subscription Expired")
+                Text(L10n.Documents.Locked.title)
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(Color.textPrimary)
-                Text("Renew your plan to open this file")
+                Text(L10n.Documents.Locked.message)
                     .font(.system(size: 12))
                     .foregroundStyle(Color.textSecondary)
             }
@@ -78,7 +78,7 @@ struct DocumentListRow: View {
             Spacer()
 
             Button(action: onUnlock) {
-                Text("Renew")
+                Text(L10n.Documents.Locked.renew)
                     .font(.system(size: 12, weight: .bold))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 14)

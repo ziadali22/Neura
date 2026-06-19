@@ -370,7 +370,7 @@ struct DocumentMetadataView: View {
                 .font(.headingXS)
                 .foregroundColor(.textPrimary)
 
-            TextField("Blood Test", text: $metadata.name)
+            TextField(L10n.Documents.Metadata.namePlaceholder, text: $metadata.name)
                 .focused($focusedField, equals: .name)
                 .font(.bodyL)
                 .textFieldStyle(.plain)
@@ -391,7 +391,7 @@ struct DocumentMetadataView: View {
                 .font(.headingXS)
                 .foregroundColor(.textPrimary)
 
-            TextField("e.g. Dr. Sarah Johnson", text: $metadata.doctorName)
+            TextField(L10n.Documents.Metadata.doctorPlaceholder, text: $metadata.doctorName)
                 .focused($focusedField, equals: .doctor)
                 .font(.bodyL)
                 .textFieldStyle(.plain)

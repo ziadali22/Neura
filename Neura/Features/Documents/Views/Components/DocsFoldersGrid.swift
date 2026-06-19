@@ -20,7 +20,7 @@ struct DocsFoldersGrid: View {
             grid
         }
         .scrollIndicators(.hidden)
-        .alert("Rename Folder", isPresented: Binding(
+        .alert(L10n.Documents.Folder.renameTitle, isPresented: Binding(
             get: { folderToRename != nil },
             set: { if !$0 { folderToRename = nil } }
         )) {
@@ -70,7 +70,7 @@ struct DocsFoldersGrid: View {
                             folderToRename = folder
                         }
                     } label: {
-                        Label("Rename", systemImage: "pencil")
+                        Label(L10n.Common.rename, systemImage: "pencil")
                     }
                     Button(role: .destructive) {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
@@ -108,12 +108,12 @@ struct DocsFoldersGrid: View {
     private func deleteConfirmation(_ folder: CustomFolder) -> some View {
         VStack(spacing: 16) {
             VStack(spacing: 6) {
-                Text("Delete \"\(folder.name)\"?")
+                Text(L10n.Documents.Folder.deleteTitle(folder.name))
                     .font(.system(size: 17, weight: .semibold))
                     .foregroundColor(.textPrimary)
                     .multilineTextAlignment(.center)
 
-                Text("The folder will be removed. Your documents stay safe and remain in their categories.")
+                Text(L10n.Documents.Folder.deleteMessage)
                     .font(.system(size: 13))
                     .foregroundColor(.textSecondary)
                     .multilineTextAlignment(.center)
