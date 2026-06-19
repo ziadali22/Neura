@@ -470,3 +470,8 @@
 "tabBar.profile" = "Profile";
 "tabBar.home" = "Home";
 "tabBar.docs" = "Docs";
+
+// MARK: - CategoryDocumentsView extras
+"documents.noneSelected" = "None Selected";
+"documents.selectedFormat" = "%d Selected";
+"documents.category.emptyTitleFormat" = "No %@";

@@ -465,3 +465,8 @@
 "tabBar.profile" = "الملف الشخصي";
 "tabBar.home" = "الرئيسية";
 "tabBar.docs" = "المستندات";
+
+// MARK: - CategoryDocumentsView extras
+"documents.noneSelected" = "لم يتم تحديد أي عنصر";
+"documents.selectedFormat" = "%d محدد";
+"documents.category.emptyTitleFormat" = "لا توجد %@";

@@ -465,3 +465,8 @@
 "tabBar.profile" = "Profil";
 "tabBar.home" = "Acasă";
 "tabBar.docs" = "Documente";
+
+// MARK: - CategoryDocumentsView extras
+"documents.noneSelected" = "Niciun element selectat";
+"documents.selectedFormat" = "%d selectate";
+"documents.category.emptyTitleFormat" = "Fără %@";

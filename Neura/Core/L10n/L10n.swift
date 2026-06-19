@@ -329,6 +329,10 @@ enum L10n {
         static func selectedCount(_ count: Int) -> String {
             "documents.selectedCountFormat".l10n(args: [count])
         }
+        static var noneSelected: String { "documents.noneSelected".l10n() }
+        static func selected(_ count: Int) -> String {
+            "documents.selectedFormat".l10n(args: [count])
+        }
         static var newFolderMessage: String { "documents.newFolderMessage".l10n() }
 
         enum PhotoAccess {
@@ -386,6 +390,7 @@ enum L10n {
         enum Category {
             static var noDocumentsYet: String { "documents.category.noDocumentsYet".l10n() }
             static func searchFormat(_ category: String) -> String { "documents.category.searchFormat".l10n(args: [category]) }
+            static func emptyTitleFormat(_ category: String) -> String { "documents.category.emptyTitleFormat".l10n(args: [category]) }
             static func emptyDescriptionFormat(_ category: String) -> String { "documents.category.emptyDescriptionFormat".l10n(args: [category]) }
             static var scanFirst: String { "documents.category.scanFirst".l10n() }
             static var addNewFile: String { "documents.category.addNewFile".l10n() }

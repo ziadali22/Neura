@@ -63,13 +63,13 @@ struct CategoryDocumentsView: View {
         .animation(.spring(response: 0.3, dampingFraction: 0.85), value: isSelecting)
         .animation(.spring(response: 0.3, dampingFraction: 0.85), value: selectedDocuments.isEmpty)
         .alert(
-            "Delete \(selectedDocuments.count) Document\(selectedDocuments.count == 1 ? "" : "s")?",
+            L10n.Documents.deleteAlertTitle(selectedDocuments.count),
             isPresented: $showDeleteAlert
         ) {
-            Button("Cancel", role: .cancel) {}
-            Button("Delete", role: .destructive, action: deleteSelected)
+            Button(L10n.Common.cancel, role: .cancel) {}
+            Button(L10n.Common.delete, role: .destructive, action: deleteSelected)
         } message: {
-            Text("This action cannot be undone.")
+            Text(L10n.Common.thisActionCannotBeUndone)
         }
     }
 
@@ -83,7 +83,7 @@ struct CategoryDocumentsView: View {
                     isSelecting = true
                 }
             } label: {
-                Text("Select")
+                Text(L10n.Documents.select)
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(Color.accent)
             }
@@ -108,7 +108,7 @@ struct CategoryDocumentsView: View {
                     }
                 }
             } label: {
-                Text("Select All")
+                Text(L10n.Documents.selectAll)
                     .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(Color.textPrimary)
                     .padding(.horizontal, 14)
@@ -120,7 +120,7 @@ struct CategoryDocumentsView: View {
 
             Spacer()
 
-            Text(selectedDocuments.isEmpty ? category.localizedName : "\(selectedDocuments.count) Items")
+            Text(selectedDocuments.isEmpty ? category.localizedName : L10n.Documents.selectedCount(selectedDocuments.count))
                 .font(.headingS)
                 .foregroundStyle(Color.textPrimary)
                 .contentTransition(.numericText())
@@ -155,7 +155,7 @@ struct CategoryDocumentsView: View {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(Color.textTertiary)
                 .font(.system(size: 15))
-            TextField("Search documents", text: $searchText)
+            TextField(L10n.Documents.searchPlaceholder, text: $searchText)
                 .font(.bodyL)
         }
         .padding(.horizontal, 14)
@@ -172,7 +172,7 @@ struct CategoryDocumentsView: View {
 
     private var selectedCountRow: some View {
         HStack {
-            Text(selectedDocuments.isEmpty ? "None Selected" : "\(selectedDocuments.count) Selected")
+            Text(selectedDocuments.isEmpty ? L10n.Documents.noneSelected : L10n.Documents.selected(selectedDocuments.count))
                 .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(Color.textSecondary)
             Spacer()
@@ -247,11 +247,11 @@ struct CategoryDocumentsView: View {
             }
 
             VStack(spacing: 8) {
-                Text("No \(category.localizedName)")
+                Text(L10n.Documents.Category.emptyTitleFormat(category.localizedName))
                     .font(.system(size: 22, weight: .bold))
                     .foregroundStyle(Color.textPrimary)
 
-                Text("Scan or upload a document and tag it as \(category.localizedName).")
+                Text(L10n.Documents.Category.emptyDescriptionFormat(category.localizedName))
                     .font(.bodyS)
                     .foregroundStyle(Color.textSecondary)
                     .multilineTextAlignment(.center)
@@ -261,7 +261,7 @@ struct CategoryDocumentsView: View {
             Button {
                 viewModel.showAddOptions()
             } label: {
-                Text("Add document")
+                Text(L10n.Documents.addDocument)
                     .font(.buttonM)
                     .foregroundStyle(.white)
                     .frame(width: 190)
