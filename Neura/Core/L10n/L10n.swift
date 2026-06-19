@@ -35,6 +35,13 @@ enum L10n {
         static var ok: String { "common.ok".l10n() }
     }
 
+    // MARK: - Tab Bar
+    enum TabBar {
+        static var profile: String { "tabBar.profile".l10n() }
+        static var home: String { "tabBar.home".l10n() }
+        static var docs: String { "tabBar.docs".l10n() }
+    }
+
     // MARK: - Onboarding
     enum Onboarding {
         enum Welcome {

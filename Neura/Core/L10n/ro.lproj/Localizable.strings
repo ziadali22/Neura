@@ -460,3 +460,8 @@
 "Psychiatry" = "Psihiatrie";
 "Surgery" = "Chirurgie";
 "Urology" = "Urologie";
+
+// MARK: - Tab Bar
+"tabBar.profile" = "Profil";
+"tabBar.home" = "Acasă";
+"tabBar.docs" = "Documente";

@@ -460,3 +460,8 @@
 "Psychiatry" = "الطب النفسي";
 "Surgery" = "الجراحة";
 "Urology" = "المسالك البولية";
+
+// MARK: - Tab Bar
+"tabBar.profile" = "الملف الشخصي";
+"tabBar.home" = "الرئيسية";
+"tabBar.docs" = "المستندات";

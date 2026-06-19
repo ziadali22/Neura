@@ -465,3 +465,8 @@
 "Psychiatry" = "Psychiatry";
 "Surgery" = "Surgery";
 "Urology" = "Urology";
+
+// MARK: - Tab Bar
+"tabBar.profile" = "Profile";
+"tabBar.home" = "Home";
+"tabBar.docs" = "Docs";

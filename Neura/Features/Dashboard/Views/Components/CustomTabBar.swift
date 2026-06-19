@@ -24,11 +24,13 @@ struct CustomTabBar: View {
         let action: AppCoordinator.AddDocumentAction
     }
 
-    private let actions: [ActionItem] = [
-        .init(icon: "scanAdd",  title: "Scan Document",      subtitle: "Use camera to scan pages",          action: .scan),
-        .init(icon: "imageAdd", title: "Upload from Photos", subtitle: "Choose an image from your library", action: .photo),
-        .init(icon: "fileAdd",  title: "Import File",        subtitle: "Select a PDF or image file",        action: .file),
-    ]
+    private var actions: [ActionItem] {
+        [
+            .init(icon: "scanAdd",  title: L10n.Documents.scan,         subtitle: L10n.Documents.AddDocument.scanSubtitle,  action: .scan),
+            .init(icon: "imageAdd", title: L10n.Documents.uploadPhotos, subtitle: L10n.Documents.AddDocument.photoSubtitle, action: .photo),
+            .init(icon: "fileAdd",  title: L10n.Documents.importFile,   subtitle: L10n.Documents.AddDocument.fileSubtitle,  action: .file),
+        ]
+    }
 
     // MARK: - Body
 
@@ -160,7 +162,7 @@ struct CustomTabBar: View {
                 .shadow(color: Color.accent.opacity(0.18), radius: 8, x: 0, y: 3)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(isMenuOpen ? "Close" : "Add document")
+        .accessibilityLabel(isMenuOpen ? L10n.Common.close : L10n.Documents.addDocument)
     }
 
     // MARK: - Helpers
@@ -216,9 +218,9 @@ extension AppCoordinator.Tab: CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .profile: "Profile"
-        case .home:    "Home"
-        case .docs:    "Docs"
+        case .profile: L10n.TabBar.profile
+        case .home:    L10n.TabBar.home
+        case .docs:    L10n.TabBar.docs
         }
     }
 
