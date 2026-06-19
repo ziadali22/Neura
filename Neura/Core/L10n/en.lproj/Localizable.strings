@@ -486,3 +486,6 @@
 "documents.folder.deleteMessage" = "The folder will be removed. Your documents stay safe and remain in their categories.";
 "documents.metadata.namePlaceholder" = "Blood Test";
 "documents.metadata.doctorPlaceholder" = "e.g. Dr. Sarah Johnson";
+
+// MARK: - Health Profile extras
+"healthProfile.chooseFromContacts" = "Choose from Contacts";

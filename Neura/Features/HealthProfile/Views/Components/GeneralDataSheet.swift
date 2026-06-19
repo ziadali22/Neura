@@ -16,6 +16,9 @@ struct GeneralDataSheet: View {
     @State private var showAddFieldAlert = false
     @State private var newFieldName = ""
 
+    // Emergency contact picker
+    @State private var showContactPicker = false
+
     var body: some View {
         VStack(spacing: 0) {
             // Nav bar
@@ -41,7 +44,11 @@ struct GeneralDataSheet: View {
                         .padding(.bottom, 8)
 
                     ForEach(fields) { field in
-                        fieldRow(field)
+                        if field.keyPath == \.emergencyContactName {
+                            emergencyContactRow(field)
+                        } else {
+                            fieldRow(field)
+                        }
                     }
 
                     ForEach(viewModel.profile.generalData.customFields) { field in
@@ -101,6 +108,16 @@ struct GeneralDataSheet: View {
                 viewModel.updateGeneralCustomField(id: field.id, value: newValue)
             }
             .presentationDragIndicator(.hidden)
+        }
+        // Emergency contact picker (pulls name + number from phone Contacts)
+        .sheet(isPresented: $showContactPicker) {
+            ContactPicker(isPresented: $showContactPicker) { name, phone in
+                viewModel.updateGeneralField(\.emergencyContactName, value: name)
+                if !phone.isEmpty {
+                    viewModel.updateGeneralField(\.emergencyContactNumber, value: phone)
+                }
+            }
+            .ignoresSafeArea()
         }
         .alert("Add Field", isPresented: $showAddFieldAlert) {
             TextField("Field name", text: $newFieldName)
@@ -174,6 +191,48 @@ private extension GeneralDataSheet {
             .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 4)
         }
         .buttonStyle(ScaleButtonStyle())
+    }
+
+    /// Emergency contact row: tap the label area to type manually, or tap the
+    /// Contacts button to pick from the phone (fills name + number at once).
+    func emergencyContactRow(_ field: GeneralFieldInfo) -> some View {
+        HStack(spacing: 12) {
+            Button { textEditingField = field } label: {
+                HStack {
+                    Text(field.label)
+                        .font(.bodyL)
+                        .foregroundColor(.textPrimary)
+
+                    Spacer()
+
+                    if field.value.isEmpty {
+                        Text("Add")
+                            .font(.bodyL)
+                            .foregroundColor(.textTertiary)
+                    } else {
+                        Text(field.value)
+                            .font(.statLabel)
+                            .foregroundColor(.textSecondary)
+                            .lineLimit(1)
+                    }
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            Button { showContactPicker = true } label: {
+                Image(systemName: "person.crop.circle.fill.badge.plus")
+                    .font(.system(size: 20))
+                    .foregroundColor(.accent)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(L10n.HealthProfile.chooseFromContacts)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .background(Color.surfaceWhite)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 4)
     }
 
     func customFieldRow(_ field: HealthProfile.GeneralData.CustomField) -> some View {

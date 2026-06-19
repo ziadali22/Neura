@@ -481,3 +481,6 @@
 "documents.folder.deleteMessage" = "سيتم حذف المجلد. تبقى مستنداتك آمنة وضمن فئاتها.";
 "documents.metadata.namePlaceholder" = "تحليل دم";
 "documents.metadata.doctorPlaceholder" = "مثال: د. سارة جونسون";
+
+// MARK: - Health Profile extras
+"healthProfile.chooseFromContacts" = "اختر من جهات الاتصال";

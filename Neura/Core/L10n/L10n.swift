@@ -488,6 +488,7 @@ enum L10n {
         static var insuranceStatus: String { "healthProfile.insuranceStatus".l10n() }
         static var bloodType: String { "healthProfile.bloodType".l10n() }
         static var emergencyContact: String { "healthProfile.emergencyContact".l10n() }
+        static var chooseFromContacts: String { "healthProfile.chooseFromContacts".l10n() }
         static var addName: String { "healthProfile.addName".l10n() }
         static var addDate: String { "healthProfile.addDate".l10n() }
         static var addGender: String { "healthProfile.addGender".l10n() }

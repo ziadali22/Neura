@@ -481,3 +481,6 @@
 "documents.folder.deleteMessage" = "Folderul va fi eliminat. Documentele tale rămân în siguranță și în categoriile lor.";
 "documents.metadata.namePlaceholder" = "Analiză de sânge";
 "documents.metadata.doctorPlaceholder" = "ex. Dr. Sarah Johnson";
+
+// MARK: - Health Profile extras
+"healthProfile.chooseFromContacts" = "Alege din Contacte";
