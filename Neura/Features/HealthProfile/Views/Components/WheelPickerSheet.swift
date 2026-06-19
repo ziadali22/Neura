@@ -85,7 +85,7 @@ extension WheelPickerSheet {
     }
 
     static var weightValues: [String] {
-        (30...200).map { "\($0) kg" }
+        (30...300).map { "\($0) kg" }
     }
 }
 
