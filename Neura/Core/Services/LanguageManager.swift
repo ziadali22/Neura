@@ -46,6 +46,11 @@ final class LanguageManager {
         currentLanguage.layoutDirection
     }
 
+    /// SF Symbol for a back/dismiss button. Flips to `chevron.forward` in Arabic (RTL).
+    var backChevronSymbol: String {
+        currentLanguage == .arabic ? "chevron.forward" : "chevron.backward"
+    }
+
     func setLanguage(_ language: AppLanguage) {
         UserDefaults.standard.set(language.rawValue, forKey: "app_language")
         currentLanguage = language

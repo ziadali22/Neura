@@ -557,3 +557,63 @@
 // MARK: - Coachmark
 "coachmark.documentUpload.title" = "Add your first document";
 "coachmark.documentUpload.subtitle" = "Tap + to scan, upload a photo, or import a file.";
+
+// MARK: - Calendar
+"calendar.title" = "Calendar";
+"calendar.promoTitle" = "Your health calendar";
+"calendar.promoOpen" = "Open";
+"calendar.emptyTitle" = "Start your health timeline";
+"calendar.emptyMessage" = "Track medication, appointments, and medical events in one place.";
+"calendar.addFirstEntry" = "Add your first entry";
+"calendar.addEntry" = "Add entry";
+"calendar.agendaTitle" = "Timeline";
+"calendar.newEntryTitle" = "New Entry";
+"calendar.editEntryTitle" = "Edit Entry";
+"calendar.field.type" = "Type";
+"calendar.field.title" = "Title";
+"calendar.field.titlePlaceholder" = "e.g. Vitamin D";
+"calendar.field.date" = "Date";
+"calendar.field.time" = "Time";
+"calendar.field.repeat" = "Repeat";
+"calendar.field.endDate" = "Ends";
+"calendar.field.reminder" = "Reminder";
+"calendar.field.notes" = "Notes";
+"calendar.field.linkDocument" = "Link a document";
+"calendar.noDocumentLinked" = "None";
+"calendar.deleteEntry" = "Delete Entry";
+"calendar.deleteConfirmTitle" = "Delete this entry?";
+"calendar.deleteConfirmMessage" = "This can't be undone.";
+"calendar.field.allDay" = "All day";
+"calendar.recurrence.none" = "Does not repeat";
+"calendar.recurrence.daily" = "Daily";
+"calendar.recurrence.weekly" = "Weekly";
+"calendar.recurrence.monthly" = "Monthly";
+"calendar.reminder.atTime" = "At time of event";
+"calendar.reminder.min15" = "15 minutes before";
+"calendar.reminder.hour1" = "1 hour before";
+"calendar.reminder.day1" = "1 day before";
+"calendar.openDocument" = "Open document";
+"calendar.next" = "Next";
+"calendar.field.specialization" = "Specialization";
+"calendar.field.doctor" = "Doctor";
+"calendar.field.doctorPlaceholder" = "e.g. Dr. Jamie Brown";
+"calendar.reminder.body30" = "Starts in 30 minutes";
+"calendar.reminder.body15" = "Starts in 15 minutes";
+"calendar.reminder.bodyWeek" = "Coming up in 1 week";
+"calendar.reminder.body2Days" = "Coming up in 2 days";
+"calendar.reminder.body2Hours" = "Coming up in 2 hours";
+"calendar.reminder.bodyMedTime" = "Time to take your medication";
+"calendar.reminder.bodyMedFollowUp" = "Did you take your medication?";
+"calendar.reminder.appt" = "Hey, Appointment with %@";
+"calendar.reminder.apptWithSpec" = "Hey, Appointment with %@ (%@)";
+"calendar.reminder.apptPlain" = "Hey, %@";
+"calendar.reminderInfo" = "You'll be reminded 1 week, 2 days, and 2 hours before appointments, and 30 and 15 minutes before other events.";
+"calendar.today" = "Today";
+"calendar.emptyHint" = "Tap any day to add an event.";
+"calendar.todayEmptyHint" = "Nothing planned for today — add an appointment, medication, or medical event to stay on track.";
+"calendar.addEvent" = "Add";
+"calendar.a11yHasEvents" = "Has events";
+"calendar.reminderInfoRecurring" = "Appointments remind you 1 week, 2 days, and 2 hours before each upcoming occurrence; other events 30 and 15 minutes before.";
+
+// MARK: - Health Profile extras
+"healthProfile.chooseFromContacts" = "Choose from Contacts";

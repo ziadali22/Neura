@@ -47,7 +47,20 @@ struct DashboardView: View {
                     coordinator.selectedTab = .docs
                 },
                 canUpload: subscriptionManager.canUpload,
-                onPaywallNeeded: { showPaywall = true },
+                onPaywallNeeded: {
+                    // The FAB tap hit the paywall instead of opening the add
+                    // menu, so `showAddMenu` never toggles. Advance the coach
+                    // mark here too — otherwise the spotlight stays up behind
+                    // the paywall and the calendar promo (gated on
+                    // `hasSeenCoachmark`) never surfaces.
+                    if !hasSeenCoachmark {
+                        if showCoachmark {
+                            withAnimation(.easeOut(duration: 0.2)) { showCoachmark = false }
+                        }
+                        hasSeenCoachmark = true
+                    }
+                    showPaywall = true
+                },
                 showCoachmarkHighlight: showCoachmarkMenuHighlight
             )
             .padding(.horizontal, 20)
@@ -69,6 +82,7 @@ struct DashboardView: View {
         }
         .task(id: scenePhase) {
             guard scenePhase == .active else { return }
+            CalendarReminderScheduler.shared.reschedule(for: CalendarEntryStore.shared.entries)
             SyncQueueManager.shared.drainPending()
         }
         .task {

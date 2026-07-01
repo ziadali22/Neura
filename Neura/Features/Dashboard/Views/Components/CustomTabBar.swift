@@ -186,75 +186,59 @@ struct CustomTabBar: View {
 
 // MARK: - Tab segmented control
 
-/// A `UISegmentedControl` driving the three tabs. Icons are tinted manually so
-/// the active tab shows in the accent colour regardless of how the underlying
-/// asset is authored; selection is also reinforced by the selected-segment pill.
-private struct TabSegmentedControl: UIViewRepresentable {
+/// A SwiftUI segmented control driving the three tabs. Each segment stacks the
+/// tab icon over its label; the active tab is tinted accent and sits on a
+/// sliding pill (matched-geometry) in the card colour.
+private struct TabSegmentedControl: View {
     var tabs: [AppCoordinator.Tab]
     @Binding var selectedTab: AppCoordinator.Tab
 
-    func makeUIView(context: Context) -> UISegmentedControl {
-        let control = UISegmentedControl(items: Array(repeating: "", count: tabs.count))
-        control.selectedSegmentIndex = index(of: selectedTab)
-        control.selectedSegmentTintColor = UIColor(Color.backgroundCard)
-        applyImages(to: control, selectedIndex: control.selectedSegmentIndex)
-        control.addTarget(
-            context.coordinator,
-            action: #selector(Coordinator.didSelect(_:)),
-            for: .valueChanged
-        )
-        // Hide the auto-inserted divider image views so only our glyphs show.
-        DispatchQueue.main.async {
-            for view in control.subviews.dropLast() where view is UIImageView {
-                view.alpha = 0
+    @Namespace private var pill
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(tabs) { tab in
+                segment(tab)
             }
         }
-        return control
+        .padding(4)
     }
 
-    func updateUIView(_ uiView: UISegmentedControl, context: Context) {
-        let idx = index(of: selectedTab)
-        if uiView.selectedSegmentIndex != idx {
-            uiView.selectedSegmentIndex = idx
+    private func segment(_ tab: AppCoordinator.Tab) -> some View {
+        let selected = tab == selectedTab
+        return Button {
+            guard !selected else { return }
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                selectedTab = tab
+            }
+        } label: {
+            VStack(spacing: 3) {
+                Image(selected ? tab.selectedIcon : tab.icon)
+                    .renderingMode(.template)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 22, height: 22)
+
+                Text(tab.label)
+                    .font(.system(size: 11, weight: selected ? .semibold : .medium))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            .foregroundStyle(selected ? Color.accent : Color.textSecondary)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .contentShape(Rectangle())
+            .background {
+                if selected {
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(Color.backgroundCard)
+                        .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 1)
+                        .matchedGeometryEffect(id: "selectedPill", in: pill)
+                }
+            }
         }
-        applyImages(to: uiView, selectedIndex: idx)
-    }
-
-    func makeCoordinator() -> Coordinator { Coordinator(parent: self) }
-
-    func sizeThatFits(_ proposal: ProposedViewSize, uiView: UISegmentedControl, context: Context) -> CGSize? {
-        proposal.replacingUnspecifiedDimensions()
-    }
-
-    // MARK: Internals
-
-    private func index(of tab: AppCoordinator.Tab) -> Int {
-        tabs.firstIndex(of: tab) ?? 0
-    }
-
-    private func applyImages(to control: UISegmentedControl, selectedIndex: Int) {
-        for (i, tab) in tabs.enumerated() {
-            control.setImage(image(for: tab, selected: i == selectedIndex), forSegmentAt: i)
-        }
-    }
-
-    private func image(for tab: AppCoordinator.Tab, selected: Bool) -> UIImage? {
-        let name = selected ? tab.selectedIcon : tab.icon
-        let color = UIColor(selected ? Color.accent : Color.textSecondary)
-        return UIImage(named: name)?
-            .withRenderingMode(.alwaysTemplate)
-            .withTintColor(color, renderingMode: .alwaysOriginal)
-    }
-
-    final class Coordinator: NSObject {
-        var parent: TabSegmentedControl
-        init(parent: TabSegmentedControl) { self.parent = parent }
-
-        @objc func didSelect(_ control: UISegmentedControl) {
-            let i = control.selectedSegmentIndex
-            guard parent.tabs.indices.contains(i) else { return }
-            parent.selectedTab = parent.tabs[i]
-        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(tab.label)
+        .accessibilityAddTraits(selected ? [.isButton, .isSelected] : .isButton)
     }
 }
 

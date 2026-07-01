@@ -143,6 +143,54 @@ final class SyncQueueManager: ObservableObject {
         }
     }
 
+    // MARK: - Calendar Upload
+
+    func enqueueCalendarUpload(_ entries: [CalendarEntry]) {
+        pending.add(PendingSyncOp(kind: .calendarUpload, id: nil))
+        attemptCalendarUpload(entries)
+    }
+
+    private func attemptCalendarUpload(_ entries: [CalendarEntry]) {
+        guard let uid, let key else { return }
+        Task {
+            do {
+                try await CalendarEntrySyncService.shared.upload(entries, uid: uid, key: key)
+                pending.remove(PendingSyncOp(kind: .calendarUpload, id: nil))
+                SyncLog.success("Uploaded calendar entries")
+            } catch {
+                SyncLog.failure("Calendar upload failed", error: error)
+            }
+        }
+    }
+
+    // MARK: - Custom Folders Upload
+
+    func enqueueCustomFoldersUpload(_ folders: [CustomFolder]) {
+        pending.add(PendingSyncOp(kind: .customFoldersUpload, id: nil))
+        attemptCustomFoldersUpload(folders)
+    }
+
+    private func attemptCustomFoldersUpload(_ folders: [CustomFolder]) {
+        guard let uid, let key else { return }
+        // Never overwrite good cloud data with an empty list — this is the same
+        // empty-clobber guard used for preferences/calendar. A freshly reinstalled
+        // store starts empty until restore finishes; uploading [] here would wipe
+        // the folders we're about to download.
+        guard !folders.isEmpty else {
+            pending.remove(PendingSyncOp(kind: .customFoldersUpload, id: nil))
+            return
+        }
+        Task {
+            do {
+                try await CustomFolderSyncService.shared.upload(folders, uid: uid, key: key)
+                pending.remove(PendingSyncOp(kind: .customFoldersUpload, id: nil))
+                SyncLog.success("Uploaded custom folders")
+            } catch {
+                SyncLog.failure("Custom folders upload failed", error: error)
+            }
+        }
+    }
+
     // MARK: - Drain (retry everything pending)
 
     /// Re-attempts every queued operation. Payloads are reconstructed from local
@@ -200,6 +248,20 @@ final class SyncQueueManager: ObservableObject {
                 } else {
                     attemptPreferencesUpload(UserPreferences(medicalAreas: areas, location: location))
                 }
+            case .calendarUpload:
+                let entries = CalendarEntryStore.shared.loadEntriesFromDisk()
+                if entries.isEmpty {
+                    pending.remove(op)
+                } else {
+                    attemptCalendarUpload(entries)
+                }
+            case .customFoldersUpload:
+                let folders = CustomFolderStore.shared.folders
+                if folders.isEmpty {
+                    pending.remove(op)
+                } else {
+                    attemptCustomFoldersUpload(folders)
+                }
             }
         }
     }
@@ -228,6 +290,15 @@ final class SyncQueueManager: ObservableObject {
                 SyncLog.success("Restored preferences")
             }
 
+            // 1c. Custom folders — restore BEFORE documents so the folders that
+            // documents reference (via the folder UUID in `tags`) already exist
+            // when the grid rebuilds, and no duplicate "Other" is auto-created.
+            if let cloudFolders = try? await CustomFolderSyncService.shared.download(uid: uid, key: key),
+               !cloudFolders.isEmpty {
+                CustomFolderStore.shared.merge(cloudFolders)
+                SyncLog.success("Restored \(cloudFolders.count) custom folder(s)")
+            }
+
             // 2. Documents — download missing files, rebuild metadata
             if let restored = try? await DocumentSyncService.shared.downloadAll(uid: uid, key: key),
                !restored.isEmpty {
@@ -240,6 +311,22 @@ final class SyncQueueManager: ObservableObject {
                 NotificationCenter.default.post(name: .documentsRestored, object: nil)
                 SyncLog.success("Restored \(restored.count) document(s)")
             }
+
+            // 3. Calendar entries (appointments / medication / medical events)
+            if let cloudEntries = try? await CalendarEntrySyncService.shared.download(uid: uid, key: key),
+               !cloudEntries.isEmpty {
+                let local = CalendarEntryStore.shared.loadEntriesFromDisk()
+                var merged = local
+                for entry in cloudEntries where !local.contains(where: { $0.id == entry.id }) {
+                    merged.append(entry)
+                }
+                CalendarEntryStore.shared.replaceAll(merged)
+                NotificationCenter.default.post(name: .calendarEntriesRestored, object: nil)
+                // Re-arm reminders now so notifications aren't missing until the
+                // next foreground.
+                CalendarReminderScheduler.shared.reschedule(for: merged)
+                SyncLog.success("Restored \(cloudEntries.count) calendar entr(ies)")
+            }
         }
     }
 }
@@ -249,4 +336,8 @@ final class SyncQueueManager: ObservableObject {
 extension Notification.Name {
     static let documentsRestored = Notification.Name("com.neura.documentsRestored")
     static let healthProfileRestored = Notification.Name("com.neura.healthProfileRestored")
+    static let calendarEntriesRestored = Notification.Name("com.neura.calendarEntriesRestored")
+    /// Posted after any local document mutation (add / update / delete) persists,
+    /// so other screens holding a cached snapshot (e.g. Home's recent list) refresh.
+    static let documentsChanged = Notification.Name("com.neura.documentsChanged")
 }

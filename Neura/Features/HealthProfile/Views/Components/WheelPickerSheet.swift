@@ -11,11 +11,16 @@ struct WheelPickerSheet: View {
         fieldName: String,
         values: [String],
         current: String,
+        defaultValue: String = "",
         onSave: @escaping (String) -> Void
     ) {
         self.fieldName = fieldName
         self.values = values
-        let startIndex = values.firstIndex(of: current) ?? (values.count / 2)
+        // Land on the saved value, else the field's preferred default, else the
+        // middle of the range.
+        let startIndex = values.firstIndex(of: current)
+            ?? values.firstIndex(of: defaultValue)
+            ?? (values.count / 2)
         self._selectedIndex = State(initialValue: startIndex)
         self.onSave = onSave
     }
@@ -85,7 +90,7 @@ extension WheelPickerSheet {
     }
 
     static var weightValues: [String] {
-        (30...200).map { "\($0) kg" }
+        (30...300).map { "\($0) kg" }
     }
 }
 

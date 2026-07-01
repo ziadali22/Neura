@@ -48,8 +48,20 @@ struct NeuraApp: App {
            Auth.auth().currentUser != nil {
             try? Auth.auth().signOut()
         }
-        let done = UserDefaults.standard.bool(forKey: key)
-        let signedIn = Auth.auth().currentUser != nil
+        var done = UserDefaults.standard.bool(forKey: key)
+        var signedIn = Auth.auth().currentUser != nil
+
+        #if DEBUG
+        // Tester bypass (DEBUG builds only): launch with `-skipAuth YES` to jump
+        // straight into the Dashboard without signing in. Set it in Xcode via
+        // Edit Scheme… → Run → Arguments → Arguments Passed On Launch: `-skipAuth YES`.
+        // The flag is compiled out of Release builds, so it can never ship.
+        if UserDefaults.standard.bool(forKey: "skipAuth") {
+            done = true
+            signedIn = true
+        }
+        #endif
+
         _hasCompletedOnboarding = State(initialValue: done)
         _isSignedIn = State(initialValue: signedIn)
         _showSplash = State(initialValue: done && signedIn)
@@ -105,6 +117,11 @@ struct NeuraApp: App {
             }
             // Only react to sign-out — not to sign-in during onboarding
             .onReceive(AuthService.shared.$currentUser) { user in
+                #if DEBUG
+                // In the tester bypass there is no real Firebase user, so ignore the
+                // nil publish that would otherwise bounce us back to onboarding.
+                if UserDefaults.standard.bool(forKey: "skipAuth") { return }
+                #endif
                 if user == nil {
                     isSignedIn = false
                     hasCompletedOnboarding = false

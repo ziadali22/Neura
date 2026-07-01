@@ -122,7 +122,7 @@ private extension DocumentViewerView {
     var navBar: some View {
         HStack {
             Button { dismiss() } label: {
-                Image(systemName: "chevron.backward")
+                Image(systemName: LanguageManager.shared.backChevronSymbol)
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.textPrimary)
                     .frame(width: 40, height: 40)

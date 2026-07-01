@@ -8,11 +8,16 @@ struct SecureProfileCard: View {
     var onCustomizeTap: (() -> Void)?
     var onTap: (() -> Void)?
 
-    @State private var dragAmount = CGSize.zero
+    /// Card height scales with the device so smaller iPhones get a shorter
+    /// card while larger phones keep the full presence. Clamped 360–450pt.
+    private var cardHeight: CGFloat {
+        let screenHeight = UIScreen.main.bounds.height
+        return max(360, min(450, screenHeight * 0.5))
+    }
 
     var body: some View {
         ZStack {
-            CardBackgroundView(background: background, height: 450)
+            CardBackgroundView(background: background, height: cardHeight)
                 .clipShape(RoundedRectangle(cornerRadius: 40))
                 .overlay {
                     VStack {
@@ -37,32 +42,11 @@ struct SecureProfileCard: View {
                 .shadow(
                     color: .black.opacity(0.15),
                     radius: 15,
-                    x: -dragAmount.width / 10,
-                    y: 10 - dragAmount.height / 10
+                    x: 0,
+                    y: 10
                 )
         }
-        .rotation3DEffect(
-            .degrees(-Double(dragAmount.width) / 15),
-            axis: (x: 0, y: 1, z: 0)
-        )
-        .rotation3DEffect(
-            .degrees(Double(dragAmount.height) / 15),
-            axis: (x: 1, y: 0, z: 0)
-        )
         .contentShape(RoundedRectangle(cornerRadius: 40))
-        .gesture(
-            DragGesture()
-                .onChanged { value in
-                    withAnimation(.interactiveSpring()) {
-                        dragAmount = value.translation
-                    }
-                }
-                .onEnded { _ in
-                    withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
-                        dragAmount = .zero
-                    }
-                }
-        )
         .onTapGesture { onTap?() }
         .accessibilityLabel("Health profile card")
         .accessibilityAddTraits(.isButton)

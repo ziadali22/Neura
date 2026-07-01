@@ -111,6 +111,10 @@ struct DocsView: View {
                 let trimmed = newFolderName.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard !trimmed.isEmpty else { return }
                 folderStore.add(name: trimmed)
+                AnalyticsManager.shared.track("folder_created", properties: [
+                    "folder_name": trimmed,
+                    "total_folders": folderStore.folders.count
+                ])
             }
             Button(L10n.Common.cancel, role: .cancel) {}
         } message: {

@@ -54,7 +54,7 @@ private extension EmergencyCardView {
     var navBar: some View {
         HStack {
             Button { dismiss() } label: {
-                Image(systemName: "chevron.backward")
+                Image(systemName: LanguageManager.shared.backChevronSymbol)
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.textPrimary)
                     .frame(width: 40, height: 40)
@@ -198,10 +198,10 @@ private extension EmergencyCardView {
     var vitalsStripInline: some View {
         let gd = viewModel.profile.generalData
         let items: [(icon: String, value: String, label: String, color: Color)] = [
-            ("drop.fill", gd.bloodType, "Blood", Color(hex: "E8392E")),
-            ("ruler", gd.height, "Height", Color(hex: "5E5CE6")),
-            ("scalemass", gd.weight, "Weight", Color(hex: "10B981")),
-            ("figure.stand", gd.gender, "Gender", Color(hex: "F59E0B")),
+            ("drop.fill", gd.bloodType, L10n.HealthProfile.bloodType, Color(hex: "E8392E")),
+            ("ruler", gd.height, L10n.HealthProfile.height, Color(hex: "5E5CE6")),
+            ("scalemass", gd.weight, L10n.HealthProfile.weight, Color(hex: "10B981")),
+            ("figure.stand", gd.gender, L10n.HealthProfile.gender, Color(hex: "F59E0B")),
         ].filter { !$0.value.isEmpty }
 
         return Group {
@@ -246,13 +246,13 @@ private extension EmergencyCardView {
     var cardFields: [CardField] {
         let gd = viewModel.profile.generalData
         return [
-            .init(icon: "person.fill", label: "Full Name", value: gd.fullName, iconColor: Color(hex: "E8392E")),
-            .init(icon: "calendar", label: "Date of Birth", value: gd.dateOfBirth, iconColor: Color(hex: "E8392E")),
-            .init(icon: "exclamationmark.triangle.fill", label: "Allergies", value: entriesText(for: "allerg"), iconColor: Color(hex: "F59E0B")),
-            .init(icon: "pill.fill", label: "Medications", value: entriesText(for: "medication", or: "supplement"), iconColor: Color(hex: "8B5CF6")),
-            .init(icon: "heart.text.clipboard", label: "Conditions", value: entriesText(for: "condition"), iconColor: Color(hex: "E8392E")),
-            .init(icon: "shield.checkered", label: "Insurance", value: gd.insuranceStatus, iconColor: Color(hex: "10B981")),
-            .init(icon: "phone.fill", label: "Emergency Contact", value: [gd.emergencyContactName, gd.emergencyContactNumber].filter { !$0.isEmpty }.joined(separator: " · "), iconColor: Color(hex: "10B981")),
+            .init(icon: "person.fill", label: L10n.HealthProfile.fullName, value: gd.fullName, iconColor: Color(hex: "E8392E")),
+            .init(icon: "calendar", label: L10n.HealthProfile.dateOfBirth, value: gd.dateOfBirth, iconColor: Color(hex: "E8392E")),
+            .init(icon: "exclamationmark.triangle.fill", label: L10n.Onboarding.Medical.allergies, value: entriesText(for: "allerg"), iconColor: Color(hex: "F59E0B")),
+            .init(icon: "pill.fill", label: L10n.Onboarding.Medical.medications, value: entriesText(for: "medication", or: "supplement"), iconColor: Color(hex: "8B5CF6")),
+            .init(icon: "heart.text.clipboard", label: L10n.Onboarding.Medical.conditions, value: entriesText(for: "condition"), iconColor: Color(hex: "E8392E")),
+            .init(icon: "shield.checkered", label: L10n.HealthProfile.insuranceStatus, value: gd.insuranceStatus, iconColor: Color(hex: "10B981")),
+            .init(icon: "phone.fill", label: L10n.HealthProfile.emergencyContact, value: [gd.emergencyContactName, gd.emergencyContactNumber].filter { !$0.isEmpty }.joined(separator: " · "), iconColor: Color(hex: "10B981")),
         ]
     }
 
@@ -398,10 +398,10 @@ private extension EmergencyCardView {
         let fields = buildPDFFields(from: profile)
         let gd = profile.generalData
         let vitals: [(String, String)] = [
-            ("Blood", gd.bloodType),
-            ("Height", gd.height),
-            ("Weight", gd.weight),
-            ("Gender", gd.gender),
+            (L10n.HealthProfile.bloodType, gd.bloodType),
+            (L10n.HealthProfile.height, gd.height),
+            (L10n.HealthProfile.weight, gd.weight),
+            (L10n.HealthProfile.gender, gd.gender),
         ].filter { !$0.1.isEmpty }
 
         let rowH: CGFloat = 38.0
@@ -426,10 +426,10 @@ private extension EmergencyCardView {
             UIBezierPath(roundedRect: headerRect, byRoundingCorners: [.topLeft, .topRight], cornerRadii: CGSize(width: 18, height: 18)).fill()
 
             // Header text
-            let sub = NSAttributedString(string: "IN CASE OF", attributes: [.font: subFont, .foregroundColor: UIColor.white.withAlphaComponent(0.7), .kern: 3.0])
+            let sub = NSAttributedString(string: L10n.Emergency.inCaseOf, attributes: [.font: subFont, .foregroundColor: UIColor.white.withAlphaComponent(0.7), .kern: 3.0])
             sub.draw(at: CGPoint(x: cardX + 22, y: cardY + 22))
 
-            let main = NSAttributedString(string: "EMERGENCY", attributes: [.font: titleFont, .foregroundColor: UIColor.white, .kern: 1.0])
+            let main = NSAttributedString(string: L10n.Emergency.emergency, attributes: [.font: titleFont, .foregroundColor: UIColor.white, .kern: 1.0])
             main.draw(at: CGPoint(x: cardX + 22, y: cardY + 44))
 
             // Cross decoration
@@ -486,7 +486,7 @@ private extension EmergencyCardView {
                 let lbl = NSAttributedString(string: field.label.uppercased(), attributes: [
                     .font: labelFont, .foregroundColor: labelRedUI, .kern: 0.5
                 ])
-                let val = NSAttributedString(string: field.value.isEmpty ? "Not set" : field.value, attributes: [
+                let val = NSAttributedString(string: field.value.isEmpty ? L10n.Onboarding.EmergencyCard.notSet : field.value, attributes: [
                     .font: valueFont, .foregroundColor: field.value.isEmpty ? dimUI : textUI
                 ])
 
@@ -506,10 +506,10 @@ private extension EmergencyCardView {
             UIBezierPath(rect: CGRect(x: cardX + 22, y: y, width: cardW - 44, height: 0.5)).fill()
             y += 10
 
-            let powered = NSAttributedString(string: "Powered by ", attributes: [
+            let powered = NSAttributedString(string: L10n.Emergency.poweredBy + " ", attributes: [
                 .font: UIFont.systemFont(ofSize: 10, weight: .regular), .foregroundColor: dimUI
             ])
-            let neura = NSAttributedString(string: "Neura", attributes: [
+            let neura = NSAttributedString(string: L10n.Common.neura, attributes: [
                 .font: UIFont.systemFont(ofSize: 10, weight: .bold), .foregroundColor: accentUI
             ])
 
@@ -536,13 +536,13 @@ private extension EmergencyCardView {
 
     func buildPDFFields(from profile: HealthProfile) -> [PDFField] {
         [
-            .init(label: "Full Name", value: profile.generalData.fullName),
-            .init(label: "Date of Birth", value: profile.generalData.dateOfBirth),
-            .init(label: "Allergies", value: entriesText(for: "allerg")),
-            .init(label: "Medications", value: entriesText(for: "medication", or: "supplement")),
-            .init(label: "Conditions", value: entriesText(for: "condition")),
-            .init(label: "Insurance", value: profile.generalData.insuranceStatus),
-            .init(label: "Emergency Contact", value: [profile.generalData.emergencyContactName, profile.generalData.emergencyContactNumber].filter { !$0.isEmpty }.joined(separator: " · ")),
+            .init(label: L10n.HealthProfile.fullName, value: profile.generalData.fullName),
+            .init(label: L10n.HealthProfile.dateOfBirth, value: profile.generalData.dateOfBirth),
+            .init(label: L10n.Onboarding.Medical.allergies, value: entriesText(for: "allerg")),
+            .init(label: L10n.Onboarding.Medical.medications, value: entriesText(for: "medication", or: "supplement")),
+            .init(label: L10n.Onboarding.Medical.conditions, value: entriesText(for: "condition")),
+            .init(label: L10n.HealthProfile.insuranceStatus, value: profile.generalData.insuranceStatus),
+            .init(label: L10n.HealthProfile.emergencyContact, value: [profile.generalData.emergencyContactName, profile.generalData.emergencyContactNumber].filter { !$0.isEmpty }.joined(separator: " · ")),
         ]
     }
 }

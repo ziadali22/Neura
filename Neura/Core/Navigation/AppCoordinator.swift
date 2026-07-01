@@ -49,6 +49,7 @@ enum HomeRoute: Hashable {
     case healthProfile
     case healthProfileDetail
     case emergencyCard
+    case calendar
 }
 
 enum DocsRoute: Hashable {

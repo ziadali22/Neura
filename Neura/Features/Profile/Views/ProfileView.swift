@@ -51,7 +51,7 @@ struct ProfileView: View {
                         }
 
                         // Profile section
-//                        ProfileSectionHeader(title: L10n.Profile.Section.profile)
+                        ProfileSectionHeader(title: L10n.Profile.Section.profile)
                         VStack(spacing: 11) {
                             SettingsRow(icon: "profile", title: L10n.Profile.healthProfile) {
                                 router.push(.healthProfile)
@@ -59,6 +59,12 @@ struct ProfileView: View {
                             SettingsRow(icon: "sub", title: L10n.Profile.subscription) {
                                 handleSubscriptionTap()
                             }
+                        }
+                        .padding(.bottom, 24)
+
+                        // Preferences section
+                        ProfileSectionHeader(title: L10n.Profile.Section.preferences)
+                        VStack(spacing: 11) {
                             BiometricLockRow(
                                 icon: biometricAuth.biometricIcon,
                                 title: L10n.Profile.biometricLock(biometricAuth.biometricLabel),
@@ -70,6 +76,12 @@ struct ProfileView: View {
                             SettingsRow(icon: "lan", title: L10n.Profile.language) {
                                 router.push(.language)
                             }
+                        }
+                        .padding(.bottom, 24)
+
+                        // Support section
+                        ProfileSectionHeader(title: L10n.Profile.Section.support)
+                        VStack(spacing: 11) {
                             SettingsRow(icon: "fav", title: L10n.Profile.feedback) {
                                 showFeedback = true
                             }
@@ -78,7 +90,12 @@ struct ProfileView: View {
                                     UIApplication.shared.open(url)
                                 }
                             }
+                        }
+                        .padding(.bottom, 24)
 
+                        // Account section
+                        ProfileSectionHeader(title: L10n.Profile.Section.account)
+                        VStack(spacing: 11) {
                             SettingsRow(
                                 icon: "logout",
                                 title: L10n.Profile.logOut,
@@ -96,44 +113,6 @@ struct ProfileView: View {
                             }
                         }
                         .padding(.bottom, 20)
-
-                        // Preferences section
-//                        ProfileSectionHeader(title: L10n.Profile.Section.preferences)
-//                        VStack(spacing: 11) {
-//                            SettingsRow(icon: "sec", title: L10n.Profile.security)
-//                            SettingsRow(icon: "lan", title: L10n.Profile.language) {
-//                                router.push(.language)
-//                            }
-//                        }
-//                        .padding(.bottom, 20)
-
-                        // Support section
-//                        ProfileSectionHeader(title: L10n.Profile.Section.support)
-//                        VStack(spacing: 11) {
-//                            SettingsRow(icon: "fav", title: L10n.Profile.feedback)
-//                            SettingsRow(icon: "Instagram", title: L10n.Profile.contactUs)
-//                        }
-//                        .padding(.bottom, 20)
-
-                        // Account section
-//                        ProfileSectionHeader(title: L10n.Profile.Section.account)
-//                        VStack(spacing: 11) {
-//                            SettingsRow(
-//                                icon: "logout",
-//                                title: L10n.Profile.logOut,
-//                                showChevron: false
-//                            ) {
-//                                showLogOutAlert = true
-//                            }
-//                            SettingsRow(
-//                                icon: "delete",
-//                                title: L10n.Profile.deleteAccount,
-//                                style: .destructive,
-//                                showChevron: false
-//                            ) {
-//                                showDeleteAlert = true
-//                            }
-//                        }
 
                         legalFooter
                             .padding(.top, 8)

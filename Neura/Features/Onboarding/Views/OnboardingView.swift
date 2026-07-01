@@ -52,7 +52,7 @@ struct OnboardingView: View {
             // Back + Skip buttons — left and right aligned
             HStack {
                 if viewModel.currentStep != .stopSearching {
-                    Button("Back", systemImage: "chevron.backward") {
+                    Button("Back", systemImage: LanguageManager.shared.backChevronSymbol) {
                         HapticManager.light()
                         viewModel.goBack()
                     }

@@ -15,21 +15,35 @@ struct CustomFolderGridCard: View {
         Self.tints[folder.colorSeed % Self.tints.count]
     }
 
+    /// The auto-created catch-all folder for documents saved without a
+    /// category or type gets a dedicated asset instead of a random symbol.
+    private var isOtherFolder: Bool {
+        folder.name.caseInsensitiveCompare(CustomFolderStore.otherFolderName) == .orderedSame
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Image(systemName: folder.iconSymbol)
-                .font(.system(size: 22, weight: .semibold))
-                .foregroundStyle(tint)
-                .frame(width: 48, height: 48)
-                .background(tint.opacity(0.15))
-                .clipShape(.rect(cornerRadius: 12))
+            if isOtherFolder {
+                // Match the built-in category cards: bare icon, no tint box.
+                Image("otherIcon")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 40, height: 40)
+            } else {
+                Image(systemName: folder.iconSymbol)
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundStyle(tint)
+                    .frame(width: 40, height: 40)
+                    .background(tint.opacity(0.15))
+                    .clipShape(.rect(cornerRadius: 12))
+            }
 
-            HStack(spacing: 4) {
+            HStack(alignment: .bottom , spacing: 4) {
                 Text(folder.name)
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(Color.textPrimary)
                     .lineLimit(2)
-                    .minimumScaleFactor(0.85)
+                    .minimumScaleFactor(0.75)
 
                 Text("(\(count))")
                     .font(.system(size: 13))

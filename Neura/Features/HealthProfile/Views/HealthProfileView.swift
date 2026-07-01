@@ -189,7 +189,7 @@ private extension HealthProfileView {
     var navBar: some View {
         ZStack {
             Button { dismiss() } label: {
-                Image(systemName: "chevron.backward")
+                Image(systemName: LanguageManager.shared.backChevronSymbol)
                     .font(.system(size: 18, weight: .medium))
                     .foregroundColor(.textPrimary)
                     .frame(width: 40, height: 40)

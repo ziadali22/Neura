@@ -80,14 +80,11 @@ struct DocumentMetadataView: View {
                     notesSection
                 }
                 .padding(.horizontal, 20)
-                .padding(.bottom, 100)
+                .padding(.bottom, 40)
             }
             .contentShape(Rectangle())
             .onTapGesture {
                 focusedField = nil
-            }
-            .safeAreaInset(edge: .bottom) {
-                saveButton
             }
             .background(Color.backgroundPrimary)
             .navigationTitle(editingDocument == nil ? L10n.Documents.Metadata.title : L10n.Common.edit)
@@ -99,6 +96,12 @@ struct DocumentMetadataView: View {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(L10n.Common.cancel) { dismiss() }
                         .foregroundColor(.textPrimary)
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(L10n.Common.save) { save() }
+                        .fontWeight(.semibold)
+                        .foregroundColor(canSave ? .accent : .textTertiary)
+                        .disabled(!canSave)
                 }
                 ToolbarItem(placement: .keyboard) {
                     HStack {
@@ -264,9 +267,16 @@ struct DocumentMetadataView: View {
                     } label: {
                         categoryChip(
                             icon: {
-                                Image(systemName: "folder.fill")
-                                    .font(.system(size: 16))
-                                    .foregroundColor(.accent)
+                                if folder.name.caseInsensitiveCompare(CustomFolderStore.otherFolderName) == .orderedSame {
+                                    Image("otherIcon")
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(width: 28, height: 28)
+                                } else {
+                                    Image(systemName: "folder.fill")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.accent)
+                                }
                             },
                             label: folder.name,
                             isSelected: metadata.customFolderId == folder.id
@@ -288,7 +298,9 @@ struct DocumentMetadataView: View {
             icon()
             Text(label)
                 .font(.bodyS)
-                .lineLimit(1)
+                .lineLimit(2)
+                .minimumScaleFactor(0.85)
+                .multilineTextAlignment(.leading)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 14)
@@ -431,27 +443,6 @@ struct DocumentMetadataView: View {
             .cornerRadius(14)
             .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
         }
-    }
-
-    // MARK: - Save Button
-
-    private var saveButton: some View {
-        Button { save() } label: {
-            Text(L10n.Documents.Metadata.save)
-                .font(.buttonL)
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 58)
-                .background(canSave ? Color.accent : Color.textTertiary)
-                .cornerRadius(18)
-        }
-        .disabled(!canSave)
-        .padding(.horizontal, 20)
-        .padding(.bottom, 16)
-        .background(
-            Color.backgroundPrimary
-                .shadow(color: .black.opacity(0.05), radius: 10, y: -5)
-        )
     }
 
     // MARK: - Helpers

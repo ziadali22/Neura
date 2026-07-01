@@ -118,9 +118,11 @@ struct DocumentListRow: View {
                     .frame(width: 36, height: 36)
                     .accessibilityHidden(true)
             } else {
-                Image(systemName: document.isPDF ? "doc.fill" : "photo.fill")
-                    .font(.system(size: 18))
-                    .foregroundStyle(iconColor)
+                // No category/type chosen — use the dedicated "Other" asset.
+                Image("otherIcon")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 36, height: 36)
                     .accessibilityHidden(true)
             }
         }

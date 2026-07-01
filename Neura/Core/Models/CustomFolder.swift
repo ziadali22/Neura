@@ -37,8 +37,13 @@ struct CustomFolder: Identifiable, Codable, Hashable {
 
 // MARK: - Custom Folder Store
 
+@MainActor
 final class CustomFolderStore: ObservableObject {
     static let shared = CustomFolderStore()
+
+    /// Name of the auto-created catch-all folder used for documents saved
+    /// without a category or custom folder.
+    static let otherFolderName = "Other"
 
     @Published private(set) var folders: [CustomFolder] = []
     private let key = "customFolders_v1"
@@ -50,6 +55,23 @@ final class CustomFolderStore: ObservableObject {
         guard !trimmed.isEmpty else { return }
         folders.append(CustomFolder(name: trimmed))
         save()
+    }
+
+    /// Returns the existing folder matching `name` (case-insensitive) or
+    /// creates and persists a new one. Used to auto-file documents that the
+    /// user saved without choosing a category or folder.
+    @discardableResult
+    func findOrCreate(name: String) -> CustomFolder {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let existing = folders.first(where: {
+            $0.name.caseInsensitiveCompare(trimmed) == .orderedSame
+        }) {
+            return existing
+        }
+        let folder = CustomFolder(name: trimmed)
+        folders.append(folder)
+        save()
+        return folder
     }
 
     func rename(_ folder: CustomFolder, to newName: String) {
@@ -65,13 +87,32 @@ final class CustomFolderStore: ObservableObject {
         save()
     }
 
+    /// Merges cloud folders into the local list (by id) after a reinstall/new
+    /// device restore and persists locally — WITHOUT re-enqueuing an upload of
+    /// data we just downloaded. Local folders win on id conflict.
+    func merge(_ cloudFolders: [CustomFolder]) {
+        var byID = Dictionary(folders.map { ($0.id, $0) }, uniquingKeysWith: { local, _ in local })
+        for folder in cloudFolders where byID[folder.id] == nil {
+            byID[folder.id] = folder
+            folders.append(folder)
+        }
+        persist()
+    }
+
     private func load() {
         guard let data = UserDefaults.standard.data(forKey: key),
               let decoded = try? JSONDecoder().decode([CustomFolder].self, from: data) else { return }
         folders = decoded
     }
 
+    /// Persists locally and queues an encrypted cloud upload so custom folders
+    /// survive an app reinstall (recovered via `performInitialRestore`).
     private func save() {
+        persist()
+        SyncQueueManager.shared.enqueueCustomFoldersUpload(folders)
+    }
+
+    private func persist() {
         guard let data = try? JSONEncoder().encode(folders) else { return }
         UserDefaults.standard.set(data, forKey: key)
     }

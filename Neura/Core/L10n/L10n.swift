@@ -35,6 +35,57 @@ enum L10n {
         static var ok: String { "common.ok".l10n() }
     }
 
+    // MARK: - Calendar
+    enum Calendar {
+        static var title: String { "calendar.title".l10n() }
+        static var promoTitle: String { "calendar.promoTitle".l10n() }
+        static var promoOpen: String { "calendar.promoOpen".l10n() }
+        static var emptyTitle: String { "calendar.emptyTitle".l10n() }
+        static var emptyMessage: String { "calendar.emptyMessage".l10n() }
+        static var addFirstEntry: String { "calendar.addFirstEntry".l10n() }
+        static var addEntry: String { "calendar.addEntry".l10n() }
+        static var agendaTitle: String { "calendar.agendaTitle".l10n() }
+        static var next: String { "calendar.next".l10n() }
+        static var today: String { "calendar.today".l10n() }
+        static var emptyHint: String { "calendar.emptyHint".l10n() }
+        static var todayEmptyHint: String { "calendar.todayEmptyHint".l10n() }
+        static var addEvent: String { "calendar.addEvent".l10n() }
+        static var newEntryTitle: String { "calendar.newEntryTitle".l10n() }
+        static var editEntryTitle: String { "calendar.editEntryTitle".l10n() }
+        static var fieldType: String { "calendar.field.type".l10n() }
+        static var fieldTitle: String { "calendar.field.title".l10n() }
+        static var fieldTitlePlaceholder: String { "calendar.field.titlePlaceholder".l10n() }
+        static var fieldDate: String { "calendar.field.date".l10n() }
+        static var fieldTime: String { "calendar.field.time".l10n() }
+        static var fieldRepeat: String { "calendar.field.repeat".l10n() }
+        static var fieldEndDate: String { "calendar.field.endDate".l10n() }
+        static var fieldReminder: String { "calendar.field.reminder".l10n() }
+        static var fieldNotes: String { "calendar.field.notes".l10n() }
+        static var fieldSpecialization: String { "calendar.field.specialization".l10n() }
+        static var fieldDoctor: String { "calendar.field.doctor".l10n() }
+        static var fieldDoctorPlaceholder: String { "calendar.field.doctorPlaceholder".l10n() }
+        static var reminderBody30: String { "calendar.reminder.body30".l10n() }
+        static var reminderBody15: String { "calendar.reminder.body15".l10n() }
+        static var reminderBodyWeek: String { "calendar.reminder.bodyWeek".l10n() }
+        static var reminderBody2Days: String { "calendar.reminder.body2Days".l10n() }
+        static var reminderBody2Hours: String { "calendar.reminder.body2Hours".l10n() }
+        static var reminderBodyMedTime: String { "calendar.reminder.bodyMedTime".l10n() }
+        static var reminderBodyMedFollowUp: String { "calendar.reminder.bodyMedFollowUp".l10n() }
+        static var reminderAppt: String { "calendar.reminder.appt".l10n() }
+        static var reminderApptWithSpec: String { "calendar.reminder.apptWithSpec".l10n() }
+        static var reminderApptPlain: String { "calendar.reminder.apptPlain".l10n() }
+        static var reminderInfo: String { "calendar.reminderInfo".l10n() }
+        static var reminderInfoRecurring: String { "calendar.reminderInfoRecurring".l10n() }
+        static var a11yHasEvents: String { "calendar.a11yHasEvents".l10n() }
+        static var fieldLinkDocument: String { "calendar.field.linkDocument".l10n() }
+        static var noDocumentLinked: String { "calendar.noDocumentLinked".l10n() }
+        static var openDocument: String { "calendar.openDocument".l10n() }
+        static var deleteEntry: String { "calendar.deleteEntry".l10n() }
+        static var deleteConfirmTitle: String { "calendar.deleteConfirmTitle".l10n() }
+        static var deleteConfirmMessage: String { "calendar.deleteConfirmMessage".l10n() }
+        static var fieldAllDay: String { "calendar.field.allDay".l10n() }
+    }
+
     // MARK: - Onboarding
     enum Onboarding {
         enum Welcome {
@@ -488,6 +539,7 @@ enum L10n {
         static var insuranceStatus: String { "healthProfile.insuranceStatus".l10n() }
         static var bloodType: String { "healthProfile.bloodType".l10n() }
         static var emergencyContact: String { "healthProfile.emergencyContact".l10n() }
+        static var chooseFromContacts: String { "healthProfile.chooseFromContacts".l10n() }
         static var addName: String { "healthProfile.addName".l10n() }
         static var addDate: String { "healthProfile.addDate".l10n() }
         static var addGender: String { "healthProfile.addGender".l10n() }

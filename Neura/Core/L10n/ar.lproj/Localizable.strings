@@ -552,3 +552,63 @@
 // MARK: - Coachmark
 "coachmark.documentUpload.title" = "أضف وثيقتك الأولى";
 "coachmark.documentUpload.subtitle" = "اضغط + لمسح ضوئي أو رفع صورة أو استيراد ملف.";
+
+// MARK: - Calendar
+"calendar.title" = "التقويم";
+"calendar.promoTitle" = "تقويمك الصحي";
+"calendar.promoOpen" = "فتح";
+"calendar.emptyTitle" = "ابدأ سجلك الصحي";
+"calendar.emptyMessage" = "تابع الأدوية والمواعيد والأحداث الطبية في مكان واحد.";
+"calendar.addFirstEntry" = "أضف أول إدخال";
+"calendar.addEntry" = "إضافة إدخال";
+"calendar.agendaTitle" = "الجدول الزمني";
+"calendar.newEntryTitle" = "إدخال جديد";
+"calendar.editEntryTitle" = "تعديل الإدخال";
+"calendar.field.type" = "النوع";
+"calendar.field.title" = "العنوان";
+"calendar.field.titlePlaceholder" = "مثال: فيتامين د";
+"calendar.field.date" = "التاريخ";
+"calendar.field.time" = "الوقت";
+"calendar.field.repeat" = "التكرار";
+"calendar.field.endDate" = "ينتهي";
+"calendar.field.reminder" = "تذكير";
+"calendar.field.notes" = "ملاحظات";
+"calendar.field.linkDocument" = "ربط مستند";
+"calendar.noDocumentLinked" = "لا شيء";
+"calendar.deleteEntry" = "حذف الإدخال";
+"calendar.deleteConfirmTitle" = "حذف هذا الإدخال؟";
+"calendar.deleteConfirmMessage" = "لا يمكن التراجع عن هذا.";
+"calendar.field.allDay" = "طوال اليوم";
+"calendar.recurrence.none" = "لا يتكرر";
+"calendar.recurrence.daily" = "يوميًا";
+"calendar.recurrence.weekly" = "أسبوعيًا";
+"calendar.recurrence.monthly" = "شهريًا";
+"calendar.reminder.atTime" = "وقت الحدث";
+"calendar.reminder.min15" = "قبل 15 دقيقة";
+"calendar.reminder.hour1" = "قبل ساعة";
+"calendar.reminder.day1" = "قبل يوم";
+"calendar.openDocument" = "فتح المستند";
+"calendar.next" = "التالي";
+"calendar.field.specialization" = "التخصص";
+"calendar.field.doctor" = "الطبيب";
+"calendar.field.doctorPlaceholder" = "مثال: د. جيمي براون";
+"calendar.reminder.body30" = "يبدأ خلال 30 دقيقة";
+"calendar.reminder.body15" = "يبدأ خلال 15 دقيقة";
+"calendar.reminder.bodyWeek" = "قادم خلال أسبوع";
+"calendar.reminder.body2Days" = "قادم خلال يومين";
+"calendar.reminder.body2Hours" = "قادم خلال ساعتين";
+"calendar.reminder.bodyMedTime" = "حان وقت تناول دوائك";
+"calendar.reminder.bodyMedFollowUp" = "هل تناولت دواءك؟";
+"calendar.reminder.appt" = "مرحبًا، موعد مع %@";
+"calendar.reminder.apptWithSpec" = "مرحبًا، موعد مع %@ (%@)";
+"calendar.reminder.apptPlain" = "مرحبًا، %@";
+"calendar.reminderInfo" = "سيتم تذكيرك قبل المواعيد بأسبوع ويومين وساعتين، وقبل الأحداث الأخرى بـ 30 و15 دقيقة.";
+"calendar.today" = "اليوم";
+"calendar.emptyHint" = "اضغط على أي يوم لإضافة حدث.";
+"calendar.todayEmptyHint" = "لا شيء مخطط لهذا اليوم — أضف موعدًا أو دواءً أو حدثًا طبيًا لتبقى على المسار.";
+"calendar.addEvent" = "إضافة";
+"calendar.a11yHasEvents" = "يحتوي على أحداث";
+"calendar.reminderInfoRecurring" = "تذكّرك المواعيد قبل كل موعد قادم بأسبوع ويومين وساعتين؛ والأحداث الأخرى بـ 30 و15 دقيقة.";
+
+// MARK: - Health Profile extras
+"healthProfile.chooseFromContacts" = "اختر من جهات الاتصال";

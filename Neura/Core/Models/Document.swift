@@ -1,6 +1,7 @@
 import Foundation
 import PDFKit
 import SwiftUI
+import L10n_swift
 
 // MARK: - Document Type
 
@@ -116,6 +117,11 @@ enum MedicalSpecialization: String, Codable, CaseIterable, Identifiable {
     case other           = "Other"
 
     var id: String { rawValue }
+
+    /// Resolved via L10n_swift so it follows the in-app language toggle.
+    var localizedName: String {
+        rawValue.l10n()
+    }
 
     var icon: String {
         switch self {

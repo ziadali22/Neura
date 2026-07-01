@@ -37,6 +37,7 @@ struct LanguagePickerView: View {
                         .padding(.vertical, 16)
                         .background(Color.surfaceWhite)
                         .cornerRadius(14)
+                        .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 4)
                     }
                     .buttonStyle(ScaleButtonStyle())
                 }

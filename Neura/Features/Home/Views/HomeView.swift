@@ -18,6 +18,11 @@ struct HomeView: View {
     @State private var showBackgroundPicker = false
     @State private var selectedDocument: Document?
     @State private var cardBackground: CardBackground = CardBackground.saved()
+    @AppStorage("hasSeenCalendarPromo") private var hasSeenCalendarPromo = false
+    /// Shared with DashboardView — the calendar promo waits until the
+    /// plus-button coach mark has been seen before it appears.
+    @AppStorage("hasSeenDocumentCoachmark") private var hasSeenCoachmark = false
+    @State private var showCalendarPromo = false
 
     private var greeting: String {
         let hour = Calendar.current.component(.hour, from: Date())
@@ -47,14 +52,42 @@ struct HomeView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     // MARK: - Greeting
-                    Text(greeting)
-                        .font(.displaySemi)
-                        .foregroundStyle(Color.textPrimary)
-                        .padding(.horizontal, 20)
-                        .padding(.top, 24)
-                        .opacity(greetingAppear ? 1 : 0)
-                        .offset(y: greetingAppear ? 0 : -20)
-                        .animation(.spring(response: 0.6, dampingFraction: 0.8), value: greetingAppear)
+                    HStack(alignment: .top) {
+                        Text(greeting)
+                            .font(.displaySemi)
+                            .foregroundStyle(Color.textPrimary)
+                        Spacer()
+                        Button { router.push(.calendar) } label: {
+                            
+                            GlassIconButton(size: 50) {
+
+                                Image("calendar-date1")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 28, height: 28)
+
+                            }
+                        }
+                    }
+                    .overlay(alignment: .topTrailing) {
+                        if showCalendarPromo {
+                            CalendarPromoPopover(
+                                onOpen: {
+                                    dismissCalendarPromo()
+                                    router.push(.calendar)
+                                },
+                                onDismiss: { dismissCalendarPromo() }
+                            )
+                            .offset(x: 0, y: 48)
+                            .transition(.scale(scale: 0.9).combined(with: .opacity))
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 24)
+                    .opacity(greetingAppear ? 1 : 0)
+                    .offset(y: greetingAppear ? 0 : -20)
+                    .animation(.spring(response: 0.6, dampingFraction: 0.8), value: greetingAppear)
+                    .zIndex(1)
 
                     // MARK: - Upload Limit Banner
                     // Shown for all free users from install onward; the banner itself
@@ -122,6 +155,8 @@ struct HomeView: View {
                     HealthProfileDetailView()
                 case .emergencyCard:
                     EmergencyCardView()
+                case .calendar:
+                    CalendarView()
                 }
             }
             .sheet(isPresented: $showShareSheet) {
@@ -159,6 +194,11 @@ struct HomeView: View {
             .onAppear {
                 loadRecentDocuments()
                 Task { await updateChecker.checkForUpdate() }
+                maybeShowCalendarPromo()
+            }
+            .onChange(of: hasSeenCoachmark) { _, seen in
+                // The coach mark just got dismissed — now surface the promo.
+                if seen { maybeShowCalendarPromo() }
             }
             .onChange(of: router.path) {
                 if router.path.isEmpty {
@@ -169,6 +209,9 @@ struct HomeView: View {
             .onReceive(NotificationCenter.default.publisher(for: .documentsRestored)) { _ in
                 loadRecentDocuments()
             }
+            .onReceive(NotificationCenter.default.publisher(for: .documentsChanged)) { _ in
+                loadRecentDocuments()
+            }
             .onReceive(NotificationCenter.default.publisher(for: .healthProfileRestored)) { _ in
                 healthVM.reload()
             }
@@ -176,6 +219,20 @@ struct HomeView: View {
     }
 
     // MARK: - Actions
+
+    /// Shows the calendar promo once — but only after the plus-button coach
+    /// mark has been seen, so the two onboarding hints don't overlap.
+    private func maybeShowCalendarPromo() {
+        guard hasSeenCoachmark, !hasSeenCalendarPromo, !showCalendarPromo else { return }
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.8).delay(1.0)) {
+            showCalendarPromo = true
+        }
+    }
+
+    private func dismissCalendarPromo() {
+        withAnimation(.easeOut(duration: 0.2)) { showCalendarPromo = false }
+        hasSeenCalendarPromo = true
+    }
 
     private func authenticateAndOpenProfile() {
         guard biometricAuth.isBiometricLockEnabled else {

@@ -552,3 +552,63 @@
 // MARK: - Coachmark
 "coachmark.documentUpload.title" = "Adaugă primul tău document";
 "coachmark.documentUpload.subtitle" = "Apasă + pentru a scana, a încărca o fotografie sau a importa un fișier.";
+
+// MARK: - Calendar
+"calendar.title" = "Calendar";
+"calendar.promoTitle" = "Calendarul tău de sănătate";
+"calendar.promoOpen" = "Deschide";
+"calendar.emptyTitle" = "Începe cronologia ta de sănătate";
+"calendar.emptyMessage" = "Urmărește medicamente, programări și evenimente medicale într-un singur loc.";
+"calendar.addFirstEntry" = "Adaugă prima înregistrare";
+"calendar.addEntry" = "Adaugă înregistrare";
+"calendar.agendaTitle" = "Cronologie";
+"calendar.newEntryTitle" = "Înregistrare nouă";
+"calendar.editEntryTitle" = "Editează înregistrarea";
+"calendar.field.type" = "Tip";
+"calendar.field.title" = "Titlu";
+"calendar.field.titlePlaceholder" = "ex. Vitamina D";
+"calendar.field.date" = "Data";
+"calendar.field.time" = "Ora";
+"calendar.field.repeat" = "Repetare";
+"calendar.field.endDate" = "Se termină";
+"calendar.field.reminder" = "Memento";
+"calendar.field.notes" = "Note";
+"calendar.field.linkDocument" = "Atașează un document";
+"calendar.noDocumentLinked" = "Niciunul";
+"calendar.deleteEntry" = "Șterge înregistrarea";
+"calendar.deleteConfirmTitle" = "Ștergi această înregistrare?";
+"calendar.deleteConfirmMessage" = "Această acțiune nu poate fi anulată.";
+"calendar.field.allDay" = "Toată ziua";
+"calendar.recurrence.none" = "Nu se repetă";
+"calendar.recurrence.daily" = "Zilnic";
+"calendar.recurrence.weekly" = "Săptămânal";
+"calendar.recurrence.monthly" = "Lunar";
+"calendar.reminder.atTime" = "La ora evenimentului";
+"calendar.reminder.min15" = "Cu 15 minute înainte";
+"calendar.reminder.hour1" = "Cu 1 oră înainte";
+"calendar.reminder.day1" = "Cu 1 zi înainte";
+"calendar.openDocument" = "Deschide documentul";
+"calendar.next" = "Următor";
+"calendar.field.specialization" = "Specializare";
+"calendar.field.doctor" = "Medic";
+"calendar.field.doctorPlaceholder" = "ex. Dr. Jamie Brown";
+"calendar.reminder.body30" = "Începe în 30 de minute";
+"calendar.reminder.body15" = "Începe în 15 minute";
+"calendar.reminder.bodyWeek" = "Urmează în 1 săptămână";
+"calendar.reminder.body2Days" = "Urmează în 2 zile";
+"calendar.reminder.body2Hours" = "Urmează în 2 ore";
+"calendar.reminder.bodyMedTime" = "E timpul să îți iei medicamentul";
+"calendar.reminder.bodyMedFollowUp" = "Ți-ai luat medicamentul?";
+"calendar.reminder.appt" = "Salut, programare la %@";
+"calendar.reminder.apptWithSpec" = "Salut, programare la %@ (%@)";
+"calendar.reminder.apptPlain" = "Salut, %@";
+"calendar.reminderInfo" = "Vei fi notificat cu 1 săptămână, 2 zile și 2 ore înainte de programări, și cu 30 și 15 minute înainte de alte evenimente.";
+"calendar.today" = "Astăzi";
+"calendar.emptyHint" = "Atinge orice zi pentru a adăuga un eveniment.";
+"calendar.todayEmptyHint" = "Nimic planificat pentru azi — adaugă o programare, un medicament sau un eveniment medical ca să rămâi pe drumul cel bun.";
+"calendar.addEvent" = "Adaugă";
+"calendar.a11yHasEvents" = "Are evenimente";
+"calendar.reminderInfoRecurring" = "Programările te anunță cu 1 săptămână, 2 zile și 2 ore înainte de fiecare apariție viitoare; alte evenimente cu 30 și 15 minute înainte.";
+
+// MARK: - Health Profile extras
+"healthProfile.chooseFromContacts" = "Alege din Contacte";

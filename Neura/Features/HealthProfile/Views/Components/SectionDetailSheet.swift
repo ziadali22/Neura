@@ -6,6 +6,7 @@ struct SectionDetailSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showAddEntry = false
     @State private var editingEntry: HealthProfile.HealthSection.Entry?
+    @State private var emptyStateAppear = false
 
     private var section: HealthProfile.HealthSection? {
         viewModel.profile.sections.first { $0.id == sectionID }
@@ -72,7 +73,7 @@ private extension SectionDetailSheet {
     var navBar: some View {
         ZStack {
             Button { dismiss() } label: {
-                Image(systemName: "chevron.backward")
+                Image(systemName: LanguageManager.shared.backChevronSymbol)
                     .font(.system(size: 18, weight: .medium))
                     .foregroundColor(.textPrimary)
                     .frame(width: 40, height: 40)
@@ -95,21 +96,34 @@ private extension SectionDetailSheet {
         VStack(spacing: 12) {
             Spacer()
 
-            Image(systemName: "tray")
+            Image("search")
                 .font(.system(size: 44))
                 .foregroundColor(.textTertiary.opacity(0.5))
+                .scaleEffect(emptyStateAppear ? 1 : 0.8)
+                .opacity(emptyStateAppear ? 1 : 0)
+                .animation(.spring(response: 0.5, dampingFraction: 0.7), value: emptyStateAppear)
 
             Text(L10n.HealthProfile.noEntries)
                 .font(.headingS)
                 .foregroundColor(.textPrimary)
+                .opacity(emptyStateAppear ? 1 : 0)
+                .offset(y: emptyStateAppear ? 0 : 8)
+                .animation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.08), value: emptyStateAppear)
 
             Text(L10n.HealthProfile.noEntriesSubtitle)
                 .font(.bodyS)
                 .foregroundColor(.textTertiary)
+                .opacity(emptyStateAppear ? 1 : 0)
+                .offset(y: emptyStateAppear ? 0 : 8)
+                .animation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.16), value: emptyStateAppear)
 
             Spacer()
         }
         .frame(maxWidth: .infinity)
+        .onAppear {
+            guard !emptyStateAppear else { return }
+            emptyStateAppear = true
+        }
     }
 
     func entryCard(_ entry: HealthProfile.HealthSection.Entry) -> some View {

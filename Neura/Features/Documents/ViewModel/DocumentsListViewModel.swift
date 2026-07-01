@@ -208,6 +208,40 @@ final class DocumentsListViewModel: ObservableObject {
         var loaded = fileManager.loadMetadata()
         loaded = loaded.filter { fileManager.fileExists(for: $0) }
         documents = loaded.sorted { $0.createdAt > $1.createdAt }
+        reconcileOrphanFolders()
+    }
+
+    /// Heals documents whose folder was lost (e.g. an app reinstall before
+    /// folder sync existed): a doc with no category whose folder-UUID tag no
+    /// longer matches any folder would render in no folder card at all. We file
+    /// every such doc into the canonical "Other" folder and re-tag it to that
+    /// folder's id. Idempotent — once a doc matches "Other" it's skipped, so
+    /// this stops mutating after the first heal and never churns on relaunch.
+    private func reconcileOrphanFolders() {
+        let existingFolderIDs = Set(CustomFolderStore.shared.folders.map { $0.id.uuidString })
+
+        func isInExistingFolder(_ doc: Document) -> Bool {
+            doc.tags?.contains { existingFolderIDs.contains($0) } == true
+        }
+
+        // A doc is "orphaned" when it has no category and isn't a member of any
+        // folder that still exists. Categorised docs always show under their
+        // category, so they can never go missing and are left untouched.
+        let orphans = documents.filter { $0.category == nil && !isInExistingFolder($0) }
+        guard !orphans.isEmpty else { return }
+
+        let other = CustomFolderStore.shared.findOrCreate(name: CustomFolderStore.otherFolderName)
+        let otherTag = other.id.uuidString
+
+        for orphan in orphans {
+            guard let index = documents.firstIndex(where: { $0.id == orphan.id }) else { continue }
+            // Drop any stale folder-UUID tags (orphan references), keep free-text
+            // tags, then point the doc at the current "Other" folder.
+            let freeTextTags = (documents[index].tags ?? []).filter { UUID(uuidString: $0) == nil }
+            documents[index].tags = freeTextTags + [otherTag]
+            SyncQueueManager.shared.enqueueMetadataUpdate(documents[index])
+        }
+        persistMetadata()
     }
 
     // MARK: - Add Document (source picker)
@@ -335,8 +369,22 @@ final class DocumentsListViewModel: ObservableObject {
 
     // MARK: - Save Document with Metadata
 
+    /// Guarantees every saved document lands in a folder. The Folders grid is
+    /// organised by category / custom folder, so a document saved with neither
+    /// would vanish from it. When both are empty we file the document under an
+    /// auto-created "Other" custom folder instead.
+    private func resolveFolder(for metadata: DocumentMetadata) -> DocumentMetadata {
+        guard metadata.category == nil, metadata.customFolderId == nil else { return metadata }
+        var resolved = metadata
+        resolved.customFolderId = CustomFolderStore.shared
+            .findOrCreate(name: CustomFolderStore.otherFolderName).id
+        return resolved
+    }
+
     func saveDocument(metadata: DocumentMetadata, preview: DocumentPreviewContent) {
         isProcessing = true
+
+        let metadata = resolveFolder(for: metadata)
 
         Task.detached(priority: .userInitiated) { [weak self] in
             guard let self else { return }
@@ -415,6 +463,8 @@ final class DocumentsListViewModel: ObservableObject {
                         preview: DocumentPreviewContent) {
         guard let index = documents.firstIndex(where: { $0.id == document.id }) else { return }
         var updated = documents[index]
+
+        let metadata = resolveFolder(for: metadata)
 
         // Apply metadata.
         updated.name = metadata.name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -495,6 +545,10 @@ final class DocumentsListViewModel: ObservableObject {
     private func persistMetadata() {
         do {
             try fileManager.saveMetadata(documents)
+            // Broadcast so other screens with a cached snapshot (Home's recent
+            // list) reload — they own a separate view model instance and would
+            // otherwise stay stale after a mutation made on a different tab.
+            NotificationCenter.default.post(name: .documentsChanged, object: nil)
         } catch {
             errorMessage = "Failed to save metadata: \(error.localizedDescription)"
         }
