@@ -42,7 +42,7 @@ enum AnalyticsEvent: String {
 }
 
 enum AnalyticsProperty: String {
-    case source, category, folder, count, tab, action, enabled, language
+    case source, category, count, tab, action, enabled, language
 }
 ```
 
@@ -82,34 +82,35 @@ Naming convention: snake_case, past-tense for completed actions (`_completed`, `
 | `language_changed` | language picker selection | `language: String` |
 | `subscription_screen_viewed` | tapped from profile | `source: "profile"` |
 
-### Docs (`Features/Documents/Views/DocsView.swift`, `DocumentsListViewModel.swift`)
+### Docs (`Features/Documents/Views/DocsView.swift`, `DocumentsListViewModel.swift`, `Components/DocsFoldersGrid.swift`, `Components/DocumentViewerView.swift`)
 | Event | Trigger | Properties |
 |---|---|---|
-| `docs_viewed` | `.onAppear` | — |
-| `document_deleted` | `deleteDocument()` | `category: String`, `source` |
-| `documents_bulk_deleted` | `deleteSelectedDocuments()` | `count: Int` |
-| `document_scan_started` | `scanFromFolder()` / scan tab entry | `source: String` |
-| `add_document_sheet_opened` | add sheet opens | — |
-| `category_filter_selected` | category picker changes | `category: String` |
-| `folder_filter_selected` | folder picker changes | `folder_filter_active: Bool` (no folder name) |
-| `share_document_tapped` | share menu item tapped | `category: String` |
+| `docs_viewed` | `DocsView.onAppear` | — |
+| `document_deleted` | `DocumentsListViewModel.deleteDocument(_:)` | `category: String` (document's `DocumentCategory` rawValue, or `"none"`) |
+| `documents_bulk_deleted` | `DocsView.deleteSelectedDocuments()` | `count: Int` |
+| `add_document_sheet_opened` | `DocumentsListViewModel.showAddOptions()`, only when it reaches `showSourcePicker = true` (not the paywall branch) | — |
+| `document_scan_started` | `DocumentsListViewModel.startScanning()` | — |
+| `category_opened` | tapping a built-in category card (`NavigationLink(value: category)` in `DocsFoldersGrid`) | `category: String` (`DocumentCategory` rawValue) |
+| `folder_opened` | tapping a custom folder card (`NavigationLink(value: folder)` in `DocsFoldersGrid`) | — (no folder name — user-authored text) |
+| `document_share_tapped` | `DocumentViewerView.shareDocument()` (the standard iOS share sheet action; QR share is separately Pro-gated and still blocked on Firebase per `CLAUDE.md`, not instrumented here) | `category: String` (or `"none"`) |
 
-No document names, dates, or health content in any property — category/type enums only.
+No document names, dates, folder names, or health content in any property — category/type enums only.
 
-### Dashboard (`Features/Dashboard/Views/DashboardView.swift`, `CustomTabBar.swift`, `FloatingDocumentMenu.swift`)
+### Dashboard (`Features/Dashboard/Views/Components/CustomTabBar.swift`)
+`FloatingDocumentMenu.swift` is dead code (never instantiated outside its own preview — confirmed via grep) and is NOT touched. The live tab-switch and add-menu UI is entirely in `CustomTabBar.swift`.
 | Event | Trigger | Properties |
 |---|---|---|
-| `tab_switched` | tab bar selection changes | `tab: String` |
-| `floating_menu_opened` | + button tapped | — |
-| `floating_menu_action_selected` | scan/photo/file chosen | `action: String` |
+| `tab_switched` | `TabSegmentedControl.segment(_:)` button action, when `selectedTab` actually changes | `tab: String` (`"profile"`/`"home"`/`"docs"`, from `AppCoordinator.Tab`) |
+| `floating_menu_opened` | `CustomTabBar.fab`, only the `canUpload` branch (menu actually opens; the `onPaywallNeeded` branch is a separate, already-implicit case) | — |
+| `floating_menu_action_selected` | `CustomTabBar.fire(_:)` | `action: String` (`"scan"`/`"photo"`/`"file"`, from `AppCoordinator.AddDocumentAction`) |
 
-### HealthProfile (`Features/HealthProfile/`)
+### HealthProfile (`Features/HealthProfile/Views/HealthProfileDetailView.swift`, `ViewModel/HealthProfileViewModel.swift`)
 | Event | Trigger | Properties |
 |---|---|---|
-| `health_profile_viewed` | detail view `.onAppear` | — |
-| `health_profile_saved` | save action completes | `fields_updated_count: Int` |
+| `health_profile_viewed` | `HealthProfileDetailView.onAppear` | — |
+| `health_profile_saved` | `HealthProfileViewModel.save()` — the single private chokepoint every mutation (`updateGeneralField`, `addEntry`, `removeSection`, etc.) already funnels through | — |
 
-No field names or values — only a count of how many fields changed.
+`fields_updated_count` from the earlier draft is dropped: `save()` has no visibility into which/how many fields changed without threading extra state through ~10 call sites for no clear analytical payoff (YAGNI). Just knowing a save happened is the useful signal.
 
 ## Testing
 
