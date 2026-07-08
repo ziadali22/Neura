@@ -40,6 +40,12 @@ final class AnalyticsManager {
         Mixpanel.mainInstance().track(event: event, properties: properties)
     }
 
+    /// Tracks an event using a centrally-defined name. Prefer this over the
+    /// string overload above for any event whose name isn't dynamically built.
+    func track(_ event: AnalyticsEvent, properties: [String: MixpanelType]? = nil) {
+        track(event.rawValue, properties: properties)
+    }
+
     /// Associates subsequent events with a stable user identifier (e.g. after sign-in).
     func identify(_ distinctId: String) {
         guard isInitialized else { return }
