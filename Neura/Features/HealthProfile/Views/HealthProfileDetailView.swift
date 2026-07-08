@@ -28,6 +28,7 @@ struct HealthProfileDetailView: View {
             }
         }
         .background(Color.backgroundPrimary)
+        .onAppear { AnalyticsManager.shared.track(.healthProfileViewed) }
         .overlay(alignment: .bottom) {
             HStack(spacing: 12) {
                 reportButton

@@ -375,6 +375,7 @@ final class HealthProfileViewModel: ObservableObject {
         }
         SyncQueueManager.shared.enqueueProfileUpload(profile)
         updateNotifications()
+        AnalyticsManager.shared.track(.healthProfileSaved)
     }
 
     private func updateNotifications() {
