@@ -90,18 +90,16 @@ struct HomeView: View {
                     .zIndex(1)
 
                     // MARK: - Upload Limit Banner
-                    // Shown for all free users from install onward; the banner itself
-                    // swaps to an upsell once the upload limit is reached.
-                    if !subscriptionManager.isPro {
-                        UploadLimitBanner(
-                            subscriptionManager: subscriptionManager,
-                            onTap: { showPaywall = true }
-                        )
-                        .padding(.horizontal, 24)
-                        .opacity(bannerAppear ? 1 : 0)
-                        .offset(y: bannerAppear ? 0 : -10)
-                        .animation(.spring(response: 0.6, dampingFraction: 0.8), value: bannerAppear)
-                    }
+//                    if !subscriptionManager.isPro {
+//                        UploadLimitBanner(
+//                            subscriptionManager: subscriptionManager,
+//                            onTap: { showPaywall = true }
+//                        )
+//                        .padding(.horizontal, 24)
+//                        .opacity(bannerAppear ? 1 : 0)
+//                        .offset(y: bannerAppear ? 0 : -10)
+//                        .animation(.spring(response: 0.6, dampingFraction: 0.8), value: bannerAppear)
+//                    }
 
                     // MARK: - Profile Cards
                     VStack(alignment: .leading, spacing: 16) {
@@ -109,9 +107,18 @@ struct HomeView: View {
                             name: healthVM.profile.generalData.fullName,
                             location: UserDefaults.standard.string(forKey: "user_location") ?? "",
                             background: cardBackground,
-                            onShareTap: { showShareSheet = true },
-                            onCustomizeTap: { showBackgroundPicker = true },
-                            onTap: { authenticateAndOpenProfile() }
+                            onShareTap: {
+                                AnalyticsManager.shared.track(.shareHealthProfileTapped, properties: ["source": "home"])
+                                showShareSheet = true
+                            },
+                            onCustomizeTap: {
+                                AnalyticsManager.shared.track(.backgroundPickerOpened)
+                                showBackgroundPicker = true
+                            },
+                            onTap: {
+                                AnalyticsManager.shared.track(.secureProfileCardTapped)
+                                authenticateAndOpenProfile()
+                            }
                         )
                         .scaleEffect(profileCardAppear ? 1 : 0.95)
                         .opacity(profileCardAppear ? 1 : 0)
@@ -119,7 +126,10 @@ struct HomeView: View {
 
                         CompleteProfileCard(
                             generalData: healthVM.profile.generalData,
-                            onTap: { router.push(.healthProfile) }
+                            onTap: {
+                                AnalyticsManager.shared.track(.completeProfileCardTapped)
+                                router.push(.healthProfile)
+                            }
                         )
                             .offset(y: completeCardAppear ? 0 : 30)
                             .opacity(completeCardAppear ? 1 : 0)
@@ -128,7 +138,10 @@ struct HomeView: View {
                     .padding(.horizontal, 20)
 
                     // MARK: - Emergency Card
-                    EmergencyCardBanner { router.push(.emergencyCard) }
+                    EmergencyCardBanner {
+                        AnalyticsManager.shared.track(.emergencyCardTapped)
+                        router.push(.emergencyCard)
+                    }
                         .padding(.horizontal, 20)
                         .opacity(completeCardAppear ? 1 : 0)
                         .offset(y: completeCardAppear ? 0 : 20)
@@ -176,6 +189,7 @@ struct HomeView: View {
                 AppUpdateSheet(update: update)
                     .presentationDetents([.medium])
                     .presentationCornerRadius(32)
+                    .onAppear { AnalyticsManager.shared.track(.appUpdatePromptShown) }
             }
             .sheet(item: $selectedDocument) { document in
                 NavigationStack {
@@ -192,6 +206,7 @@ struct HomeView: View {
                 }
             }
             .onAppear {
+                AnalyticsManager.shared.track(.homeViewed)
                 loadRecentDocuments()
                 Task { await updateChecker.checkForUpdate() }
                 maybeShowCalendarPromo()
