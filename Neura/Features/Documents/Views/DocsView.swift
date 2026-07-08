@@ -42,11 +42,12 @@ struct DocsView: View {
         }
         .photosPicker(
             isPresented: $viewModel.showPhotoPicker,
-            selection: $viewModel.selectedPhotoItem,
+            selection: $viewModel.selectedPhotoItems,
+            maxSelectionCount: nil,
             matching: .images
         )
-        .onChange(of: viewModel.selectedPhotoItem) { _, item in
-            viewModel.handlePhotoSelection(item)
+        .onChange(of: viewModel.selectedPhotoItems) { _, items in
+            viewModel.handlePhotoSelection(items)
         }
         .fileImporter(
             isPresented: $viewModel.showFileImporter,
@@ -111,8 +112,7 @@ struct DocsView: View {
                 let trimmed = newFolderName.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard !trimmed.isEmpty else { return }
                 folderStore.add(name: trimmed)
-                AnalyticsManager.shared.track("folder_created", properties: [
-                    "folder_name": trimmed,
+                AnalyticsManager.shared.track(.folderCreated, properties: [
                     "total_folders": folderStore.folders.count
                 ])
             }
@@ -126,12 +126,16 @@ struct DocsView: View {
                 coordinator.pendingAddAction = nil
                 handlePendingAction(action)
             }
+            openPendingDocumentIfNeeded()
         }
         .onChange(of: coordinator.pendingAddAction) { _, action in
             if let action {
                 coordinator.pendingAddAction = nil
                 handlePendingAction(action)
             }
+        }
+        .onChange(of: coordinator.pendingDocumentID) { _, id in
+            if id != nil { openPendingDocumentIfNeeded() }
         }
         .onChange(of: isSelecting) { _, selecting in
             withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
@@ -319,6 +323,15 @@ struct DocsView: View {
         case .photo: viewModel.startPhotoUpload()
         case .file:  viewModel.startFileImport()
         }
+    }
+
+    /// Pushes the document a tapped reminder notification pointed at, if any —
+    /// mirrors `handlePendingAction`'s consumption of `coordinator.pendingAddAction`.
+    private func openPendingDocumentIfNeeded() {
+        guard let id = coordinator.pendingDocumentID else { return }
+        coordinator.pendingDocumentID = nil
+        guard let document = viewModel.documents.first(where: { $0.id == id }) else { return }
+        navigationPath.append(document)
     }
 
     private func shareSelectedDocuments() {

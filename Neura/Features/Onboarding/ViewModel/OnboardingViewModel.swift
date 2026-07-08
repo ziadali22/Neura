@@ -201,7 +201,7 @@ final class OnboardingViewModel: ObservableObject {
                 if isReturningUser {
                     finalize()
                 } else {
-                    AnalyticsManager.shared.track("sign_up_completed", properties: ["method": "apple"])
+                    AnalyticsManager.shared.track(.signUpCompleted, properties: ["method": "apple"])
                     advance()
                 }
             } catch {
@@ -223,7 +223,7 @@ final class OnboardingViewModel: ObservableObject {
                 if isReturningUser {
                     finalize()
                 } else {
-                    AnalyticsManager.shared.track("sign_up_completed", properties: ["method": "google"])
+                    AnalyticsManager.shared.track(.signUpCompleted, properties: ["method": "google"])
                     advance()
                 }
             } catch {

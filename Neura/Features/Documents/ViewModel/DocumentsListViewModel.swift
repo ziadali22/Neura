@@ -45,7 +45,7 @@ final class DocumentsListViewModel: ObservableObject {
 
     // Photo picker
     @Published var showPhotoPicker = false
-    @Published var selectedPhotoItem: PhotosPickerItem?
+    @Published var selectedPhotoItems: [PhotosPickerItem] = []
     @Published var showPhotoPermissionAlert = false
 
     // File importer
@@ -335,15 +335,20 @@ final class DocumentsListViewModel: ObservableObject {
 
     // MARK: - Handle Photo Selection
 
-    func handlePhotoSelection(_ item: PhotosPickerItem?) {
-        guard let item else { return }
+    func handlePhotoSelection(_ items: [PhotosPickerItem]) {
+        guard !items.isEmpty else { return }
 
         Task {
             do {
-                guard let data = try await item.loadTransferable(type: Data.self) else { return }
-                guard let image = UIImage(data: data) else { return }
+                var images: [UIImage] = []
+                for item in items {
+                    guard let data = try await item.loadTransferable(type: Data.self),
+                          let image = UIImage(data: data) else { continue }
+                    images.append(image)
+                }
+                guard !images.isEmpty else { return }
 
-                pendingPreview = .scannedImages([image])
+                pendingPreview = .scannedImages(images)
                 showMetadataForm = true
             } catch {
                 errorMessage = "Failed to load photo: \(error.localizedDescription)"
@@ -410,6 +415,7 @@ final class DocumentsListViewModel: ObservableObject {
                 document.specialization = metadata.specialization
                 if !metadata.doctorName.isEmpty { document.doctorName = metadata.doctorName }
                 if !metadata.notes.isEmpty { document.notes = metadata.notes }
+                document.expiryDate = metadata.expiryDate
                 if let folderId = metadata.customFolderId {
                     document.tags = (document.tags ?? []) + [folderId.uuidString]
                 }
@@ -422,14 +428,15 @@ final class DocumentsListViewModel: ObservableObject {
 
                     self.documents.insert(document, at: 0)
                     self.persistMetadata()
+                    DocumentExpiryReminderScheduler.shared.reschedule(for: self.documents)
                     SyncQueueManager.shared.enqueueUpload(document)
                     self.pendingPreview = nil
-                    self.selectedPhotoItem = nil
+                    self.selectedPhotoItems = []
                     SubscriptionManager.shared.recordUpload()
 
                     // Value Moment: the user successfully added a health document.
                     // Only the source is tracked — never the medical document type (PII).
-                    AnalyticsManager.shared.track("document_saved", properties: ["source": source])
+                    AnalyticsManager.shared.track(.documentSaved, properties: ["source": source])
 
                     UINotificationFeedbackGenerator().notificationOccurred(.success)
 
@@ -476,6 +483,7 @@ final class DocumentsListViewModel: ObservableObject {
         let notes = metadata.notes.trimmingCharacters(in: .whitespacesAndNewlines)
         updated.notes = notes.isEmpty ? nil : notes
         updated.tags = metadata.customFolderId.map { [$0.uuidString] }
+        updated.expiryDate = metadata.expiryDate
 
         var fileBytesChanged = false
 
@@ -503,7 +511,8 @@ final class DocumentsListViewModel: ObservableObject {
                         specialization: updated.specialization,
                         doctorName: updated.doctorName,
                         notes: updated.notes,
-                        tags: updated.tags
+                        tags: updated.tags,
+                        expiryDate: updated.expiryDate
                     )
                 } else if updated.documentType == .image {
                     try fm.replaceImage(images[0], documentID: updated.id)
@@ -519,6 +528,7 @@ final class DocumentsListViewModel: ObservableObject {
 
         documents[index] = updated
         persistMetadata()
+        DocumentExpiryReminderScheduler.shared.reschedule(for: documents)
         SyncQueueManager.shared.enqueueMetadataUpdate(updated)
         if fileBytesChanged {
             SyncQueueManager.shared.enqueueUpload(updated)
@@ -533,6 +543,7 @@ final class DocumentsListViewModel: ObservableObject {
             try fileManager.deleteDocument(document)
             documents.removeAll { $0.id == document.id }
             persistMetadata()
+            DocumentExpiryReminderScheduler.shared.reschedule(for: documents)
             SyncQueueManager.shared.enqueueDelete(document.id)
             SubscriptionManager.shared.recordDeletion()
         } catch {

@@ -21,7 +21,7 @@ final class SubscriptionManager: ObservableObject {
         static let all = [annual, monthly]
     }
 
-    private let freeUploadLimit = 3
+    private let freeUploadLimit = 5
     private let freeShareLimit = 1
     private let uploadCountKey = "neura_document_upload_count"
     private let shareCountKey = "neura_share_count"
@@ -169,7 +169,7 @@ final class SubscriptionManager: ObservableObject {
                 case .verified(let transaction):
                     await transaction.finish()
                     await refreshEntitlements()
-                    AnalyticsManager.shared.track("subscription_started", properties: [
+                    AnalyticsManager.shared.track(.subscriptionStarted, properties: [
                         "product_id": product.id,
                         "price": NSDecimalNumber(decimal: product.price).doubleValue
                     ])

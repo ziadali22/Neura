@@ -137,7 +137,7 @@ struct PaywallView: View {
             }
         }
         .task { await subscriptionManager.loadProducts() }
-        .onAppear { AnalyticsManager.shared.track("paywall_viewed") }
+        .onAppear { AnalyticsManager.shared.track(.paywallViewed) }
         .alert(
             L10n.Common.neura,
             isPresented: Binding(

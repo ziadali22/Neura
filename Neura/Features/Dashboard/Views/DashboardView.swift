@@ -1,9 +1,11 @@
 import SwiftUI
+import Combine
 
 struct DashboardView: View {
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var coordinator = AppCoordinator()
     @StateObject private var subscriptionManager = SubscriptionManager.shared
+    @StateObject private var notificationRouter = NotificationRouter.shared
     @State private var showPaywall = false
     @AppStorage("hasSeenDocumentCoachmark") private var hasSeenCoachmark = false
     @State private var showCoachmark = false
@@ -82,8 +84,19 @@ struct DashboardView: View {
         }
         .task(id: scenePhase) {
             guard scenePhase == .active else { return }
+            AnalyticsManager.shared.track(.sessionStart)
             CalendarReminderScheduler.shared.reschedule(for: CalendarEntryStore.shared.entries)
             SyncQueueManager.shared.drainPending()
+            ReEngagementNotificationManager.shared.scheduleIfNeeded()
+            Task.detached(priority: .utility) {
+                let documents = DocumentFileManager.shared.loadMetadata()
+                DocumentExpiryReminderScheduler.shared.reschedule(for: documents)
+            }
+        }
+        .onReceive(notificationRouter.$pendingDocumentID.compactMap { $0 }) { id in
+            coordinator.selectedTab = .docs
+            coordinator.pendingDocumentID = id
+            notificationRouter.pendingDocumentID = nil
         }
         .task {
             guard !hasSeenCoachmark else { return }

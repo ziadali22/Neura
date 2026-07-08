@@ -116,8 +116,13 @@ final class CalendarViewModel: ObservableObject {
     // MARK: - Mutations
 
     func save(_ entry: CalendarEntry) {
+        let isNew = store.entry(id: entry.id) == nil
         store.update(entry)            // update() inserts if id is new
         scheduler.reschedule(for: store.entries)
+        AnalyticsManager.shared.track(
+            isNew ? .calendarEntryCreated : .calendarEntryUpdated,
+            properties: ["type": entry.type.rawValue]
+        )
     }
 
     func delete(_ entry: CalendarEntry) {
@@ -134,6 +139,7 @@ final class CalendarViewModel: ObservableObject {
         } else {
             updated.completedDates.append(date)
             HapticManager.success()
+            AnalyticsManager.shared.track(.calendarEntryCompleted, properties: ["type": entry.type.rawValue])
         }
         store.update(updated)
         // Reschedule so the medication "Did you take it?" follow-up is dropped
