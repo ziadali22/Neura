@@ -50,6 +50,9 @@ struct DocsFoldersGrid: View {
                     )
                 }
                 .buttonStyle(ScaleButtonStyle())
+                .simultaneousGesture(TapGesture().onEnded {
+                    AnalyticsManager.shared.track(.categoryOpened, properties: ["category": category.rawValue])
+                })
             }
 
             // User-created custom folders
@@ -61,6 +64,9 @@ struct DocsFoldersGrid: View {
                     CustomFolderGridCard(folder: folder, count: count)
                 }
                 .buttonStyle(ScaleButtonStyle())
+                .simultaneousGesture(TapGesture().onEnded {
+                    AnalyticsManager.shared.track(.folderOpened)
+                })
                 .contextMenu {
                     Button {
                         renameText = folder.name

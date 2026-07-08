@@ -252,11 +252,13 @@ final class DocumentsListViewModel: ObservableObject {
             showPaywall = true
             return
         }
+        AnalyticsManager.shared.track(.addDocumentSheetOpened)
         showSourcePicker = true
     }
 
     func startScanning() {
         guard ensureCanUpload() else { return }
+        AnalyticsManager.shared.track(.documentScanStarted)
         showSourcePicker = false
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             self.showScanner = true
@@ -546,6 +548,7 @@ final class DocumentsListViewModel: ObservableObject {
             DocumentExpiryReminderScheduler.shared.reschedule(for: documents)
             SyncQueueManager.shared.enqueueDelete(document.id)
             SubscriptionManager.shared.recordDeletion()
+            AnalyticsManager.shared.track(.documentDeleted, properties: ["category": document.category?.rawValue ?? "none"])
         } catch {
             errorMessage = "Failed to delete: \(error.localizedDescription)"
         }

@@ -121,6 +121,7 @@ struct DocsView: View {
             Text(L10n.Documents.newFolderMessage)
         }
         .onAppear {
+            AnalyticsManager.shared.track(.docsViewed)
             viewModel.loadDocuments()
             if let action = coordinator.pendingAddAction {
                 coordinator.pendingAddAction = nil
@@ -351,6 +352,7 @@ struct DocsView: View {
 
     private func deleteSelectedDocuments() {
         let toDelete = viewModel.documents.filter { selectedDocuments.contains($0.id) }
+        AnalyticsManager.shared.track(.documentsBulkDeleted, properties: ["count": toDelete.count])
         for doc in toDelete { viewModel.deleteDocument(doc) }
         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
             selectedDocuments.removeAll()

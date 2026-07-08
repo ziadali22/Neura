@@ -438,6 +438,8 @@ private extension DocumentViewerView {
     func shareDocument() {
         guard document.fileExists else { return }
 
+        AnalyticsManager.shared.track(.documentShareTapped, properties: ["category": document.category?.rawValue ?? "none"])
+
         let activityVC = UIActivityViewController(
             activityItems: [document.fileURL],
             applicationActivities: nil
