@@ -154,6 +154,9 @@ struct CustomTabBar: View {
         Button {
             HapticManager.medium()
             if canUpload {
+                if !isMenuOpen {
+                    AnalyticsManager.shared.track(.floatingMenuOpened)
+                }
                 isMenuOpen.toggle()
             } else {
                 onPaywallNeeded()
@@ -177,6 +180,7 @@ struct CustomTabBar: View {
 
     private func fire(_ action: AppCoordinator.AddDocumentAction) {
         HapticManager.medium()
+        AnalyticsManager.shared.track(.floatingMenuActionSelected, properties: ["action": String(describing: action)])
         isMenuOpen = false
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
             onAction(action)
@@ -208,6 +212,7 @@ private struct TabSegmentedControl: View {
         let selected = tab == selectedTab
         return Button {
             guard !selected else { return }
+            AnalyticsManager.shared.track(.tabSwitched, properties: ["tab": tab.label.lowercased()])
             withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                 selectedTab = tab
             }
