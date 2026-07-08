@@ -13,7 +13,11 @@ Mixpanel is already live in the app (`Core/Services/AnalyticsManager.swift`, rea
 
 Home and Profile tabs have **zero** tracking. Docs has partial coverage. This spec adds screen-view and key-action tracking across Home, Profile, Docs, Dashboard, and HealthProfile, and centralizes event/property names.
 
-**Explicitly out of scope / rejected**: sending disease names, diagnoses, health report contents, or city/location tied to health data to Mixpanel. Mixpanel attaches a `distinct_id` (+ device/IP) to every event, so any health-condition field would be identifiable PHI sent to a third party without a BAA or user consent — rejected regardless of what other fields accompany it. Document-related events track category/type enums only (e.g. `"medical"`, `"lab_report"`), never document names, disease names, or free-text content.
+**Explicitly out of scope / rejected**: sending disease names, diagnoses, health report contents, or city/location tied to health data to Mixpanel. Mixpanel attaches a `distinct_id` (+ device/IP) to every event, so any health-condition field would be identifiable PHI sent to a third party without a BAA or user consent — rejected regardless of what other fields accompany it.
+
+This also rules out any **free-text, user-authored string** as a property value, not just literal disease names — a folder or document name typed by a user in a health app carries the same risk (e.g. a folder named "Diabetes meds"). The only string properties sent are raw values of fixed, app-defined enums the user picks from (e.g. `DocumentCategory`: Blood Tests, Prescriptions, Imaging, etc.), never user-typed text. `MedicalSpecialization` (Oncology, Psychiatry, etc.) is also excluded even though it's a fixed enum, since it's diagnosis-adjacent. `doctorName`, `notes`, `tags`, and document/folder names are never sent.
+
+**Fixing a pre-existing leak**: the current `folder_created` event (`DocsView.swift:115-116`) sends the raw user-typed `folder_name`. Since this pass centralizes analytics, this call site is updated to drop `folder_name` and keep only `total_folders` — leaving it in place while refusing `disease` elsewhere wouldn't be consistent.
 
 ## Architecture
 
@@ -87,7 +91,7 @@ Naming convention: snake_case, past-tense for completed actions (`_completed`, `
 | `document_scan_started` | `scanFromFolder()` / scan tab entry | `source: String` |
 | `add_document_sheet_opened` | add sheet opens | — |
 | `category_filter_selected` | category picker changes | `category: String` |
-| `folder_filter_selected` | folder picker changes | `folder: String` |
+| `folder_filter_selected` | folder picker changes | `folder_filter_active: Bool` (no folder name) |
 | `share_document_tapped` | share menu item tapped | `category: String` |
 
 No document names, dates, or health content in any property — category/type enums only.
