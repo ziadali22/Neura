@@ -8,6 +8,7 @@ struct LanguagePickerView: View {
             VStack(spacing: 10) {
                 ForEach(AppLanguage.allCases) { language in
                     Button {
+                        AnalyticsManager.shared.track(.languageChanged, properties: ["language": language.rawValue])
                         // Do NOT wrap this in withAnimation: changing the language
                         // re-applies \.locale / \.layoutDirection to the whole app at the
                         // NeuraApp root, which animates an app-wide re-layout. Because the

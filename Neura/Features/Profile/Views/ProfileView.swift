@@ -83,6 +83,7 @@ struct ProfileView: View {
                         ProfileSectionHeader(title: L10n.Profile.Section.support)
                         VStack(spacing: 11) {
                             SettingsRow(icon: "fav", title: L10n.Profile.feedback) {
+                                AnalyticsManager.shared.track(.feedbackSheetOpened)
                                 showFeedback = true
                             }
                             SettingsRow(icon: "Instagram", title: L10n.Profile.contactUs) {
@@ -139,6 +140,7 @@ struct ProfileView: View {
                 }
             }
         }
+        .onAppear { AnalyticsManager.shared.track(.profileViewed) }
         .fullScreenCover(isPresented: $showPaywall) {
             PaywallView(subscriptionManager: subscriptionManager)
         }
@@ -239,6 +241,7 @@ private struct BiometricLockRow: View {
 
 private extension ProfileView {
     func handleLogOut() {
+        AnalyticsManager.shared.track(.loggedOut)
         clearLocalUserData()
         // Sign out from Firebase — AuthService publishes isSignedIn=false,
         // which causes NeuraApp to switch back to OnboardingView.
@@ -254,6 +257,7 @@ private extension ProfileView {
                 // actually gone — otherwise a failed/cancelled deletion would strand the
                 // user in Home with all their data erased.
                 try await AuthService.shared.deleteAccount()
+                AnalyticsManager.shared.track(.accountDeleted)
                 clearLocalUserData()
                 // deleteAccount() published currentUser = nil, so NeuraApp has already
                 // swapped to OnboardingView; this view (and its overlay) tears down with it.
@@ -273,6 +277,7 @@ private extension ProfileView {
             return
         }
 
+        AnalyticsManager.shared.track(.biometricToggleChanged, properties: ["enabled": enabled])
         Task {
             _ = await biometricAuth.setBiometricLockEnabled(enabled)
         }
@@ -280,6 +285,7 @@ private extension ProfileView {
 
     func handleSubscriptionTap() {
         if subscriptionManager.isPro {
+            AnalyticsManager.shared.track(.subscriptionScreenViewed, properties: ["source": "profile"])
             router.push(.subscription)
         } else {
             showPaywall = true
