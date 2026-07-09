@@ -64,7 +64,13 @@ struct GeneralDataSheet: View {
         .background(Color.backgroundPrimary)
         // Text input sheet (Name only)
         .sheet(item: $textEditingField) { field in
-            EditFieldSheet(fieldName: field.label, value: field.value, keyboardType: field.keyboardType) { newValue in
+            EditFieldSheet(
+                fieldName: field.label,
+                value: field.value,
+                keyboardType: field.keyboardType,
+                validate: field.validate,
+                invalidMessage: field.invalidMessage
+            ) { newValue in
                 viewModel.updateGeneralField(field.keyPath, value: newValue)
             }
             .presentationDragIndicator(.hidden)
@@ -322,13 +328,17 @@ struct GeneralFieldInfo: Identifiable {
     let value: String
     let kind: GeneralFieldKind
     let keyboardType: UIKeyboardType
+    let validate: ((String) -> Bool)?
+    let invalidMessage: String?
 
-    init(label: String, keyPath: WritableKeyPath<HealthProfile.GeneralData, String>, value: String, kind: GeneralFieldKind, keyboardType: UIKeyboardType = .default) {
+    init(label: String, keyPath: WritableKeyPath<HealthProfile.GeneralData, String>, value: String, kind: GeneralFieldKind, keyboardType: UIKeyboardType = .default, validate: ((String) -> Bool)? = nil, invalidMessage: String? = nil) {
         self.label = label
         self.keyPath = keyPath
         self.value = value
         self.kind = kind
         self.keyboardType = keyboardType
+        self.validate = validate
+        self.invalidMessage = invalidMessage
     }
 
     var options: [String] {
