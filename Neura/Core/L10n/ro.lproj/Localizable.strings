@@ -486,7 +486,6 @@
 "profile.security" = "Securitate";
 "profile.language" = "Limbă";
 "profile.email" = "E-mail";
-"profile.emailPlaceholder" = "your@email.com";
 "profile.emailInvalid" = "Introduceți o adresă de e-mail validă";
 "profile.feedback" = "Feedback";
 "profile.feedback.title" = "Trimite feedback";

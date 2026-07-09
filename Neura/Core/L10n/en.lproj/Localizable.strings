@@ -491,7 +491,6 @@
 "profile.security" = "Security";
 "profile.language" = "Language";
 "profile.email" = "Email";
-"profile.emailPlaceholder" = "your@email.com";
 "profile.emailInvalid" = "Enter a valid email address";
 "profile.feedback" = "Feedback";
 "profile.feedback.title" = "Send Feedback";

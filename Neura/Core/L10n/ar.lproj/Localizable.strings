@@ -486,7 +486,6 @@
 "profile.security" = "الأمان";
 "profile.language" = "اللغة";
 "profile.email" = "البريد الإلكتروني";
-"profile.emailPlaceholder" = "your@email.com";
 "profile.emailInvalid" = "أدخل بريدًا إلكترونيًا صالحًا";
 "profile.feedback" = "ملاحظات";
 "profile.feedback.title" = "إرسال ملاحظات";
