@@ -153,7 +153,21 @@ struct GeneralDataSheet: View {
             .init(label: L10n.HealthProfile.myNumber,         keyPath: \.myPhoneNumber,         value: data.myPhoneNumber,         kind: .text, keyboardType: .phonePad),
             .init(label: L10n.HealthProfile.emergencyContact, keyPath: \.emergencyContactName,  value: data.emergencyContactName,  kind: .text),
             .init(label: L10n.HealthProfile.emergencyNumber,  keyPath: \.emergencyContactNumber, value: data.emergencyContactNumber, kind: .text, keyboardType: .phonePad),
+            .init(
+                label: L10n.Profile.email,
+                keyPath: \.email,
+                value: data.email,
+                kind: .text,
+                keyboardType: .emailAddress,
+                validate: Self.isValidEmailFormat,
+                invalidMessage: L10n.Profile.emailInvalid
+            ),
         ]
+    }
+
+    static func isValidEmailFormat(_ value: String) -> Bool {
+        let pattern = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}$"
+        return value.range(of: pattern, options: [.regularExpression, .caseInsensitive]) != nil
     }
 }
 

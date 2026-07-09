@@ -35,6 +35,10 @@ final class HealthProfileViewModel: ObservableObject {
     func updateGeneralField(_ keyPath: WritableKeyPath<HealthProfile.GeneralData, String>, value: String) {
         profile.generalData[keyPath: keyPath] = value
         save()
+
+        if keyPath == \HealthProfile.GeneralData.email, !value.trimmingCharacters(in: .whitespaces).isEmpty {
+            AnalyticsManager.shared.setUserEmail(value, isSubscribed: SubscriptionManager.shared.isPro)
+        }
     }
 
     // MARK: - Custom General Fields
