@@ -52,6 +52,19 @@ final class AnalyticsManager {
         Mixpanel.mainInstance().identify(distinctId: distinctId)
     }
 
+    /// Sets the user's email on their Mixpanel People profile (via the reserved
+    /// `$email` property) plus their current subscription status, and fires an
+    /// `email_submitted` event carrying the same status. No-ops if analytics isn't
+    /// initialized yet.
+    func setUserEmail(_ email: String, isSubscribed: Bool) {
+        guard isInitialized else { return }
+        Mixpanel.mainInstance().people.set(properties: [
+            "$email": email,
+            "is_subscribed": isSubscribed
+        ])
+        track(.emailSubmitted, properties: ["is_subscribed": isSubscribed])
+    }
+
     /// Clears the current identity (e.g. on sign-out).
     func reset() {
         guard isInitialized else { return }

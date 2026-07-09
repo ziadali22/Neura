@@ -35,6 +35,7 @@ enum AnalyticsEvent: String {
     case feedbackSheetOpened = "feedback_sheet_opened"
     case languageChanged = "language_changed"
     case subscriptionScreenViewed = "subscription_screen_viewed"
+    case emailSubmitted = "email_submitted"
 
     // Docs
     case docsViewed = "docs_viewed"
