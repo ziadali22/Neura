@@ -18,7 +18,6 @@ struct ProfileView: View {
     // Legal links, reachable by all users (incl. free tier) outside the paywall (App Review 5.1.1 / 5.1.2).
     private static let privacyURL = URL(string: "https://myneura.org/privacy")!
     private static let termsURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
-    private static let userEmailKey = "neura_user_email"
 
     private var legalFooter: some View {
         HStack(spacing: 6) {
@@ -54,11 +53,6 @@ struct ProfileView: View {
                         // Profile section
                         ProfileSectionHeader(title: L10n.Profile.Section.profile)
                         VStack(spacing: 11) {
-                            EmailCaptureRow(
-                                initialEmail: UserDefaults.standard.string(forKey: Self.userEmailKey) ?? ""
-                            ) { email in
-                                handleEmailSave(email)
-                            }
                             SettingsRow(icon: "profile", title: L10n.Profile.healthProfile) {
                                 router.push(.healthProfile)
                             }
@@ -298,11 +292,6 @@ private extension ProfileView {
         }
     }
 
-    func handleEmailSave(_ email: String) {
-        UserDefaults.standard.set(email, forKey: Self.userEmailKey)
-        AnalyticsManager.shared.setUserEmail(email, isSubscribed: subscriptionManager.isPro)
-    }
-
     func clearLocalUserData() {
         let keys = [
             "health_profile_data",
@@ -312,8 +301,7 @@ private extension ProfileView {
             "neura_biometric_lock_enabled",
             "neura_document_upload_count",
             "neura_share_count",
-            "neura_is_pro",
-            Self.userEmailKey
+            "neura_is_pro"
         ]
         keys.forEach { UserDefaults.standard.removeObject(forKey: $0) }
         try? DocumentFileManager.shared.deleteAllLocalDocuments()

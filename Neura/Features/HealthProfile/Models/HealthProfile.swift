@@ -16,6 +16,7 @@ struct HealthProfile: Codable {
         var myPhoneNumber: String
         var emergencyContactName: String
         var emergencyContactNumber: String
+        var email: String
         /// User-added fields beyond the built-in ones (label + value).
         var customFields: [CustomField]
 
@@ -31,7 +32,7 @@ struct HealthProfile: Codable {
             }
         }
 
-        init(fullName: String, dateOfBirth: String, gender: String, height: String, weight: String, bloodType: String, insuranceStatus: String, myPhoneNumber: String = "", emergencyContactName: String = "", emergencyContactNumber: String = "", customFields: [CustomField] = []) {
+        init(fullName: String, dateOfBirth: String, gender: String, height: String, weight: String, bloodType: String, insuranceStatus: String, myPhoneNumber: String = "", emergencyContactName: String = "", emergencyContactNumber: String = "", email: String = "", customFields: [CustomField] = []) {
             self.fullName = fullName
             self.dateOfBirth = dateOfBirth
             self.gender = gender
@@ -42,6 +43,7 @@ struct HealthProfile: Codable {
             self.myPhoneNumber = myPhoneNumber
             self.emergencyContactName = emergencyContactName
             self.emergencyContactNumber = emergencyContactNumber
+            self.email = email
             self.customFields = customFields
         }
 
@@ -56,6 +58,9 @@ struct HealthProfile: Codable {
             insuranceStatus = try container.decode(String.self, forKey: .insuranceStatus)
             myPhoneNumber = try container.decodeIfPresent(String.self, forKey: .myPhoneNumber) ?? ""
             emergencyContactName = try container.decodeIfPresent(String.self, forKey: .emergencyContactName) ?? ""
+            // Backward-compatible: profiles saved before the email field existed
+            // have no `email` key — default to empty rather than throwing.
+            email = try container.decodeIfPresent(String.self, forKey: .email) ?? ""
             // Backward-compatible: profiles saved before custom fields existed
             // have no `customFields` key — default to empty rather than throwing.
             customFields = try container.decodeIfPresent([CustomField].self, forKey: .customFields) ?? []
@@ -70,7 +75,7 @@ struct HealthProfile: Codable {
 
         private enum CodingKeys: String, CodingKey {
             case fullName, dateOfBirth, gender, height, weight, bloodType, insuranceStatus
-            case myPhoneNumber, emergencyContactName, emergencyContactNumber, customFields
+            case myPhoneNumber, emergencyContactName, emergencyContactNumber, email, customFields
         }
 
         private enum LegacyCodingKeys: String, CodingKey {
