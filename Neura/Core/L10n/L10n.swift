@@ -686,6 +686,9 @@ enum L10n {
         static var subscription: String { "profile.subscription".l10n() }
         static var security: String { "profile.security".l10n() }
         static var language: String { "profile.language".l10n() }
+        static var email: String { "profile.email".l10n() }
+        static var emailPlaceholder: String { "profile.emailPlaceholder".l10n() }
+        static var emailInvalid: String { "profile.emailInvalid".l10n() }
         static var feedback: String { "profile.feedback".l10n() }
 
         enum Feedback {
