@@ -30,9 +30,10 @@ struct DocsView: View {
             AddDocumentSheet(
                 onScan: { viewModel.startScanning() },
                 onPhoto: { viewModel.startPhotoUpload() },
-                onFile: { viewModel.startFileImport() }
+                onFile: { viewModel.startFileImport() },
+                onGoogleDrive: { viewModel.startGoogleDriveImport() }
             )
-            .presentationDetents([.height(270)])
+            .presentationDetents([.height(350)])
             .presentationDragIndicator(.hidden)
             .presentationBackground(Color.surfaceWhite)
         }
@@ -91,6 +92,13 @@ struct DocsView: View {
             Button(L10n.Common.cancel, role: .cancel) {}
         } message: {
             Text(L10n.Documents.PhotoAccess.message)
+        }
+        .alert(L10n.Documents.GoogleDriveImport.tipTitle, isPresented: $viewModel.showDriveImportTip) {
+            Button(L10n.Documents.GoogleDriveImport.tipContinue) {
+                viewModel.confirmDriveImportTip()
+            }
+        } message: {
+            Text(L10n.Documents.GoogleDriveImport.tipMessage)
         }
         .alert(L10n.Common.error, isPresented: .constant(viewModel.errorMessage != nil)) {
             Button(L10n.Common.ok) { viewModel.errorMessage = nil }
