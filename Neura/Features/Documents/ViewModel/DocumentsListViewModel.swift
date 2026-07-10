@@ -4,7 +4,7 @@ import Combine
 
 // MARK: - Display Mode
 
-enum DocsDisplayMode {
+enum DocsDisplayMode: String {
     case folders
     case files
 }
@@ -27,7 +27,13 @@ enum DocumentSortOption: String, CaseIterable, Identifiable {
 final class DocumentsListViewModel: ObservableObject {
     @Published var documents: [Document] = []
     @Published var searchText = ""
-    @Published var displayMode: DocsDisplayMode = .folders
+    @Published var displayMode: DocsDisplayMode = .folders {
+        didSet {
+            UserDefaults.standard.set(displayMode.rawValue, forKey: Self.displayModeDefaultsKey)
+        }
+    }
+
+    private static let displayModeDefaultsKey = "docs.displayMode"
 
     // Filtering & Sorting
     @Published var selectedCategoryFilter: DocumentCategory?
@@ -51,6 +57,10 @@ final class DocumentsListViewModel: ObservableObject {
     // File importer
     @Published var showFileImporter = false
 
+    // Google Drive import tip
+    @Published var showDriveImportTip = false
+    private static let hasSeenDriveImportTipKey = "docs.hasSeenDriveImportTip"
+
     // Metadata form
     @Published var showMetadataForm = false
     @Published var pendingPreview: DocumentPreviewContent?
@@ -63,6 +73,10 @@ final class DocumentsListViewModel: ObservableObject {
     private var restoreObserver: NSObjectProtocol?
 
     init() {
+        if let saved = UserDefaults.standard.string(forKey: Self.displayModeDefaultsKey),
+           let mode = DocsDisplayMode(rawValue: saved) {
+            displayMode = mode
+        }
         restoreObserver = NotificationCenter.default.addObserver(
             forName: .documentsRestored, object: nil, queue: .main
         ) { [weak self] _ in self?.loadDocuments() }
@@ -85,12 +99,7 @@ final class DocumentsListViewModel: ObservableObject {
 
         // Search
         if !searchText.isEmpty {
-            let query = searchText
-            result = result.filter {
-                $0.name.localizedCaseInsensitiveContains(query)
-                || ($0.category?.rawValue.localizedCaseInsensitiveContains(query) ?? false)
-                || ($0.doctorName?.localizedCaseInsensitiveContains(query) ?? false)
-            }
+            result = result.filter { matchesSearch($0, query: searchText) }
         }
 
         // Sort
@@ -109,6 +118,14 @@ final class DocumentsListViewModel: ObservableObject {
     // All documents sorted newest-first (no category/specialisation filter applied).
     var allFilesSorted: [Document] {
         documents.sorted { $0.createdAt > $1.createdAt }
+    }
+
+    // Shared search predicate so every document list (Files mode, Folders grid, etc.)
+    // matches search text the same way.
+    func matchesSearch(_ document: Document, query: String) -> Bool {
+        document.name.localizedCaseInsensitiveContains(query)
+        || (document.category?.rawValue.localizedCaseInsensitiveContains(query) ?? false)
+        || (document.doctorName?.localizedCaseInsensitiveContains(query) ?? false)
     }
 
     // MARK: - Grouped by Date
@@ -303,7 +320,29 @@ final class DocumentsListViewModel: ObservableObject {
         }
     }
 
-    /// Authoritative upload gate for every source (scan / photo / file). Entry points
+    func startGoogleDriveImport() {
+        guard ensureCanUpload() else { return }
+        showSourcePicker = false
+        if UserDefaults.standard.bool(forKey: Self.hasSeenDriveImportTipKey) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                self.showFileImporter = true
+            }
+        } else {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                self.showDriveImportTip = true
+            }
+        }
+    }
+
+    func confirmDriveImportTip() {
+        UserDefaults.standard.set(true, forKey: Self.hasSeenDriveImportTipKey)
+        showDriveImportTip = false
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            self.showFileImporter = true
+        }
+    }
+
+    /// Authoritative upload gate for every source (scan / photo / file / Drive). Entry points
     /// (the FAB and `showAddOptions`) gate too, but this is the single chokepoint that
     /// guarantees a free user never exceeds the limit. Returns false (and shows the
     /// paywall) when the limit is reached.
