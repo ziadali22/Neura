@@ -5,6 +5,7 @@ struct AddDocumentSheet: View {
     let onScan: () -> Void
     let onPhoto: () -> Void
     let onFile: () -> Void
+    let onGoogleDrive: () -> Void
 
     private struct Option {
         let icon: String
@@ -27,12 +28,14 @@ struct AddDocumentSheet: View {
             optionRow(icon: "imageAdd",  title: "Upload from Photos", subtitle: "Choose an image from your library") { dismiss(); onPhoto() }
             Divider().padding(.leading, 76)
             optionRow(icon: "fileAdd",   title: "Import File",        subtitle: "Select a PDF or image file")         { dismiss(); onFile() }
+            Divider().padding(.leading, 76)
+            optionRow(icon: "google-drive", title: "Import from Google Drive", subtitle: "Bring in a file from your Drive", isSymbolIcon: false) { dismiss(); onGoogleDrive() }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color.backgroundPrimary.ignoresSafeArea())
     }
 
-    private func optionRow(icon: String, title: String, subtitle: String, action: @escaping () -> Void) -> some View {
+    private func optionRow(icon: String, title: String, subtitle: String, isSymbolIcon: Bool = true, action: @escaping () -> Void) -> some View {
         Button {
             HapticManager.medium()
             action()
@@ -42,9 +45,16 @@ struct AddDocumentSheet: View {
                     .fill(Color(hex: "E7E0D8").opacity(0.4))
                     .frame(width: 52, height: 52)
                     .overlay {
-                        Image(icon)
-                            .font(.system(size: 25))
-                            .foregroundStyle(Color.accent)
+                        if isSymbolIcon {
+                            Image(icon)
+                                .font(.system(size: 25))
+                                .foregroundStyle(Color.accent)
+                        } else {
+                            Image(icon)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 25, height: 25)
+                        }
                     }
 
                 VStack(alignment: .leading, spacing: 3) {
@@ -66,6 +76,6 @@ struct AddDocumentSheet: View {
 }
 
 #Preview {
-    AddDocumentSheet(onScan: {}, onPhoto: {}, onFile: {})
-        .presentationDetents([.height(280)])
+    AddDocumentSheet(onScan: {}, onPhoto: {}, onFile: {}, onGoogleDrive: {})
+        .presentationDetents([.height(350)])
 }
