@@ -112,6 +112,11 @@ enum L10n {
             static var mediaAccessibility: String { "onboarding.qrShare.mediaAccessibility".l10n() }
         }
 
+        enum CalendarStep {
+            static var title: String    { "onboarding.calendarStep.title".l10n() }
+            static var subtitle: String { "onboarding.calendarStep.subtitle".l10n() }
+        }
+
         enum Statistics {
             static var number: String { "onboarding.statistics.number".l10n() }
             static var body: String   { "onboarding.statistics.body".l10n() }
@@ -476,6 +481,12 @@ enum L10n {
             static var fileSubtitle: String { "documents.addDocument.fileSubtitle".l10n() }
         }
 
+        enum GoogleDriveImport {
+            static var tipTitle: String { "documents.googleDriveImport.tipTitle".l10n() }
+            static var tipMessage: String { "documents.googleDriveImport.tipMessage".l10n() }
+            static var tipContinue: String { "documents.googleDriveImport.tipContinue".l10n() }
+        }
+
         enum CategoryPicker {
             static var title: String { "documents.categoryPicker.title".l10n() }
             static var subtitle: String { "documents.categoryPicker.subtitle".l10n() }
@@ -509,6 +520,8 @@ enum L10n {
             static var notesPlaceholder: String { "documents.metadata.notesPlaceholder".l10n() }
             static var save: String { "documents.metadata.save".l10n() }
             static var specializationTitle: String { "documents.metadata.specializationTitle".l10n() }
+            static var expiryToggle: String { "documents.metadata.expiryToggle".l10n() }
+            static var expiryDate: String { "documents.metadata.expiryDate".l10n() }
         }
     }
 

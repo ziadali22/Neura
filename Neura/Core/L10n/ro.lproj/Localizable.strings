@@ -60,6 +60,10 @@
 "onboarding.documentScan.title" = "Scanează, organizează\nși distribuie dosarele";
 "onboarding.documentScan.subtitle" = "Îndreaptă camera spre orice document medical și Neura îl arhivează automat.";
 
+// MARK: - Onboarding Calendar
+"onboarding.calendarStep.title" = "Începe-ți cronologia de sănătate";
+"onboarding.calendarStep.subtitle" = "Urmărește medicamentele, programările și evenimentele medicale într-un singur loc.";
+
 // MARK: - Onboarding Privacy
 "onboarding.privacy.title" = "Datele tale de sănătate\nsunt private și securizate";
 "onboarding.privacy.subtitle" = "Documentele tale sunt criptate și stocate în siguranță. Numai tu controlezi ce distribui.";
@@ -255,6 +259,9 @@
 "documents.photoAccess.title" = "Acces la poze necesar";
 "documents.photoAccess.openSettings" = "Deschide Setări";
 "documents.photoAccess.message" = "Neura are nevoie de acces la biblioteca ta de poze pentru a încărca imagini. Permite accesul în Setări.";
+"documents.googleDriveImport.tipTitle" = "Import din Google Drive";
+"documents.googleDriveImport.tipMessage" = "În fereastra care se deschide, atinge Browse, apoi Locations, apoi Google Drive. Dacă nu îl vezi, instalează aplicația Google Drive și conectează-te mai întâi.";
+"documents.googleDriveImport.tipContinue" = "Continuă";
 "documents.filter.title" = "Filtre";
 "documents.filter.button" = "Filtru";
 "documents.filter.order" = "Ordine";
@@ -342,6 +349,8 @@
 "documents.metadata.notesPlaceholder" = "Detalii suplimentare despre acest document";
 "documents.metadata.save" = "Salvează documentul";
 "documents.metadata.specializationTitle" = "Specializare";
+"documents.metadata.expiryToggle" = "Setează data expirării / reînnoirii";
+"documents.metadata.expiryDate" = "Data expirării";
 
 // MARK: - QR Sharing
 "qr.uploading" = "Se încarcă documentul";

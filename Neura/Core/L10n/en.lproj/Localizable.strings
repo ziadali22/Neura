@@ -57,6 +57,10 @@
 "onboarding.qrShare.subtitle" = "Create a private link or QR code and choose exactly which details and documents are visible.";
 "onboarding.qrShare.mediaAccessibility" = "Demonstration of sharing a document via QR code";
 
+// MARK: - Onboarding Calendar
+"onboarding.calendarStep.title" = "Start your health timeline";
+"onboarding.calendarStep.subtitle" = "Track medication, appointments, and medical events in one place.";
+
 // MARK: - Onboarding Statistics
 "onboarding.statistics.number" = "12 million";
 "onboarding.statistics.body" = "misdiagnoses every year. Most could be prevented if doctors had the full picture";
@@ -260,6 +264,9 @@
 "documents.photoAccess.title" = "Photos Access Required";
 "documents.photoAccess.openSettings" = "Open Settings";
 "documents.photoAccess.message" = "Neura needs access to your photo library to upload images. Please allow access in Settings.";
+"documents.googleDriveImport.tipTitle" = "Importing from Google Drive";
+"documents.googleDriveImport.tipMessage" = "In the browser that opens, tap Browse, then Locations, then Google Drive. If you don't see it, install the Google Drive app and sign in first.";
+"documents.googleDriveImport.tipContinue" = "Continue";
 "documents.filter.title" = "Filters";
 "documents.filter.button" = "Filter";
 "documents.filter.order" = "Order";
@@ -336,6 +343,8 @@
 "documents.metadata.notesPlaceholder" = "Additional details about this document";
 "documents.metadata.save" = "Save Document";
 "documents.metadata.specializationTitle" = "Specialization";
+"documents.metadata.expiryToggle" = "Set expiry / renewal date";
+"documents.metadata.expiryDate" = "Expiry Date";
 
 // MARK: - Documents Folder
 "documents.folder.renameTitle" = "Rename Folder";
