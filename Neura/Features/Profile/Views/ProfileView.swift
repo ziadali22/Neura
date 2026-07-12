@@ -305,6 +305,7 @@ private extension ProfileView {
         ]
         keys.forEach { UserDefaults.standard.removeObject(forKey: $0) }
         try? DocumentFileManager.shared.deleteAllLocalDocuments()
+        ActiveSpaceManager.shared.resetForSignOut()
     }
 }
 

@@ -23,6 +23,7 @@ final class SubscriptionManager: ObservableObject {
 
     private let freeUploadLimit = 5
     private let freeShareLimit = 1
+    private let freeSpaceLimit = 2
     private let uploadCountKey = "neura_document_upload_count"
     private let shareCountKey = "neura_share_count"
     private let isProKey = "neura_is_pro"
@@ -73,6 +74,10 @@ final class SubscriptionManager: ObservableObject {
 
     var canShareViaQR: Bool {
         isPro || shareCount < freeShareLimit
+    }
+
+    var canCreateSpace: Bool {
+        isPro || ActiveSpaceManager.shared.visibleSpaces.count < freeSpaceLimit
     }
 
     /// "remaining/total" for the home banner — counts down from the limit as uploads are used.
