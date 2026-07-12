@@ -25,7 +25,11 @@ Critically, every synced record (`Document`, `HealthProfile`) is stored as a sin
 
 ### Storage & sync — no path changes
 
-The six sync services keep writing to `users/{uid}/...` exactly as today. Only the Codable payload shape changes. Files on disk under `~/Documents/NeuraScans/` and in Firebase Storage don't move. This avoids any read-modify-write migration pass over existing users' encrypted documents/files — the single highest-risk item this design deliberately routes around.
+The six existing sync services keep writing to `users/{uid}/...` exactly as today. Only the Codable payload shape changes. Files on disk under `~/Documents/NeuraScans/` and in Firebase Storage don't move. This avoids any read-modify-write migration pass over existing users' encrypted documents/files — the single highest-risk item this design deliberately routes around.
+
+**The `Space` list itself must also sync** (a gap missed in the first pass of this spec). Without it, a child space's Documents/CalendarEntries download fine on a second device or reinstall — their Firestore paths never changed — but there is no local `Space` to house them, so they're effectively invisible. A new `SpaceSyncService` mirrors the existing `CustomFolderSyncService` pattern exactly: single encrypted blob at `users/{uid}/spaces/data`, restored via the same "local wins on id conflict" merge used for custom folders, and restored **first** in `performInitialRestore` (before documents/calendar/health profile) for the same reason custom folders restore before documents — so the containers documents/entries reference already exist when everything else rebuilds.
+
+**The default Space uses a fixed, well-known UUID** (not a randomly generated one) across every account and every device. This is what makes the cloud/local merge above correct: if the default space got a fresh random id on every local reset (e.g. logout/login), a re-login would produce two "default" spaces (local-fresh vs. cloud-original) and the `HealthProfile` dictionary — keyed by the *original* default space's id — would fail to resolve against the new one, silently resurfacing the `.sample` demo profile instead of the user's real data.
 
 ### Active Space state & switching
 
@@ -44,6 +48,7 @@ The six sync services keep writing to `users/{uid}/...` exactly as today. Only t
 - `Document`/`CalendarEntry` decode: missing `spaceID` defaults to the primary Space's `id`.
 - `SubscriptionManager.canCreateSpace`: boundary at 1 vs. 2 total Spaces for free tier; always `true` for Pro.
 - Default Space cannot be archived or deleted.
+- Cloud restore merge: a fresh install/second device restores the same default Space id as the original device (fixed UUID, no duplicate "default" after merge), then a child Space, then that child's Documents/CalendarEntries become visible after switching to it.
 
 ## Out of scope (v1)
 
