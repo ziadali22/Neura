@@ -430,6 +430,10 @@ enum L10n {
             "documents.selectedFormat".l10n(args: [count])
         }
         static var newFolderMessage: String { "documents.newFolderMessage".l10n() }
+        static var categoryEmptyTitle: String { "documents.categoryEmptyTitle".l10n() }
+        static func categoryEmptyMessage(_ category: String) -> String {
+            "documents.categoryEmptyMessageFormat".l10n(args: [category])
+        }
 
         enum PhotoAccess {
             static var title: String { "documents.photoAccess.title".l10n() }
@@ -731,6 +735,7 @@ enum L10n {
 
         enum Spaces {
             static var addSpaceTitle: String { "profile.spaces.addSpaceTitle".l10n() }
+            static var editSpaceTitle: String { "profile.spaces.editSpaceTitle".l10n() }
             static var namePlaceholder: String { "profile.spaces.namePlaceholder".l10n() }
             static var removeTitle: String { "profile.spaces.removeTitle".l10n() }
             static var removeMessage: String { "profile.spaces.removeMessage".l10n() }

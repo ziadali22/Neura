@@ -262,6 +262,8 @@
 "documents.noneSelected" = "لم يتم التحديد";
 "documents.selectedFormat" = "%d محدد";
 "documents.newFolderMessage" = "أدخل اسماً لمجلدك الجديد.";
+"documents.categoryEmptyTitle" = "لا توجد مستندات بعد";
+"documents.categoryEmptyMessageFormat" = "امسح أو ارفع مستنداً وصنّفه كـ %@.";
 "documents.photoAccess.title" = "الوصول إلى الصور مطلوب";
 "documents.photoAccess.openSettings" = "فتح الإعدادات";
 "documents.photoAccess.message" = "يحتاج Neura إلى الوصول إلى مكتبة صورك لرفع الصور. يُرجى السماح بالوصول من الإعدادات.";
@@ -327,7 +329,7 @@
 "documents.folder.renameTitle" = "إعادة تسمية المجلد";
 "documents.folder.namePlaceholder" = "اسم المجلد";
 "documents.folder.noDocuments" = "لا توجد مستندات";
-"documents.folder.emptyDescriptionFormat" = "قم بمسح أو رفع مستند وتعيينه إلى %@.";
+"documents.folder.emptyDescriptionFormat" = "قم بمسح أو رفع مستند";
 
 // MARK: - Add Document Sheet Subtitles
 "documents.addDocument.scanSubtitle" = "استخدم الكاميرا لمسح الصفحات";
@@ -495,6 +497,7 @@
 "profile.section.profile" = "الملف الشخصي";
 "profile.section.spaces" = "الحسابات";
 "profile.spaces.addSpaceTitle" = "إضافة حساب";
+"profile.spaces.editSpaceTitle" = "تعديل الحساب";
 "profile.spaces.namePlaceholder" = "الاسم";
 "profile.spaces.removeTitle" = "إزالة الحساب";
 "profile.spaces.removeMessage" = "تبقى مستندات هذا الحساب وأحداث التقويم والملف الصحي محفوظة لكنها مخفية. تواصل مع الدعم لاستعادة الوصول لاحقًا.";
@@ -605,6 +608,9 @@
 "calendar.newEntryTitle" = "إدخال جديد";
 "calendar.editEntryTitle" = "تعديل الإدخال";
 "calendar.field.type" = "النوع";
+"calendar.entryType.medication" = "دواء";
+"calendar.entryType.appointment" = "موعد";
+"calendar.entryType.medicalEvent" = "حدث طبي";
 "calendar.field.title" = "العنوان";
 "calendar.field.titlePlaceholder" = "مثال: فيتامين د";
 "calendar.field.date" = "التاريخ";

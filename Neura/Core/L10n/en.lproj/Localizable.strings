@@ -267,6 +267,8 @@
 "documents.noneSelected" = "None Selected";
 "documents.selectedFormat" = "%d Selected";
 "documents.newFolderMessage" = "Enter a name for your new folder.";
+"documents.categoryEmptyTitle" = "No documents yet";
+"documents.categoryEmptyMessageFormat" = "Scan or upload a document and tag it as %@.";
 "documents.photoAccess.title" = "Photos Access Required";
 "documents.photoAccess.openSettings" = "Open Settings";
 "documents.photoAccess.message" = "Neura needs access to your photo library to upload images. Please allow access in Settings.";
@@ -356,7 +358,7 @@
 "documents.folder.renameTitle" = "Rename Folder";
 "documents.folder.namePlaceholder" = "Folder name";
 "documents.folder.noDocuments" = "No Documents";
-"documents.folder.emptyDescriptionFormat" = "Scan or upload a document and assign it to %@.";
+"documents.folder.emptyDescriptionFormat" = "Scan or upload a document.";
 
 // MARK: - Add Document Sheet Subtitles
 "documents.addDocument.scanSubtitle" = "Use camera to scan pages";
@@ -500,6 +502,7 @@
 "profile.section.profile" = "Profile";
 "profile.section.spaces" = "Accounts";
 "profile.spaces.addSpaceTitle" = "Add Account";
+"profile.spaces.editSpaceTitle" = "Edit Account";
 "profile.spaces.namePlaceholder" = "Name";
 "profile.spaces.removeTitle" = "Remove Account";
 "profile.spaces.removeMessage" = "This account's documents, calendar entries, and health profile stay saved but hidden. Contact support to restore access later.";
@@ -610,6 +613,9 @@
 "calendar.newEntryTitle" = "New Entry";
 "calendar.editEntryTitle" = "Edit Entry";
 "calendar.field.type" = "Type";
+"calendar.entryType.medication" = "Medication";
+"calendar.entryType.appointment" = "Appointment";
+"calendar.entryType.medicalEvent" = "Medical Event";
 "calendar.field.title" = "Title";
 "calendar.field.titlePlaceholder" = "e.g. Vitamin D";
 "calendar.field.date" = "Date";

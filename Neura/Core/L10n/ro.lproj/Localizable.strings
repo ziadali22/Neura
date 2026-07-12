@@ -262,6 +262,8 @@
 "documents.noneSelected" = "Niciunul selectat";
 "documents.selectedFormat" = "%d selectate";
 "documents.newFolderMessage" = "Introdu un nume pentru noul dosar.";
+"documents.categoryEmptyTitle" = "Niciun document încă";
+"documents.categoryEmptyMessageFormat" = "Scanează sau încarcă un document și etichetează-l ca %@.";
 "documents.photoAccess.title" = "Acces la poze necesar";
 "documents.photoAccess.openSettings" = "Deschide Setări";
 "documents.photoAccess.message" = "Neura are nevoie de acces la biblioteca ta de poze pentru a încărca imagini. Permite accesul în Setări.";
@@ -327,7 +329,7 @@
 "documents.folder.renameTitle" = "Redenumește dosarul";
 "documents.folder.namePlaceholder" = "Numele dosarului";
 "documents.folder.noDocuments" = "Niciun document";
-"documents.folder.emptyDescriptionFormat" = "Scanează sau încarcă un document și atribuie-l lui %@.";
+"documents.folder.emptyDescriptionFormat" = "Scanează sau încarcă un document.";
 
 // MARK: - Add Document Sheet Subtitles
 "documents.addDocument.scanSubtitle" = "Folosește camera pentru a scana pagini";
@@ -495,6 +497,7 @@
 "profile.section.profile" = "Profil";
 "profile.section.spaces" = "Conturi";
 "profile.spaces.addSpaceTitle" = "Adaugă cont";
+"profile.spaces.editSpaceTitle" = "Editează contul";
 "profile.spaces.namePlaceholder" = "Nume";
 "profile.spaces.removeTitle" = "Elimină contul";
 "profile.spaces.removeMessage" = "Documentele, evenimentele din calendar și profilul medical ale acestui cont rămân salvate, dar ascunse. Contactează asistența pentru a restaura accesul mai târziu.";
@@ -605,6 +608,9 @@
 "calendar.newEntryTitle" = "Înregistrare nouă";
 "calendar.editEntryTitle" = "Editează înregistrarea";
 "calendar.field.type" = "Tip";
+"calendar.entryType.medication" = "Medicament";
+"calendar.entryType.appointment" = "Programare";
+"calendar.entryType.medicalEvent" = "Eveniment medical";
 "calendar.field.title" = "Titlu";
 "calendar.field.titlePlaceholder" = "ex. Vitamina D";
 "calendar.field.date" = "Data";
