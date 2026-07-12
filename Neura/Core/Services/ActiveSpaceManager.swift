@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import UIKit
 
 @MainActor
 final class ActiveSpaceManager: ObservableObject {
@@ -47,7 +48,7 @@ final class ActiveSpaceManager: ObservableObject {
     }
 
     private static func makeDefaultSpace() -> Space {
-        Space(id: defaultSpaceID, name: "Me", colorHex: "FF5A00", isDefault: true)
+        Space(id: defaultSpaceID, name: "Me", isDefault: true)
     }
 
     // MARK: - Actions
@@ -58,11 +59,25 @@ final class ActiveSpaceManager: ObservableObject {
     }
 
     @discardableResult
-    func createSpace(name: String, colorHex: String) -> Space {
-        let space = Space(name: name, colorHex: colorHex)
+    func createSpace(name: String, avatarImage: UIImage?) -> Space {
+        var space = Space(name: name)
+        if let avatarImage {
+            space.avatarFilename = AccountAvatarStore.shared.save(avatarImage, for: space.id)
+        }
         spaces.append(space)
         save()
         return space
+    }
+
+    /// Renames an account and optionally replaces its photo (nil = leave the
+    /// existing photo, or lack thereof, unchanged).
+    func updateSpace(id: UUID, name: String, avatarImage: UIImage?) {
+        guard let index = spaces.firstIndex(where: { $0.id == id }) else { return }
+        spaces[index].name = name
+        if let avatarImage {
+            spaces[index].avatarFilename = AccountAvatarStore.shared.save(avatarImage, for: id)
+        }
+        save()
     }
 
     func archiveSpace(id: UUID) {
