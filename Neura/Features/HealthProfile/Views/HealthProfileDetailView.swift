@@ -128,6 +128,7 @@ private extension HealthProfileDetailView {
             (L10n.HealthProfile.myNumber,         data.myPhoneNumber),
             (L10n.HealthProfile.emergencyContact, data.emergencyContactName),
             (L10n.HealthProfile.emergencyNumber,  data.emergencyContactNumber),
+            (L10n.Profile.email,                  data.email),
         ] + data.customFields.map { (label: $0.label, value: $0.value) }
 
         return Button {
