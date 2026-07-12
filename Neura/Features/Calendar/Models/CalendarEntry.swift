@@ -13,11 +13,12 @@ enum CalendarEntryType: String, Codable, CaseIterable, Identifiable {
     /// Resolved via L10n_swift so it follows the in-app language toggle.
     var localizedName: String { rawValue.l10n() }
 
+    /// Custom asset name, rendered as a template image tinted with `color`.
     var icon: String {
         switch self {
-        case .medication:   return "pill.fill"
-        case .appointment:  return "stethoscope"
-        case .medicalEvent: return "cross.case.fill"
+        case .medication:   return "calendar-medicine"
+        case .appointment:  return "calendar-events"
+        case .medicalEvent: return "calendar-events"
         }
     }
 
@@ -129,6 +130,9 @@ struct CalendarEntry: Identifiable, Codable, Equatable {
     var specialization: MedicalSpecialization?
     /// Occurrence dates the user has marked complete (per-occurrence for recurring entries).
     var completedDates: [Date]
+    /// Which Space this entry belongs to. `nil` means it predates Spaces and
+    /// is treated as belonging to the default space.
+    var spaceID: UUID?
 
     init(
         id: UUID = UUID(),
@@ -142,7 +146,8 @@ struct CalendarEntry: Identifiable, Codable, Equatable {
         recurrence: RecurrenceRule = RecurrenceRule(),
         doctor: String? = nil,
         specialization: MedicalSpecialization? = nil,
-        completedDates: [Date] = []
+        completedDates: [Date] = [],
+        spaceID: UUID? = nil
     ) {
         self.id = id
         self.type = type
@@ -156,6 +161,7 @@ struct CalendarEntry: Identifiable, Codable, Equatable {
         self.doctor = doctor
         self.specialization = specialization
         self.completedDates = completedDates
+        self.spaceID = spaceID
     }
 
     /// Occurrence dates of this entry within a date range.

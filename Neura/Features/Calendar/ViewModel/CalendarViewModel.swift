@@ -7,19 +7,28 @@ final class CalendarViewModel: ObservableObject {
     @Published var selectedDay: Date
 
     private let store: CalendarEntryStore
+    private let activeSpaceManager: ActiveSpaceManager
     private let scheduler = CalendarReminderScheduler.shared
     private var cancellable: AnyCancellable?
 
-    /// Mirror of the store's entries so SwiftUI re-renders on change.
+    /// Mirror of the store's entries, already filtered to the active space, so
+    /// SwiftUI re-renders on either a data change or a space switch.
     @Published private(set) var entries: [CalendarEntry] = []
 
-    init(store: CalendarEntryStore = .shared) {
+    init(store: CalendarEntryStore = .shared, activeSpaceManager: ActiveSpaceManager = .shared) {
         self.store = store
+        self.activeSpaceManager = activeSpaceManager
         let today = Calendar.current.startOfDay(for: Date())
         self.visibleMonth = today
         self.selectedDay = today
-        self.entries = store.entries
-        cancellable = store.$entries.sink { [weak self] in self?.entries = $0 }
+        self.entries = store.entries.filter {
+            ($0.spaceID ?? ActiveSpaceManager.defaultSpaceID) == activeSpaceManager.currentSpaceID
+        }
+        cancellable = Publishers.CombineLatest(store.$entries, activeSpaceManager.$currentSpaceID)
+            .map { entries, spaceID in
+                entries.filter { ($0.spaceID ?? ActiveSpaceManager.defaultSpaceID) == spaceID }
+            }
+            .sink { [weak self] filtered in self?.entries = filtered }
     }
 
     // MARK: - Derived queries
@@ -116,7 +125,11 @@ final class CalendarViewModel: ObservableObject {
     // MARK: - Mutations
 
     func save(_ entry: CalendarEntry) {
+        var entry = entry
         let isNew = store.entry(id: entry.id) == nil
+        if isNew {
+            entry.spaceID = activeSpaceManager.currentSpaceID
+        }
         store.update(entry)            // update() inserts if id is new
         scheduler.reschedule(for: store.entries)
         AnalyticsManager.shared.track(
