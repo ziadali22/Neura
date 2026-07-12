@@ -159,6 +159,12 @@ struct Document: Identifiable, Codable, Equatable, Hashable {
     var notes: String?
     var tags: [String]?
     var specialization: MedicalSpecialization?
+    /// Optional renewal/expiry date (passport, insurance card, warranty, etc.).
+    /// Drives `DocumentExpiryReminderScheduler` reminders when set.
+    var expiryDate: Date?
+    /// Which Space this document belongs to. `nil` means it predates Spaces
+    /// and is treated as belonging to the default space.
+    var spaceID: UUID?
 
     /// Full resolved URL in the current sandbox. Not encoded.
     var fileURL: URL {
@@ -175,7 +181,9 @@ struct Document: Identifiable, Codable, Equatable, Hashable {
         specialization: MedicalSpecialization? = nil,
         doctorName: String? = nil,
         notes: String? = nil,
-        tags: [String]? = nil
+        tags: [String]? = nil,
+        expiryDate: Date? = nil,
+        spaceID: UUID? = nil
     ) {
         self.id = id
         self.name = name
@@ -187,12 +195,14 @@ struct Document: Identifiable, Codable, Equatable, Hashable {
         self.doctorName = doctorName
         self.notes = notes
         self.tags = tags
+        self.expiryDate = expiryDate
+        self.spaceID = spaceID
     }
 
     // MARK: - Codable
 
     private enum CodingKeys: String, CodingKey {
-        case id, name, filename, createdAt, documentType, category, specialization, doctorName, notes, tags
+        case id, name, filename, createdAt, documentType, category, specialization, doctorName, notes, tags, expiryDate, spaceID
         // Legacy key for backward compatibility
         case fileURL
     }
@@ -208,6 +218,8 @@ struct Document: Identifiable, Codable, Equatable, Hashable {
         doctorName = try container.decodeIfPresent(String.self, forKey: .doctorName)
         notes = try container.decodeIfPresent(String.self, forKey: .notes)
         tags = try container.decodeIfPresent([String].self, forKey: .tags)
+        expiryDate = try container.decodeIfPresent(Date.self, forKey: .expiryDate)
+        spaceID = try container.decodeIfPresent(UUID.self, forKey: .spaceID)
 
         // Try new filename key first, fall back to extracting from legacy fileURL
         if let fn = try container.decodeIfPresent(String.self, forKey: .filename) {
@@ -231,6 +243,8 @@ struct Document: Identifiable, Codable, Equatable, Hashable {
         try container.encodeIfPresent(doctorName, forKey: .doctorName)
         try container.encodeIfPresent(notes, forKey: .notes)
         try container.encodeIfPresent(tags, forKey: .tags)
+        try container.encodeIfPresent(expiryDate, forKey: .expiryDate)
+        try container.encodeIfPresent(spaceID, forKey: .spaceID)
     }
 
     // MARK: - Computed Properties

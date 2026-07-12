@@ -70,6 +70,7 @@ final class DocumentsListViewModel: ObservableObject {
     @Published var errorMessage: String?
 
     private let fileManager = DocumentFileManager.shared
+    private let activeSpaceManager = ActiveSpaceManager.shared
     private var restoreObserver: NSObjectProtocol?
 
     init() {
@@ -85,7 +86,9 @@ final class DocumentsListViewModel: ObservableObject {
     // MARK: - Filtered & Sorted Documents
 
     var filteredDocuments: [Document] {
-        var result = documents
+        var result = documents.filter {
+            ($0.spaceID ?? ActiveSpaceManager.defaultSpaceID) == activeSpaceManager.currentSpaceID
+        }
 
         // Category filter
         if let category = selectedCategoryFilter {
@@ -115,9 +118,11 @@ final class DocumentsListViewModel: ObservableObject {
         return result
     }
 
-    // All documents sorted newest-first (no category/specialisation filter applied).
+    // All documents in the active space, sorted newest-first (no category/specialisation filter applied).
     var allFilesSorted: [Document] {
-        documents.sorted { $0.createdAt > $1.createdAt }
+        documents
+            .filter { ($0.spaceID ?? ActiveSpaceManager.defaultSpaceID) == activeSpaceManager.currentSpaceID }
+            .sorted { $0.createdAt > $1.createdAt }
     }
 
     // Shared search predicate so every document list (Files mode, Folders grid, etc.)
@@ -431,6 +436,7 @@ final class DocumentsListViewModel: ObservableObject {
         isProcessing = true
 
         let metadata = resolveFolder(for: metadata)
+        let spaceID = activeSpaceManager.currentSpaceID
 
         Task.detached(priority: .userInitiated) { [weak self] in
             guard let self else { return }
@@ -457,6 +463,7 @@ final class DocumentsListViewModel: ObservableObject {
                 if !metadata.doctorName.isEmpty { document.doctorName = metadata.doctorName }
                 if !metadata.notes.isEmpty { document.notes = metadata.notes }
                 document.expiryDate = metadata.expiryDate
+                document.spaceID = spaceID
                 if let folderId = metadata.customFolderId {
                     document.tags = (document.tags ?? []) + [folderId.uuidString]
                 }

@@ -125,7 +125,8 @@ actor DocumentSyncService {
                 specialization: syncMeta.specialization.flatMap { MedicalSpecialization(rawValue: $0) },
                 doctorName: syncMeta.doctorName,
                 notes: syncMeta.notes,
-                tags: syncMeta.tags
+                tags: syncMeta.tags,
+                spaceID: syncMeta.spaceID
             )
             restored.append(doc)
         }
@@ -147,6 +148,7 @@ private struct DocumentSyncMetadata: Codable {
     let doctorName: String?
     let notes: String?
     let tags: [String]?
+    let spaceID: UUID?
 
     init(from doc: Document) {
         name           = doc.name
@@ -158,5 +160,6 @@ private struct DocumentSyncMetadata: Codable {
         doctorName     = doc.doctorName
         notes          = doc.notes
         tags           = doc.tags
+        spaceID        = doc.spaceID
     }
 }
