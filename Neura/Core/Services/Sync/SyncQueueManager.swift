@@ -191,6 +191,33 @@ final class SyncQueueManager: ObservableObject {
         }
     }
 
+    // MARK: - Spaces Upload
+
+    func enqueueSpacesUpload(_ spaces: [Space]) {
+        pending.add(PendingSyncOp(kind: .spacesUpload, id: nil))
+        attemptSpacesUpload(spaces)
+    }
+
+    private func attemptSpacesUpload(_ spaces: [Space]) {
+        guard let uid, let key else { return }
+        // Never overwrite good cloud data with an empty list (same guard as
+        // custom folders). Spaces always has >=1 (the default), so this is
+        // belt-and-suspenders.
+        guard !spaces.isEmpty else {
+            pending.remove(PendingSyncOp(kind: .spacesUpload, id: nil))
+            return
+        }
+        Task {
+            do {
+                try await SpaceSyncService.shared.upload(spaces, uid: uid, key: key)
+                pending.remove(PendingSyncOp(kind: .spacesUpload, id: nil))
+                SyncLog.success("Uploaded spaces")
+            } catch {
+                SyncLog.failure("Spaces upload failed", error: error)
+            }
+        }
+    }
+
     // MARK: - Drain (retry everything pending)
 
     /// Re-attempts every queued operation. Payloads are reconstructed from local
@@ -262,6 +289,13 @@ final class SyncQueueManager: ObservableObject {
                 } else {
                     attemptCustomFoldersUpload(folders)
                 }
+            case .spacesUpload:
+                let spaces = ActiveSpaceManager.shared.spaces
+                if spaces.isEmpty {
+                    pending.remove(op)
+                } else {
+                    attemptSpacesUpload(spaces)
+                }
             }
         }
     }
@@ -272,7 +306,16 @@ final class SyncQueueManager: ObservableObject {
     /// Called once per sign-in; idempotent — skips files already on disk.
     func performInitialRestore(uid: String, key: SymmetricKey) {
         Task {
-            // 1. Health profile
+            // 1. Spaces — restored BEFORE everything else so the containers
+            // that documents/entries/health profiles reference (via spaceID)
+            // already exist locally when the rest of the restore runs.
+            if let cloudSpaces = try? await SpaceSyncService.shared.download(uid: uid, key: key),
+               !cloudSpaces.isEmpty {
+                ActiveSpaceManager.shared.mergeFromCloud(cloudSpaces)
+                SyncLog.success("Restored \(cloudSpaces.count) space(s)")
+            }
+
+            // 2. Health profile
             if let profile = try? await HealthProfileSyncService.shared.download(uid: uid, key: key),
                let data = try? JSONEncoder().encode(profile) {
                 UserDefaults.standard.set(data, forKey: "health_profile_data")
@@ -280,7 +323,7 @@ final class SyncQueueManager: ObservableObject {
                 SyncLog.success("Restored health profile")
             }
 
-            // 1b. Preferences (medical areas + location)
+            // 2b. Preferences (medical areas + location)
             if let prefs = try? await PreferencesSyncService.shared.download(uid: uid, key: key) {
                 UserDefaults.standard.set(prefs.location, forKey: "user_location")
                 if let areasData = try? JSONEncoder().encode(prefs.medicalAreas) {
@@ -290,7 +333,7 @@ final class SyncQueueManager: ObservableObject {
                 SyncLog.success("Restored preferences")
             }
 
-            // 1c. Custom folders — restore BEFORE documents so the folders that
+            // 2c. Custom folders — restore BEFORE documents so the folders that
             // documents reference (via the folder UUID in `tags`) already exist
             // when the grid rebuilds, and no duplicate "Other" is auto-created.
             if let cloudFolders = try? await CustomFolderSyncService.shared.download(uid: uid, key: key),
@@ -299,7 +342,7 @@ final class SyncQueueManager: ObservableObject {
                 SyncLog.success("Restored \(cloudFolders.count) custom folder(s)")
             }
 
-            // 2. Documents — download missing files, rebuild metadata
+            // 3. Documents — download missing files, rebuild metadata
             if let restored = try? await DocumentSyncService.shared.downloadAll(uid: uid, key: key),
                !restored.isEmpty {
                 let existing = DocumentFileManager.shared.loadMetadata()
@@ -312,7 +355,7 @@ final class SyncQueueManager: ObservableObject {
                 SyncLog.success("Restored \(restored.count) document(s)")
             }
 
-            // 3. Calendar entries (appointments / medication / medical events)
+            // 4. Calendar entries (appointments / medication / medical events)
             if let cloudEntries = try? await CalendarEntrySyncService.shared.download(uid: uid, key: key),
                !cloudEntries.isEmpty {
                 let local = CalendarEntryStore.shared.loadEntriesFromDisk()
