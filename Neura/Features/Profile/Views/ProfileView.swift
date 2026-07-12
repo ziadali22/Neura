@@ -62,6 +62,11 @@ struct ProfileView: View {
                         }
                         .padding(.bottom, 24)
 
+                        // Spaces section
+                        ProfileSectionHeader(title: L10n.Profile.Section.spaces)
+                        SpacesSection()
+                            .padding(.bottom, 24)
+
                         // Preferences section
                         ProfileSectionHeader(title: L10n.Profile.Section.preferences)
                         VStack(spacing: 11) {

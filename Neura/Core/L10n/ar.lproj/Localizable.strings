@@ -199,6 +199,11 @@
 "onboarding.scanning.bloodTest" = "فحص الدم";
 "onboarding.scanning.readyToShare" = "جاهز للمشاركة";
 
+// MARK: - Tab Bar
+"tabBar.profile" = "الملف الشخصي";
+"tabBar.home" = "الرئيسية";
+"tabBar.docs" = "المستندات";
+
 // MARK: - Home
 "home.greeting.morning" = "صباح الخير";
 "home.greeting.afternoon" = "مساء الخير";
@@ -208,6 +213,7 @@
 "home.customizeCard" = "تخصيص البطاقة";
 "home.shareHealthProfile" = "مشاركة الملف الصحي";
 "home.completeProfile" = "أكمل ملفك الشخصي";
+"home.encryptedSecure" = "مشفّر وآمن";
 "home.uploadLimit.remainingFormat" = "%@ رفع مستند مجاني متبقٍ";
 "home.uploadLimit.upgrade" = "جرّب Neura Pro لإزالة الحد";
 "home.uploadLimit.reachedTitle" = "أزِل حد الرفع";
@@ -487,6 +493,11 @@
 // MARK: - Profile
 "profile.title" = "الملف الشخصي";
 "profile.section.profile" = "الملف الشخصي";
+"profile.section.spaces" = "الحسابات";
+"profile.spaces.addSpaceTitle" = "إضافة حساب";
+"profile.spaces.namePlaceholder" = "الاسم";
+"profile.spaces.removeTitle" = "إزالة الحساب";
+"profile.spaces.removeMessage" = "تبقى مستندات هذا الحساب وأحداث التقويم والملف الصحي محفوظة لكنها مخفية. تواصل مع الدعم لاستعادة الوصول لاحقًا.";
 "profile.section.preferences" = "التفضيلات";
 "profile.section.support" = "الدعم";
 "profile.section.account" = "الحساب";
@@ -564,6 +575,24 @@
 "coachmark.documentUpload.title" = "أضف وثيقتك الأولى";
 "coachmark.documentUpload.subtitle" = "اضغط + لمسح ضوئي أو رفع صورة أو استيراد ملف.";
 
+// MARK: - Medical Specialization
+"medicalSpecialization.cardiology" = "أمراض القلب";
+"medicalSpecialization.dermatology" = "الأمراض الجلدية";
+"medicalSpecialization.dentistry" = "طب الأسنان";
+"medicalSpecialization.endocrinology" = "الغدد الصماء";
+"medicalSpecialization.gastroenterology" = "أمراض الجهاز الهضمي";
+"medicalSpecialization.generalMedicine" = "الطب العام";
+"medicalSpecialization.gynaecology" = "أمراض النساء";
+"medicalSpecialization.neurology" = "الأعصاب";
+"medicalSpecialization.oncology" = "الأورام";
+"medicalSpecialization.ophthalmology" = "طب العيون";
+"medicalSpecialization.orthopaedics" = "جراحة العظام";
+"medicalSpecialization.pulmonology" = "أمراض الرئة";
+"medicalSpecialization.psychiatry" = "الطب النفسي";
+"medicalSpecialization.surgery" = "الجراحة";
+"medicalSpecialization.urology" = "المسالك البولية";
+"medicalSpecialization.other" = "أخرى";
+
 // MARK: - Calendar
 "calendar.title" = "التقويم";
 "calendar.promoTitle" = "تقويمك الصحي";
@@ -599,6 +628,7 @@
 "calendar.reminder.hour1" = "قبل ساعة";
 "calendar.reminder.day1" = "قبل يوم";
 "calendar.openDocument" = "فتح المستند";
+"calendar.removeLinkedDocument" = "إزالة المستند المرتبط";
 "calendar.next" = "التالي";
 "calendar.field.specialization" = "التخصص";
 "calendar.field.doctor" = "الطبيب";
@@ -606,20 +636,24 @@
 "calendar.reminder.body30" = "يبدأ خلال 30 دقيقة";
 "calendar.reminder.body15" = "يبدأ خلال 15 دقيقة";
 "calendar.reminder.bodyWeek" = "قادم خلال أسبوع";
-"calendar.reminder.body2Days" = "قادم خلال يومين";
+"calendar.reminder.body1Day" = "قادم خلال يوم";
 "calendar.reminder.body2Hours" = "قادم خلال ساعتين";
 "calendar.reminder.bodyMedTime" = "حان وقت تناول دوائك";
 "calendar.reminder.bodyMedFollowUp" = "هل تناولت دواءك؟";
 "calendar.reminder.appt" = "مرحبًا، موعد مع %@";
 "calendar.reminder.apptWithSpec" = "مرحبًا، موعد مع %@ (%@)";
 "calendar.reminder.apptPlain" = "مرحبًا، %@";
-"calendar.reminderInfo" = "سيتم تذكيرك قبل المواعيد بأسبوع ويومين وساعتين، وقبل الأحداث الأخرى بـ 30 و15 دقيقة.";
+"calendar.reminderInfoAppointment" = "سيتم تذكيرك بأسبوع ويوم وساعتين قبل هذا الموعد.";
+"calendar.reminderInfoAppointmentRecurring" = "سيتم تذكيرك بأسبوع ويوم وساعتين قبل كل موعد قادم.";
+"calendar.reminderInfoMedication" = "سيتم تذكيرك في الوقت المحدد.";
+"calendar.reminderInfoMedicationRecurring" = "سيتم تذكيرك في الوقت المحدد لكل جرعة.";
+"calendar.reminderInfoMedicalEvent" = "سيتم تذكيرك قبل 30 و15 دقيقة من هذا الحدث.";
+"calendar.reminderInfoMedicalEventRecurring" = "سيتم تذكيرك قبل 30 و15 دقيقة من كل حدث قادم.";
 "calendar.today" = "اليوم";
 "calendar.emptyHint" = "اضغط على أي يوم لإضافة حدث.";
 "calendar.todayEmptyHint" = "لا شيء مخطط لهذا اليوم — أضف موعدًا أو دواءً أو حدثًا طبيًا لتبقى على المسار.";
 "calendar.addEvent" = "إضافة";
 "calendar.a11yHasEvents" = "يحتوي على أحداث";
-"calendar.reminderInfoRecurring" = "تذكّرك المواعيد قبل كل موعد قادم بأسبوع ويومين وساعتين؛ والأحداث الأخرى بـ 30 و15 دقيقة.";
 
 // MARK: - Health Profile extras
 "healthProfile.chooseFromContacts" = "اختر من جهات الاتصال";

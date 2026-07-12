@@ -204,6 +204,11 @@
 "onboarding.scanning.bloodTest" = "Blood Test";
 "onboarding.scanning.readyToShare" = "Ready to share";
 
+// MARK: - Tab Bar
+"tabBar.profile" = "Profile";
+"tabBar.home" = "Home";
+"tabBar.docs" = "Docs";
+
 // MARK: - Home
 "home.greeting.morning" = "Good morning";
 "home.greeting.afternoon" = "Good afternoon";
@@ -213,6 +218,7 @@
 "home.customizeCard" = "Customize card";
 "home.shareHealthProfile" = "Share health profile";
 "home.completeProfile" = "Complete your profile";
+"home.encryptedSecure" = "ENCRYPTED & SECURE";
 "home.uploadLimit.remainingFormat" = "%@ free Documents Uploads left";
 "home.uploadLimit.upgrade" = "Try Neura Pro to remove limit";
 "home.uploadLimit.reachedTitle" = "Remove your upload limit";
@@ -492,6 +498,11 @@
 // MARK: - Profile
 "profile.title" = "Profile";
 "profile.section.profile" = "Profile";
+"profile.section.spaces" = "Accounts";
+"profile.spaces.addSpaceTitle" = "Add Account";
+"profile.spaces.namePlaceholder" = "Name";
+"profile.spaces.removeTitle" = "Remove Account";
+"profile.spaces.removeMessage" = "This account's documents, calendar entries, and health profile stay saved but hidden. Contact support to restore access later.";
 "profile.section.preferences" = "Preferences";
 "profile.section.support" = "Support";
 "profile.section.account" = "Account";
@@ -569,6 +580,24 @@
 "coachmark.documentUpload.title" = "Add your first document";
 "coachmark.documentUpload.subtitle" = "Tap + to scan, upload a photo, or import a file.";
 
+// MARK: - Medical Specialization
+"medicalSpecialization.cardiology" = "Cardiology";
+"medicalSpecialization.dermatology" = "Dermatology";
+"medicalSpecialization.dentistry" = "Dentistry";
+"medicalSpecialization.endocrinology" = "Endocrinology";
+"medicalSpecialization.gastroenterology" = "Gastroenterology";
+"medicalSpecialization.generalMedicine" = "General Medicine";
+"medicalSpecialization.gynaecology" = "Gynaecology";
+"medicalSpecialization.neurology" = "Neurology";
+"medicalSpecialization.oncology" = "Oncology";
+"medicalSpecialization.ophthalmology" = "Ophthalmology";
+"medicalSpecialization.orthopaedics" = "Orthopaedics";
+"medicalSpecialization.pulmonology" = "Pulmonology";
+"medicalSpecialization.psychiatry" = "Psychiatry";
+"medicalSpecialization.surgery" = "Surgery";
+"medicalSpecialization.urology" = "Urology";
+"medicalSpecialization.other" = "Other";
+
 // MARK: - Calendar
 "calendar.title" = "Calendar";
 "calendar.promoTitle" = "Your health calendar";
@@ -604,6 +633,7 @@
 "calendar.reminder.hour1" = "1 hour before";
 "calendar.reminder.day1" = "1 day before";
 "calendar.openDocument" = "Open document";
+"calendar.removeLinkedDocument" = "Remove linked document";
 "calendar.next" = "Next";
 "calendar.field.specialization" = "Specialization";
 "calendar.field.doctor" = "Doctor";
@@ -611,20 +641,24 @@
 "calendar.reminder.body30" = "Starts in 30 minutes";
 "calendar.reminder.body15" = "Starts in 15 minutes";
 "calendar.reminder.bodyWeek" = "Coming up in 1 week";
-"calendar.reminder.body2Days" = "Coming up in 2 days";
+"calendar.reminder.body1Day" = "Coming up in 1 day";
 "calendar.reminder.body2Hours" = "Coming up in 2 hours";
 "calendar.reminder.bodyMedTime" = "Time to take your medication";
 "calendar.reminder.bodyMedFollowUp" = "Did you take your medication?";
 "calendar.reminder.appt" = "Hey, Appointment with %@";
 "calendar.reminder.apptWithSpec" = "Hey, Appointment with %@ (%@)";
 "calendar.reminder.apptPlain" = "Hey, %@";
-"calendar.reminderInfo" = "You'll be reminded 1 week, 2 days, and 2 hours before appointments, and 30 and 15 minutes before other events.";
+"calendar.reminderInfoAppointment" = "You'll be reminded 1 week, 1 day, and 2 hours before this appointment.";
+"calendar.reminderInfoAppointmentRecurring" = "You'll be reminded 1 week, 1 day, and 2 hours before each upcoming occurrence.";
+"calendar.reminderInfoMedication" = "You'll be reminded at the scheduled time.";
+"calendar.reminderInfoMedicationRecurring" = "You'll be reminded at the scheduled time for each dose.";
+"calendar.reminderInfoMedicalEvent" = "You'll be reminded 30 and 15 minutes before this event.";
+"calendar.reminderInfoMedicalEventRecurring" = "You'll be reminded 30 and 15 minutes before each upcoming occurrence.";
 "calendar.today" = "Today";
 "calendar.emptyHint" = "Tap any day to add an event.";
 "calendar.todayEmptyHint" = "Nothing planned for today — add an appointment, medication, or medical event to stay on track.";
 "calendar.addEvent" = "Add";
 "calendar.a11yHasEvents" = "Has events";
-"calendar.reminderInfoRecurring" = "Appointments remind you 1 week, 2 days, and 2 hours before each upcoming occurrence; other events 30 and 15 minutes before.";
 
 // MARK: - Health Profile extras
 "healthProfile.chooseFromContacts" = "Choose from Contacts";

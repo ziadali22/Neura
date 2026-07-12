@@ -199,6 +199,11 @@
 "onboarding.scanning.bloodTest" = "Analize de sânge";
 "onboarding.scanning.readyToShare" = "Gata de partajat";
 
+// MARK: - Tab Bar
+"tabBar.profile" = "Profil";
+"tabBar.home" = "Acasă";
+"tabBar.docs" = "Documente";
+
 // MARK: - Home
 "home.greeting.morning" = "Bună dimineața";
 "home.greeting.afternoon" = "Bună ziua";
@@ -208,6 +213,7 @@
 "home.customizeCard" = "Personalizează cardul";
 "home.shareHealthProfile" = "Distribuie profilul de sănătate";
 "home.completeProfile" = "Completează-ți profilul";
+"home.encryptedSecure" = "CRIPTAT ȘI SECURIZAT";
 "home.uploadLimit.remainingFormat" = "%@ încărcări gratuite rămase";
 "home.uploadLimit.upgrade" = "Încearcă Neura Pro pentru a elimina limita";
 "home.uploadLimit.reachedTitle" = "Elimină limita de încărcare";
@@ -487,6 +493,11 @@
 // MARK: - Profile
 "profile.title" = "Profil";
 "profile.section.profile" = "Profil";
+"profile.section.spaces" = "Conturi";
+"profile.spaces.addSpaceTitle" = "Adaugă cont";
+"profile.spaces.namePlaceholder" = "Nume";
+"profile.spaces.removeTitle" = "Elimină contul";
+"profile.spaces.removeMessage" = "Documentele, evenimentele din calendar și profilul medical ale acestui cont rămân salvate, dar ascunse. Contactează asistența pentru a restaura accesul mai târziu.";
 "profile.section.preferences" = "Preferințe";
 "profile.section.support" = "Asistență";
 "profile.section.account" = "Cont";
@@ -564,6 +575,24 @@
 "coachmark.documentUpload.title" = "Adaugă primul tău document";
 "coachmark.documentUpload.subtitle" = "Apasă + pentru a scana, a încărca o fotografie sau a importa un fișier.";
 
+// MARK: - Medical Specialization
+"medicalSpecialization.cardiology" = "Cardiologie";
+"medicalSpecialization.dermatology" = "Dermatologie";
+"medicalSpecialization.dentistry" = "Stomatologie";
+"medicalSpecialization.endocrinology" = "Endocrinologie";
+"medicalSpecialization.gastroenterology" = "Gastroenterologie";
+"medicalSpecialization.generalMedicine" = "Medicină generală";
+"medicalSpecialization.gynaecology" = "Ginecologie";
+"medicalSpecialization.neurology" = "Neurologie";
+"medicalSpecialization.oncology" = "Oncologie";
+"medicalSpecialization.ophthalmology" = "Oftalmologie";
+"medicalSpecialization.orthopaedics" = "Ortopedie";
+"medicalSpecialization.pulmonology" = "Pneumologie";
+"medicalSpecialization.psychiatry" = "Psihiatrie";
+"medicalSpecialization.surgery" = "Chirurgie";
+"medicalSpecialization.urology" = "Urologie";
+"medicalSpecialization.other" = "Altele";
+
 // MARK: - Calendar
 "calendar.title" = "Calendar";
 "calendar.promoTitle" = "Calendarul tău de sănătate";
@@ -599,6 +628,7 @@
 "calendar.reminder.hour1" = "Cu 1 oră înainte";
 "calendar.reminder.day1" = "Cu 1 zi înainte";
 "calendar.openDocument" = "Deschide documentul";
+"calendar.removeLinkedDocument" = "Elimină documentul asociat";
 "calendar.next" = "Următor";
 "calendar.field.specialization" = "Specializare";
 "calendar.field.doctor" = "Medic";
@@ -606,20 +636,24 @@
 "calendar.reminder.body30" = "Începe în 30 de minute";
 "calendar.reminder.body15" = "Începe în 15 minute";
 "calendar.reminder.bodyWeek" = "Urmează în 1 săptămână";
-"calendar.reminder.body2Days" = "Urmează în 2 zile";
+"calendar.reminder.body1Day" = "Urmează într-o zi";
 "calendar.reminder.body2Hours" = "Urmează în 2 ore";
 "calendar.reminder.bodyMedTime" = "E timpul să îți iei medicamentul";
 "calendar.reminder.bodyMedFollowUp" = "Ți-ai luat medicamentul?";
 "calendar.reminder.appt" = "Salut, programare la %@";
 "calendar.reminder.apptWithSpec" = "Salut, programare la %@ (%@)";
 "calendar.reminder.apptPlain" = "Salut, %@";
-"calendar.reminderInfo" = "Vei fi notificat cu 1 săptămână, 2 zile și 2 ore înainte de programări, și cu 30 și 15 minute înainte de alte evenimente.";
+"calendar.reminderInfoAppointment" = "Vei fi notificat cu 1 săptămână, 1 zi și 2 ore înainte de această programare.";
+"calendar.reminderInfoAppointmentRecurring" = "Vei fi notificat cu 1 săptămână, 1 zi și 2 ore înainte de fiecare apariție viitoare.";
+"calendar.reminderInfoMedication" = "Vei fi notificat la ora programată.";
+"calendar.reminderInfoMedicationRecurring" = "Vei fi notificat la ora programată pentru fiecare doză.";
+"calendar.reminderInfoMedicalEvent" = "Vei fi notificat cu 30 și 15 minute înainte de acest eveniment.";
+"calendar.reminderInfoMedicalEventRecurring" = "Vei fi notificat cu 30 și 15 minute înainte de fiecare apariție viitoare.";
 "calendar.today" = "Astăzi";
 "calendar.emptyHint" = "Atinge orice zi pentru a adăuga un eveniment.";
 "calendar.todayEmptyHint" = "Nimic planificat pentru azi — adaugă o programare, un medicament sau un eveniment medical ca să rămâi pe drumul cel bun.";
 "calendar.addEvent" = "Adaugă";
 "calendar.a11yHasEvents" = "Are evenimente";
-"calendar.reminderInfoRecurring" = "Programările te anunță cu 1 săptămână, 2 zile și 2 ore înainte de fiecare apariție viitoare; alte evenimente cu 30 și 15 minute înainte.";
 
 // MARK: - Health Profile extras
 "healthProfile.chooseFromContacts" = "Alege din Contacte";

@@ -35,6 +35,26 @@ enum L10n {
         static var ok: String { "common.ok".l10n() }
     }
 
+    // MARK: - Medical Specialization
+    enum MedicalSpecialization {
+        static var cardiology: String { "medicalSpecialization.cardiology".l10n() }
+        static var dermatology: String { "medicalSpecialization.dermatology".l10n() }
+        static var dentistry: String { "medicalSpecialization.dentistry".l10n() }
+        static var endocrinology: String { "medicalSpecialization.endocrinology".l10n() }
+        static var gastroenterology: String { "medicalSpecialization.gastroenterology".l10n() }
+        static var generalMedicine: String { "medicalSpecialization.generalMedicine".l10n() }
+        static var gynaecology: String { "medicalSpecialization.gynaecology".l10n() }
+        static var neurology: String { "medicalSpecialization.neurology".l10n() }
+        static var oncology: String { "medicalSpecialization.oncology".l10n() }
+        static var ophthalmology: String { "medicalSpecialization.ophthalmology".l10n() }
+        static var orthopaedics: String { "medicalSpecialization.orthopaedics".l10n() }
+        static var pulmonology: String { "medicalSpecialization.pulmonology".l10n() }
+        static var psychiatry: String { "medicalSpecialization.psychiatry".l10n() }
+        static var surgery: String { "medicalSpecialization.surgery".l10n() }
+        static var urology: String { "medicalSpecialization.urology".l10n() }
+        static var other: String { "medicalSpecialization.other".l10n() }
+    }
+
     // MARK: - Calendar
     enum Calendar {
         static var title: String { "calendar.title".l10n() }
@@ -67,19 +87,24 @@ enum L10n {
         static var reminderBody30: String { "calendar.reminder.body30".l10n() }
         static var reminderBody15: String { "calendar.reminder.body15".l10n() }
         static var reminderBodyWeek: String { "calendar.reminder.bodyWeek".l10n() }
-        static var reminderBody2Days: String { "calendar.reminder.body2Days".l10n() }
+        static var reminderBody1Day: String { "calendar.reminder.body1Day".l10n() }
         static var reminderBody2Hours: String { "calendar.reminder.body2Hours".l10n() }
         static var reminderBodyMedTime: String { "calendar.reminder.bodyMedTime".l10n() }
         static var reminderBodyMedFollowUp: String { "calendar.reminder.bodyMedFollowUp".l10n() }
         static var reminderAppt: String { "calendar.reminder.appt".l10n() }
         static var reminderApptWithSpec: String { "calendar.reminder.apptWithSpec".l10n() }
         static var reminderApptPlain: String { "calendar.reminder.apptPlain".l10n() }
-        static var reminderInfo: String { "calendar.reminderInfo".l10n() }
-        static var reminderInfoRecurring: String { "calendar.reminderInfoRecurring".l10n() }
+        static var reminderInfoAppointment: String { "calendar.reminderInfoAppointment".l10n() }
+        static var reminderInfoAppointmentRecurring: String { "calendar.reminderInfoAppointmentRecurring".l10n() }
+        static var reminderInfoMedication: String { "calendar.reminderInfoMedication".l10n() }
+        static var reminderInfoMedicationRecurring: String { "calendar.reminderInfoMedicationRecurring".l10n() }
+        static var reminderInfoMedicalEvent: String { "calendar.reminderInfoMedicalEvent".l10n() }
+        static var reminderInfoMedicalEventRecurring: String { "calendar.reminderInfoMedicalEventRecurring".l10n() }
         static var a11yHasEvents: String { "calendar.a11yHasEvents".l10n() }
         static var fieldLinkDocument: String { "calendar.field.linkDocument".l10n() }
         static var noDocumentLinked: String { "calendar.noDocumentLinked".l10n() }
         static var openDocument: String { "calendar.openDocument".l10n() }
+        static var removeLinkedDocument: String { "calendar.removeLinkedDocument".l10n() }
         static var deleteEntry: String { "calendar.deleteEntry".l10n() }
         static var deleteConfirmTitle: String { "calendar.deleteConfirmTitle".l10n() }
         static var deleteConfirmMessage: String { "calendar.deleteConfirmMessage".l10n() }
@@ -307,6 +332,13 @@ enum L10n {
         }
     }
 
+    // MARK: - Tab Bar
+    enum TabBar {
+        static var profile: String { "tabBar.profile".l10n() }
+        static var home: String { "tabBar.home".l10n() }
+        static var docs: String { "tabBar.docs".l10n() }
+    }
+
     // MARK: - Home
     enum Home {
         enum Greeting {
@@ -319,6 +351,7 @@ enum L10n {
         static var customizeCard: String { "home.customizeCard".l10n() }
         static var shareHealthProfile: String { "home.shareHealthProfile".l10n() }
         static var completeProfile: String { "home.completeProfile".l10n() }
+        static var encryptedSecure: String { "home.encryptedSecure".l10n() }
 
         enum UploadLimit {
             static func remaining(_ text: String) -> String {
@@ -690,9 +723,17 @@ enum L10n {
 
         enum Section {
             static var profile: String { "profile.section.profile".l10n() }
+            static var spaces: String { "profile.section.spaces".l10n() }
             static var preferences: String { "profile.section.preferences".l10n() }
             static var support: String { "profile.section.support".l10n() }
             static var account: String { "profile.section.account".l10n() }
+        }
+
+        enum Spaces {
+            static var addSpaceTitle: String { "profile.spaces.addSpaceTitle".l10n() }
+            static var namePlaceholder: String { "profile.spaces.namePlaceholder".l10n() }
+            static var removeTitle: String { "profile.spaces.removeTitle".l10n() }
+            static var removeMessage: String { "profile.spaces.removeMessage".l10n() }
         }
 
         static var healthProfile: String { "profile.healthProfile".l10n() }
