@@ -6,11 +6,22 @@ import Combine
 final class HealthProfileViewModel: ObservableObject {
     @Published var profile: HealthProfile
 
-    private static let storageKey = "health_profile_data"
+    private static let storageKey = "health_profiles_by_space"
+    /// Legacy single-profile key from before Spaces existed — read once for migration.
+    private static let legacyStorageKey = "health_profile_data"
+
+    private let activeSpaceManager: ActiveSpaceManager
+    private var spaceObserver: AnyCancellable?
     private var restoreObserver: NSObjectProtocol?
 
-    init() {
-        self.profile = Self.loadFromDisk() ?? .sample
+    init(activeSpaceManager: ActiveSpaceManager = .shared) {
+        self.activeSpaceManager = activeSpaceManager
+        let all = Self.loadAllFromDisk()
+        self.profile = Self.profile(for: activeSpaceManager.currentSpaceID, in: all)
+
+        spaceObserver = activeSpaceManager.$currentSpaceID.sink { [weak self] newSpaceID in
+            self?.reload(for: newSpaceID)
+        }
         restoreObserver = NotificationCenter.default.addObserver(
             forName: .healthProfileRestored, object: nil, queue: .main
         ) { [weak self] _ in
@@ -19,15 +30,45 @@ final class HealthProfileViewModel: ObservableObject {
     }
 
     func reload() {
-        if let fresh = Self.loadFromDisk() {
-            profile = fresh
-        }
+        reload(for: activeSpaceManager.currentSpaceID)
     }
 
-    private static func loadFromDisk() -> HealthProfile? {
-        guard let data = UserDefaults.standard.data(forKey: storageKey),
-              let saved = try? JSONDecoder().decode(HealthProfile.self, from: data) else { return nil }
-        return saved
+    /// Reloads for an explicit space id rather than re-reading
+    /// `activeSpaceManager.currentSpaceID`. Required when called from the
+    /// `$currentSpaceID` sink: `@Published` notifies subscribers from `willSet`,
+    /// before the backing storage is updated, so re-reading the property inside
+    /// the sink would still see the *previous* space — the emitted value is the
+    /// only reliable source of the new one at that point.
+    private func reload(for spaceID: UUID) {
+        let all = Self.loadAllFromDisk()
+        profile = Self.profile(for: spaceID, in: all)
+    }
+
+    /// A space with no stored profile yet gets an empty `.default` profile —
+    /// EXCEPT the original default space, which keeps showing the `.sample`
+    /// demo data on first launch (existing pre-Spaces behavior, preserved so
+    /// new users aren't regressed). A newly created child space must never
+    /// show demo or another space's data.
+    private static func profile(for spaceID: UUID, in all: [UUID: HealthProfile]) -> HealthProfile {
+        if let existing = all[spaceID] { return existing }
+        return spaceID == ActiveSpaceManager.defaultSpaceID ? .sample : .default
+    }
+
+    private static func loadAllFromDisk() -> [UUID: HealthProfile] {
+        if let data = UserDefaults.standard.data(forKey: storageKey),
+           let saved = try? JSONDecoder().decode([UUID: HealthProfile].self, from: data) {
+            return saved
+        }
+        // One-time migration: wrap the pre-Spaces single profile under the default space.
+        if let legacyData = UserDefaults.standard.data(forKey: legacyStorageKey),
+           let legacyProfile = try? JSONDecoder().decode(HealthProfile.self, from: legacyData) {
+            let migrated = [ActiveSpaceManager.defaultSpaceID: legacyProfile]
+            if let data = try? JSONEncoder().encode(migrated) {
+                UserDefaults.standard.set(data, forKey: storageKey)
+            }
+            return migrated
+        }
+        return [:]
     }
 
     // MARK: - General Data
@@ -374,10 +415,12 @@ final class HealthProfileViewModel: ObservableObject {
 
     private func save() {
         profile.lastUpdated = Date()
-        if let data = try? JSONEncoder().encode(profile) {
+        var all = Self.loadAllFromDisk()
+        all[activeSpaceManager.currentSpaceID] = profile
+        if let data = try? JSONEncoder().encode(all) {
             UserDefaults.standard.set(data, forKey: Self.storageKey)
         }
-        SyncQueueManager.shared.enqueueProfileUpload(profile)
+        SyncQueueManager.shared.enqueueProfileUpload(all)
         updateNotifications()
         AnalyticsManager.shared.track(.healthProfileSaved)
     }

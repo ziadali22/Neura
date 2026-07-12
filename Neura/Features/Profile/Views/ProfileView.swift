@@ -295,6 +295,7 @@ private extension ProfileView {
     func clearLocalUserData() {
         let keys = [
             "health_profile_data",
+            "health_profiles_by_space",
             "hasCompletedOnboarding",
             "user_location",
             "onboarding_medical_areas",

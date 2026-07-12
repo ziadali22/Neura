@@ -105,18 +105,18 @@ final class SyncQueueManager: ObservableObject {
 
     // MARK: - Health Profile Upload
 
-    func enqueueProfileUpload(_ profile: HealthProfile) {
+    func enqueueProfileUpload(_ profiles: [UUID: HealthProfile]) {
         pending.add(PendingSyncOp(kind: .profileUpload, id: nil))
-        attemptProfileUpload(profile)
+        attemptProfileUpload(profiles)
     }
 
-    private func attemptProfileUpload(_ profile: HealthProfile) {
+    private func attemptProfileUpload(_ profiles: [UUID: HealthProfile]) {
         guard let uid, let key else { return }
         Task {
             do {
-                try await HealthProfileSyncService.shared.upload(profile: profile, uid: uid, key: key)
+                try await HealthProfileSyncService.shared.upload(profiles: profiles, uid: uid, key: key)
                 pending.remove(PendingSyncOp(kind: .profileUpload, id: nil))
-                SyncLog.success("Uploaded health profile")
+                SyncLog.success("Uploaded health profile(s)")
             } catch {
                 SyncLog.failure("Profile upload failed", error: error)
             }
@@ -255,9 +255,9 @@ final class SyncQueueManager: ObservableObject {
                     pending.remove(op)
                 }
             case .profileUpload:
-                if let data = UserDefaults.standard.data(forKey: "health_profile_data"),
-                   let profile = try? JSONDecoder().decode(HealthProfile.self, from: data) {
-                    attemptProfileUpload(profile)
+                if let data = UserDefaults.standard.data(forKey: "health_profiles_by_space"),
+                   let profiles = try? JSONDecoder().decode([UUID: HealthProfile].self, from: data) {
+                    attemptProfileUpload(profiles)
                 } else {
                     pending.remove(op)
                 }
@@ -315,12 +315,12 @@ final class SyncQueueManager: ObservableObject {
                 SyncLog.success("Restored \(cloudSpaces.count) space(s)")
             }
 
-            // 2. Health profile
-            if let profile = try? await HealthProfileSyncService.shared.download(uid: uid, key: key),
-               let data = try? JSONEncoder().encode(profile) {
-                UserDefaults.standard.set(data, forKey: "health_profile_data")
+            // 2. Health profile(s)
+            if let profiles = try? await HealthProfileSyncService.shared.download(uid: uid, key: key),
+               let data = try? JSONEncoder().encode(profiles) {
+                UserDefaults.standard.set(data, forKey: "health_profiles_by_space")
                 NotificationCenter.default.post(name: .healthProfileRestored, object: nil)
-                SyncLog.success("Restored health profile")
+                SyncLog.success("Restored \(profiles.count) health profile(s)")
             }
 
             // 2b. Preferences (medical areas + location)

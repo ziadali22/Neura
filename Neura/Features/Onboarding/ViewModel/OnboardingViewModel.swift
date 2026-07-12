@@ -91,7 +91,8 @@ final class OnboardingViewModel: ObservableObject {
         case .statistics:       return .documentScan
         case .documentScan:     return .profileCardIntro
         case .profileCardIntro: return .qrShare
-        case .qrShare:          return .privacySecurity
+        case .qrShare:          return .calendar
+        case .calendar:         return .privacySecurity
         case .privacySecurity:  return .welcome
         case .welcome:          return .profile
         case .profile:          return .location
@@ -121,7 +122,8 @@ final class OnboardingViewModel: ObservableObject {
         case .documentScan:     return .statistics
         case .profileCardIntro: return .documentScan
         case .qrShare:          return .profileCardIntro
-        case .privacySecurity:  return .qrShare
+        case .calendar:         return .qrShare
+        case .privacySecurity:  return .calendar
         case .welcome:          return .privacySecurity
         case .profile:          return .welcome
         case .location:         return .profile
@@ -312,12 +314,15 @@ final class OnboardingViewModel: ObservableObject {
         fill(state.allergies,   section: "allerg")
         fill(state.conditions,  section: "condition")
 
-        if let data = try? JSONEncoder().encode(profile) {
-            UserDefaults.standard.set(data, forKey: "health_profile_data")
+        // Onboarding always sets up the primary account owner's own profile —
+        // stored under the default space, same as HealthProfileViewModel.
+        let profiles: [UUID: HealthProfile] = [ActiveSpaceManager.defaultSpaceID: profile]
+        if let data = try? JSONEncoder().encode(profiles) {
+            UserDefaults.standard.set(data, forKey: "health_profiles_by_space")
         }
         // Upload to Firestore so a future reinstall + relogin restores it
         // (and hasExistingCloudData detects this user as returning).
-        SyncQueueManager.shared.enqueueProfileUpload(profile)
+        SyncQueueManager.shared.enqueueProfileUpload(profiles)
 
         // Persist selected medical areas
         let areas = state.medicalAreas.map(\.rawValue)
