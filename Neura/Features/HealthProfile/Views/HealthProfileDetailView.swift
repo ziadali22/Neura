@@ -306,9 +306,13 @@ private extension HealthProfileDetailView {
         isGeneratingReport = true
 
         Task.detached(priority: .userInitiated) {
-            let profile = await MainActor.run { viewModel.profile }
+            let (profile, spaceID) = await MainActor.run {
+                (viewModel.profile, ActiveSpaceManager.shared.currentSpaceID)
+            }
+            // The report is this account's medical record — including another
+            // account's documents would leak them into an exported PDF.
             let documents = DocumentFileManager.shared.loadMetadata()
-                .filter { $0.fileExists }
+                .filter { $0.fileExists && $0.belongsToSpace(spaceID) }
                 .sorted { $0.createdAt > $1.createdAt }
 
             let url = HealthReportGenerator().generate(profile: profile, documents: documents)

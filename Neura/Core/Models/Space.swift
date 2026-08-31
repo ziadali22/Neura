@@ -8,6 +8,9 @@ struct Space: Identifiable, Codable, Equatable {
     var isArchived: Bool
     /// Filename in AccountAvatarStore, or nil if no photo has been set.
     var avatarFilename: String?
+    /// Canonical `Relationship.rawValue` (e.g. "child"), or a legacy localized
+    /// label from before relationships were stored canonically. Nil if unset.
+    var relationship: String?
 
     private static let colorPalette = ["FF5A00", "3498DB", "9B59B6", "27AE60", "E74C3C", "1ABC9C"]
 
@@ -27,7 +30,8 @@ struct Space: Identifiable, Codable, Equatable {
         createdAt: Date = Date(),
         isDefault: Bool = false,
         isArchived: Bool = false,
-        avatarFilename: String? = nil
+        avatarFilename: String? = nil,
+        relationship: String? = nil
     ) {
         self.id = id
         self.name = name
@@ -35,5 +39,6 @@ struct Space: Identifiable, Codable, Equatable {
         self.isDefault = isDefault
         self.isArchived = isArchived
         self.avatarFilename = avatarFilename
+        self.relationship = relationship
     }
 }

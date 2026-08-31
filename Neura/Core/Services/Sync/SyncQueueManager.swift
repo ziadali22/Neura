@@ -218,6 +218,44 @@ final class SyncQueueManager: ObservableObject {
         }
     }
 
+    // MARK: - Growth Photo Upload
+
+    func enqueueGrowthPhotoUpload(_ entryID: UUID) {
+        pending.add(PendingSyncOp(kind: .growthPhotoUpload, id: entryID.uuidString))
+        attemptGrowthPhotoUpload(entryID)
+    }
+
+    private func attemptGrowthPhotoUpload(_ entryID: UUID) {
+        guard let uid, let key else { return }
+        Task {
+            do {
+                try await GrowthPhotoSyncService.shared.upload(entryID: entryID, uid: uid, key: key)
+                pending.remove(PendingSyncOp(kind: .growthPhotoUpload, id: entryID.uuidString))
+                SyncLog.success("Uploaded growth photo \(entryID)")
+            } catch {
+                SyncLog.failure("Growth photo upload failed \(entryID)", error: error)
+            }
+        }
+    }
+
+    func enqueueGrowthPhotoDelete(_ entryID: UUID) {
+        pending.add(PendingSyncOp(kind: .growthPhotoDelete, id: entryID.uuidString))
+        attemptGrowthPhotoDelete(entryID)
+    }
+
+    private func attemptGrowthPhotoDelete(_ entryID: UUID) {
+        guard let uid else { return }
+        Task {
+            do {
+                try await GrowthPhotoSyncService.shared.delete(entryID: entryID, uid: uid)
+                pending.remove(PendingSyncOp(kind: .growthPhotoDelete, id: entryID.uuidString))
+                SyncLog.success("Deleted growth photo \(entryID)")
+            } catch {
+                SyncLog.failure("Growth photo delete failed \(entryID)", error: error)
+            }
+        }
+    }
+
     // MARK: - Drain (retry everything pending)
 
     /// Re-attempts every queued operation. Payloads are reconstructed from local
@@ -296,6 +334,19 @@ final class SyncQueueManager: ObservableObject {
                 } else {
                     attemptSpacesUpload(spaces)
                 }
+            case .growthPhotoUpload:
+                if let id = op.id, let uuid = UUID(uuidString: id),
+                   GrowthPhotoStore.shared.fileExists(for: uuid) {
+                    attemptGrowthPhotoUpload(uuid)
+                } else {
+                    pending.remove(op)
+                }
+            case .growthPhotoDelete:
+                if let id = op.id, let uuid = UUID(uuidString: id) {
+                    attemptGrowthPhotoDelete(uuid)
+                } else {
+                    pending.remove(op)
+                }
             }
         }
     }
@@ -353,6 +404,14 @@ final class SyncQueueManager: ObservableObject {
                 try? DocumentFileManager.shared.saveMetadata(merged)
                 NotificationCenter.default.post(name: .documentsRestored, object: nil)
                 SyncLog.success("Restored \(restored.count) document(s)")
+            }
+
+            // 3b. Growth photos — after profiles so we know which measurements exist,
+            // but listing the cloud collection is enough even if a local entry is stale.
+            do {
+                try await GrowthPhotoSyncService.shared.downloadMissing(uid: uid, key: key)
+            } catch {
+                SyncLog.failure("Growth photo restore failed", error: error)
             }
 
             // 4. Calendar entries (appointments / medication / medical events)

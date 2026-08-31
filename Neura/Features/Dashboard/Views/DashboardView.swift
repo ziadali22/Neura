@@ -40,7 +40,7 @@ struct DashboardView: View {
 
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            let visible = !coordinator.isInDetailView && !coordinator.isSelectingDocs
+            let visible = !coordinator.isInDetailView && !coordinator.isSelectingDocs && !coordinator.isSearchingDocs
             CustomTabBar(
                 selectedTab: $coordinator.selectedTab,
                 isMenuOpen: $coordinator.showAddMenu,
@@ -88,9 +88,10 @@ struct DashboardView: View {
             CalendarReminderScheduler.shared.reschedule(for: CalendarEntryStore.shared.entries)
             SyncQueueManager.shared.drainPending()
             ReEngagementNotificationManager.shared.scheduleIfNeeded()
+            let accountNames = ActiveSpaceManager.shared.namesBySpaceID
             Task.detached(priority: .utility) {
                 let documents = DocumentFileManager.shared.loadMetadata()
-                DocumentExpiryReminderScheduler.shared.reschedule(for: documents)
+                DocumentExpiryReminderScheduler.shared.reschedule(for: documents, accountNames: accountNames)
             }
         }
         .onReceive(notificationRouter.$pendingDocumentID.compactMap { $0 }) { id in
@@ -100,9 +101,10 @@ struct DashboardView: View {
         }
         .task {
             guard !hasSeenCoachmark else { return }
+            let spaceID = ActiveSpaceManager.shared.currentSpaceID
             let hasDocs = await Task.detached(priority: .userInitiated) {
                 !DocumentFileManager.shared.loadMetadata()
-                    .filter { $0.fileExists }
+                    .filter { $0.fileExists && $0.belongsToSpace(spaceID) }
                     .isEmpty
             }.value
             if hasDocs {

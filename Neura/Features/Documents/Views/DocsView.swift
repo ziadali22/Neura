@@ -16,6 +16,9 @@ struct DocsView: View {
     @State private var showDeleteSelectedAlert = false
     @State private var showNewFolderAlert = false
     @State private var newFolderName = ""
+    @State private var didAutoSwitchToFilesForSearch = false
+    @FocusState private var isSearchFocused: Bool
+    @State private var crossSpacePrompt: CrossSpaceDocumentPrompt?
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
@@ -33,7 +36,7 @@ struct DocsView: View {
                 onFile: { viewModel.startFileImport() },
                 onGoogleDrive: { viewModel.startGoogleDriveImport() }
             )
-            .presentationDetents([.height(350)])
+            .presentationDetents([.height(400)])
             .presentationDragIndicator(.hidden)
             .presentationBackground(Color.surfaceWhite)
         }
@@ -44,7 +47,7 @@ struct DocsView: View {
         .photosPicker(
             isPresented: $viewModel.showPhotoPicker,
             selection: $viewModel.selectedPhotoItems,
-            maxSelectionCount: nil,
+            maxSelectionCount: DocumentsListViewModel.photoSelectionLimit,
             matching: .images
         )
         .onChange(of: viewModel.selectedPhotoItems) { _, items in
@@ -106,6 +109,36 @@ struct DocsView: View {
             if let error = viewModel.errorMessage { Text(error) }
         }
         .alert(
+            crossSpacePrompt.map { L10n.Profile.Spaces.openInAccountTitleFormat($0.spaceName) } ?? "",
+            isPresented: Binding(
+                get: { crossSpacePrompt != nil },
+                set: { if !$0 { crossSpacePrompt = nil } }
+            )
+        ) {
+            Button(L10n.Profile.Spaces.openInAccountConfirm) {
+                guard let prompt = crossSpacePrompt else { return }
+                crossSpacePrompt = nil
+                ActiveSpaceManager.shared.setActive(prompt.spaceID)
+                AnalyticsManager.shared.track(.spaceSwitched, properties: [
+                    "source": "notification_deep_link",
+                    "to_default": prompt.spaceID == ActiveSpaceManager.defaultSpaceID
+                ])
+                // Allow the space filter to refresh before navigating.
+                Task { @MainActor in
+                    try? await Task.sleep(nanoseconds: 50_000_000)
+                    if let document = viewModel.spaceScopedDocuments.first(where: { $0.id == prompt.documentID })
+                        ?? viewModel.documents.first(where: { $0.id == prompt.documentID }) {
+                        navigationPath.append(document)
+                    }
+                }
+            }
+            Button(L10n.Common.cancel, role: .cancel) { crossSpacePrompt = nil }
+        } message: {
+            if let prompt = crossSpacePrompt {
+                Text(L10n.Profile.Spaces.openInAccountMessageFormat(prompt.spaceName))
+            }
+        }
+        .alert(
             L10n.Documents.deleteAlertTitle(selectedDocuments.count),
             isPresented: $showDeleteSelectedAlert
         ) {
@@ -121,7 +154,7 @@ struct DocsView: View {
                 guard !trimmed.isEmpty else { return }
                 folderStore.add(name: trimmed)
                 AnalyticsManager.shared.track(.folderCreated, properties: [
-                    "total_folders": folderStore.folders.count
+                    "total_folders": folderStore.foldersForActiveSpace.count
                 ])
             }
             Button(L10n.Common.cancel, role: .cancel) {}
@@ -151,7 +184,26 @@ struct DocsView: View {
                 coordinator.isSelectingDocs = selecting
             }
         }
-        .onDisappear { coordinator.isSelectingDocs = false }
+        .onChange(of: isSearchFocused) { _, focused in
+            withAnimation(.easeInOut(duration: 0.2)) {
+                coordinator.isSearchingDocs = focused
+            }
+        }
+        .onChange(of: viewModel.searchText) { _, text in
+            withAnimation(.easeInOut(duration: 0.22)) {
+                if !text.isEmpty && viewModel.displayMode == .folders {
+                    didAutoSwitchToFilesForSearch = true
+                    viewModel.displayMode = .files
+                } else if text.isEmpty && didAutoSwitchToFilesForSearch {
+                    didAutoSwitchToFilesForSearch = false
+                    viewModel.displayMode = .folders
+                }
+            }
+        }
+        .onDisappear {
+            coordinator.isSelectingDocs = false
+            coordinator.isSearchingDocs = false
+        }
     }
 
     // MARK: - Navigation Content
@@ -257,6 +309,7 @@ struct DocsView: View {
                     Button {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                             viewModel.displayMode = viewModel.displayMode == .folders ? .files : .folders
+                            didAutoSwitchToFilesForSearch = false
                             isSelecting = false
                             selectedDocuments.removeAll()
                         }
@@ -288,6 +341,7 @@ struct DocsView: View {
                 .font(.system(size: 15))
             TextField(L10n.Documents.searchPlaceholder, text: $viewModel.searchText)
                 .font(.bodyL)
+                .focused($isSearchFocused)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 11)
@@ -339,12 +393,25 @@ struct DocsView: View {
     private func openPendingDocumentIfNeeded() {
         guard let id = coordinator.pendingDocumentID else { return }
         coordinator.pendingDocumentID = nil
+
+        if let document = viewModel.spaceScopedDocuments.first(where: { $0.id == id }) {
+            navigationPath.append(document)
+            return
+        }
+
+        // Document exists in another account — offer to switch before opening.
         guard let document = viewModel.documents.first(where: { $0.id == id }) else { return }
-        navigationPath.append(document)
+        let spaceID = document.spaceID ?? ActiveSpaceManager.defaultSpaceID
+        guard let space = ActiveSpaceManager.shared.visibleSpaces.first(where: { $0.id == spaceID }) else { return }
+        crossSpacePrompt = CrossSpaceDocumentPrompt(
+            documentID: document.id,
+            spaceID: space.id,
+            spaceName: space.name
+        )
     }
 
     private func shareSelectedDocuments() {
-        let urls = viewModel.documents
+        let urls = viewModel.spaceScopedDocuments
             .filter { selectedDocuments.contains($0.id) && $0.fileExists }
             .map(\.fileURL)
         guard !urls.isEmpty else { return }
@@ -359,7 +426,7 @@ struct DocsView: View {
     }
 
     private func deleteSelectedDocuments() {
-        let toDelete = viewModel.documents.filter { selectedDocuments.contains($0.id) }
+        let toDelete = viewModel.spaceScopedDocuments.filter { selectedDocuments.contains($0.id) }
         AnalyticsManager.shared.track(.documentsBulkDeleted, properties: ["count": toDelete.count])
         for doc in toDelete { viewModel.deleteDocument(doc) }
         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
@@ -374,4 +441,13 @@ struct DocsView: View {
 #Preview {
     DocsView()
         .environmentObject(AppCoordinator())
+}
+
+// MARK: - Cross-space notification prompt
+
+private struct CrossSpaceDocumentPrompt: Identifiable {
+    let id = UUID()
+    let documentID: UUID
+    let spaceID: UUID
+    let spaceName: String
 }

@@ -27,6 +27,8 @@
 "common.create" = "إنشاء";
 "common.error" = "خطأ";
 "common.ok" = "حسناً";
+"common.notSet" = "غير محدد";
+"common.confirm" = "تأكيد";
 
 // MARK: - Onboarding Welcome
 "onboarding.welcome.title" = "مرحباً بك في Neura";
@@ -208,8 +210,10 @@
 "home.greeting.morning" = "صباح الخير";
 "home.greeting.afternoon" = "مساء الخير";
 "home.greeting.evening" = "مساء النور";
+"home.greeting.withNameFormat" = "%@، %@";
 "home.recent" = "الأخيرة";
 "home.empty" = "لا يوجد شيء هنا بعد — امسح مستنداً أو ارفعه.";
+"home.emptyForAccountFormat" = "لا يوجد شيء هنا بعد — أضف أول مستند لـ %@.";
 "home.customizeCard" = "تخصيص البطاقة";
 "home.shareHealthProfile" = "مشاركة الملف الصحي";
 "home.completeProfile" = "أكمل ملفك الشخصي";
@@ -253,6 +257,8 @@
 "documents.noDocumentsTitle" = "لا توجد مستندات";
 "documents.noMatchingMessage" = "جرّب تعديل الفلاتر.";
 "documents.noDocumentsMessage" = "امسح أو ارفع أول مستند طبي لك.";
+"documents.emptyTitleForAccountFormat" = "لا مستندات لـ %@ بعد";
+"documents.emptyMessageForAccountFormat" = "أضف أو امسح أول سجل طبي لـ %@.";
 "documents.addDocument" = "إضافة مستند";
 "documents.scan" = "مسح المستند";
 "documents.uploadPhotos" = "رفع من الصور";
@@ -264,6 +270,7 @@
 "documents.newFolderMessage" = "أدخل اسماً لمجلدك الجديد.";
 "documents.categoryEmptyTitle" = "لا توجد مستندات بعد";
 "documents.categoryEmptyMessageFormat" = "امسح أو ارفع مستنداً وصنّفه كـ %@.";
+"documents.otherFolderName" = "أخرى";
 "documents.photoAccess.title" = "الوصول إلى الصور مطلوب";
 "documents.photoAccess.openSettings" = "فتح الإعدادات";
 "documents.photoAccess.message" = "يحتاج Neura إلى الوصول إلى مكتبة صورك لرفع الصور. يُرجى السماح بالوصول من الإعدادات.";
@@ -397,6 +404,9 @@
 "healthProfile.additionalDetails" = "تفاصيل إضافية";
 "healthProfile.noEntries" = "لا توجد مدخلات بعد";
 "healthProfile.noEntriesSubtitle" = "اضغط الزر أدناه لإضافة مدخل";
+"healthProfile.vaccinations.emptyTitle" = "لا توجد تطعيمات بعد";
+"healthProfile.vaccinations.emptySubtitle" = "سجّل اللقاحات وتواريخها لهذا الحساب.";
+"healthProfile.vaccinations.latest" = "الأحدث";
 "healthProfile.editFormat" = "تعديل %@";
 "healthProfile.deleteFormat" = "حذف %@";
 "healthProfile.report.title" = "التقرير الصحي";
@@ -430,6 +440,7 @@
 "healthProfile.section.allergies" = "الحساسيات";
 "healthProfile.section.symptoms" = "الأعراض المُبلَّغ عنها";
 "healthProfile.section.familyHistory" = "التاريخ العائلي";
+"healthProfile.section.vaccinations" = "التطعيمات";
 
 "healthProfile.option.male" = "ذكر";
 "healthProfile.option.female" = "أنثى";
@@ -483,6 +494,15 @@
 "healthProfile.entry.family.field2" = "التفاصيل";
 "healthProfile.entry.family.field2Placeholder" = "مثال: شُخِّص في سن الخمسين";
 
+"healthProfile.entry.vaccination.add" = "إضافة تطعيم";
+"healthProfile.entry.vaccination.delete" = "حذف التطعيم";
+"healthProfile.entry.vaccination.name" = "اللقاح";
+"healthProfile.entry.vaccination.namePlaceholder" = "مثال: الحصبة والنكاف والحصبة الألمانية";
+"healthProfile.entry.vaccination.field1" = "تاريخ الإعطاء";
+"healthProfile.entry.vaccination.field1Placeholder" = "مثال: 12 مارس 2024";
+"healthProfile.entry.vaccination.field2" = "الجرعة / الموعد التالي";
+"healthProfile.entry.vaccination.field2Placeholder" = "مثال: الجرعة 2 من 3، أو الموعد التالي يونيو 2026";
+
 "healthProfile.entry.default.add" = "إضافة مدخل";
 "healthProfile.entry.default.delete" = "حذف المدخل";
 "healthProfile.entry.default.name" = "الاسم";
@@ -498,13 +518,31 @@
 "profile.section.spaces" = "الحسابات";
 "profile.spaces.addSpaceTitle" = "إضافة حساب";
 "profile.spaces.editSpaceTitle" = "تعديل الحساب";
+"profile.spaces.changePhoto" = "تغيير الصورة";
 "profile.spaces.namePlaceholder" = "الاسم";
 "profile.spaces.removeTitle" = "إزالة الحساب";
 "profile.spaces.removeMessage" = "تبقى مستندات هذا الحساب وأحداث التقويم والملف الصحي محفوظة لكنها مخفية. تواصل مع الدعم لاستعادة الوصول لاحقًا.";
+"profile.spaces.detailsSectionTitle" = "عن هذا الشخص";
+"profile.spaces.relationshipLabel" = "صلة القرابة";
+"profile.spaces.relationshipChild" = "طفل";
+"profile.spaces.relationshipSpouse" = "زوج/زوجة";
+"profile.spaces.relationshipParent" = "أحد الوالدين";
+"profile.spaces.relationshipSibling" = "أخ/أخت";
+"profile.spaces.relationshipOther" = "أخرى";
+"profile.spaces.includeDateOfBirth" = "إضافة تاريخ الميلاد";
+"profile.spaces.confirmSwitchTitleFormat" = "هل تريد التبديل إلى %@؟";
+"profile.spaces.confirmSwitchMessageFormat" = "عند التبديل بين الحسابات، سترى البطاقة الطبية لـ %@ وجميع سجلاته.";
+"profile.spaces.switchedToFormat" = "تم التبديل إلى %@";
+"profile.spaces.switchSuccess" = "تم تبديل الملف الشخصي بنجاح";
+"profile.spaces.openInAccountTitleFormat" = "فتح في حساب %@؟";
+"profile.spaces.openInAccountMessageFormat" = "هذا المستند يخص %@. بدّل الحساب لفتحه.";
+"profile.spaces.openInAccountConfirm" = "تبديل وفتح";
 "profile.section.preferences" = "التفضيلات";
 "profile.section.support" = "الدعم";
 "profile.section.account" = "الحساب";
 "profile.healthProfile" = "الملف الصحي";
+"profile.vaccinations" = "التطعيمات";
+"profile.growth" = "النمو";
 "profile.subscription" = "الاشتراك";
 "profile.security" = "الأمان";
 "profile.language" = "اللغة";
@@ -602,6 +640,8 @@
 "calendar.promoOpen" = "فتح";
 "calendar.emptyTitle" = "ابدأ سجلك الصحي";
 "calendar.emptyMessage" = "تابع الأدوية والمواعيد والأحداث الطبية في مكان واحد.";
+"calendar.emptyTitleForAccountFormat" = "ابدأ السجل الصحي لـ %@";
+"calendar.emptyMessageForAccountFormat" = "تابع الأدوية والمواعيد والأحداث الطبية لـ %@.";
 "calendar.addFirstEntry" = "أضف أول إدخال";
 "calendar.addEntry" = "إضافة إدخال";
 "calendar.agendaTitle" = "الجدول الزمني";
@@ -663,3 +703,22 @@
 
 // MARK: - Health Profile extras
 "healthProfile.chooseFromContacts" = "اختر من جهات الاتصال";
+
+// MARK: - Growth
+"growth.title" = "النمو";
+"growth.add" = "إضافة قياس";
+"growth.edit" = "تعديل القياس";
+"growth.date" = "التاريخ";
+"growth.height" = "الطول";
+"growth.weight" = "الوزن";
+"growth.photo" = "صورة";
+"growth.addPhoto" = "أضف صورة";
+"growth.changePhoto" = "تغيير الصورة";
+"growth.removePhoto" = "إزالة الصورة";
+"growth.notes" = "ملاحظات";
+"growth.notesPlaceholder" = "ملاحظة اختيارية";
+"growth.emptyTitle" = "لا توجد قياسات بعد";
+"growth.emptySubtitle" = "سجّل الطول والوزن وصورة لمتابعة النمو.";
+"growth.chartTitle" = "الاتجاه";
+"growth.latest" = "الأحدث";
+"growth.delete" = "حذف القياس";

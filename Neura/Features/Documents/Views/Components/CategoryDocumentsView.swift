@@ -11,7 +11,7 @@ struct CategoryDocumentsView: View {
     @State private var showDeleteAlert = false
 
     private var documents: [Document] {
-        viewModel.documents
+        viewModel.spaceScopedDocuments
             .filter { $0.category == category }
             .sorted { $0.createdAt > $1.createdAt }
     }
@@ -83,7 +83,7 @@ struct CategoryDocumentsView: View {
                     isSelecting = true
                 }
             } label: {
-                Text("Select")
+                Text(L10n.Documents.select)
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(Color.accent)
             }
@@ -108,7 +108,7 @@ struct CategoryDocumentsView: View {
                     }
                 }
             } label: {
-                Text("Select All")
+                Text(L10n.Documents.selectAll)
                     .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(Color.textPrimary)
                     .padding(.horizontal, 14)
@@ -172,7 +172,7 @@ struct CategoryDocumentsView: View {
 
     private var selectedCountRow: some View {
         HStack {
-            Text(selectedDocuments.isEmpty ? "None Selected" : "\(selectedDocuments.count) Selected")
+            Text(selectedDocuments.isEmpty ? L10n.Documents.noneSelected : L10n.Documents.selected(selectedDocuments.count))
                 .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(Color.textSecondary)
             Spacer()
@@ -247,11 +247,11 @@ struct CategoryDocumentsView: View {
             }
 
             VStack(spacing: 8) {
-                Text("No \(category.localizedName)")
+                Text(L10n.Documents.categoryEmptyTitle)
                     .font(.system(size: 22, weight: .bold))
                     .foregroundStyle(Color.textPrimary)
 
-                Text("Scan or upload a document and tag it as \(category.localizedName).")
+                Text(L10n.Documents.categoryEmptyMessage(category.localizedName))
                     .font(.bodyS)
                     .foregroundStyle(Color.textSecondary)
                     .multilineTextAlignment(.center)
@@ -261,7 +261,7 @@ struct CategoryDocumentsView: View {
             Button {
                 viewModel.showAddOptions()
             } label: {
-                Text("Add document")
+                Text(L10n.Documents.addDocument)
                     .font(.buttonM)
                     .foregroundStyle(.white)
                     .frame(width: 190)
@@ -289,7 +289,7 @@ struct CategoryDocumentsView: View {
     }
 
     private func deleteSelected() {
-        let toDelete = viewModel.documents.filter { selectedDocuments.contains($0.id) }
+        let toDelete = viewModel.spaceScopedDocuments.filter { selectedDocuments.contains($0.id) }
         for doc in toDelete { viewModel.deleteDocument(doc) }
         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
             selectedDocuments.removeAll()
@@ -298,7 +298,7 @@ struct CategoryDocumentsView: View {
     }
 
     private func shareSelected() {
-        let urls = viewModel.documents
+        let urls = viewModel.spaceScopedDocuments
             .filter { selectedDocuments.contains($0.id) && $0.fileExists }
             .map(\.fileURL)
         guard !urls.isEmpty else { return }

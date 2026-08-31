@@ -23,13 +23,17 @@ struct AddDocumentSheet: View {
                 .padding(.top, 12)
                 .padding(.bottom, 20)
 
-            optionRow(icon: "scanAdd",   title: "Scan Document",      subtitle: "Use camera to scan pages")           { dismiss(); onScan() }
-            Divider().padding(.leading, 76)
-            optionRow(icon: "imageAdd",  title: "Upload from Photos", subtitle: "Choose an image from your library") { dismiss(); onPhoto() }
-            Divider().padding(.leading, 76)
-            optionRow(icon: "fileAdd",   title: "Import File",        subtitle: "Select a PDF or image file")         { dismiss(); onFile() }
-            Divider().padding(.leading, 76)
-            optionRow(icon: "google-drive", title: "Import from Google Drive", subtitle: "Bring in a file from your Drive", isSymbolIcon: false) { dismiss(); onGoogleDrive() }
+            // Scrollable so rows are never silently clipped by the sheet's fixed
+            // presentation height (e.g. longer translations, Dynamic Type).
+            ScrollView {
+                optionRow(icon: "scanAdd",   title: "Scan Document",      subtitle: "Use camera to scan pages")           { dismiss(); onScan() }
+                Divider().padding(.leading, 76)
+                optionRow(icon: "imageAdd",  title: "Upload from Photos", subtitle: "Choose an image from your library") { dismiss(); onPhoto() }
+                Divider().padding(.leading, 76)
+                optionRow(icon: "fileAdd",   title: "Import File",        subtitle: "Select a PDF or image file")         { dismiss(); onFile() }
+                Divider().padding(.leading, 76)
+                optionRow(icon: "google-drive", title: "Import from Google Drive", subtitle: "Bring in a file from your Drive", isSymbolIcon: false) { dismiss(); onGoogleDrive() }
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color.backgroundPrimary.ignoresSafeArea())
@@ -77,5 +81,5 @@ struct AddDocumentSheet: View {
 
 #Preview {
     AddDocumentSheet(onScan: {}, onPhoto: {}, onFile: {}, onGoogleDrive: {})
-        .presentationDetents([.height(350)])
+        .presentationDetents([.height(380)])
 }

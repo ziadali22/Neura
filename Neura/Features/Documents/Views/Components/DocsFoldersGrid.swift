@@ -35,14 +35,32 @@ struct DocsFoldersGrid: View {
         }
     }
 
+    private var searchQuery: String {
+        viewModel.searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var matchingDocuments: [Document] {
+        let scoped = viewModel.spaceScopedDocuments
+        guard !searchQuery.isEmpty else { return scoped }
+        return scoped.filter { viewModel.matchesSearch($0, query: searchQuery) }
+    }
+
     private var grid: some View {
         let docsByCategory = Dictionary(
-            grouping: viewModel.documents.filter { $0.category != nil },
+            grouping: matchingDocuments.filter { $0.category != nil },
             by: { $0.category! }
         )
+        let visibleCategories = DocumentCategory.allCases.filter {
+            searchQuery.isEmpty || (docsByCategory[$0]?.isEmpty == false)
+        }
+        let visibleFolders = folderStore.foldersForActiveSpace.filter { folder in
+            searchQuery.isEmpty || matchingDocuments.contains {
+                $0.tags?.contains(folder.id.uuidString) == true
+            }
+        }
         return LazyVGrid(columns: columns, spacing: 12) {
             // Built-in categories
-            ForEach(DocumentCategory.allCases) { category in
+            ForEach(visibleCategories) { category in
                 NavigationLink(value: category) {
                     CategoryFolderGridCard(
                         category: category,
@@ -56,8 +74,8 @@ struct DocsFoldersGrid: View {
             }
 
             // User-created custom folders
-            ForEach(folderStore.folders) { folder in
-                let count = viewModel.documents.filter {
+            ForEach(visibleFolders) { folder in
+                let count = matchingDocuments.filter {
                     $0.tags?.contains(folder.id.uuidString) == true
                 }.count
                 NavigationLink(value: folder) {

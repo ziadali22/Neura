@@ -118,9 +118,25 @@ enum MedicalSpecialization: String, Codable, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    /// Resolved via L10n_swift so it follows the in-app language toggle.
     var localizedName: String {
-        rawValue.l10n()
+        switch self {
+        case .cardiology:       return L10n.MedicalSpecialization.cardiology
+        case .dermatology:      return L10n.MedicalSpecialization.dermatology
+        case .dentistry:        return L10n.MedicalSpecialization.dentistry
+        case .endocrinology:    return L10n.MedicalSpecialization.endocrinology
+        case .gastroenterology: return L10n.MedicalSpecialization.gastroenterology
+        case .generalMedicine:  return L10n.MedicalSpecialization.generalMedicine
+        case .gynaecology:      return L10n.MedicalSpecialization.gynaecology
+        case .neurology:        return L10n.MedicalSpecialization.neurology
+        case .oncology:         return L10n.MedicalSpecialization.oncology
+        case .ophthalmology:    return L10n.MedicalSpecialization.ophthalmology
+        case .orthopaedics:     return L10n.MedicalSpecialization.orthopaedics
+        case .pulmonology:      return L10n.MedicalSpecialization.pulmonology
+        case .psychiatry:       return L10n.MedicalSpecialization.psychiatry
+        case .surgery:          return L10n.MedicalSpecialization.surgery
+        case .urology:          return L10n.MedicalSpecialization.urology
+        case .other:            return L10n.MedicalSpecialization.other
+        }
     }
 
     var icon: String {
@@ -251,6 +267,12 @@ struct Document: Identifiable, Codable, Equatable, Hashable {
 
     var fileExists: Bool {
         FileManager.default.fileExists(atPath: fileURL.path)
+    }
+
+    /// Whether this document belongs to the given account. A nil `spaceID` means
+    /// it predates multi-account support and belongs to the default account.
+    func belongsToSpace(_ spaceID: UUID) -> Bool {
+        (self.spaceID ?? ActiveSpaceManager.defaultSpaceID) == spaceID
     }
 
     var isPDF: Bool {

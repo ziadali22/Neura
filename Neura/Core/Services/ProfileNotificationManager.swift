@@ -51,17 +51,8 @@ final class ProfileNotificationManager {
     // MARK: - Permission
 
     private func requestPermissionThenSchedule(filledCount: Int, total: Int) {
-        center.getNotificationSettings { [weak self] settings in
-            switch settings.authorizationStatus {
-            case .notDetermined:
-                self?.center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
-                    if granted { self?.schedule(filledCount: filledCount, total: total) }
-                }
-            case .authorized, .provisional, .ephemeral:
-                self?.schedule(filledCount: filledCount, total: total)
-            default:
-                break
-            }
+        NotificationAuthorization.runIfAuthorized { [weak self] in
+            self?.schedule(filledCount: filledCount, total: total)
         }
     }
 

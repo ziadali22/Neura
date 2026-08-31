@@ -13,7 +13,7 @@ struct NewFolderGridCard: View {
             }
 
             VStack(alignment: .leading, spacing: 4) {
-                Text("New Folder")
+                Text(L10n.Documents.Category.newFolder)
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(Color.accent)
             }

@@ -54,6 +54,10 @@ final class DocumentsListViewModel: ObservableObject {
     @Published var selectedPhotoItems: [PhotosPickerItem] = []
     @Published var showPhotoPermissionAlert = false
 
+    /// Every selected photo becomes one page of a single PDF, and each page is
+    /// decoded into memory before saving — an unbounded selection stalls the app.
+    static let photoSelectionLimit = 20
+
     // File importer
     @Published var showFileImporter = false
 
@@ -72,6 +76,7 @@ final class DocumentsListViewModel: ObservableObject {
     private let fileManager = DocumentFileManager.shared
     private let activeSpaceManager = ActiveSpaceManager.shared
     private var restoreObserver: NSObjectProtocol?
+    private var cancellables = Set<AnyCancellable>()
 
     init() {
         if let saved = UserDefaults.standard.string(forKey: Self.displayModeDefaultsKey),
@@ -81,14 +86,36 @@ final class DocumentsListViewModel: ObservableObject {
         restoreObserver = NotificationCenter.default.addObserver(
             forName: .documentsRestored, object: nil, queue: .main
         ) { [weak self] _ in self?.loadDocuments() }
+
+        // `documents` itself doesn't change when the active account switches, so
+        // without this, views observing this view model never re-render on switch
+        // and the (correctly-filtered) computed properties below appear stale.
+        // Only send objectWillChange here — don't read currentSpaceID synchronously,
+        // since @Published emits from willSet before the backing value updates.
+        activeSpaceManager.$currentSpaceID
+            .dropFirst()
+            .sink { [weak self] _ in self?.objectWillChange.send() }
+            .store(in: &cancellables)
+    }
+
+    // MARK: - Space Scoping
+
+    func belongsToSpace(_ document: Document, spaceID: UUID) -> Bool {
+        document.belongsToSpace(spaceID)
+    }
+
+    /// All documents belonging to the active account only — no category/search
+    /// filtering. This is the shared base every other document-listing surface
+    /// (folders grid, custom folders, categories, Home's recents) should read
+    /// from instead of the raw, all-accounts `documents` array.
+    var spaceScopedDocuments: [Document] {
+        documents.filter { belongsToSpace($0, spaceID: activeSpaceManager.currentSpaceID) }
     }
 
     // MARK: - Filtered & Sorted Documents
 
     var filteredDocuments: [Document] {
-        var result = documents.filter {
-            ($0.spaceID ?? ActiveSpaceManager.defaultSpaceID) == activeSpaceManager.currentSpaceID
-        }
+        var result = spaceScopedDocuments
 
         // Category filter
         if let category = selectedCategoryFilter {
@@ -120,9 +147,7 @@ final class DocumentsListViewModel: ObservableObject {
 
     // All documents in the active space, sorted newest-first (no category/specialisation filter applied).
     var allFilesSorted: [Document] {
-        documents
-            .filter { ($0.spaceID ?? ActiveSpaceManager.defaultSpaceID) == activeSpaceManager.currentSpaceID }
-            .sorted { $0.createdAt > $1.createdAt }
+        spaceScopedDocuments.sorted { $0.createdAt > $1.createdAt }
     }
 
     // Shared search predicate so every document list (Files mode, Folders grid, etc.)
@@ -147,34 +172,31 @@ final class DocumentsListViewModel: ObservableObject {
 
         let calendar = Calendar.current
         let now = Date()
-        let today = calendar.startOfDay(for: now)
-        let yesterday = calendar.date(byAdding: .day, value: -1, to: today)!
-        let weekAgo = calendar.date(byAdding: .day, value: -7, to: today)!
-        let monthAgo = calendar.date(byAdding: .month, value: -1, to: today)!
 
         var todayDocs: [Document] = []
         var yesterdayDocs: [Document] = []
         var thisWeekDocs: [Document] = []
         var thisMonthDocs: [Document] = []
-        var olderByMonth: [String: [Document]] = [:]
-
-        let monthFormatter = DateFormatter()
-        monthFormatter.dateFormat = "MMMM yyyy"
+        // Keyed by a sortable year*12+month value so section ordering doesn't
+        // depend on the incoming sort order (or on a localized title string).
+        var olderByMonth: [Int: [Document]] = [:]
 
         for doc in docs {
-            let docDay = calendar.startOfDay(for: doc.createdAt)
+            let date = doc.createdAt
 
-            if docDay >= today {
+            if calendar.isDateInToday(date) {
                 todayDocs.append(doc)
-            } else if docDay >= yesterday {
+            } else if calendar.isDateInYesterday(date) {
                 yesterdayDocs.append(doc)
-            } else if docDay >= weekAgo {
+            } else if calendar.isDate(date, equalTo: now, toGranularity: .weekOfYear) {
                 thisWeekDocs.append(doc)
-            } else if docDay >= monthAgo {
+            } else if calendar.isDate(date, equalTo: now, toGranularity: .month) {
                 thisMonthDocs.append(doc)
             } else {
-                let key = monthFormatter.string(from: doc.createdAt)
-                olderByMonth[key, default: []].append(doc)
+                let parts = calendar.dateComponents([.year, .month], from: date)
+                if let year = parts.year, let month = parts.month {
+                    olderByMonth[year * 12 + month, default: []].append(doc)
+                }
             }
         }
 
@@ -184,11 +206,19 @@ final class DocumentsListViewModel: ObservableObject {
         if !thisWeekDocs.isEmpty { sections.append(.init(id: "week", title: L10n.Documents.Section.thisWeek, documents: thisWeekDocs)) }
         if !thisMonthDocs.isEmpty { sections.append(.init(id: "month", title: L10n.Documents.Section.thisMonth, documents: thisMonthDocs)) }
 
-        for (month, monthDocs) in olderByMonth.sorted(by: { $0.value.first!.createdAt > $1.value.first!.createdAt }) {
-            sections.append(.init(id: month, title: month, documents: monthDocs))
+        let monthFormatter = DateFormatter()
+        monthFormatter.setLocalizedDateFormatFromTemplate("MMMM yyyy")
+
+        for (key, monthDocs) in olderByMonth.sorted(by: { $0.key > $1.key }) {
+            let title = monthDocs
+                .max(by: { $0.createdAt < $1.createdAt })
+                .map { monthFormatter.string(from: $0.createdAt) } ?? ""
+            sections.append(.init(id: "month-\(key)", title: title, documents: monthDocs))
         }
 
-        return sections
+        // Sections are built newest-first; "Oldest First" reverses them so the
+        // header order matches the order of the documents inside them.
+        return sortOption == .oldest ? sections.reversed() : sections
     }
 
     // MARK: - Active filter count for badge
@@ -211,13 +241,18 @@ final class DocumentsListViewModel: ObservableObject {
 
     /// The IDs of documents that are inaccessible because the subscription has expired.
     /// The 3 oldest documents (first uploaded) always remain accessible.
+    ///
+    /// Computed per account so it matches what the account actually shows —
+    /// counting every account's documents would let the owner's uploads consume
+    /// all three free slots and leave another account's only document locked.
     var lockedDocumentIDs: Set<UUID> {
         guard SubscriptionManager.shared.hasExpiredSubscription else { return [] }
-        let accessibleIDs = Set(documents
+        let scoped = spaceScopedDocuments
+        let accessibleIDs = Set(scoped
             .sorted { $0.createdAt < $1.createdAt }
             .prefix(3)
             .map(\.id))
-        return Set(documents.map(\.id)).subtracting(accessibleIDs)
+        return Set(scoped.map(\.id)).subtracting(accessibleIDs)
     }
 
     func isLocked(_ document: Document) -> Bool {
@@ -227,10 +262,65 @@ final class DocumentsListViewModel: ObservableObject {
     // MARK: - Load
 
     func loadDocuments() {
-        var loaded = fileManager.loadMetadata()
-        loaded = loaded.filter { fileManager.fileExists(for: $0) }
-        documents = loaded.sorted { $0.createdAt > $1.createdAt }
+        let fromDisk = fileManager.loadMetadata()
+        let onDisk = fromDisk.filter { fileManager.fileExists(for: $0) }
+        documents = onDisk.sorted { $0.createdAt > $1.createdAt }
+        adoptLegacyFolders()
         reconcileOrphanFolders()
+
+        // DIAGNOSTIC (missing-docs-on-launch investigation): pinpoints which stage
+        // drops the documents when the app opens empty — metadata read, the
+        // file-exists filter, or the active-space filter. Remove once resolved.
+        SyncLog.info("loadDocuments — metadata=\(fromDisk.count) afterFileExists=\(onDisk.count) currentSpace=\(activeSpaceManager.currentSpaceID.uuidString.prefix(8)) spaceScoped=\(spaceScopedDocuments.count)")
+    }
+
+    /// Migrates folders created before folders were account-scoped. Such a
+    /// folder has no `spaceID`, so it would otherwise appear in every account
+    /// and — once scoping applies — every non-owner document filed inside it
+    /// would look orphaned and get swept into "Other", losing the user's
+    /// organisation. Each legacy folder is handed to the owner account, and any
+    /// other account that had documents in it gets its own copy with those
+    /// documents re-tagged. Runs once: afterwards no folder lacks a `spaceID`.
+    private func adoptLegacyFolders() {
+        let store = CustomFolderStore.shared
+        let legacy = store.legacyFolders
+        guard !legacy.isEmpty else { return }
+        // Ownership is inferred from the documents filed in each folder, so never
+        // run against an empty list: a cloud restore writes folders before
+        // document metadata, and assigning every folder to the owner here would
+        // orphan the other accounts' documents once that metadata lands.
+        guard !documents.isEmpty else { return }
+
+        var didRetag = false
+        for folder in legacy {
+            let tag = folder.id.uuidString
+            let owningSpaceIDs = Set(
+                documents
+                    .filter { $0.tags?.contains(tag) == true }
+                    .map { $0.spaceID ?? ActiveSpaceManager.defaultSpaceID }
+            )
+
+            store.assign(folder, to: ActiveSpaceManager.defaultSpaceID)
+
+            for spaceID in owningSpaceIDs where spaceID != ActiveSpaceManager.defaultSpaceID {
+                let copy = store.clone(folder, for: spaceID)
+                didRetag = retag(tag, to: copy.id.uuidString, in: spaceID) || didRetag
+            }
+        }
+        if didRetag { persistMetadata() }
+    }
+
+    /// Repoints one account's documents from `oldTag` to `newTag`.
+    /// Returns whether anything changed.
+    private func retag(_ oldTag: String, to newTag: String, in spaceID: UUID) -> Bool {
+        var changed = false
+        for index in documents.indices where belongsToSpace(documents[index], spaceID: spaceID) {
+            guard let tags = documents[index].tags, tags.contains(oldTag) else { continue }
+            documents[index].tags = tags.map { $0 == oldTag ? newTag : $0 }
+            SyncQueueManager.shared.enqueueMetadataUpdate(documents[index])
+            changed = true
+        }
+        return changed
     }
 
     /// Heals documents whose folder was lost (e.g. an app reinstall before
@@ -239,8 +329,12 @@ final class DocumentsListViewModel: ObservableObject {
     /// every such doc into the canonical "Other" folder and re-tag it to that
     /// folder's id. Idempotent — once a doc matches "Other" it's skipped, so
     /// this stops mutating after the first heal and never churns on relaunch.
+    ///
+    /// Scoped to the active account: folders and documents both belong to an
+    /// account, so healing another account's documents here would silently
+    /// re-file data the user isn't even looking at.
     private func reconcileOrphanFolders() {
-        let existingFolderIDs = Set(CustomFolderStore.shared.folders.map { $0.id.uuidString })
+        let existingFolderIDs = Set(CustomFolderStore.shared.foldersForActiveSpace.map { $0.id.uuidString })
 
         func isInExistingFolder(_ doc: Document) -> Bool {
             doc.tags?.contains { existingFolderIDs.contains($0) } == true
@@ -249,7 +343,7 @@ final class DocumentsListViewModel: ObservableObject {
         // A doc is "orphaned" when it has no category and isn't a member of any
         // folder that still exists. Categorised docs always show under their
         // category, so they can never go missing and are left untouched.
-        let orphans = documents.filter { $0.category == nil && !isInExistingFolder($0) }
+        let orphans = spaceScopedDocuments.filter { $0.category == nil && !isInExistingFolder($0) }
         guard !orphans.isEmpty else { return }
 
         let other = CustomFolderStore.shared.findOrCreate(name: CustomFolderStore.otherFolderName)
@@ -384,7 +478,15 @@ final class DocumentsListViewModel: ObservableObject {
     func handlePhotoSelection(_ items: [PhotosPickerItem]) {
         guard !items.isEmpty else { return }
 
+        let items = Array(items.prefix(Self.photoSelectionLimit))
+        isProcessing = true
+
         Task {
+            defer {
+                isProcessing = false
+                selectedPhotoItems = []
+            }
+
             do {
                 var images: [UIImage] = []
                 for item in items {
@@ -476,7 +578,7 @@ final class DocumentsListViewModel: ObservableObject {
 
                     self.documents.insert(document, at: 0)
                     self.persistMetadata()
-                    DocumentExpiryReminderScheduler.shared.reschedule(for: self.documents)
+                    self.rescheduleExpiryReminders()
                     SyncQueueManager.shared.enqueueUpload(document)
                     self.pendingPreview = nil
                     self.selectedPhotoItems = []
@@ -576,7 +678,7 @@ final class DocumentsListViewModel: ObservableObject {
 
         documents[index] = updated
         persistMetadata()
-        DocumentExpiryReminderScheduler.shared.reschedule(for: documents)
+        rescheduleExpiryReminders()
         SyncQueueManager.shared.enqueueMetadataUpdate(updated)
         if fileBytesChanged {
             SyncQueueManager.shared.enqueueUpload(updated)
@@ -591,13 +693,24 @@ final class DocumentsListViewModel: ObservableObject {
             try fileManager.deleteDocument(document)
             documents.removeAll { $0.id == document.id }
             persistMetadata()
-            DocumentExpiryReminderScheduler.shared.reschedule(for: documents)
+            rescheduleExpiryReminders()
             SyncQueueManager.shared.enqueueDelete(document.id)
             SubscriptionManager.shared.recordDeletion()
             AnalyticsManager.shared.track(.documentDeleted, properties: ["category": document.category?.rawValue ?? "none"])
         } catch {
             errorMessage = "Failed to delete: \(error.localizedDescription)"
         }
+    }
+
+    // MARK: - Reminders
+
+    /// Expiry reminders span every account by design, labelled with the owning
+    /// account's name so they're never ambiguous.
+    private func rescheduleExpiryReminders() {
+        DocumentExpiryReminderScheduler.shared.reschedule(
+            for: documents,
+            accountNames: activeSpaceManager.namesBySpaceID
+        )
     }
 
     // MARK: - Persistence

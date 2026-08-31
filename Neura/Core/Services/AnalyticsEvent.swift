@@ -55,6 +55,16 @@ enum AnalyticsEvent: String {
     // HealthProfile
     case healthProfileViewed = "health_profile_viewed"
     case healthProfileSaved = "health_profile_saved"
+
+    // Spaces / Accounts
+    case spaceCreated = "space_created"
+    case spaceSwitched = "space_switched"
+    case spaceArchived = "space_archived"
+    case spaceAddBlocked = "space_add_blocked"
+
+    // Growth
+    case growthViewed = "growth_viewed"
+    case growthEntrySaved = "growth_entry_saved"
 }
 
 /// Property key constants, reused across events to keep key names consistent.

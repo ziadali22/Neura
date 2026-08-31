@@ -3,7 +3,10 @@ import SwiftUI
 struct HealthProfileView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel = HealthProfileViewModel()
+    @StateObject private var activeSpaceManager = ActiveSpaceManager.shared
     @State private var showGeneralData = false
+    @State private var showGrowth = false
+    @State private var showVaccinations = false
     @State private var selectedSectionID: UUID?
     @State private var showAddSection = false
     @State private var newSectionTitle = ""
@@ -30,12 +33,29 @@ struct HealthProfileView: View {
                 VStack(spacing: 11) {
                     generalDataRow
 
+                    if activeSpaceManager.currentSpace?.showsGrowth == true {
+                        SettingsRow(icon: "ruler", title: L10n.Profile.growth, isSystemIcon: true) {
+                            showGrowth = true
+                        }
+                    }
+
                     ForEach(viewModel.profile.sections) { section in
-                        sectionRow(section)
+                        if section.title == HealthProfile.vaccinationsSectionTitle {
+                            SettingsRow(
+                                icon: "syringe",
+                                title: section.localizedTitle,
+                                isSystemIcon: true
+                            ) {
+                                showVaccinations = true
+                            }
+                        } else {
+                            sectionRow(section)
+                        }
                     }
 
                     addFieldButton
                 }
+                .id(activeSpaceManager.currentSpaceID)
                 .padding(.horizontal, 20)
                 .padding(.top, 8)
                 .padding(.bottom, 100)
@@ -44,6 +64,18 @@ struct HealthProfileView: View {
         .background(Color.backgroundPrimary)
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .tabBar)
+        .navigationDestination(isPresented: $showGrowth) {
+            GrowthView()
+        }
+        .navigationDestination(isPresented: $showVaccinations) {
+            VaccinationsView()
+        }
+        .onChange(of: showGrowth) { _, isShowing in
+            if !isShowing { viewModel.reload() }
+        }
+        .onChange(of: showVaccinations) { _, isShowing in
+            if !isShowing { viewModel.reload() }
+        }
         .sheet(isPresented: $showGeneralData) {
             GeneralDataSheet(viewModel: viewModel)
                 .presentationDragIndicator(.hidden)
@@ -120,6 +152,7 @@ struct HealthProfileView: View {
         case let t where t.contains("allerg"): return "Leaf"
         case let t where t.contains("medication") || t.contains("supplement"): return "Pill"
         case let t where t.contains("family"): return "family"
+        case let t where t.contains("vaccin"): return "syringe"
         case let t where t.contains("mobility"): return "mobility"
         default: return "generalDataicon"
         }

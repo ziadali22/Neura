@@ -10,8 +10,13 @@ enum CalendarEntryType: String, Codable, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    /// Resolved via L10n_swift so it follows the in-app language toggle.
-    var localizedName: String { rawValue.l10n() }
+    var localizedName: String {
+        switch self {
+        case .medication:   return "calendar.entryType.medication".l10n()
+        case .appointment:  return "calendar.entryType.appointment".l10n()
+        case .medicalEvent: return "calendar.entryType.medicalEvent".l10n()
+        }
+    }
 
     /// Custom asset name, rendered as a template image tinted with `color`.
     var icon: String {

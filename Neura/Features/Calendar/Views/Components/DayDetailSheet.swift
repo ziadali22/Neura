@@ -7,6 +7,7 @@ struct DayDetailSheet: View {
     let day: Date
     @ObservedObject var viewModel: CalendarViewModel
     let documents: [Document]
+    var onDeleteDocument: ((Document) -> Void)? = nil
 
     @Environment(\.dismiss) private var dismiss
     @State private var editorEntry: CalendarEntry?
@@ -75,7 +76,8 @@ struct DayDetailSheet: View {
                 initialDate: entry.date,
                 documents: documents,
                 onSave: { viewModel.save($0) },
-                onDelete: { viewModel.delete($0) }
+                onDelete: { viewModel.delete($0) },
+                onDeleteDocument: onDeleteDocument
             )
         }
     }

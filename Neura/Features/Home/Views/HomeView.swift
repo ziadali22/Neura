@@ -7,6 +7,7 @@ struct HomeView: View {
     @StateObject private var updateChecker = AppUpdateChecker.shared
     @StateObject private var healthVM = HealthProfileViewModel()
     @StateObject private var docsViewModel = DocumentsListViewModel()
+    @ObservedObject private var activeSpaceManager = ActiveSpaceManager.shared
     @State private var recentDocuments: [Document] = []
     @State private var greetingAppear = true
     @State private var bannerAppear = true
@@ -227,6 +228,9 @@ struct HomeView: View {
             .onReceive(NotificationCenter.default.publisher(for: .documentsChanged)) { _ in
                 loadRecentDocuments()
             }
+            .onChange(of: activeSpaceManager.currentSpaceID) { _, _ in
+                loadRecentDocuments()
+            }
             .onReceive(NotificationCenter.default.publisher(for: .healthProfileRestored)) { _ in
                 healthVM.reload()
             }
@@ -265,9 +269,8 @@ struct HomeView: View {
     // MARK: - Data Loading
 
     private func loadRecentDocuments() {
-        recentDocuments = DocumentFileManager.shared.loadMetadata()
-            .filter { $0.fileExists }
-            .sorted { $0.createdAt > $1.createdAt }
+        docsViewModel.loadDocuments()
+        recentDocuments = docsViewModel.allFilesSorted
     }
 
 }

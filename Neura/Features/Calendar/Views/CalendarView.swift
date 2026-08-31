@@ -50,7 +50,7 @@ struct CalendarView: View {
             EntryEditorSheet(
                 existing: nil,
                 initialDate: viewModel.selectedDay,
-                documents: docsViewModel.documents,
+                documents: docsViewModel.spaceScopedDocuments,
                 onSave: { viewModel.save($0) }
             )
         }
@@ -59,7 +59,8 @@ struct CalendarView: View {
             DayDetailSheet(
                 day: viewModel.selectedDay,
                 viewModel: viewModel,
-                documents: docsViewModel.documents
+                documents: docsViewModel.spaceScopedDocuments,
+                onDeleteDocument: { docsViewModel.deleteDocument($0) }
             )
         }
         // Edit existing entry (from the agenda)
@@ -67,9 +68,10 @@ struct CalendarView: View {
             EntryEditorSheet(
                 existing: entry,
                 initialDate: entry.date,
-                documents: docsViewModel.documents,
+                documents: docsViewModel.spaceScopedDocuments,
                 onSave: { viewModel.save($0) },
-                onDelete: { viewModel.delete($0) }
+                onDelete: { viewModel.delete($0) },
+                onDeleteDocument: { docsViewModel.deleteDocument($0) }
             )
         }
         // Agenda

@@ -9,6 +9,7 @@ struct EntryEditorSheet: View {
     let documents: [Document]
     let onSave: (CalendarEntry) -> Void
     let onDelete: ((CalendarEntry) -> Void)?
+    let onDeleteDocument: ((Document) -> Void)?
 
     @State private var type: CalendarEntryType
     @State private var title: String
@@ -32,13 +33,15 @@ struct EntryEditorSheet: View {
         initialDate: Date,
         documents: [Document],
         onSave: @escaping (CalendarEntry) -> Void,
-        onDelete: ((CalendarEntry) -> Void)? = nil
+        onDelete: ((CalendarEntry) -> Void)? = nil,
+        onDeleteDocument: ((Document) -> Void)? = nil
     ) {
         self.existing = existing
         self.initialDate = initialDate
         self.documents = documents
         self.onSave = onSave
         self.onDelete = onDelete
+        self.onDeleteDocument = onDeleteDocument
 
         _type = State(initialValue: existing?.type ?? .medication)
         _title = State(initialValue: existing?.title ?? "")
@@ -82,6 +85,7 @@ struct EntryEditorSheet: View {
                     DatePicker(L10n.Calendar.fieldDate, selection: $date, displayedComponents: .date)
                     if !isAllDay {
                         DatePicker(L10n.Calendar.fieldTime, selection: $date, displayedComponents: .hourAndMinute)
+                            .environment(\.locale, Locale(identifier: "en_GB"))
                     }
                     Picker(L10n.Calendar.fieldRepeat, selection: $frequency) {
                         ForEach(RecurrenceFrequency.allCases) { f in
@@ -96,14 +100,11 @@ struct EntryEditorSheet: View {
                     }
                 }
 
-//                Section {
-//                    Label(
-//                        frequency == .none ? L10n.Calendar.reminderInfo : L10n.Calendar.reminderInfoRecurring,
-//                        systemImage: "bell.fill"
-//                    )
-//                    .font(.captionS)
-//                    .foregroundStyle(Color.textSecondary)
-//                }
+                Section {
+                    Label(reminderInfoText, systemImage: "bell.fill")
+                        .font(.captionS)
+                        .foregroundStyle(Color.textSecondary)
+                }
 
                 Section {
                     Picker(L10n.Calendar.fieldLinkDocument, selection: $linkedDocumentID) {
@@ -114,10 +115,18 @@ struct EntryEditorSheet: View {
                     }
                     if let id = linkedDocumentID, let doc = documents.first(where: { $0.id == id }) {
                         NavigationLink {
-                            DocumentViewerView(document: doc, onDelete: {})
-                                .toolbar(.hidden, for: .navigationBar)
+                            DocumentViewerView(document: doc, onDelete: {
+                                onDeleteDocument?(doc)
+                                linkedDocumentID = nil
+                            })
+                            .toolbar(.hidden, for: .navigationBar)
                         } label: {
                             Label(L10n.Calendar.openDocument, systemImage: "doc.text")
+                        }
+                        Button(role: .destructive) {
+                            linkedDocumentID = nil
+                        } label: {
+                            Label(L10n.Calendar.removeLinkedDocument, systemImage: "link.badge.minus")
                         }
                     }
                 }
@@ -168,6 +177,18 @@ struct EntryEditorSheet: View {
                         .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             }
+        }
+    }
+
+    private var reminderInfoText: String {
+        let recurring = frequency != .none
+        switch type {
+        case .appointment:
+            return recurring ? L10n.Calendar.reminderInfoAppointmentRecurring : L10n.Calendar.reminderInfoAppointment
+        case .medication:
+            return recurring ? L10n.Calendar.reminderInfoMedicationRecurring : L10n.Calendar.reminderInfoMedication
+        case .medicalEvent:
+            return recurring ? L10n.Calendar.reminderInfoMedicalEventRecurring : L10n.Calendar.reminderInfoMedicalEvent
         }
     }
 

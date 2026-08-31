@@ -195,6 +195,12 @@ private extension DocumentViewerView {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 36, height: 36)
+                } else {
+                    // No category/type chosen — use the dedicated "Other" asset.
+                    Image("otherIcon")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 36, height: 36)
                 }
 
                 VStack(alignment: .leading, spacing: 2) {

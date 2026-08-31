@@ -3,6 +3,7 @@ import StoreKit
 
 struct PaywallView: View {
     @ObservedObject var subscriptionManager: SubscriptionManager
+    var source: String? = nil
     @Environment(\.dismiss) private var dismiss
     @State private var currentSlide = 0
     @State private var scrollID: Int? = 0
@@ -137,7 +138,13 @@ struct PaywallView: View {
             }
         }
         .task { await subscriptionManager.loadProducts() }
-        .onAppear { AnalyticsManager.shared.track(.paywallViewed) }
+        .onAppear {
+            if let source {
+                AnalyticsManager.shared.track(.paywallViewed, properties: ["source": source])
+            } else {
+                AnalyticsManager.shared.track(.paywallViewed)
+            }
+        }
         .alert(
             L10n.Common.neura,
             isPresented: Binding(

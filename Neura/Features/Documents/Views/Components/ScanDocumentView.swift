@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 
 // MARK: - Document Metadata
 
@@ -10,6 +11,7 @@ struct DocumentMetadata {
     var doctorName: String = ""
     var notes: String = ""
     var documentDate: Date = Date()
+    var expiryDate: Date?
 }
 
 // MARK: - Preview Content
@@ -32,7 +34,11 @@ struct DocumentMetadataView: View {
     @State private var metadata = DocumentMetadata()
     @State private var scannedImages: [UIImage] = []
     @State private var showScanner = false
+    @State private var showAddImageOptions = false
+    @State private var showPhotoPicker = false
+    @State private var selectedPhotoItems: [PhotosPickerItem] = []
     @State private var showSpecializationPicker = false
+    @State private var hasExpiry = false
     @FocusState private var focusedField: Field?
 
     private enum Field: Hashable {
@@ -59,7 +65,9 @@ struct DocumentMetadataView: View {
             meta.doctorName = doc.doctorName ?? ""
             meta.notes = doc.notes ?? ""
             meta.documentDate = doc.createdAt
+            meta.expiryDate = doc.expiryDate
             _metadata = State(initialValue: meta)
+            _hasExpiry = State(initialValue: doc.expiryDate != nil)
 
             if case .scannedImages(let images) = preview {
                 _scannedImages = State(initialValue: images)
@@ -75,6 +83,7 @@ struct DocumentMetadataView: View {
                     categorySection
                     specializationSection
                     dateSection
+                    expirySection
                     nameSection
                     doctorSection
                     notesSection
@@ -180,7 +189,7 @@ struct DocumentMetadataView: View {
 
                 // Add more pages button
                 Button {
-                    showScanner = true
+                    showAddImageOptions = true
                 } label: {
                     RoundedRectangle(cornerRadius: 12)
                         .strokeBorder(Color.accent, lineWidth: 2)
@@ -196,9 +205,39 @@ struct DocumentMetadataView: View {
                         )
                 }
             }
+            .padding(.top, 6) // room for the close button's negative offset so it isn't clipped by the scroll view
         }
         .padding(.horizontal, -20) // extend beyond parent padding
         .padding(.horizontal, 20)  // re-add padding inside scroll content
+        .confirmationDialog("Add a Page", isPresented: $showAddImageOptions, titleVisibility: .visible) {
+            Button("Scan Document") { showScanner = true }
+            Button("Upload from Photos") { showPhotoPicker = true }
+            Button(L10n.Common.cancel, role: .cancel) {}
+        }
+        .photosPicker(
+            isPresented: $showPhotoPicker,
+            selection: $selectedPhotoItems,
+            maxSelectionCount: DocumentsListViewModel.photoSelectionLimit,
+            matching: .images
+        )
+        .onChange(of: selectedPhotoItems) { _, items in
+            guard !items.isEmpty else { return }
+            Task {
+                var newImages: [UIImage] = []
+                for item in items {
+                    guard let data = try? await item.loadTransferable(type: Data.self),
+                          let image = UIImage(data: data) else { continue }
+                    newImages.append(image)
+                }
+                guard !newImages.isEmpty else { return }
+                await MainActor.run {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        scannedImages.append(contentsOf: newImages)
+                    }
+                    selectedPhotoItems = []
+                }
+            }
+        }
     }
 
     private func importedFilePreview(url: URL) -> some View {
@@ -258,7 +297,7 @@ struct DocumentMetadataView: View {
                     .buttonStyle(.plain)
                 }
 
-                ForEach(folderStore.folders) { folder in
+                ForEach(folderStore.foldersForActiveSpace) { folder in
                     Button {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                             metadata.customFolderId = (metadata.customFolderId == folder.id) ? nil : folder.id
@@ -278,7 +317,7 @@ struct DocumentMetadataView: View {
                                         .foregroundColor(.accent)
                                 }
                             },
-                            label: folder.name,
+                            label: folder.displayName,
                             isSelected: metadata.customFolderId == folder.id
                         )
                     }
@@ -324,7 +363,7 @@ struct DocumentMetadataView: View {
                 showSpecializationPicker = true
             } label: {
                 HStack {
-                    Text(metadata.specialization.rawValue)
+                    Text(metadata.specialization.localizedName)
                         .font(.bodyL)
                         .foregroundColor(.textPrimary)
 
@@ -372,6 +411,55 @@ struct DocumentMetadataView: View {
             .cornerRadius(14)
             .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
         }
+    }
+
+    // MARK: - Expiry Section
+
+    /// Optional renewal/expiry date (passport, insurance card, warranty). When
+    /// set, `DocumentExpiryReminderScheduler` fires reminders 30 and 7 days out.
+    private var expirySection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Toggle(isOn: $hasExpiry.animation(.spring(response: 0.3, dampingFraction: 0.7))) {
+                Text(L10n.Documents.Metadata.expiryToggle)
+                    .font(.headingXS)
+                    .foregroundColor(.textPrimary)
+            }
+            .tint(.accent)
+            .onChange(of: hasExpiry) { _, enabled in
+                metadata.expiryDate = enabled ? (metadata.expiryDate ?? Self.defaultExpiryDate) : nil
+            }
+
+            if hasExpiry {
+                HStack {
+                    Text(L10n.Documents.Metadata.expiryDate)
+                        .font(.bodyL)
+                        .foregroundColor(.textPrimary)
+
+                    Spacer()
+
+                    DatePicker(
+                        "",
+                        selection: Binding(
+                            get: { metadata.expiryDate ?? Self.defaultExpiryDate },
+                            set: { metadata.expiryDate = $0 }
+                        ),
+                        in: Date()...,
+                        displayedComponents: .date
+                    )
+                    .datePickerStyle(.compact)
+                    .labelsHidden()
+                    .tint(.accent)
+                }
+                .padding(16)
+                .background(Color.surfaceWhite)
+                .cornerRadius(14)
+                .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
+            }
+        }
+    }
+
+    private static var defaultExpiryDate: Date {
+        Calendar.current.date(byAdding: .year, value: 1, to: Date()) ?? Date()
     }
 
     // MARK: - Name Section
@@ -520,7 +608,7 @@ private struct SpecializationPickerView: View {
                                 .foregroundStyle(Color.textSecondary)
                                 .frame(width: 28, alignment: .center)
 
-                            Text(spec.rawValue)
+                            Text(spec.localizedName)
                                 .font(.bodyL)
                                 .foregroundStyle(Color.textPrimary)
 

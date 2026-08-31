@@ -2,8 +2,8 @@ import Foundation
 import UserNotifications
 
 /// Schedules local notifications for calendar entries. Appointments get three
-/// reminders — 1 week, 2 days and 2 hours before — naming the doctor in the
-/// notification. Medication fires at the scheduled time (5 min before) plus a
+/// reminders — 1 week, 1 day and 2 hours before — naming the doctor in the
+/// notification. Medication fires at the scheduled time plus a
 /// +30 min "Did you take your medication?" follow-up, which is skipped once the
 /// occurrence is marked taken. Medical events get two short reminders (30m / 15m
 /// before). Reschedules a rolling window of the soonest reminders to stay under
@@ -32,20 +32,21 @@ final class CalendarReminderScheduler {
         var skipIfCompleted: Bool = false
     }
 
-    /// Reminder schedule for an entry type. Appointments lead long (week / 2 days
-    /// / 2 hours). Medication fires 5 min before plus a +30 min follow-up that is
-    /// suppressed once taken. Medical events keep the short 30m / 15m reminders.
+    /// Reminder schedule for an entry type. Appointments lead long (week / 1 day
+    /// / 2 hours). Medication fires at the scheduled time plus a +30 min
+    /// follow-up that is suppressed once taken. Medical events keep the short
+    /// 30m / 15m reminders.
     private func leads(for type: CalendarEntryType) -> [Lead] {
         switch type {
         case .appointment:
             return [
                 Lead(minutes: 7 * 24 * 60, body: L10n.Calendar.reminderBodyWeek),
-                Lead(minutes: 2 * 24 * 60, body: L10n.Calendar.reminderBody2Days),
+                Lead(minutes: 1 * 24 * 60, body: L10n.Calendar.reminderBody1Day),
                 Lead(minutes: 2 * 60,      body: L10n.Calendar.reminderBody2Hours),
             ]
         case .medication:
             return [
-                Lead(minutes: 5,   body: L10n.Calendar.reminderBodyMedTime),
+                Lead(minutes: 0,   body: L10n.Calendar.reminderBodyMedTime),
                 Lead(minutes: -30, body: L10n.Calendar.reminderBodyMedFollowUp, skipIfCompleted: true),
             ]
         case .medicalEvent:
@@ -64,18 +65,8 @@ final class CalendarReminderScheduler {
             clearOurPending()
             return
         }
-        center.getNotificationSettings { [weak self] settings in
-            guard let self else { return }
-            switch settings.authorizationStatus {
-            case .notDetermined:
-                self.center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
-                    if granted { self.rebuild(entries) }
-                }
-            case .authorized, .provisional, .ephemeral:
-                self.rebuild(entries)
-            default:
-                break
-            }
+        NotificationAuthorization.runIfAuthorized { [weak self] in
+            self?.rebuild(entries)
         }
     }
 
@@ -136,6 +127,11 @@ final class CalendarReminderScheduler {
         content.title = entry.notificationHeadline
         content.body = lead.body
         content.sound = .default
+        // Deep-links to the linked document on tap (see AppDelegate's
+        // UNUserNotificationCenterDelegate conformance).
+        if let linkedDocumentID = entry.linkedDocumentID {
+            content.userInfo = ["documentID": linkedDocumentID.uuidString]
+        }
 
         let comps = Calendar.current.dateComponents(
             [.year, .month, .day, .hour, .minute], from: fireDate

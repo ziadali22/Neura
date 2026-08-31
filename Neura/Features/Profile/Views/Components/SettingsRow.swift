@@ -5,6 +5,7 @@ struct SettingsRow: View {
     let title: String
     var style: RowStyle = .normal
     var showChevron: Bool = true
+    var isSystemIcon: Bool = false
     var action: (() -> Void)? = nil
 
     enum RowStyle {
@@ -12,11 +13,12 @@ struct SettingsRow: View {
         case destructive
     }
 
-    init(icon: String, title: String, style: RowStyle = .normal, showChevron: Bool = true, action: (() -> Void)? = nil) {
+    init(icon: String, title: String, style: RowStyle = .normal, showChevron: Bool = true, isSystemIcon: Bool = false, action: (() -> Void)? = nil) {
         self.icon = icon
         self.title = title
         self.style = style
         self.showChevron = showChevron
+        self.isSystemIcon = isSystemIcon
         self.action = action
     }
 
@@ -25,7 +27,13 @@ struct SettingsRow: View {
             action?()
         } label: {
             HStack(spacing: 12) {
-                Image(icon)
+                Group {
+                    if isSystemIcon {
+                        Image(systemName: icon)
+                    } else {
+                        Image(icon)
+                    }
+                }
                     .font(.system(size: 20))
                     .foregroundStyle(style == .destructive ? Color.red : Color.textPrimary)
                     .frame(width: 24, height: 24)

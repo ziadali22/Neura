@@ -8,11 +8,19 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         UNUserNotificationCenter.current().delegate = self
+
+        // Meta App Events. Must run here rather than in NeuraApp.init() — the Facebook SDK
+        // needs the launch options to log fb_mobile_activate_app and resolve ad deep links.
+        MetaAdsManager.shared.initialize(application: application, launchOptions: launchOptions)
+
         return true
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
-        GIDSignIn.sharedInstance.handle(url)
+        // Let the Facebook SDK claim ad-attribution URLs first; anything it does not
+        // consume is a Google Sign-In callback.
+        if MetaAdsManager.shared.handle(url: url, application: app, options: options) { return true }
+        return GIDSignIn.sharedInstance.handle(url)
     }
 }
 
@@ -139,6 +147,7 @@ struct NeuraApp: App {
                 SubscriptionManager.shared.start()
             }
             .onOpenURL { url in
+                if MetaAdsManager.shared.handle(url: url, application: UIApplication.shared) { return }
                 GIDSignIn.sharedInstance.handle(url)
             }
             // Only react to sign-out — not to sign-in during onboarding

@@ -84,9 +84,10 @@ struct CalendarEntryRow: View {
                         .fill(entry.type.color.opacity(0.15))
                         .frame(width: 42, height: 42)
                         .overlay {
-                            Image(systemName: entry.type.icon)
-                                .font(.system(size: 17))
-                                .foregroundStyle(entry.type.color)
+                            Image(entry.type.icon)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 28, height: 28)
                         }
 
                     VStack(alignment: .leading, spacing: 3) {

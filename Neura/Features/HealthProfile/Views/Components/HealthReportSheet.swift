@@ -128,9 +128,13 @@ struct HealthReportSheet: View {
         UserDefaults.standard.set(true, forKey: "neura_has_generated_health_report")
 
         Task.detached(priority: .userInitiated) {
-            let profile = await MainActor.run { profileVM.profile }
+            let (profile, spaceID) = await MainActor.run {
+                (profileVM.profile, ActiveSpaceManager.shared.currentSpaceID)
+            }
+            // The report is this account's medical record — including another
+            // account's documents would leak them into an exported PDF.
             let documents = DocumentFileManager.shared.loadMetadata()
-                .filter { $0.fileExists }
+                .filter { $0.fileExists && $0.belongsToSpace(spaceID) }
                 .sorted { $0.createdAt > $1.createdAt }
 
             let generator = HealthReportGenerator()

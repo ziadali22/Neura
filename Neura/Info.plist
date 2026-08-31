@@ -19,8 +19,43 @@
 		<string>Almarai-Bold.ttf</string>
 		<string>Almarai-ExtraBold.ttf</string>
 	</array>
+	<!-- Meta App Events. MetaAdsManager reads these keys and starts the Facebook SDK
+	     once both values are present (it still no-ops on leftover YOUR_* placeholders). -->
+	<key>FacebookAppID</key>
+	<string>1022175404063244</string>
+	<key>FacebookClientToken</key>
+	<string>bcb09dc1c9e6860f40bd05deb5bad11a</string>
+	<key>FacebookDisplayName</key>
+	<string>Neura</string>
+	<!-- Auto-logs fb_mobile_activate_app (install + every launch) and collects the
+	     advertiser ID, which is what Meta needs to attribute installs to campaigns. -->
+	<key>FacebookAutoLogAppEventsEnabled</key>
+	<true/>
+	<key>FacebookAdvertiserIDCollectionEnabled</key>
+	<true/>
+	<!-- Meta's SKAdNetwork identifiers, required for install attribution on iOS 14.5+.
+	     Source: developers.facebook.com/docs/SKAdNetwork -->
+	<key>SKAdNetworkItems</key>
+	<array>
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>v9wttpbfk9.skadnetwork</string>
+		</dict>
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>n38lu8286q.skadnetwork</string>
+		</dict>
+	</array>
 	<key>CFBundleURLTypes</key>
 	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>fb1022175404063244</string>
+			</array>
+		</dict>
 		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>

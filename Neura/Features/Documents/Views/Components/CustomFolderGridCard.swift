@@ -39,7 +39,7 @@ struct CustomFolderGridCard: View {
             }
 
             HStack(alignment: .bottom , spacing: 4) {
-                Text(folder.name)
+                Text(folder.displayName)
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(Color.textPrimary)
                     .lineLimit(2)

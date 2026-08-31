@@ -10,7 +10,7 @@ struct CustomFolderDocumentsView: View {
     @State private var searchText = ""
 
     private var documents: [Document] {
-        viewModel.documents
+        viewModel.spaceScopedDocuments
             .filter { $0.tags?.contains(folder.id.uuidString) == true }
             .sorted { $0.createdAt > $1.createdAt }
     }
@@ -82,7 +82,7 @@ struct CustomFolderDocumentsView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
-                    renameText = currentName
+                    renameText = folderStore.folders.first(where: { $0.id == folder.id })?.name ?? folder.name
                     showRename = true
                 } label: {
                     Image(systemName: "pencil")
@@ -98,7 +98,7 @@ struct CustomFolderDocumentsView: View {
     }
 
     private var currentName: String {
-        folderStore.folders.first(where: { $0.id == folder.id })?.name ?? folder.name
+        folderStore.folders.first(where: { $0.id == folder.id })?.displayName ?? folder.displayName
     }
 
     // MARK: - Search Bar
@@ -145,7 +145,7 @@ struct CustomFolderDocumentsView: View {
             Button {
                 viewModel.showAddOptions()
             } label: {
-                Text("Add document")
+                Text(L10n.Documents.addDocument)
                     .font(.buttonM)
                     .foregroundStyle(.white)
                     .frame(width: 190)
@@ -174,19 +174,10 @@ private struct MonthSection: Identifiable {
 
 private struct CustomFolderDocumentRow: View {
     let document: Document
-    @ScaledMetric private var iconSize: CGFloat = 44
 
     var body: some View {
         HStack(spacing: 14) {
-            Circle()
-                .fill(Color.accent.opacity(0.13))
-                .frame(width: iconSize, height: iconSize)
-                .overlay {
-                    Image(systemName: "folder.fill")
-                        .font(.system(size: 18))
-                        .foregroundStyle(Color.accent)
-                }
-                .accessibilityHidden(true)
+            documentIcon
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(document.name)
@@ -210,5 +201,26 @@ private struct CustomFolderDocumentRow: View {
         .background(Color.surfaceWhite)
         .clipShape(.rect(cornerRadius: 14))
         .shadow(color: .black.opacity(0.04), radius: 6, x: 0, y: 2)
+    }
+
+    // MARK: - Icon
+
+    private var documentIcon: some View {
+        ZStack {
+            if let gridIcon = document.category?.gridIcon {
+                Image(gridIcon)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 36, height: 36)
+                    .accessibilityHidden(true)
+            } else {
+                // No category/type chosen — use the dedicated "Other" asset.
+                Image("otherIcon")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 36, height: 36)
+                    .accessibilityHidden(true)
+            }
+        }
     }
 }

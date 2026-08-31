@@ -261,6 +261,7 @@ final class OnboardingViewModel: ObservableObject {
 
     func finalize() {
         saveProfile()
+        AnalyticsManager.shared.trackOnboardingCompleted()
         UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
         withAnimation(.easeInOut(duration: 0.4)) { isComplete = true }
     }

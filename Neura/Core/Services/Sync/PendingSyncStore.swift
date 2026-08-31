@@ -11,6 +11,8 @@ struct PendingSyncOp: Codable, Hashable {
         case calendarUpload
         case customFoldersUpload
         case spacesUpload
+        case growthPhotoUpload
+        case growthPhotoDelete
     }
     let kind: Kind
     /// Document UUID string for document ops; nil for profile/preferences/calendar/folders (single-doc).

@@ -9,7 +9,7 @@ struct DocsFilesView: View {
     let onAddDocument: () -> Void
 
     var body: some View {
-        if viewModel.documents.isEmpty {
+        if viewModel.spaceScopedDocuments.isEmpty {
             DocsEmptyState(onAddDocument: onAddDocument)
         } else {
             VStack(spacing: 0) {

@@ -27,6 +27,8 @@
 "common.create" = "Create";
 "common.error" = "Error";
 "common.ok" = "OK";
+"common.notSet" = "Not set";
+"common.confirm" = "Confirm";
 
 // MARK: - Onboarding Welcome
 "onboarding.welcome.title" = "Welcome to Neura";
@@ -213,8 +215,10 @@
 "home.greeting.morning" = "Good morning";
 "home.greeting.afternoon" = "Good afternoon";
 "home.greeting.evening" = "Good evening";
+"home.greeting.withNameFormat" = "%@, %@";
 "home.recent" = "Recent";
 "home.empty" = "Nothing here yet — scan or upload a document.";
+"home.emptyForAccountFormat" = "Nothing here yet — add %@'s first document.";
 "home.customizeCard" = "Customize card";
 "home.shareHealthProfile" = "Share health profile";
 "home.completeProfile" = "Complete your profile";
@@ -258,6 +262,8 @@
 "documents.noDocumentsTitle" = "No Documents";
 "documents.noMatchingMessage" = "Try adjusting your filters.";
 "documents.noDocumentsMessage" = "Scan or upload your first medical document.";
+"documents.emptyTitleForAccountFormat" = "No documents for %@ yet";
+"documents.emptyMessageForAccountFormat" = "Add or scan %@'s first medical record.";
 "documents.addDocument" = "Add Document";
 "documents.scan" = "Scan Document";
 "documents.uploadPhotos" = "Upload from Photos";
@@ -269,6 +275,7 @@
 "documents.newFolderMessage" = "Enter a name for your new folder.";
 "documents.categoryEmptyTitle" = "No documents yet";
 "documents.categoryEmptyMessageFormat" = "Scan or upload a document and tag it as %@.";
+"documents.otherFolderName" = "Other";
 "documents.photoAccess.title" = "Photos Access Required";
 "documents.photoAccess.openSettings" = "Open Settings";
 "documents.photoAccess.message" = "Neura needs access to your photo library to upload images. Please allow access in Settings.";
@@ -402,6 +409,9 @@
 "healthProfile.additionalDetails" = "Additional details";
 "healthProfile.noEntries" = "No entries yet";
 "healthProfile.noEntriesSubtitle" = "Tap the button below to add one";
+"healthProfile.vaccinations.emptyTitle" = "No vaccinations yet";
+"healthProfile.vaccinations.emptySubtitle" = "Log shots and dates for this account.";
+"healthProfile.vaccinations.latest" = "Latest";
 "healthProfile.editFormat" = "Edit %@";
 "healthProfile.deleteFormat" = "Delete %@";
 "healthProfile.report.title" = "Health Report";
@@ -435,6 +445,7 @@
 "healthProfile.section.allergies" = "Allergies";
 "healthProfile.section.symptoms" = "Reported Symptoms";
 "healthProfile.section.familyHistory" = "Family History";
+"healthProfile.section.vaccinations" = "Vaccinations";
 
 "healthProfile.option.male" = "Male";
 "healthProfile.option.female" = "Female";
@@ -488,6 +499,15 @@
 "healthProfile.entry.family.field2" = "Details";
 "healthProfile.entry.family.field2Placeholder" = "E.g. diagnosed at 50";
 
+"healthProfile.entry.vaccination.add" = "Add Vaccination";
+"healthProfile.entry.vaccination.delete" = "Delete Vaccination";
+"healthProfile.entry.vaccination.name" = "Vaccine";
+"healthProfile.entry.vaccination.namePlaceholder" = "E.g. MMR, Hepatitis B";
+"healthProfile.entry.vaccination.field1" = "Date given";
+"healthProfile.entry.vaccination.field1Placeholder" = "E.g. 12 Mar 2024";
+"healthProfile.entry.vaccination.field2" = "Dose / next due";
+"healthProfile.entry.vaccination.field2Placeholder" = "E.g. Dose 2 of 3, or next due Jun 2026";
+
 "healthProfile.entry.default.add" = "Add Entry";
 "healthProfile.entry.default.delete" = "Delete Entry";
 "healthProfile.entry.default.name" = "Name";
@@ -503,13 +523,31 @@
 "profile.section.spaces" = "Accounts";
 "profile.spaces.addSpaceTitle" = "Add Account";
 "profile.spaces.editSpaceTitle" = "Edit Account";
+"profile.spaces.changePhoto" = "Change photo";
 "profile.spaces.namePlaceholder" = "Name";
 "profile.spaces.removeTitle" = "Remove Account";
 "profile.spaces.removeMessage" = "This account's documents, calendar entries, and health profile stay saved but hidden. Contact support to restore access later.";
+"profile.spaces.detailsSectionTitle" = "About this person";
+"profile.spaces.relationshipLabel" = "Relationship";
+"profile.spaces.relationshipChild" = "Child";
+"profile.spaces.relationshipSpouse" = "Spouse";
+"profile.spaces.relationshipParent" = "Parent";
+"profile.spaces.relationshipSibling" = "Sibling";
+"profile.spaces.relationshipOther" = "Other";
+"profile.spaces.includeDateOfBirth" = "Add date of birth";
+"profile.spaces.confirmSwitchTitleFormat" = "Are you switching to %@?";
+"profile.spaces.confirmSwitchMessageFormat" = "If you switch profiles, you'll see %@'s medical card and all their records.";
+"profile.spaces.switchedToFormat" = "Switched to %@";
+"profile.spaces.switchSuccess" = "Profile switched successfully";
+"profile.spaces.openInAccountTitleFormat" = "Open in %@'s account?";
+"profile.spaces.openInAccountMessageFormat" = "This document belongs to %@. Switch accounts to open it.";
+"profile.spaces.openInAccountConfirm" = "Switch & Open";
 "profile.section.preferences" = "Preferences";
 "profile.section.support" = "Support";
 "profile.section.account" = "Account";
 "profile.healthProfile" = "Health Profile";
+"profile.vaccinations" = "Vaccinations";
+"profile.growth" = "Growth";
 "profile.subscription" = "Subscription";
 "profile.security" = "Security";
 "profile.language" = "Language";
@@ -607,6 +645,8 @@
 "calendar.promoOpen" = "Open";
 "calendar.emptyTitle" = "Start your health timeline";
 "calendar.emptyMessage" = "Track medication, appointments, and medical events in one place.";
+"calendar.emptyTitleForAccountFormat" = "Start %@'s health timeline";
+"calendar.emptyMessageForAccountFormat" = "Track medication, appointments, and medical events for %@.";
 "calendar.addFirstEntry" = "Add your first entry";
 "calendar.addEntry" = "Add entry";
 "calendar.agendaTitle" = "Timeline";
@@ -668,3 +708,22 @@
 
 // MARK: - Health Profile extras
 "healthProfile.chooseFromContacts" = "Choose from Contacts";
+
+// MARK: - Growth
+"growth.title" = "Growth";
+"growth.add" = "Add measurement";
+"growth.edit" = "Edit measurement";
+"growth.date" = "Date";
+"growth.height" = "Height";
+"growth.weight" = "Weight";
+"growth.photo" = "Photo";
+"growth.addPhoto" = "Add a photo";
+"growth.changePhoto" = "Change photo";
+"growth.removePhoto" = "Remove photo";
+"growth.notes" = "Notes";
+"growth.notesPlaceholder" = "Optional note";
+"growth.emptyTitle" = "No measurements yet";
+"growth.emptySubtitle" = "Log height, weight, and a photo to watch them grow.";
+"growth.chartTitle" = "Trend";
+"growth.latest" = "Latest";
+"growth.delete" = "Delete measurement";

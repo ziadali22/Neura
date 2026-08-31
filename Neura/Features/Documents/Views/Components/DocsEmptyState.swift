@@ -30,7 +30,7 @@ struct DocsEmptyState: View {
 
             // CTA button
             Button(action: onAddDocument) {
-                Text("Add document")
+                Text(L10n.Documents.addDocument)
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(.white)
                     .frame(width: 190)

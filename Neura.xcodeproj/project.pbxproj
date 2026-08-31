@@ -16,6 +16,7 @@
 		42677F772F786ACB00BC08A2 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 42677F762F786ACB00BC08A2 /* GoogleSignIn */; };
 		42677F792F786ACB00BC08A2 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 42677F782F786ACB00BC08A2 /* GoogleSignInSwift */; };
 		42A11D452FD230E200473A1E /* Mixpanel in Frameworks */ = {isa = PBXBuildFile; productRef = 42A11D442FD230E200473A1E /* Mixpanel */; };
+		42FB00032FD4000000FB0001 /* FacebookCore in Frameworks */ = {isa = PBXBuildFile; productRef = 42FB00022FD4000000FB0001 /* FacebookCore */; };
 		BB00A3002F4C801C00BC0001 /* L10n-swift in Frameworks */ = {isa = PBXBuildFile; productRef = BB00A2002F4C801C00BC0001 /* L10n-swift */; };
 /* End PBXBuildFile section */
 
@@ -56,6 +57,7 @@
 				42677F702F781F8B00BC08A2 /* FirebaseAuth in Frameworks */,
 				42677F742F781F9700BC08A2 /* FirebaseStorage in Frameworks */,
 				42A11D452FD230E200473A1E /* Mixpanel in Frameworks */,
+				42FB00032FD4000000FB0001 /* FacebookCore in Frameworks */,
 				42677F612F772B4700BC08A2 /* FirebaseCore in Frameworks */,
 				42677F772F786ACB00BC08A2 /* GoogleSignIn in Frameworks */,
 				BB00A3002F4C801C00BC0001 /* L10n-swift in Frameworks */,
@@ -119,6 +121,7 @@
 				BB00A2002F4C801C00BC0001 /* L10n-swift */,
 				4258089C2FCF011700EC4817 /* Lottie */,
 				42A11D442FD230E200473A1E /* Mixpanel */,
+				42FB00022FD4000000FB0001 /* FacebookCore */,
 			);
 			productName = Neura;
 			productReference = 992DECD82F4C801C003CF200 /* Neura.app */;
@@ -156,6 +159,7 @@
 				BB00A1002F4C801C00BC0001 /* XCRemoteSwiftPackageReference "L10n-swift" */,
 				4258089B2FCF011700EC4817 /* XCRemoteSwiftPackageReference "lottie-ios" */,
 				42A11D432FD230E200473A1E /* XCRemoteSwiftPackageReference "mixpanel-swift" */,
+				42FB00012FD4000000FB0001 /* XCRemoteSwiftPackageReference "facebook-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 992DECD92F4C801C003CF200 /* Products */;
@@ -316,7 +320,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Neura/Neura.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 7N5DS8U658;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -334,7 +338,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Neura.health;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -358,7 +362,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Neura/Neura.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 7N5DS8U658;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -376,7 +380,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Neura.health;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -449,6 +453,14 @@
 				minimumVersion = 6.4.0;
 			};
 		};
+		42FB00012FD4000000FB0001 /* XCRemoteSwiftPackageReference "facebook-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/facebook/facebook-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 18.1.0;
+			};
+		};
 		BB00A1002F4C801C00BC0001 /* XCRemoteSwiftPackageReference "L10n-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Decybel07/L10n-swift";
@@ -504,6 +516,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 42A11D432FD230E200473A1E /* XCRemoteSwiftPackageReference "mixpanel-swift" */;
 			productName = Mixpanel;
+		};
+		42FB00022FD4000000FB0001 /* FacebookCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 42FB00012FD4000000FB0001 /* XCRemoteSwiftPackageReference "facebook-ios-sdk" */;
+			productName = FacebookCore;
 		};
 		BB00A2002F4C801C00BC0001 /* L10n-swift */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -212,7 +212,7 @@ private struct TabSegmentedControl: View {
         let selected = tab == selectedTab
         return Button {
             guard !selected else { return }
-            AnalyticsManager.shared.track(.tabSwitched, properties: ["tab": tab.label.lowercased()])
+            AnalyticsManager.shared.track(.tabSwitched, properties: ["tab": tab.analyticsName])
             withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                 selectedTab = tab
             }
@@ -234,9 +234,8 @@ private struct TabSegmentedControl: View {
             .contentShape(Rectangle())
             .background {
                 if selected {
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
                         .fill(Color.backgroundCard)
-                        .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 1)
                         .matchedGeometryEffect(id: "selectedPill", in: pill)
                 }
             }
@@ -355,9 +354,17 @@ extension AppCoordinator.Tab: CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .profile: "Profile"
-        case .home:    "Home"
-        case .docs:    "Docs"
+        case .profile: L10n.TabBar.profile
+        case .home:    L10n.TabBar.home
+        case .docs:    L10n.TabBar.docs
+        }
+    }
+
+    var analyticsName: String {
+        switch self {
+        case .profile: "profile"
+        case .home:    "home"
+        case .docs:    "docs"
         }
     }
 

@@ -176,7 +176,10 @@ final class SubscriptionManager: ObservableObject {
                     await refreshEntitlements()
                     AnalyticsManager.shared.track(.subscriptionStarted, properties: [
                         "product_id": product.id,
-                        "price": NSDecimalNumber(decimal: product.price).doubleValue
+                        "price": NSDecimalNumber(decimal: product.price).doubleValue,
+                        // Needed so this event can also be reported to Meta as
+                        // fb_mobile_purchase, which requires an explicit currency.
+                        "currency": product.priceFormatStyle.currencyCode
                     ])
                     return .success
                 case .unverified:

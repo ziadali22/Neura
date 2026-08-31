@@ -79,7 +79,7 @@ private struct YearGroup: Identifiable {
     var id: Int { year }
 }
 
-/// A single timeline card: colour-coded date badge, title, subtitle, chevron.
+/// A single timeline card: colour-coded date-number badge, title, subtitle, chevron.
 struct TimelineRow: View {
     let entry: CalendarEntry
 

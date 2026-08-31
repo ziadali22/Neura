@@ -4,6 +4,8 @@ struct ProfileView: View {
     @EnvironmentObject private var router: ProfileRouter
     @StateObject private var subscriptionManager = SubscriptionManager.shared
     @StateObject private var biometricAuth = BiometricAuthManager.shared
+    @StateObject private var activeSpaceManager = ActiveSpaceManager.shared
+    @State private var showsGrowth = ActiveSpaceManager.shared.currentSpace?.showsGrowth == true
     @State private var showLogOutAlert = false
     @State private var showDeleteAlert = false
     @State private var isDeleting = false
@@ -14,6 +16,7 @@ struct ProfileView: View {
     @State private var showFeedback = false
     @State private var titleAppear = true
     @State private var contentAppear = true
+    @State private var toastMessage: String?
 
     // Legal links, reachable by all users (incl. free tier) outside the paywall (App Review 5.1.1 / 5.1.2).
     private static let privacyURL = URL(string: "https://myneura.org/privacy")!
@@ -44,6 +47,15 @@ struct ProfileView: View {
                         .animation(.spring(response: 0.6, dampingFraction: 0.8), value: titleAppear)
 
                     VStack(alignment: .leading, spacing: 0) {
+                        // Accounts
+                        SpacesSection(
+                            onProfileSwitched: {
+                                toastMessage = L10n.Profile.Spaces.switchSuccess
+                            },
+                            onSpaceChanged: { syncGrowthRow() }
+                        )
+                            .padding(.bottom, 24)
+
                         // Neura Pro
                         if !subscriptionManager.isPro {
                             NeuraProCard()
@@ -56,16 +68,21 @@ struct ProfileView: View {
                             SettingsRow(icon: "profile", title: L10n.Profile.healthProfile) {
                                 router.push(.healthProfile)
                             }
+                            SettingsRow(icon: "syringe", title: L10n.Profile.vaccinations, isSystemIcon: true) {
+                                router.push(.vaccinations)
+                            }
+                            if showsGrowth {
+                                SettingsRow(icon: "ruler", title: L10n.Profile.growth, isSystemIcon: true) {
+                                    router.push(.growth)
+                                }
+                            }
                             SettingsRow(icon: "sub", title: L10n.Profile.subscription) {
                                 handleSubscriptionTap()
                             }
                         }
+                        .id(activeSpaceManager.currentSpaceID)
+                        .animation(.spring(response: 0.35, dampingFraction: 0.85), value: showsGrowth)
                         .padding(.bottom, 24)
-
-                        // Spaces section
-                        ProfileSectionHeader(title: L10n.Profile.Section.spaces)
-                        SpacesSection()
-                            .padding(.bottom, 24)
 
                         // Preferences section
                         ProfileSectionHeader(title: L10n.Profile.Section.preferences)
@@ -138,6 +155,12 @@ struct ProfileView: View {
                 switch route {
                 case .healthProfile:
                     HealthProfileView()
+                case .vaccinations:
+                    VaccinationsView()
+                case .growth:
+                    if showsGrowth {
+                        GrowthView()
+                    }
                 case .language:
                     LanguagePickerView()
                 case .subscription:
@@ -145,7 +168,15 @@ struct ProfileView: View {
                 }
             }
         }
-        .onAppear { AnalyticsManager.shared.track(.profileViewed) }
+        .topToast($toastMessage)
+        .onAppear {
+            AnalyticsManager.shared.track(.profileViewed)
+            activeSpaceManager.ensureRelationshipsCanonical()
+            syncGrowthRow()
+        }
+        .onChange(of: activeSpaceManager.currentSpaceID) { _, _ in
+            syncGrowthRow()
+        }
         .fullScreenCover(isPresented: $showPaywall) {
             PaywallView(subscriptionManager: subscriptionManager)
         }
@@ -245,6 +276,14 @@ private struct BiometricLockRow: View {
 // MARK: - Actions
 
 private extension ProfileView {
+    func syncGrowthRow() {
+        let next = activeSpaceManager.currentSpace?.showsGrowth == true
+        guard next != showsGrowth else { return }
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+            showsGrowth = next
+        }
+    }
+
     func handleLogOut() {
         AnalyticsManager.shared.track(.loggedOut)
         clearLocalUserData()

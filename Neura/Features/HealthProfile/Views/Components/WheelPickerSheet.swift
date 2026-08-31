@@ -85,12 +85,19 @@ struct WheelPickerSheet: View {
 // MARK: - Preset Value Ranges
 
 extension WheelPickerSheet {
+    // 30 cm / 1 kg covers infants and children as well as adults.
     static var heightValues: [String] {
-        (100...230).map { "\($0) cm" }
+        (30...230).map { "\($0) cm" }
     }
 
     static var weightValues: [String] {
-        (30...300).map { "\($0) kg" }
+        let light = stride(from: 1.0, through: 30.0, by: 0.5).map { value -> String in
+            value.rounded() == value
+                ? "\(Int(value)) kg"
+                : String(format: "%.1f kg", value)
+        }
+        let heavy = (31...300).map { "\($0) kg" }
+        return light + heavy
     }
 }
 

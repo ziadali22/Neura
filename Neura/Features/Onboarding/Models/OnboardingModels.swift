@@ -8,6 +8,7 @@ enum OnboardingStep: Int, CaseIterable, Hashable {
     case stopSearching
     case storeAndShare
     case qrShare
+    case calendar
     case statistics
     case recordsLocation
     case documentScan
@@ -39,7 +40,7 @@ enum OnboardingStep: Int, CaseIterable, Hashable {
     var showsProgressBar: Bool {
         switch self {
         case .stopSearching, .storeAndShare, .statistics, .documentScan,
-             .profileCardIntro, .qrShare, .privacySecurity, .welcome,
+             .profileCardIntro, .qrShare, .calendar, .privacySecurity, .welcome,
              .notifications, .calculating:
             return false
         default: return true
@@ -55,7 +56,7 @@ enum OnboardingStep: Int, CaseIterable, Hashable {
     /// Off-flow/retired steps are intentionally absent (they fire no analytics).
     static let analyticsFlow: [OnboardingStep] = [
         .stopSearching, .storeAndShare, .statistics, .documentScan,
-        .profileCardIntro, .qrShare, .privacySecurity, .welcome,
+        .profileCardIntro, .qrShare, .calendar, .privacySecurity, .welcome,
         .profile, .location, .biometrics, .healthKit, .profileCard,
         .notifications
     ]

@@ -75,7 +75,7 @@ private extension SectionDetailSheet {
             Button { dismiss() } label: {
                 Image(systemName: LanguageManager.shared.backChevronSymbol)
                     .font(.system(size: 18, weight: .medium))
-                    .foregroundColor(.textPrimary)
+                    .foregroundStyle(Color.textPrimary)
                     .frame(width: 40, height: 40)
                     .background(Color.surfaceWhite)
                     .clipShape(Circle())
@@ -85,7 +85,7 @@ private extension SectionDetailSheet {
 
             Text(section?.localizedTitle ?? "")
                 .font(.headingS)
-                .foregroundColor(.textPrimary)
+                .foregroundStyle(Color.textPrimary)
         }
         .padding(.horizontal, 20)
         .padding(.top, 12)
@@ -96,23 +96,26 @@ private extension SectionDetailSheet {
         VStack(spacing: 12) {
             Spacer()
 
-            Image("search")
-                .font(.system(size: 44))
-                .foregroundColor(.textTertiary.opacity(0.5))
+            Image(systemName: emptyIcon)
+                .font(.system(size: 40, weight: .medium))
+                .foregroundStyle(Color.textTertiary)
+                .accessibilityHidden(true)
                 .scaleEffect(emptyStateAppear ? 1 : 0.8)
                 .opacity(emptyStateAppear ? 1 : 0)
                 .animation(.spring(response: 0.5, dampingFraction: 0.7), value: emptyStateAppear)
 
             Text(L10n.HealthProfile.noEntries)
                 .font(.headingS)
-                .foregroundColor(.textPrimary)
+                .foregroundStyle(Color.textPrimary)
                 .opacity(emptyStateAppear ? 1 : 0)
                 .offset(y: emptyStateAppear ? 0 : 8)
                 .animation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.08), value: emptyStateAppear)
 
             Text(L10n.HealthProfile.noEntriesSubtitle)
                 .font(.bodyS)
-                .foregroundColor(.textTertiary)
+                .foregroundStyle(Color.textTertiary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 32)
                 .opacity(emptyStateAppear ? 1 : 0)
                 .offset(y: emptyStateAppear ? 0 : 8)
                 .animation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.16), value: emptyStateAppear)
@@ -126,43 +129,38 @@ private extension SectionDetailSheet {
         }
     }
 
+    private var emptyIcon: String {
+        let title = section?.title.lowercased() ?? ""
+        if title.contains("vaccin") { return "syringe" }
+        if title.contains("allerg") { return "leaf" }
+        if title.contains("medication") || title.contains("supplement") { return "pills" }
+        if title.contains("condition") { return "heart.text.clipboard" }
+        if title.contains("symptom") { return "waveform.path.ecg" }
+        if title.contains("family") { return "figure.2.and.child.holdinghands" }
+        return "square.and.pencil"
+    }
+
     func entryCard(_ entry: HealthProfile.HealthSection.Entry) -> some View {
         Button {
             editingEntry = entry
         } label: {
-            VStack(alignment: .leading, spacing: 10) {
-                Text(entry.text)
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.accent)
-
-                if !entry.field1.isEmpty {
-                    detailRow(config.field1Label, value: entry.field1)
-                }
-
-                if !entry.field2.isEmpty {
-                    detailRow(config.field2Label, value: entry.field2)
-                }
-
-                detailRow(L10n.HealthProfile.notes, value: entry.notes.isEmpty ? "-" : entry.notes)
-            }
-            .padding(20)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.surfaceWhite)
-            .clipShape(RoundedRectangle(cornerRadius: 20))
-            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            HealthEntryCard(title: entry.text, details: details(for: entry))
         }
         .buttonStyle(ScaleButtonStyle())
     }
 
-    func detailRow(_ label: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(label)
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.textPrimary)
-            Text(value)
-                .font(.bodyS)
-                .foregroundColor(.textSecondary)
+    private func details(for entry: HealthProfile.HealthSection.Entry) -> [(label: String, value: String)] {
+        var rows: [(label: String, value: String)] = []
+        if !entry.field1.isEmpty {
+            rows.append((config.field1Label, entry.field1))
         }
+        if !entry.field2.isEmpty {
+            rows.append((config.field2Label, entry.field2))
+        }
+        if !entry.notes.isEmpty {
+            rows.append((L10n.HealthProfile.notes, entry.notes))
+        }
+        return rows
     }
 
     var addButton: some View {
@@ -175,12 +173,12 @@ private extension SectionDetailSheet {
                 Image(systemName: "plus")
                     .font(.system(size: 16, weight: .semibold))
             }
-            .foregroundColor(.white)
+            .foregroundStyle(.white)
             .frame(maxWidth: .infinity)
             .frame(height: 56)
             .background(Color.accent)
             .clipShape(Capsule())
-            .shadow(color: Color.accent.opacity(0.3), radius: 10, x: 0, y: 4)
+            .shadow(color: Color.accent.opacity(0.3), radius: 8, x: 0, y: 4)
         }
     }
 }

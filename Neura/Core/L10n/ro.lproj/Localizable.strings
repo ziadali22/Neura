@@ -27,6 +27,8 @@
 "common.create" = "Creează";
 "common.error" = "Eroare";
 "common.ok" = "OK";
+"common.notSet" = "Nesetat";
+"common.confirm" = "Confirmă";
 
 // MARK: - Onboarding Welcome
 "onboarding.welcome.title" = "Bun venit în Neura";
@@ -208,8 +210,10 @@
 "home.greeting.morning" = "Bună dimineața";
 "home.greeting.afternoon" = "Bună ziua";
 "home.greeting.evening" = "Bună seara";
+"home.greeting.withNameFormat" = "%@, %@";
 "home.recent" = "Recente";
 "home.empty" = "Nimic aici — scanează sau încarcă un document.";
+"home.emptyForAccountFormat" = "Nimic aici — adaugă primul document al lui %@.";
 "home.customizeCard" = "Personalizează cardul";
 "home.shareHealthProfile" = "Distribuie profilul de sănătate";
 "home.completeProfile" = "Completează-ți profilul";
@@ -253,6 +257,8 @@
 "documents.noDocumentsTitle" = "Niciun document";
 "documents.noMatchingMessage" = "Încearcă să ajustezi filtrele.";
 "documents.noDocumentsMessage" = "Scanează sau încarcă primul tău document medical.";
+"documents.emptyTitleForAccountFormat" = "Niciun document pentru %@ încă";
+"documents.emptyMessageForAccountFormat" = "Adaugă sau scanează primul document medical al lui %@.";
 "documents.addDocument" = "Adaugă document";
 "documents.scan" = "Scanează document";
 "documents.uploadPhotos" = "Încarcă din poze";
@@ -264,6 +270,7 @@
 "documents.newFolderMessage" = "Introdu un nume pentru noul dosar.";
 "documents.categoryEmptyTitle" = "Niciun document încă";
 "documents.categoryEmptyMessageFormat" = "Scanează sau încarcă un document și etichetează-l ca %@.";
+"documents.otherFolderName" = "Altele";
 "documents.photoAccess.title" = "Acces la poze necesar";
 "documents.photoAccess.openSettings" = "Deschide Setări";
 "documents.photoAccess.message" = "Neura are nevoie de acces la biblioteca ta de poze pentru a încărca imagini. Permite accesul în Setări.";
@@ -397,6 +404,9 @@
 "healthProfile.additionalDetails" = "Detalii suplimentare";
 "healthProfile.noEntries" = "Nicio intrare încă";
 "healthProfile.noEntriesSubtitle" = "Apasă butonul de mai jos pentru a adăuga una";
+"healthProfile.vaccinations.emptyTitle" = "Nicio vaccinare încă";
+"healthProfile.vaccinations.emptySubtitle" = "Notează vaccinurile și datele pentru acest cont.";
+"healthProfile.vaccinations.latest" = "Cea mai recentă";
 "healthProfile.editFormat" = "Editează %@";
 "healthProfile.deleteFormat" = "Șterge %@";
 "healthProfile.report.title" = "Raport de sănătate";
@@ -430,6 +440,7 @@
 "healthProfile.section.allergies" = "Alergii";
 "healthProfile.section.symptoms" = "Simptome raportate";
 "healthProfile.section.familyHistory" = "Istoric familial";
+"healthProfile.section.vaccinations" = "Vaccinări";
 
 "healthProfile.option.male" = "Masculin";
 "healthProfile.option.female" = "Feminin";
@@ -483,6 +494,15 @@
 "healthProfile.entry.family.field2" = "Detalii";
 "healthProfile.entry.family.field2Placeholder" = "Ex. diagnosticat la 50 de ani";
 
+"healthProfile.entry.vaccination.add" = "Adaugă vaccinare";
+"healthProfile.entry.vaccination.delete" = "Șterge vaccinarea";
+"healthProfile.entry.vaccination.name" = "Vaccin";
+"healthProfile.entry.vaccination.namePlaceholder" = "Ex. ROR, Hepatita B";
+"healthProfile.entry.vaccination.field1" = "Data administrării";
+"healthProfile.entry.vaccination.field1Placeholder" = "Ex. 12 mar 2024";
+"healthProfile.entry.vaccination.field2" = "Doză / următoarea";
+"healthProfile.entry.vaccination.field2Placeholder" = "Ex. Doza 2 din 3, sau următoarea iun 2026";
+
 "healthProfile.entry.default.add" = "Adaugă intrare";
 "healthProfile.entry.default.delete" = "Șterge intrarea";
 "healthProfile.entry.default.name" = "Nume";
@@ -498,13 +518,31 @@
 "profile.section.spaces" = "Conturi";
 "profile.spaces.addSpaceTitle" = "Adaugă cont";
 "profile.spaces.editSpaceTitle" = "Editează contul";
+"profile.spaces.changePhoto" = "Schimbă fotografia";
 "profile.spaces.namePlaceholder" = "Nume";
 "profile.spaces.removeTitle" = "Elimină contul";
 "profile.spaces.removeMessage" = "Documentele, evenimentele din calendar și profilul medical ale acestui cont rămân salvate, dar ascunse. Contactează asistența pentru a restaura accesul mai târziu.";
+"profile.spaces.detailsSectionTitle" = "Despre această persoană";
+"profile.spaces.relationshipLabel" = "Relație";
+"profile.spaces.relationshipChild" = "Copil";
+"profile.spaces.relationshipSpouse" = "Soț/Soție";
+"profile.spaces.relationshipParent" = "Părinte";
+"profile.spaces.relationshipSibling" = "Frate/Soră";
+"profile.spaces.relationshipOther" = "Altul";
+"profile.spaces.includeDateOfBirth" = "Adaugă data nașterii";
+"profile.spaces.confirmSwitchTitleFormat" = "Treci la %@?";
+"profile.spaces.confirmSwitchMessageFormat" = "Dacă schimbi profilul, vei vedea fișa medicală a lui %@ și toate înregistrările sale.";
+"profile.spaces.switchedToFormat" = "Ai trecut la %@";
+"profile.spaces.switchSuccess" = "Profilul a fost schimbat cu succes";
+"profile.spaces.openInAccountTitleFormat" = "Deschizi în contul lui %@?";
+"profile.spaces.openInAccountMessageFormat" = "Acest document aparține lui %@. Schimbă contul pentru a-l deschide.";
+"profile.spaces.openInAccountConfirm" = "Schimbă și deschide";
 "profile.section.preferences" = "Preferințe";
 "profile.section.support" = "Asistență";
 "profile.section.account" = "Cont";
 "profile.healthProfile" = "Profil de sănătate";
+"profile.vaccinations" = "Vaccinări";
+"profile.growth" = "Creștere";
 "profile.subscription" = "Abonament";
 "profile.security" = "Securitate";
 "profile.language" = "Limbă";
@@ -602,6 +640,8 @@
 "calendar.promoOpen" = "Deschide";
 "calendar.emptyTitle" = "Începe cronologia ta de sănătate";
 "calendar.emptyMessage" = "Urmărește medicamente, programări și evenimente medicale într-un singur loc.";
+"calendar.emptyTitleForAccountFormat" = "Începe cronologia de sănătate a lui %@";
+"calendar.emptyMessageForAccountFormat" = "Urmărește medicamente, programări și evenimente medicale pentru %@.";
 "calendar.addFirstEntry" = "Adaugă prima înregistrare";
 "calendar.addEntry" = "Adaugă înregistrare";
 "calendar.agendaTitle" = "Cronologie";
@@ -663,3 +703,22 @@
 
 // MARK: - Health Profile extras
 "healthProfile.chooseFromContacts" = "Alege din Contacte";
+
+// MARK: - Growth
+"growth.title" = "Creștere";
+"growth.add" = "Adaugă măsurătoare";
+"growth.edit" = "Editează măsurătoarea";
+"growth.date" = "Data";
+"growth.height" = "Înălțime";
+"growth.weight" = "Greutate";
+"growth.photo" = "Fotografie";
+"growth.addPhoto" = "Adaugă o fotografie";
+"growth.changePhoto" = "Schimbă fotografia";
+"growth.removePhoto" = "Elimină fotografia";
+"growth.notes" = "Note";
+"growth.notesPlaceholder" = "Notă opțională";
+"growth.emptyTitle" = "Nicio măsurătoare încă";
+"growth.emptySubtitle" = "Notează înălțimea, greutatea și o fotografie ca să vezi cum crește.";
+"growth.chartTitle" = "Tendință";
+"growth.latest" = "Cea mai recentă";
+"growth.delete" = "Șterge măsurătoarea";

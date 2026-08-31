@@ -9,6 +9,7 @@ struct AddEntrySheet: View {
 
     @State private var name: String = ""
     @State private var field1: String = ""
+    @State private var field1Date: Date = Date()
     @State private var field2: String = ""
     @State private var notes: String = ""
     @State private var showDeleteConfirmation = false
@@ -30,8 +31,20 @@ struct AddEntrySheet: View {
         self.onDelete = onDelete
         _name = State(initialValue: entry?.text ?? "")
         _field1 = State(initialValue: entry?.field1 ?? "")
+        _field1Date = State(initialValue: Self.parseDate(entry?.field1) ?? Date())
         _field2 = State(initialValue: entry?.field2 ?? "")
         _notes = State(initialValue: entry?.notes ?? "")
+    }
+
+    private static let dateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "dd MMM yyyy"
+        return f
+    }()
+
+    private static func parseDate(_ value: String?) -> Date? {
+        guard let value, !value.isEmpty else { return nil }
+        return dateFormatter.date(from: value)
     }
 
     var body: some View {
@@ -42,14 +55,26 @@ struct AddEntrySheet: View {
                         TextField(config.namePlaceholder, text: $name)
                             .focused($focusedField, equals: .name)
                             .submitLabel(.next)
-                            .onSubmit { focusedField = .field1 }
+                            .onSubmit { focusedField = config.field1IsDate ? .field2 : .field1 }
                     }
 
                     fieldSection(config.field1Label) {
-                        TextField(config.field1Placeholder, text: $field1)
-                            .focused($focusedField, equals: .field1)
-                            .submitLabel(.next)
-                            .onSubmit { focusedField = .field2 }
+                        if config.field1IsDate {
+                            DatePicker(
+                                config.field1Label,
+                                selection: $field1Date,
+                                in: ...Date(),
+                                displayedComponents: .date
+                            )
+                            .labelsHidden()
+                            .datePickerStyle(.compact)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        } else {
+                            TextField(config.field1Placeholder, text: $field1)
+                                .focused($focusedField, equals: .field1)
+                                .submitLabel(.next)
+                                .onSubmit { focusedField = .field2 }
+                        }
                     }
 
                     fieldSection(config.field2Label) {
@@ -173,9 +198,12 @@ struct AddEntrySheet: View {
         guard canSave else { return }
         focusedField = nil
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        let resolvedField1 = config.field1IsDate
+            ? Self.dateFormatter.string(from: field1Date)
+            : field1.trimmingCharacters(in: .whitespacesAndNewlines)
         onSave(
             name.trimmingCharacters(in: .whitespacesAndNewlines),
-            field1.trimmingCharacters(in: .whitespacesAndNewlines),
+            resolvedField1,
             field2.trimmingCharacters(in: .whitespacesAndNewlines),
             notes.trimmingCharacters(in: .whitespacesAndNewlines)
         )
