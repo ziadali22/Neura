@@ -25,8 +25,10 @@ struct ProfileView: View {
     private var legalFooter: some View {
         HStack(spacing: 6) {
             Link(L10n.Paywall.privacyPolicy, destination: Self.privacyURL)
+                .buttonStyle(.plain)
             Text("·").foregroundStyle(Color.textTertiary)
             Link(L10n.Paywall.termsOfUse, destination: Self.termsURL)
+                .buttonStyle(.plain)
         }
         .font(.system(size: 13, weight: .medium))
         .tint(Color.textSecondary)

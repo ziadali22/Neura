@@ -23,6 +23,24 @@ enum DocumentSortOption: String, CaseIterable, Identifiable {
     }
 }
 
+/// Folder the user is adding from. Pre-selects that category / custom folder
+/// on the metadata form so a doc scanned inside Hospitalization doesn't land
+/// in Other.
+enum DocumentAddDestination: Equatable {
+    case category(DocumentCategory)
+    case customFolder(UUID)
+
+    var category: DocumentCategory? {
+        if case .category(let category) = self { return category }
+        return nil
+    }
+
+    var customFolderId: UUID? {
+        if case .customFolder(let id) = self { return id }
+        return nil
+    }
+}
+
 @MainActor
 final class DocumentsListViewModel: ObservableObject {
     @Published var documents: [Document] = []
@@ -68,6 +86,17 @@ final class DocumentsListViewModel: ObservableObject {
     // Metadata form
     @Published var showMetadataForm = false
     @Published var pendingPreview: DocumentPreviewContent?
+
+    /// Folder currently on screen. Used when the FAB starts an add from inside
+    /// a category / custom folder.
+    var folderContext: DocumentAddDestination?
+
+    /// Destination locked in for the in-flight add, read by the metadata form.
+    private(set) var pendingAddDestination: DocumentAddDestination?
+
+    /// Frozen copy of the destination at the moment the metadata sheet opens,
+    /// so a source-picker dismiss can't race the form's initial state.
+    private(set) var capturedFormDestination: DocumentAddDestination?
 
     // Processing
     @Published var isProcessing = false
@@ -362,18 +391,28 @@ final class DocumentsListViewModel: ObservableObject {
 
     // MARK: - Add Document (source picker)
 
-    func showAddOptions() {
+    /// Captured when Add is tapped inside a folder, before a source is picked.
+    private var destinationFromFolderButton: DocumentAddDestination?
+
+    /// True after a source is chosen so dismissing the source picker (which
+    /// happens *before* the scanner cover is presented) doesn't drop the snapshot.
+    private var isContinuingAddFlow = false
+
+    func showAddOptions(destination: DocumentAddDestination? = nil) {
         let sub = SubscriptionManager.shared
         guard sub.canUpload else {
             showPaywall = true
             return
         }
+        destinationFromFolderButton = destination ?? folderContext
+        pendingAddDestination = destinationFromFolderButton
         AnalyticsManager.shared.track(.addDocumentSheetOpened)
         showSourcePicker = true
     }
 
     func startScanning() {
         guard ensureCanUpload() else { return }
+        lockInAddDestination()
         AnalyticsManager.shared.track(.documentScanStarted)
         showSourcePicker = false
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
@@ -383,6 +422,7 @@ final class DocumentsListViewModel: ObservableObject {
 
     func startPhotoUpload() {
         guard ensureCanUpload() else { return }
+        lockInAddDestination()
         showSourcePicker = false
         let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
         switch status {
@@ -397,12 +437,14 @@ final class DocumentsListViewModel: ObservableObject {
                         self?.showPhotoPicker = true
                     } else {
                         self?.showPhotoPermissionAlert = true
+                        self?.addFlowDidEnd()
                     }
                 }
             }
         case .denied, .restricted:
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 self.showPhotoPermissionAlert = true
+                self.addFlowDidEnd()
             }
         @unknown default:
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
@@ -413,6 +455,7 @@ final class DocumentsListViewModel: ObservableObject {
 
     func startFileImport() {
         guard ensureCanUpload() else { return }
+        lockInAddDestination()
         showSourcePicker = false
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             self.showFileImporter = true
@@ -421,6 +464,7 @@ final class DocumentsListViewModel: ObservableObject {
 
     func startGoogleDriveImport() {
         guard ensureCanUpload() else { return }
+        lockInAddDestination()
         showSourcePicker = false
         if UserDefaults.standard.bool(forKey: Self.hasSeenDriveImportTipKey) {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
@@ -431,6 +475,30 @@ final class DocumentsListViewModel: ObservableObject {
                 self.showDriveImportTip = true
             }
         }
+    }
+
+    func sourcePickerDidDismiss() {
+        guard !isContinuingAddFlow else { return }
+        addFlowDidEnd()
+    }
+
+    func addFlowDidEnd() {
+        isContinuingAddFlow = false
+        pendingAddDestination = nil
+        destinationFromFolderButton = nil
+        capturedFormDestination = nil
+    }
+
+    private func lockInAddDestination() {
+        pendingAddDestination = destinationFromFolderButton ?? folderContext
+        destinationFromFolderButton = nil
+        isContinuingAddFlow = true
+    }
+
+    private func presentMetadataForm(_ preview: DocumentPreviewContent) {
+        pendingPreview = preview
+        capturedFormDestination = pendingAddDestination
+        showMetadataForm = true
     }
 
     func confirmDriveImportTip() {
@@ -461,13 +529,16 @@ final class DocumentsListViewModel: ObservableObject {
 
         switch result {
         case .success(let images):
-            guard !images.isEmpty else { return }
-            pendingPreview = .scannedImages(images)
+            guard !images.isEmpty else {
+                addFlowDidEnd()
+                return
+            }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                self.showMetadataForm = true
+                self.presentMetadataForm(.scannedImages(images))
             }
 
         case .failure(let error):
+            addFlowDidEnd()
             if case ScannerError.cancelled = error { return }
             errorMessage = error.localizedDescription
         }
@@ -494,11 +565,14 @@ final class DocumentsListViewModel: ObservableObject {
                           let image = UIImage(data: data) else { continue }
                     images.append(image)
                 }
-                guard !images.isEmpty else { return }
+                guard !images.isEmpty else {
+                    addFlowDidEnd()
+                    return
+                }
 
-                pendingPreview = .scannedImages(images)
-                showMetadataForm = true
+                presentMetadataForm(.scannedImages(images))
             } catch {
+                addFlowDidEnd()
                 errorMessage = "Failed to load photo: \(error.localizedDescription)"
             }
         }
@@ -509,12 +583,12 @@ final class DocumentsListViewModel: ObservableObject {
     func handleFileImport(_ result: Result<URL, Error>) {
         switch result {
         case .success(let url):
-            pendingPreview = .importedFile(url)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                self.showMetadataForm = true
+                self.presentMetadataForm(.importedFile(url))
             }
 
         case .failure(let error):
+            addFlowDidEnd()
             if (error as NSError).code == NSUserCancelledError { return }
             errorMessage = "Failed to import file: \(error.localizedDescription)"
         }
@@ -524,10 +598,25 @@ final class DocumentsListViewModel: ObservableObject {
 
     /// Guarantees every saved document lands in a folder. The Folders grid is
     /// organised by category / custom folder, so a document saved with neither
-    /// would vanish from it. When both are empty we file the document under an
-    /// auto-created "Other" custom folder instead.
+    /// would vanish from it.
+    ///
+    /// Prefer the folder the add was started from (Hospitalization, a custom
+    /// folder, …). Only when that is also missing do we file under an
+    /// auto-created "Other" custom folder.
     private func resolveFolder(for metadata: DocumentMetadata) -> DocumentMetadata {
-        guard metadata.category == nil, metadata.customFolderId == nil else { return metadata }
+        if metadata.category != nil || metadata.customFolderId != nil { return metadata }
+
+        if let destination = pendingAddDestination ?? capturedFormDestination {
+            var resolved = metadata
+            switch destination {
+            case .category(let category):
+                resolved.category = category
+            case .customFolder(let id):
+                resolved.customFolderId = id
+            }
+            return resolved
+        }
+
         var resolved = metadata
         resolved.customFolderId = CustomFolderStore.shared
             .findOrCreate(name: CustomFolderStore.otherFolderName).id

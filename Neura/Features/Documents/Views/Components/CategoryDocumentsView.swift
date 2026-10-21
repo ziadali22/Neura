@@ -62,6 +62,12 @@ struct CategoryDocumentsView: View {
         }
         .animation(.spring(response: 0.3, dampingFraction: 0.85), value: isSelecting)
         .animation(.spring(response: 0.3, dampingFraction: 0.85), value: selectedDocuments.isEmpty)
+        .onAppear { viewModel.folderContext = .category(category) }
+        .onDisappear {
+            if viewModel.folderContext == .category(category) {
+                viewModel.folderContext = nil
+            }
+        }
         .alert(
             "Delete \(selectedDocuments.count) Document\(selectedDocuments.count == 1 ? "" : "s")?",
             isPresented: $showDeleteAlert
@@ -77,7 +83,16 @@ struct CategoryDocumentsView: View {
 
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
-        ToolbarItem(placement: .navigationBarTrailing) {
+        ToolbarItemGroup(placement: .navigationBarTrailing) {
+            Button {
+                viewModel.showAddOptions(destination: .category(category))
+            } label: {
+                Image(systemName: "plus")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(Color.accent)
+            }
+            .accessibilityLabel(L10n.Documents.addDocument)
+
             Button {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                     isSelecting = true
@@ -227,6 +242,7 @@ struct CategoryDocumentsView: View {
             .padding(.bottom, 100)
         }
         .scrollIndicators(.hidden)
+        .scrollDismissesKeyboard(.immediately)
     }
 
     // MARK: - Empty State
@@ -259,7 +275,7 @@ struct CategoryDocumentsView: View {
             }
 
             Button {
-                viewModel.showAddOptions()
+                viewModel.showAddOptions(destination: .category(category))
             } label: {
                 Text(L10n.Documents.addDocument)
                     .font(.buttonM)

@@ -5,6 +5,7 @@ struct GrowthView: View {
     @StateObject private var viewModel = GrowthViewModel()
     @State private var showEditor = false
     @State private var editingEntry: GrowthEntry?
+    @State private var previewingEntry: GrowthEntry?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -26,6 +27,9 @@ struct GrowthView: View {
                     viewModel.save(entry: entry, photo: photo, removePhoto: removePhoto)
                 }
             )
+        }
+        .fullScreenCover(item: $previewingEntry) { entry in
+            GrowthPhotoGalleryView(entries: viewModel.photoEntries, initialID: entry.id)
         }
         .sheet(item: $editingEntry) { entry in
             AddGrowthEntrySheet(
@@ -67,55 +71,32 @@ struct GrowthView: View {
     @ViewBuilder
     private var content: some View {
         if viewModel.entries.isEmpty {
-            emptyState
+            GrowthEmptyState { showEditor = true }
         } else {
             timeline
-        }
-    }
-
-    private var emptyState: some View {
-        VStack(spacing: 12) {
-            Spacer()
-            Image(systemName: "ruler")
-                .font(.system(size: 40, weight: .medium))
-                .foregroundStyle(Color.textTertiary)
-                .accessibilityHidden(true)
-            Text(L10n.Growth.emptyTitle)
-                .font(.headingS)
-                .foregroundStyle(Color.textPrimary)
-            Text(L10n.Growth.emptySubtitle)
-                .font(.bodyS)
-                .foregroundStyle(Color.textTertiary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
-            Spacer()
-            addButton
-                .padding(.horizontal, 20)
-                .padding(.bottom, 16)
         }
     }
 
     private var timeline: some View {
         ZStack(alignment: .bottom) {
             ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 20) {
                     header
 
-                    if viewModel.chronologicalEntries.count >= 2 {
-                        GrowthChartCard(entries: viewModel.chronologicalEntries)
-                    }
+                    GrowthChartCard(
+                        points: viewModel.trendPoints,
+                        totals: viewModel.trendTotals,
+                        periodLabel: viewModel.trendPeriodLabel
+                    )
 
                     ForEach(viewModel.entries) { entry in
-                        Button {
-                            editingEntry = entry
-                        } label: {
-                            GrowthEntryCard(
-                                entry: entry,
-                                photo: viewModel.photo(for: entry),
-                                previous: viewModel.previous(before: entry)
-                            )
-                        }
-                        .buttonStyle(ScaleButtonStyle())
+                        GrowthEntryCard(
+                            entry: entry,
+                            photo: viewModel.photo(for: entry),
+                            previous: viewModel.previous(before: entry),
+                            onPreviewPhoto: { previewingEntry = entry },
+                            onEdit: { editingEntry = entry }
+                        )
                     }
                 }
                 .padding(.horizontal, 20)
@@ -130,24 +111,31 @@ struct GrowthView: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 12) {
             if !viewModel.childName.isEmpty {
                 Text(viewModel.childName)
-                    .font(.headingS)
+                    .font(.headingL)
                     .foregroundStyle(Color.textPrimary)
             }
             if let latest = viewModel.latest {
-                HStack(spacing: 16) {
-                    Text(latest.heightLabel)
-                        .font(.headingS)
-                        .foregroundStyle(Color.accent)
-                    Text(latest.weightLabel)
-                        .font(.headingS)
-                        .foregroundStyle(Color.accent)
+                let previous = viewModel.previous(before: latest)
+                HStack(alignment: .top, spacing: 24) {
+                    GrowthStatColumn(
+                        label: L10n.Growth.height,
+                        value: latest.heightLabel,
+                        delta: latest.heightDelta(from: previous),
+                        valueFont: .statValue,
+                        labelPlacement: .below
+                    )
+                    GrowthStatColumn(
+                        label: L10n.Growth.weight,
+                        value: latest.weightLabel,
+                        delta: latest.weightDelta(from: previous),
+                        valueFont: .statValue,
+                        labelPlacement: .below
+                    )
+                    Spacer(minLength: 0)
                 }
-                Text(L10n.Growth.latest)
-                    .font(.captionS)
-                    .foregroundStyle(Color.textTertiary)
             }
         }
     }

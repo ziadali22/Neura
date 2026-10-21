@@ -5,6 +5,7 @@ struct DocsFoldersGrid: View {
     @ObservedObject var folderStore: CustomFolderStore
     @Binding var showNewFolderAlert: Bool
     @Binding var newFolderName: String
+    var onNavigate: () -> Void = {}
 
     @State private var folderPendingDelete: CustomFolder?
     @State private var folderToRename: CustomFolder?
@@ -20,6 +21,7 @@ struct DocsFoldersGrid: View {
             grid
         }
         .scrollIndicators(.hidden)
+        .scrollDismissesKeyboard(.immediately)
         .alert("Rename Folder", isPresented: Binding(
             get: { folderToRename != nil },
             set: { if !$0 { folderToRename = nil } }
@@ -69,6 +71,7 @@ struct DocsFoldersGrid: View {
                 }
                 .buttonStyle(ScaleButtonStyle())
                 .simultaneousGesture(TapGesture().onEnded {
+                    onNavigate()
                     AnalyticsManager.shared.track(.categoryOpened, properties: ["category": category.rawValue])
                 })
             }
@@ -83,6 +86,7 @@ struct DocsFoldersGrid: View {
                 }
                 .buttonStyle(ScaleButtonStyle())
                 .simultaneousGesture(TapGesture().onEnded {
+                    onNavigate()
                     AnalyticsManager.shared.track(.folderOpened)
                 })
                 .contextMenu {
@@ -116,6 +120,7 @@ struct DocsFoldersGrid: View {
 
             // New Folder card
             Button {
+                onNavigate()
                 newFolderName = ""
                 showNewFolderAlert = true
             } label: {

@@ -25,11 +25,19 @@ struct DocsView: View {
             navigationContent
         }
         .onChange(of: navigationPath.count) { _, count in
+            if count > 0 {
+                isSearchFocused = false
+            }
             withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                 coordinator.isInDetailView = count > 0
             }
         }
-        .sheet(isPresented: $viewModel.showSourcePicker) {
+        .onChange(of: viewModel.showSourcePicker) { _, show in
+            if show { isSearchFocused = false }
+        }
+        .sheet(isPresented: $viewModel.showSourcePicker, onDismiss: {
+            viewModel.sourcePickerDidDismiss()
+        }) {
             AddDocumentSheet(
                 onScan: { viewModel.startScanning() },
                 onPhoto: { viewModel.startPhotoUpload() },
@@ -65,9 +73,15 @@ struct DocsView: View {
                 viewModel.handleFileImport(.failure(error))
             }
         }
-        .sheet(isPresented: $viewModel.showMetadataForm) {
+        .sheet(isPresented: $viewModel.showMetadataForm, onDismiss: {
+            viewModel.addFlowDidEnd()
+        }) {
             if let preview = viewModel.pendingPreview {
-                DocumentMetadataView(preview: preview) { metadata, updatedPreview in
+                DocumentMetadataView(
+                    preview: preview,
+                    initialCategory: viewModel.capturedFormDestination?.category ?? viewModel.pendingAddDestination?.category,
+                    initialCustomFolderId: viewModel.capturedFormDestination?.customFolderId ?? viewModel.pendingAddDestination?.customFolderId
+                ) { metadata, updatedPreview in
                     viewModel.saveDocument(metadata: metadata, preview: updatedPreview)
                 }
             }
@@ -308,6 +322,7 @@ struct DocsView: View {
 
                     Button {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                            isSearchFocused = false
                             viewModel.displayMode = viewModel.displayMode == .folders ? .files : .folders
                             didAutoSwitchToFilesForSearch = false
                             isSelecting = false
@@ -342,6 +357,8 @@ struct DocsView: View {
             TextField(L10n.Documents.searchPlaceholder, text: $viewModel.searchText)
                 .font(.bodyL)
                 .focused($isSearchFocused)
+                .submitLabel(.search)
+                .onSubmit { isSearchFocused = false }
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 11)
@@ -350,6 +367,13 @@ struct DocsView: View {
         .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
         .padding(.horizontal, 20)
         .padding(.bottom, 24)
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button(L10n.Common.done) { isSearchFocused = false }
+                    .fontWeight(.medium)
+            }
+        }
     }
 
     // MARK: - Content Area
@@ -361,7 +385,8 @@ struct DocsView: View {
                     viewModel: viewModel,
                     folderStore: folderStore,
                     showNewFolderAlert: $showNewFolderAlert,
-                    newFolderName: $newFolderName
+                    newFolderName: $newFolderName,
+                    onNavigate: { isSearchFocused = false }
                 )
                 .transition(.opacity)
             } else {

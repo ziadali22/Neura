@@ -360,6 +360,15 @@
 "documents.metadata.specializationTitle" = "Specialization";
 "documents.metadata.expiryToggle" = "Set expiry / renewal date";
 "documents.metadata.expiryDate" = "Expiry Date";
+"documents.metadata.pageOfFormat" = "Page %d of %d";
+"documents.metadata.previewHint" = "Tap to preview";
+"documents.metadata.reorderHint" = "Tap to preview · Hold to reorder";
+"documents.metadata.deletePageFormat" = "Delete page %d";
+"documents.metadata.moveEarlier" = "Move earlier";
+"documents.metadata.moveLater" = "Move later";
+"documents.metadata.addPage" = "Add a Page";
+"documents.metadata.scanPage" = "Scan Document";
+"documents.metadata.uploadPage" = "Upload from Photos";
 
 // MARK: - Documents Folder
 "documents.folder.renameTitle" = "Rename Folder";
@@ -717,6 +726,7 @@
 "growth.height" = "Height";
 "growth.weight" = "Weight";
 "growth.photo" = "Photo";
+"growth.viewPhoto" = "View full photo";
 "growth.addPhoto" = "Add a photo";
 "growth.changePhoto" = "Change photo";
 "growth.removePhoto" = "Remove photo";
@@ -725,5 +735,8 @@
 "growth.emptyTitle" = "No measurements yet";
 "growth.emptySubtitle" = "Log height, weight, and a photo to watch them grow.";
 "growth.chartTitle" = "Trend";
+"growth.chartMonths" = "Months";
+"growth.chartYears" = "Years";
+"growth.yearGrowthFormat" = "%1$@ · %2$@ in %3$@";
 "growth.latest" = "Latest";
 "growth.delete" = "Delete measurement";

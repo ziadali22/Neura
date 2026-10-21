@@ -177,6 +177,7 @@ struct DocsFilesView: View {
                 .padding(.bottom, 100)
             }
             .scrollIndicators(.hidden)
+            .scrollDismissesKeyboard(.immediately)
         }
     }
 

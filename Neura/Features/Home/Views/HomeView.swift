@@ -59,16 +59,14 @@ struct HomeView: View {
                             .foregroundStyle(Color.textPrimary)
                         Spacer()
                         Button { router.push(.calendar) } label: {
-                            
                             GlassIconButton(size: 50) {
-
                                 Image("calendar-date1")
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 28, height: 28)
-
                             }
                         }
+                        .buttonStyle(ScaleButtonStyle())
                     }
                     .overlay(alignment: .topTrailing) {
                         if showCalendarPromo {

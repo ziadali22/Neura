@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "neura-42024"
-  }
+    "default": "neura-8a679"
+  },
+  "targets": {},
+  "etags": {}
 }

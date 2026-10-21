@@ -366,6 +366,15 @@
 "documents.metadata.specializationTitle" = "التخصص";
 "documents.metadata.expiryToggle" = "تعيين تاريخ الانتهاء / التجديد";
 "documents.metadata.expiryDate" = "تاريخ الانتهاء";
+"documents.metadata.pageOfFormat" = "الصفحة %d من %d";
+"documents.metadata.previewHint" = "انقر للمعاينة";
+"documents.metadata.reorderHint" = "انقر للمعاينة · اضغط مطولاً لإعادة الترتيب";
+"documents.metadata.deletePageFormat" = "حذف الصفحة %d";
+"documents.metadata.moveEarlier" = "نقل للسابق";
+"documents.metadata.moveLater" = "نقل للتالي";
+"documents.metadata.addPage" = "إضافة صفحة";
+"documents.metadata.scanPage" = "مسح مستند";
+"documents.metadata.uploadPage" = "رفع من الصور";
 
 // MARK: - QR Sharing
 "qr.uploading" = "جارٍ رفع المستند";
@@ -712,6 +721,7 @@
 "growth.height" = "الطول";
 "growth.weight" = "الوزن";
 "growth.photo" = "صورة";
+"growth.viewPhoto" = "عرض الصورة كاملة";
 "growth.addPhoto" = "أضف صورة";
 "growth.changePhoto" = "تغيير الصورة";
 "growth.removePhoto" = "إزالة الصورة";
@@ -720,5 +730,8 @@
 "growth.emptyTitle" = "لا توجد قياسات بعد";
 "growth.emptySubtitle" = "سجّل الطول والوزن وصورة لمتابعة النمو.";
 "growth.chartTitle" = "الاتجاه";
+"growth.chartMonths" = "أشهر";
+"growth.chartYears" = "سنوات";
+"growth.yearGrowthFormat" = "%1$@ · %2$@ في %3$@";
 "growth.latest" = "الأحدث";
 "growth.delete" = "حذف القياس";

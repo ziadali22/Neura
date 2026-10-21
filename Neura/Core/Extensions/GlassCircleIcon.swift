@@ -11,20 +11,13 @@ struct GlassIconButton<Content: View>: View {
 
             ZStack {
                 Circle()
-                    .fill(.regularMaterial)
-                    .glassEffect()
+                    .fill(Color.surfaceWhite)
 
                 content()
             }
             .frame(width: size, height: size)
-            .background {
-                Circle()
-                    .fill(.regularMaterial)
-                    .glassEffect()
-                    .scaleEffect(1.65)
-                    .blur(radius: 8)
-                    .opacity(0.75)
-            }
+            .clipShape(Circle())
+            .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 4)
 
             if badge {
                 Circle()

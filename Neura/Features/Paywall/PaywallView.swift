@@ -339,8 +339,10 @@ struct PaywallView: View {
 
             HStack(spacing: 6) {
                 Link(L10n.Paywall.termsOfUse, destination: Self.termsURL)
+                    .buttonStyle(.plain)
                 Text("·").foregroundStyle(Color.black.opacity(0.3))
                 Link(L10n.Paywall.privacyPolicy, destination: Self.privacyURL)
+                    .buttonStyle(.plain)
             }
             .font(.system(size: 11, weight: .medium))
             .tint(Color.black.opacity(0.55))

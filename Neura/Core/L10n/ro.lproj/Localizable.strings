@@ -366,6 +366,15 @@
 "documents.metadata.specializationTitle" = "Specializare";
 "documents.metadata.expiryToggle" = "Setează data expirării / reînnoirii";
 "documents.metadata.expiryDate" = "Data expirării";
+"documents.metadata.pageOfFormat" = "Pagina %d din %d";
+"documents.metadata.previewHint" = "Atinge pentru previzualizare";
+"documents.metadata.reorderHint" = "Atinge pentru previzualizare · Ține apăsat pentru reordonare";
+"documents.metadata.deletePageFormat" = "Șterge pagina %d";
+"documents.metadata.moveEarlier" = "Mută mai devreme";
+"documents.metadata.moveLater" = "Mută mai târziu";
+"documents.metadata.addPage" = "Adaugă o pagină";
+"documents.metadata.scanPage" = "Scanează documentul";
+"documents.metadata.uploadPage" = "Încarcă din Poze";
 
 // MARK: - QR Sharing
 "qr.uploading" = "Se încarcă documentul";
@@ -712,6 +721,7 @@
 "growth.height" = "Înălțime";
 "growth.weight" = "Greutate";
 "growth.photo" = "Fotografie";
+"growth.viewPhoto" = "Vezi fotografia întreagă";
 "growth.addPhoto" = "Adaugă o fotografie";
 "growth.changePhoto" = "Schimbă fotografia";
 "growth.removePhoto" = "Elimină fotografia";
@@ -720,5 +730,8 @@
 "growth.emptyTitle" = "Nicio măsurătoare încă";
 "growth.emptySubtitle" = "Notează înălțimea, greutatea și o fotografie ca să vezi cum crește.";
 "growth.chartTitle" = "Tendință";
+"growth.chartMonths" = "Luni";
+"growth.chartYears" = "Ani";
+"growth.yearGrowthFormat" = "%1$@ · %2$@ în %3$@";
 "growth.latest" = "Cea mai recentă";
 "growth.delete" = "Șterge măsurătoarea";

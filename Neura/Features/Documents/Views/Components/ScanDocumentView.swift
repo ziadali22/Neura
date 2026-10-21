@@ -32,7 +32,8 @@ struct DocumentMetadataView: View {
 
     @ObservedObject private var folderStore = CustomFolderStore.shared
     @State private var metadata = DocumentMetadata()
-    @State private var scannedImages: [UIImage] = []
+    @State private var scannedPages: [ScannedPage] = []
+    @State private var previewingPage: ScannedPage?
     @State private var showScanner = false
     @State private var showAddImageOptions = false
     @State private var showPhotoPicker = false
@@ -48,6 +49,8 @@ struct DocumentMetadataView: View {
     init(
         preview: DocumentPreviewContent,
         editingDocument: Document? = nil,
+        initialCategory: DocumentCategory? = nil,
+        initialCustomFolderId: UUID? = nil,
         onSave: @escaping (DocumentMetadata, DocumentPreviewContent) -> Void
     ) {
         self.preview = preview
@@ -68,10 +71,15 @@ struct DocumentMetadataView: View {
             meta.expiryDate = doc.expiryDate
             _metadata = State(initialValue: meta)
             _hasExpiry = State(initialValue: doc.expiryDate != nil)
+        } else {
+            var meta = DocumentMetadata()
+            meta.category = initialCategory
+            meta.customFolderId = initialCustomFolderId
+            _metadata = State(initialValue: meta)
+        }
 
-            if case .scannedImages(let images) = preview {
-                _scannedImages = State(initialValue: images)
-            }
+        if case .scannedImages(let images) = preview {
+            _scannedPages = State(initialValue: images.map { ScannedPage(image: $0) })
         }
     }
 
@@ -121,10 +129,7 @@ struct DocumentMetadataView: View {
                 }
             }
             .onAppear {
-                guard editingDocument == nil else { return }
-                if case .scannedImages(let images) = preview {
-                    scannedImages = images
-                }
+                guard editingDocument == nil, metadata.name.isEmpty else { return }
                 metadata.name = defaultName
             }
         }
@@ -132,11 +137,15 @@ struct DocumentMetadataView: View {
             DocumentScanner { result in
                 if case .success(let newImages) = result {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                        scannedImages.append(contentsOf: newImages)
+                        scannedPages.append(contentsOf: newImages.map { ScannedPage(image: $0) })
                     }
                 }
             }
             .ignoresSafeArea()
+        }
+        .fullScreenCover(item: $previewingPage) { page in
+            DocumentPagesGalleryView(pages: scannedPages, initialID: page.id)
+                .presentationBackground(.black)
         }
     }
 
@@ -155,63 +164,34 @@ struct DocumentMetadataView: View {
     }
 
     private var scannedImagesPreview: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 10) {
-                ForEach(Array(scannedImages.enumerated()), id: \.offset) { index, image in
-                    ZStack(alignment: .topTrailing) {
-                        Image(uiImage: image)
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: 90, height: 120)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color.stroke, lineWidth: 1)
-                            )
+        VStack(alignment: .leading, spacing: 8) {
+            ScannedPagesStrip(
+                pages: $scannedPages,
+                onPreview: { id in
+                    focusedField = nil
+                    previewingPage = scannedPages.first(where: { $0.id == id })
+                },
+                onAdd: { showAddImageOptions = true }
+            )
 
-                        Button {
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                if scannedImages.indices.contains(index) {
-                                    scannedImages.remove(at: index)
-                                }
-                            }
-                        } label: {
-                            Image(systemName: "xmark")
-                                .font(.system(size: 9, weight: .bold))
-                                .foregroundColor(.white)
-                                .frame(width: 22, height: 22)
-                                .background(Color.black.opacity(0.6))
-                                .clipShape(Circle())
-                        }
-                        .offset(x: 6, y: -6)
-                    }
-                }
-
-                // Add more pages button
-                Button {
-                    showAddImageOptions = true
-                } label: {
-                    RoundedRectangle(cornerRadius: 12)
-                        .strokeBorder(Color.accent, lineWidth: 2)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.accent.opacity(0.06))
-                        )
-                        .frame(width: 90, height: 120)
-                        .overlay(
-                            Image(systemName: "plus")
-                                .font(.system(size: 30, weight: .medium))
-                                .foregroundColor(.accent)
-                        )
-                }
+            if !scannedPages.isEmpty {
+                Text(
+                    scannedPages.count > 1
+                        ? L10n.Documents.Metadata.reorderHint
+                        : L10n.Documents.Metadata.previewHint
+                )
+                .font(.captionS)
+                .foregroundStyle(Color.textTertiary)
+                .accessibilityHidden(true)
             }
-            .padding(.top, 6) // room for the close button's negative offset so it isn't clipped by the scroll view
         }
-        .padding(.horizontal, -20) // extend beyond parent padding
-        .padding(.horizontal, 20)  // re-add padding inside scroll content
-        .confirmationDialog("Add a Page", isPresented: $showAddImageOptions, titleVisibility: .visible) {
-            Button("Scan Document") { showScanner = true }
-            Button("Upload from Photos") { showPhotoPicker = true }
+        .confirmationDialog(
+            L10n.Documents.Metadata.addPage,
+            isPresented: $showAddImageOptions,
+            titleVisibility: .visible
+        ) {
+            Button(L10n.Documents.Metadata.scanPage) { showScanner = true }
+            Button(L10n.Documents.Metadata.uploadPage) { showPhotoPicker = true }
             Button(L10n.Common.cancel, role: .cancel) {}
         }
         .photosPicker(
@@ -223,16 +203,16 @@ struct DocumentMetadataView: View {
         .onChange(of: selectedPhotoItems) { _, items in
             guard !items.isEmpty else { return }
             Task {
-                var newImages: [UIImage] = []
+                var newPages: [ScannedPage] = []
                 for item in items {
                     guard let data = try? await item.loadTransferable(type: Data.self),
                           let image = UIImage(data: data) else { continue }
-                    newImages.append(image)
+                    newPages.append(ScannedPage(image: image))
                 }
-                guard !newImages.isEmpty else { return }
+                guard !newPages.isEmpty else { return }
                 await MainActor.run {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                        scannedImages.append(contentsOf: newImages)
+                        scannedPages.append(contentsOf: newPages)
                     }
                     selectedPhotoItems = []
                 }
@@ -539,7 +519,7 @@ struct DocumentMetadataView: View {
         let hasName = !metadata.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         switch preview {
         case .scannedImages:
-            return hasName && !scannedImages.isEmpty
+            return hasName && !scannedPages.isEmpty
         case .importedFile:
             return hasName
         }
@@ -578,7 +558,7 @@ struct DocumentMetadataView: View {
         let finalPreview: DocumentPreviewContent
         switch preview {
         case .scannedImages:
-            finalPreview = .scannedImages(scannedImages)
+            finalPreview = .scannedImages(scannedPages.map(\.image))
         case .importedFile:
             finalPreview = preview
         }

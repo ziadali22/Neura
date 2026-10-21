@@ -31,6 +31,39 @@ final class GrowthViewModel: ObservableObject {
         return ActiveSpaceManager.shared.currentSpace?.name ?? ""
     }
 
+    // MARK: - Trend
+
+    var trendPoints: [GrowthTrendPoint] {
+        GrowthTrendPoint.points(from: profileViewModel.profile.growthEntries)
+    }
+
+    /// Growth from the first reading to the latest, used under the unified chart.
+    var trendTotals: GrowthYearTotals {
+        let points = trendPoints
+        guard let first = points.first, let last = points.last else { return .zero }
+        return GrowthYearTotals(
+            heightCm: last.heightCm - first.heightCm,
+            weightKg: last.weightKg - first.weightKg
+        )
+    }
+
+    var trendPeriodLabel: String {
+        let years = Set(trendPoints.map { Calendar.current.component(.year, from: $0.date) }).sorted()
+        guard let first = years.first, let last = years.last else { return "" }
+        if first == last { return String(first) }
+        return "\(first)–\(last)"
+    }
+
+    // MARK: - Photos
+
+    /// Entries that actually have a photo, oldest first, so swiping the gallery forward
+    /// reads as the child growing.
+    var photoEntries: [GrowthEntry] {
+        chronologicalEntries.filter { $0.photoFilename != nil }
+    }
+
+    // MARK: - Entries
+
     func previous(before entry: GrowthEntry) -> GrowthEntry? {
         profileViewModel.profile.growthEntries
             .filter { $0.date < entry.date }

@@ -570,6 +570,19 @@ enum L10n {
             static var specializationTitle: String { "documents.metadata.specializationTitle".l10n() }
             static var expiryToggle: String { "documents.metadata.expiryToggle".l10n() }
             static var expiryDate: String { "documents.metadata.expiryDate".l10n() }
+            static func pageOf(_ page: Int, _ total: Int) -> String {
+                "documents.metadata.pageOfFormat".l10n(args: [page, total])
+            }
+            static var previewHint: String { "documents.metadata.previewHint".l10n() }
+            static var reorderHint: String { "documents.metadata.reorderHint".l10n() }
+            static func deletePage(_ number: Int) -> String {
+                "documents.metadata.deletePageFormat".l10n(args: [number])
+            }
+            static var moveEarlier: String { "documents.metadata.moveEarlier".l10n() }
+            static var moveLater: String { "documents.metadata.moveLater".l10n() }
+            static var addPage: String { "documents.metadata.addPage".l10n() }
+            static var scanPage: String { "documents.metadata.scanPage".l10n() }
+            static var uploadPage: String { "documents.metadata.uploadPage".l10n() }
         }
     }
 
@@ -851,6 +864,7 @@ enum L10n {
         static var height: String { "growth.height".l10n() }
         static var weight: String { "growth.weight".l10n() }
         static var photo: String { "growth.photo".l10n() }
+        static var viewPhoto: String { "growth.viewPhoto".l10n() }
         static var addPhoto: String { "growth.addPhoto".l10n() }
         static var changePhoto: String { "growth.changePhoto".l10n() }
         static var removePhoto: String { "growth.removePhoto".l10n() }
@@ -859,6 +873,11 @@ enum L10n {
         static var emptyTitle: String { "growth.emptyTitle".l10n() }
         static var emptySubtitle: String { "growth.emptySubtitle".l10n() }
         static var chartTitle: String { "growth.chartTitle".l10n() }
+        static var chartMonths: String { "growth.chartMonths".l10n() }
+        static var chartYears: String { "growth.chartYears".l10n() }
+        static func yearGrowth(_ height: String, _ weight: String, _ year: String) -> String {
+            "growth.yearGrowthFormat".l10n(args: [height, weight, year])
+        }
         static var latest: String { "growth.latest".l10n() }
         static var delete: String { "growth.delete".l10n() }
     }

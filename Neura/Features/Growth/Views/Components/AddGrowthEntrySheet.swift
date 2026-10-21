@@ -7,6 +7,20 @@ struct AddGrowthEntrySheet: View {
         let image: UIImage
     }
 
+    private enum MeasurementField: Identifiable {
+        case height
+        case weight
+
+        var id: Self { self }
+
+        var title: String {
+            switch self {
+            case .height: L10n.Growth.height
+            case .weight: L10n.Growth.weight
+            }
+        }
+    }
+
     let existing: GrowthEntry?
     let defaultHeightCm: Int
     let defaultWeightKg: Double
@@ -25,6 +39,7 @@ struct AddGrowthEntrySheet: View {
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var imagePendingCrop: IdentifiableImage?
     @State private var showDeleteConfirmation = false
+    @State private var activeWheel: MeasurementField?
 
     init(
         existing: GrowthEntry?,
@@ -51,36 +66,20 @@ struct AddGrowthEntrySheet: View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 20) {
-                    fieldSection(L10n.Growth.date) {
-                        DatePicker(
-                            L10n.Growth.date,
-                            selection: $date,
-                            in: ...Date(),
-                            displayedComponents: .date
+                    VStack(spacing: 12) {
+                        dateFieldRow
+
+                        measurementFieldRow(
+                            title: L10n.Growth.height,
+                            value: heightLabel,
+                            action: openHeightPicker
                         )
-                        .labelsHidden()
-                        .datePickerStyle(.compact)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    }
 
-                    fieldSection(L10n.Growth.height) {
-                        Picker(L10n.Growth.height, selection: $heightLabel) {
-                            ForEach(WheelPickerSheet.heightValues, id: \.self) { value in
-                                Text(value).tag(value)
-                            }
-                        }
-                        .pickerStyle(.wheel)
-                        .frame(height: 120)
-                    }
-
-                    fieldSection(L10n.Growth.weight) {
-                        Picker(L10n.Growth.weight, selection: $weightLabel) {
-                            ForEach(WheelPickerSheet.weightValues, id: \.self) { value in
-                                Text(value).tag(value)
-                            }
-                        }
-                        .pickerStyle(.wheel)
-                        .frame(height: 120)
+                        measurementFieldRow(
+                            title: L10n.Growth.weight,
+                            value: weightLabel,
+                            action: openWeightPicker
+                        )
                     }
 
                     fieldSection(L10n.Growth.photo) {
@@ -146,6 +145,22 @@ struct AddGrowthEntrySheet: View {
                     selectedPhotoItem = nil
                 }
             }
+            .sheet(item: $activeWheel) { field in
+                switch field {
+                case .height:
+                    WheelPickerSheet(
+                        fieldName: field.title,
+                        values: WheelPickerSheet.heightValues,
+                        current: heightLabel
+                    ) { heightLabel = $0 }
+                    .presentationDragIndicator(.hidden)
+                case .weight:
+                    GrowthWeightPickerSheet(
+                        currentKg: GrowthEntry.parseWeightKg(weightLabel) ?? defaultWeightKg
+                    ) { weightLabel = GrowthEntry.formatWeight($0) }
+                    .presentationDragIndicator(.hidden)
+                }
+            }
             .fullScreenCover(item: $imagePendingCrop) { wrapped in
                 GrowthPhotoCropView(
                     image: wrapped.image,
@@ -175,23 +190,106 @@ struct AddGrowthEntrySheet: View {
                     .frame(height: 200)
                     .clipped()
                     .clipShape(.rect(cornerRadius: 12))
-            }
 
-            PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
-                Text(displayedPhoto == nil ? L10n.Growth.addPhoto : L10n.Growth.changePhoto)
-                    .font(.bodyL)
-                    .foregroundStyle(Color.accent)
-            }
+                HStack {
+                    PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
+                        Text(L10n.Growth.changePhoto)
+                            .font(.headingXS)
+                            .foregroundStyle(Color.accent)
+                    }
 
-            if displayedPhoto != nil {
-                Button(L10n.Growth.removePhoto, role: .destructive) {
-                    photo = nil
-                    removePhoto = true
-                    didPickNewPhoto = false
+                    Spacer(minLength: 8)
+
+                    Button(L10n.Growth.removePhoto, systemImage: "trash", action: clearPhoto)
+                        .labelStyle(.iconOnly)
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundStyle(.red)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                        .buttonStyle(.plain)
                 }
-                .font(.bodyS)
+            } else {
+                PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
+                    Text(L10n.Growth.addPhoto)
+                        .font(.headingXS)
+                        .foregroundStyle(Color.accent)
+                }
             }
         }
+    }
+
+    private func clearPhoto() {
+        photo = nil
+        removePhoto = true
+        didPickNewPhoto = false
+    }
+
+    private func openHeightPicker() {
+        activeWheel = .height
+    }
+
+    private func openWeightPicker() {
+        activeWheel = .weight
+    }
+
+    private var dateFieldRow: some View {
+        HStack {
+            Text(L10n.Growth.date)
+                .font(.bodyL)
+                .foregroundStyle(Color.textPrimary)
+                .accessibilityHidden(true)
+
+            Spacer(minLength: 8)
+
+            DatePicker(
+                L10n.Growth.date,
+                selection: $date,
+                in: ...Date(),
+                displayedComponents: .date
+            )
+            .labelsHidden()
+            .datePickerStyle(.compact)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .background(Color.surfaceWhite)
+        .clipShape(.rect(cornerRadius: 16))
+        .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
+    }
+
+    private func measurementFieldRow(
+        title: String,
+        value: String,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            HStack {
+                Text(title)
+                    .font(.bodyL)
+                    .foregroundStyle(Color.textPrimary)
+
+                Spacer()
+
+                HStack(spacing: 6) {
+                    Text(value)
+                        .font(.statLabel)
+                        .foregroundStyle(Color.textSecondary)
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(Color.textTertiary)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .contentShape(Rectangle())
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .background(Color.surfaceWhite)
+            .clipShape(.rect(cornerRadius: 16))
+            .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
+        }
+        .buttonStyle(ScaleButtonStyle())
+        .accessibilityLabel(title)
+        .accessibilityValue(value)
     }
 
     private func fieldSection<Content: View>(

@@ -49,8 +49,9 @@ struct SpacesSection: View {
                             .font(.system(size: 24, weight: .semibold))
                             .foregroundStyle(Color.accent)
                             .frame(width: SpaceChip.avatarSize, height: SpaceChip.avatarSize)
-                            .background(Color.backgroundCard)
+                            .background(Color.surfaceWhite)
                             .clipShape(Circle())
+                            .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 4)
 
                         Text(L10n.Common.add)
                             .font(.captionS)
@@ -58,6 +59,7 @@ struct SpacesSection: View {
                             .lineLimit(1)
                     }
                 }
+                .buttonStyle(ScaleButtonStyle())
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
