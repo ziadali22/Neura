@@ -209,7 +209,10 @@ struct HomeView: View {
                     onSave: { calendarViewModel.save($0) },
                     onDelete: { calendarViewModel.delete($0) },
                     onDeleteDocument: { docsViewModel.deleteDocument($0) },
-                    onCreateDocument: { docsViewModel.registerAttachment($0) }
+                    onCreateDocument: { docsViewModel.registerAttachment($0) },
+                    onUpdateDocument: { document, metadata, preview in
+                        docsViewModel.updateDocument(document, metadata: metadata, preview: preview)
+                    }
                 )
             }
             .sheet(item: $selectedDocument) { document in

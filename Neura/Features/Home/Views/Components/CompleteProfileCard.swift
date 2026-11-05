@@ -89,7 +89,7 @@ private struct ProfileCardContent: View {
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(.white)
                         .frame(width: 44, height: 44)
-                        .background(Color.accent)
+                        .background(Color.surfaceDark)
                         .clipShape(Circle())
                         .scaleEffect(arrowBounce ? 0.9 : 1.0)
                         .offset(x: arrowBounce ? 5 : 0)

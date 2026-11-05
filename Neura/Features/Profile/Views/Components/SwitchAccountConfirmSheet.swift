@@ -40,7 +40,7 @@ struct SwitchAccountConfirmSheet: View {
             Group {
                 if isLoading {
                     ProgressView()
-                        .tint(Color.accent)
+                        .tint(Color.surfaceDark)
                         .scaleEffect(1.15)
                         .frame(maxWidth: .infinity)
                 } else {
@@ -62,7 +62,7 @@ struct SwitchAccountConfirmSheet: View {
                                 .foregroundStyle(.white)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 16)
-                                .background(Color.accent)
+                                .background(Color.surfaceDark)
                                 .clipShape(Capsule())
                         }
                         .buttonStyle(ScaleButtonStyle())

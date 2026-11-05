@@ -52,7 +52,11 @@ struct CalendarView: View {
                 initialDate: viewModel.selectedDay,
                 documents: docsViewModel.spaceScopedDocuments,
                 onSave: { viewModel.save($0) },
-                onCreateDocument: { docsViewModel.registerAttachment($0) }
+                onDeleteDocument: { docsViewModel.deleteDocument($0) },
+                onCreateDocument: { docsViewModel.registerAttachment($0) },
+                onUpdateDocument: { document, metadata, preview in
+                    docsViewModel.updateDocument(document, metadata: metadata, preview: preview)
+                }
             )
         }
         // Day details (tap a day with entries) — lists that day's entries + add
@@ -62,7 +66,10 @@ struct CalendarView: View {
                 viewModel: viewModel,
                 documents: docsViewModel.spaceScopedDocuments,
                 onDeleteDocument: { docsViewModel.deleteDocument($0) },
-                onCreateDocument: { docsViewModel.registerAttachment($0) }
+                onCreateDocument: { docsViewModel.registerAttachment($0) },
+                onUpdateDocument: { document, metadata, preview in
+                    docsViewModel.updateDocument(document, metadata: metadata, preview: preview)
+                }
             )
         }
         // Edit existing entry (from the agenda)
@@ -74,7 +81,10 @@ struct CalendarView: View {
                 onSave: { viewModel.save($0) },
                 onDelete: { viewModel.delete($0) },
                 onDeleteDocument: { docsViewModel.deleteDocument($0) },
-                onCreateDocument: { docsViewModel.registerAttachment($0) }
+                onCreateDocument: { docsViewModel.registerAttachment($0) },
+                onUpdateDocument: { document, metadata, preview in
+                    docsViewModel.updateDocument(document, metadata: metadata, preview: preview)
+                }
             )
         }
         // Agenda

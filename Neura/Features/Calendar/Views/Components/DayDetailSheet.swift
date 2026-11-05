@@ -9,6 +9,7 @@ struct DayDetailSheet: View {
     let documents: [Document]
     var onDeleteDocument: ((Document) -> Void)? = nil
     var onCreateDocument: ((Document) -> Void)? = nil
+    var onUpdateDocument: ((Document, DocumentMetadata, DocumentPreviewContent) -> Void)? = nil
 
     @Environment(\.dismiss) private var dismiss
     @State private var editorEntry: CalendarEntry?
@@ -68,7 +69,9 @@ struct DayDetailSheet: View {
                 initialDate: day,
                 documents: documents,
                 onSave: { viewModel.save($0) },
-                onCreateDocument: { onCreateDocument?($0) }
+                onDeleteDocument: onDeleteDocument,
+                onCreateDocument: { onCreateDocument?($0) },
+                onUpdateDocument: onUpdateDocument
             )
         }
         // Edit an existing entry
@@ -80,7 +83,8 @@ struct DayDetailSheet: View {
                 onSave: { viewModel.save($0) },
                 onDelete: { viewModel.delete($0) },
                 onDeleteDocument: onDeleteDocument,
-                onCreateDocument: { onCreateDocument?($0) }
+                onCreateDocument: { onCreateDocument?($0) },
+                onUpdateDocument: onUpdateDocument
             )
         }
     }

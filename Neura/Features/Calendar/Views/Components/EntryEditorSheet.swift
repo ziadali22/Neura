@@ -6,9 +6,10 @@ struct EntryEditorSheet: View {
 
     let existing: CalendarEntry?
     let initialDate: Date
-    let documents: [Document]
     let onSave: (CalendarEntry) -> Void
     let onDelete: ((CalendarEntry) -> Void)?
+    let onDeleteDocument: ((Document) -> Void)?
+    let onUpdateDocument: ((Document, DocumentMetadata, DocumentPreviewContent) -> Void)?
 
     @State private var type: CalendarEntryType
     @State private var title: String
@@ -18,7 +19,9 @@ struct EntryEditorSheet: View {
     @State private var hasEndDate: Bool
     @State private var endDate: Date
     @State private var notes: String
+    @State private var documents: [Document]
     @State private var linkedDocumentID: UUID?
+    @State private var viewingDocument: Document?
     @State private var doctor: String
     @State private var specialization: MedicalSpecialization?
     @State private var showDeleteConfirm = false
@@ -33,14 +36,16 @@ struct EntryEditorSheet: View {
         documents: [Document],
         onSave: @escaping (CalendarEntry) -> Void,
         onDelete: ((CalendarEntry) -> Void)? = nil,
-        onDeleteDocument _: ((Document) -> Void)? = nil,
-        onCreateDocument _: @escaping (Document) -> Void = { _ in }
+        onDeleteDocument: ((Document) -> Void)? = nil,
+        onCreateDocument _: @escaping (Document) -> Void = { _ in },
+        onUpdateDocument: ((Document, DocumentMetadata, DocumentPreviewContent) -> Void)? = nil
     ) {
         self.existing = existing
         self.initialDate = initialDate
-        self.documents = documents
         self.onSave = onSave
         self.onDelete = onDelete
+        self.onDeleteDocument = onDeleteDocument
+        self.onUpdateDocument = onUpdateDocument
 
         _type = State(initialValue: existing?.type ?? .medication)
         _title = State(initialValue: existing?.title ?? "")
@@ -50,6 +55,7 @@ struct EntryEditorSheet: View {
         _hasEndDate = State(initialValue: existing?.recurrence.endDate != nil)
         _endDate = State(initialValue: existing?.recurrence.endDate ?? initialDate)
         _notes = State(initialValue: existing?.notes ?? "")
+        _documents = State(initialValue: documents)
         _linkedDocumentID = State(initialValue: Self.resolvedDocumentID(existing: existing))
         _doctor = State(initialValue: existing?.doctor ?? "")
         _specialization = State(initialValue: existing?.specialization)
@@ -115,6 +121,10 @@ struct EntryEditorSheet: View {
                             Text(document.name).tag(UUID?.some(document.id))
                         }
                     }
+
+                    if linkedDocument != nil {
+                        Button(L10n.Calendar.openDocument, systemImage: "doc", action: openLinkedDocument)
+                    }
                 }
 
                 Section(L10n.Calendar.fieldNotes) {
@@ -151,6 +161,17 @@ struct EntryEditorSheet: View {
                 Button(L10n.Common.cancel, role: .cancel) {}
             } message: {
                 Text(L10n.Calendar.deleteConfirmMessage)
+            }
+            .sheet(item: $viewingDocument) { document in
+                NavigationStack {
+                    DocumentViewerView(
+                        document: document,
+                        onDelete: { removeLinkedDocument(document) },
+                        onEdit: { metadata, preview in
+                            applyLinkedDocumentEdit(document, metadata: metadata, preview: preview)
+                        }
+                    )
+                }
             }
             .navigationTitle(existing == nil ? L10n.Calendar.newEntryTitle : L10n.Calendar.editEntryTitle)
             .navigationBarTitleDisplayMode(.inline)
@@ -208,6 +229,36 @@ struct EntryEditorSheet: View {
         )
         onSave(entry)
         dismiss()
+    }
+
+    /// The file currently chosen in "Link a document", when it still exists in Docs.
+    private var linkedDocument: Document? {
+        guard let linkedDocumentID else { return nil }
+        return documents.first { $0.id == linkedDocumentID }
+    }
+
+    private func openLinkedDocument() {
+        viewingDocument = linkedDocument
+    }
+
+    /// Unlink first so a deleted file is not saved back onto the entry.
+    /// The viewer dismisses itself after this returns.
+    private func removeLinkedDocument(_ document: Document) {
+        if linkedDocumentID == document.id {
+            linkedDocumentID = nil
+        }
+        onDeleteDocument?(document)
+    }
+
+    private func applyLinkedDocumentEdit(
+        _ document: Document,
+        metadata: DocumentMetadata,
+        preview: DocumentPreviewContent
+    ) {
+        onUpdateDocument?(document, metadata, preview)
+        let trimmed = metadata.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, let index = documents.firstIndex(where: { $0.id == document.id }) else { return }
+        documents[index].name = trimmed
     }
 
     /// Newest first. The menu shows the same saved files as Docs.
