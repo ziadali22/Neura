@@ -76,7 +76,6 @@ struct HealthReportSheet: View {
                         .frame(height: 54)
                         .background(Color.accent)
                         .clipShape(Capsule())
-                        .shadow(color: Color.accent.opacity(0.3), radius: 10, x: 0, y: 4)
                     }
                     .disabled(isGenerating)
                 }

@@ -28,11 +28,11 @@ struct OptionPickerSheet: View {
                     onSave(selected)
                     dismiss()
                 } label: {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 16, weight: .bold))
+                    Image(systemName: "xmark")
+                        .font(.system(size: 13, weight: .bold))
                         .foregroundStyle(.white)
                         .frame(width: 36, height: 36)
-                        .background(Color.accent)
+                        .background(Color.surfaceDark)
                         .clipShape(Circle())
                 }
             }

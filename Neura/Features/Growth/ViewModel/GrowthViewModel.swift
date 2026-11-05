@@ -37,16 +37,6 @@ final class GrowthViewModel: ObservableObject {
         GrowthTrendPoint.points(from: profileViewModel.profile.growthEntries)
     }
 
-    /// Growth from the first reading to the latest, used under the unified chart.
-    var trendTotals: GrowthYearTotals {
-        let points = trendPoints
-        guard let first = points.first, let last = points.last else { return .zero }
-        return GrowthYearTotals(
-            heightCm: last.heightCm - first.heightCm,
-            weightKg: last.weightKg - first.weightKg
-        )
-    }
-
     var trendPeriodLabel: String {
         let years = Set(trendPoints.map { Calendar.current.component(.year, from: $0.date) }).sorted()
         guard let first = years.first, let last = years.last else { return "" }

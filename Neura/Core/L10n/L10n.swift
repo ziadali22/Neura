@@ -71,6 +71,7 @@ enum L10n {
         static var agendaTitle: String { "calendar.agendaTitle".l10n() }
         static var next: String { "calendar.next".l10n() }
         static var today: String { "calendar.today".l10n() }
+        static var tomorrow: String { "calendar.tomorrow".l10n() }
         static var emptyHint: String { "calendar.emptyHint".l10n() }
         static var todayEmptyHint: String { "calendar.todayEmptyHint".l10n() }
         static var addEvent: String { "calendar.addEvent".l10n() }
@@ -105,6 +106,7 @@ enum L10n {
         static var reminderInfoMedicalEvent: String { "calendar.reminderInfoMedicalEvent".l10n() }
         static var reminderInfoMedicalEventRecurring: String { "calendar.reminderInfoMedicalEventRecurring".l10n() }
         static var a11yHasEvents: String { "calendar.a11yHasEvents".l10n() }
+        static var a11yHasAttachment: String { "calendar.a11yHasAttachment".l10n() }
         static var fieldLinkDocument: String { "calendar.field.linkDocument".l10n() }
         static var noDocumentLinked: String { "calendar.noDocumentLinked".l10n() }
         static var openDocument: String { "calendar.openDocument".l10n() }
@@ -113,6 +115,22 @@ enum L10n {
         static var deleteConfirmTitle: String { "calendar.deleteConfirmTitle".l10n() }
         static var deleteConfirmMessage: String { "calendar.deleteConfirmMessage".l10n() }
         static var fieldAllDay: String { "calendar.field.allDay".l10n() }
+        static var attachments: String { "calendar.attachments".l10n() }
+        static var attachmentImage: String { "calendar.attachment.image".l10n() }
+        static var attachmentDocument: String { "calendar.attachment.document".l10n() }
+        static var attachmentPrescription: String { "calendar.attachment.prescription".l10n() }
+        static var addImage: String { "calendar.attachment.addImage".l10n() }
+        static var addDocument: String { "calendar.attachment.addDocument".l10n() }
+        static var addPrescription: String { "calendar.attachment.addPrescription".l10n() }
+        static var chooseExisting: String { "calendar.attachment.chooseExisting".l10n() }
+        static var choosePhoto: String { "calendar.attachment.choosePhoto".l10n() }
+        static var importFile: String { "calendar.attachment.importFile".l10n() }
+        static var removeAttachment: String { "calendar.attachment.remove".l10n() }
+        static var attachmentEmpty: String { "calendar.attachment.empty".l10n() }
+        static var attachmentMissing: String { "calendar.attachment.missing".l10n() }
+        static var attachmentExistingSubtitle: String { "calendar.attachment.existingSubtitle".l10n() }
+        static var attachmentPhotoSubtitle: String { "calendar.attachment.photoSubtitle".l10n() }
+        static var attachmentImportSubtitle: String { "calendar.attachment.importSubtitle".l10n() }
     }
 
     // MARK: - Onboarding
@@ -193,6 +211,8 @@ enum L10n {
             static var cityPlaceholder: String { "onboarding.location.cityPlaceholder".l10n() }
             static var country: String { "onboarding.location.country".l10n() }
             static var countryPlaceholder: String { "onboarding.location.countryPlaceholder".l10n() }
+            static var detect: String { "onboarding.location.detect".l10n() }
+            static var detecting: String { "onboarding.location.detecting".l10n() }
         }
 
         enum ProfileCardIntro {
@@ -429,6 +449,7 @@ enum L10n {
         static var scan: String { "documents.scan".l10n() }
         static var uploadPhotos: String { "documents.uploadPhotos".l10n() }
         static var importFile: String { "documents.importFile".l10n() }
+        static var importGoogleDrive: String { "documents.importGoogleDrive".l10n() }
         static func deleteAlertTitle(_ count: Int) -> String {
             "documents.deleteAlertTitleFormat".l10n(args: [count])
         }
@@ -527,6 +548,7 @@ enum L10n {
             static var scanSubtitle: String { "documents.addDocument.scanSubtitle".l10n() }
             static var photoSubtitle: String { "documents.addDocument.photoSubtitle".l10n() }
             static var fileSubtitle: String { "documents.addDocument.fileSubtitle".l10n() }
+            static var googleDriveSubtitle: String { "documents.addDocument.googleDriveSubtitle".l10n() }
         }
 
         enum GoogleDriveImport {
@@ -638,6 +660,7 @@ enum L10n {
         static var valueLabel: String { "healthProfile.valueLabel".l10n() }
 
         // Field labels not already covered above
+        static var location: String { "healthProfile.location".l10n() }
         static var fieldName: String { "healthProfile.field.name".l10n() }
         static var myNumber: String { "healthProfile.field.myNumber".l10n() }
         static var emergencyNumber: String { "healthProfile.field.emergencyNumber".l10n() }
@@ -875,9 +898,6 @@ enum L10n {
         static var chartTitle: String { "growth.chartTitle".l10n() }
         static var chartMonths: String { "growth.chartMonths".l10n() }
         static var chartYears: String { "growth.chartYears".l10n() }
-        static func yearGrowth(_ height: String, _ weight: String, _ year: String) -> String {
-            "growth.yearGrowthFormat".l10n(args: [height, weight, year])
-        }
         static var latest: String { "growth.latest".l10n() }
         static var delete: String { "growth.delete".l10n() }
     }

@@ -40,6 +40,7 @@ struct AddGrowthEntrySheet: View {
     @State private var imagePendingCrop: IdentifiableImage?
     @State private var showDeleteConfirmation = false
     @State private var activeWheel: MeasurementField?
+    @FocusState private var notesFocused: Bool
 
     init(
         existing: GrowthEntry?,
@@ -64,115 +65,159 @@ struct AddGrowthEntrySheet: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 20) {
-                    VStack(spacing: 12) {
-                        dateFieldRow
+        VStack(spacing: 0) {
+            header
 
-                        measurementFieldRow(
-                            title: L10n.Growth.height,
-                            value: heightLabel,
-                            action: openHeightPicker
-                        )
+            ScrollViewReader { proxy in
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 20) {
+                        Text(existing == nil ? L10n.Growth.add : L10n.Growth.edit)
+                            .font(.displayXL)
+                            .foregroundStyle(Color.textPrimary)
 
-                        measurementFieldRow(
-                            title: L10n.Growth.weight,
-                            value: weightLabel,
-                            action: openWeightPicker
-                        )
-                    }
+                        VStack(spacing: 12) {
+                            dateFieldRow
 
-                    fieldSection(L10n.Growth.photo) {
-                        photoPicker
-                    }
+                            measurementFieldRow(
+                                title: L10n.Growth.height,
+                                value: heightLabel,
+                                action: openHeightPicker
+                            )
 
-                    fieldSection(L10n.Growth.notes) {
-                        TextField(L10n.Growth.notesPlaceholder, text: $notes, axis: .vertical)
-                            .lineLimit(3...6)
-                    }
-
-                    if existing != nil, onDelete != nil {
-                        Button(L10n.Growth.delete, role: .destructive) {
-                            showDeleteConfirmation = true
+                            measurementFieldRow(
+                                title: L10n.Growth.weight,
+                                value: weightLabel,
+                                action: openWeightPicker
+                            )
                         }
-                        .font(.bodyL)
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 8)
+
+                        fieldSection(L10n.Growth.photo) {
+                            photoPicker
+                        }
+
+                        fieldSection(L10n.Growth.notes) {
+                            TextField(L10n.Growth.notesPlaceholder, text: $notes)
+                                .focused($notesFocused)
+                                .submitLabel(.done)
+                                .onSubmit { notesFocused = false }
+                        }
+                        .id("notes")
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 8)
+                    .padding(.bottom, 120)
                 }
+                .scrollDismissesKeyboard(.interactively)
+                .scrollBounceBehavior(.basedOnSize)
+                .onChange(of: notesFocused) { _, focused in
+                    guard focused else { return }
+                    scrollNotes(proxy: proxy)
+                }
+                .onChange(of: notes) { _, _ in
+                    guard notesFocused else { return }
+                    scrollNotes(proxy: proxy)
+                }
+            }
+
+            if existing != nil, onDelete != nil {
+                Button(L10n.Growth.delete, role: .destructive) {
+                    showDeleteConfirmation = true
+                }
+                .font(.bodyL)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
                 .padding(.horizontal, 20)
-                .padding(.top, 8)
-                .padding(.bottom, 40)
+                .padding(.bottom, 8)
+                .background(Color.backgroundPrimary)
             }
-            .background(Color.backgroundPrimary)
-            .navigationTitle(existing == nil ? L10n.Growth.add : L10n.Growth.edit)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(L10n.Common.cancel) { dismiss() }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button {
-                        persist()
-                    } label: {
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundStyle(.white)
-                            .frame(width: 34, height: 34)
-                            .background(canSave ? Color.accent : Color.textTertiary)
-                            .clipShape(Circle())
-                    }
-                    .disabled(!canSave)
-                    .accessibilityLabel(L10n.Common.save)
-                }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .background(Color.backgroundPrimary)
+        .contentShape(Rectangle())
+        .onTapGesture { notesFocused = false }
+        .toolbar(.hidden, for: .navigationBar)
+        .toolbar(.hidden, for: .tabBar)
+        }
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
+        .presentationBackground(Color.backgroundPrimary)
+        .alert(L10n.Common.areYouSure, isPresented: $showDeleteConfirmation) {
+            Button(L10n.Common.cancel, role: .cancel) {}
+            Button(L10n.Common.delete, role: .destructive) {
+                onDelete?()
+                dismiss()
             }
-            .alert(L10n.Common.areYouSure, isPresented: $showDeleteConfirmation) {
-                Button(L10n.Common.cancel, role: .cancel) {}
-                Button(L10n.Common.delete, role: .destructive) {
-                    onDelete?()
+        } message: {
+            Text(L10n.Common.thisActionCannotBeUndone)
+        }
+        .onChange(of: selectedPhotoItem) { _, item in
+            guard let item else { return }
+            Task {
+                if let data = try? await item.loadTransferable(type: Data.self),
+                   let uiImage = UIImage(data: data) {
+                    imagePendingCrop = IdentifiableImage(image: uiImage)
+                }
+                selectedPhotoItem = nil
+            }
+        }
+        .sheet(item: $activeWheel) { field in
+            switch field {
+            case .height:
+                WheelPickerSheet(
+                    fieldName: field.title,
+                    values: WheelPickerSheet.heightValues,
+                    current: heightLabel
+                ) { heightLabel = $0 }
+                .presentationDragIndicator(.hidden)
+            case .weight:
+                GrowthWeightPickerSheet(
+                    currentKg: GrowthEntry.parseWeightKg(weightLabel) ?? defaultWeightKg
+                ) { weightLabel = GrowthEntry.formatWeight($0) }
+                .presentationDragIndicator(.hidden)
+            }
+        }
+        .fullScreenCover(item: $imagePendingCrop) { wrapped in
+            GrowthPhotoCropView(
+                image: wrapped.image,
+                onCancel: { imagePendingCrop = nil },
+                onConfirm: { cropped in
+                    photo = cropped
+                    removePhoto = false
+                    didPickNewPhoto = true
+                    imagePendingCrop = nil
+                }
+            )
+        }
+    }
+
+    private var header: some View {
+        HStack {
+            Spacer()
+            Button {
+                if canSave {
+                    persist()
+                } else {
                     dismiss()
                 }
-            } message: {
-                Text(L10n.Common.thisActionCannotBeUndone)
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(width: 36, height: 36)
+                    .background(Color.surfaceDark)
+                    .clipShape(Circle())
             }
-            .onChange(of: selectedPhotoItem) { _, item in
-                guard let item else { return }
-                Task {
-                    if let data = try? await item.loadTransferable(type: Data.self),
-                       let uiImage = UIImage(data: data) {
-                        imagePendingCrop = IdentifiableImage(image: uiImage)
-                    }
-                    selectedPhotoItem = nil
-                }
-            }
-            .sheet(item: $activeWheel) { field in
-                switch field {
-                case .height:
-                    WheelPickerSheet(
-                        fieldName: field.title,
-                        values: WheelPickerSheet.heightValues,
-                        current: heightLabel
-                    ) { heightLabel = $0 }
-                    .presentationDragIndicator(.hidden)
-                case .weight:
-                    GrowthWeightPickerSheet(
-                        currentKg: GrowthEntry.parseWeightKg(weightLabel) ?? defaultWeightKg
-                    ) { weightLabel = GrowthEntry.formatWeight($0) }
-                    .presentationDragIndicator(.hidden)
-                }
-            }
-            .fullScreenCover(item: $imagePendingCrop) { wrapped in
-                GrowthPhotoCropView(
-                    image: wrapped.image,
-                    onCancel: { imagePendingCrop = nil },
-                    onConfirm: { cropped in
-                        photo = cropped
-                        removePhoto = false
-                        didPickNewPhoto = true
-                        imagePendingCrop = nil
-                    }
-                )
-            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(canSave ? L10n.Common.done : L10n.Common.close)
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 16)
+        .padding(.bottom, 4)
+    }
+
+    private func scrollNotes(proxy: ScrollViewProxy) {
+        withAnimation(.easeOut(duration: 0.25)) {
+            proxy.scrollTo("notes", anchor: .bottom)
         }
     }
 

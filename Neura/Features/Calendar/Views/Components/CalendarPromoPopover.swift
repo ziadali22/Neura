@@ -25,7 +25,7 @@ struct CalendarPromoPopover: View {
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .background(Color.textPrimary)
+                    .background(Color.accent)
                     .clipShape(Capsule())
             }
             .buttonStyle(ScaleButtonStyle())

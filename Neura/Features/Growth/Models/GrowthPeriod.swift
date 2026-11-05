@@ -196,15 +196,3 @@ struct GrowthTrendAxis {
         return indices.map { dates[$0] }
     }
 }
-
-// MARK: - Totals
-
-/// Growth from the first reading to the last, shown beneath the chart.
-struct GrowthYearTotals: Hashable {
-    let heightCm: Int
-    let weightKg: Double
-
-    static let zero = GrowthYearTotals(heightCm: 0, weightKg: 0)
-
-    var isEmpty: Bool { heightCm == 0 && abs(weightKg) < 0.05 }
-}

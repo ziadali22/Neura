@@ -151,6 +151,10 @@ final class HealthProfileViewModel: ObservableObject {
 
     // MARK: - General Data
 
+    func updateLocation(city: String, country: String) {
+        UserLocationStore.save(city: city, country: country)
+    }
+
     func updateGeneralField(_ keyPath: WritableKeyPath<HealthProfile.GeneralData, String>, value: String) {
         profile.generalData[keyPath: keyPath] = value
         save()
@@ -396,6 +400,7 @@ final class HealthProfileViewModel: ObservableObject {
             // MARK: General Data card
             let generalFields: [(String, String)] = [
                 ("Full Name",         profile.generalData.fullName),
+                ("Location",          UserLocationStore.current),
                 ("Date of Birth",     profile.generalData.dateOfBirth),
                 ("Gender",            profile.generalData.gender),
                 ("Height",            profile.generalData.height),

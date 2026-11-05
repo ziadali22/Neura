@@ -129,7 +129,7 @@ final class CalendarReminderScheduler {
         content.sound = .default
         // Deep-links to the linked document on tap (see AppDelegate's
         // UNUserNotificationCenterDelegate conformance).
-        if let linkedDocumentID = entry.linkedDocumentID {
+        if let linkedDocumentID = entry.primaryAttachmentID {
             content.userInfo = ["documentID": linkedDocumentID.uuidString]
         }
 

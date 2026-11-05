@@ -140,6 +140,19 @@ struct HealthProfile: Codable {
             }
         }
 
+        /// Illustration shown on the empty-entries screen. `nil` for custom sections.
+        var emptyIllustrationName: String? {
+            switch title {
+            case "Known Conditions": return "KnownConditions"
+            case "Medication & Supplements": return "MedicationAndSupplements"
+            case "Allergies": return "Allergies"
+            case HealthProfile.vaccinationsSectionTitle: return "Vaccinations"
+            case "Reported Symptoms": return "ReportedSymptoms"
+            case "Family History": return "FamilyHistory"
+            default: return nil
+            }
+        }
+
         struct Entry: Identifiable, Codable, Hashable {
             var id: UUID
             var text: String

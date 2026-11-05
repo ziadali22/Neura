@@ -27,6 +27,17 @@ final class GrowthPhotoStore {
         fileManager.fileExists(atPath: resolveURL(for: filename(for: entryID)).path)
     }
 
+    /// Measurement ids that have a JPEG on this device.
+    func localEntryIDs() -> [UUID] {
+        guard let names = try? fileManager.contentsOfDirectory(atPath: photosDirectory.path) else {
+            return []
+        }
+        return names.compactMap { name in
+            guard name.lowercased().hasSuffix(".jpg") else { return nil }
+            return UUID(uuidString: String(name.dropLast(4)))
+        }
+    }
+
     @discardableResult
     func save(_ image: UIImage, for entryID: UUID) -> String? {
         let resized = resizedImage(image)

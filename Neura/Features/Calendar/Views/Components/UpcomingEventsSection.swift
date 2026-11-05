@@ -79,9 +79,9 @@ struct UpcomingEventRow: View {
     let onToggle: () -> Void
 
     var body: some View {
-        HStack(spacing: 14) {
+        HStack(spacing: 12) {
             Button(action: onTap) {
-                HStack(spacing: 14) {
+                HStack(spacing: 12) {
                     VStack(spacing: 2) {
                         Text(date, format: .dateTime.day())
                             .font(.system(size: 22, weight: .bold))
@@ -92,7 +92,12 @@ struct UpcomingEventRow: View {
                     }
                     .frame(width: 40)
 
-                    VStack(alignment: .leading, spacing: 3) {
+                    Rectangle()
+                        .fill(Color.stroke)
+                        .frame(width: 1)
+                        .padding(.vertical, 4)
+
+                    VStack(alignment: .leading, spacing: 4) {
                         Text(entry.title)
                             .font(.headingXS)
                             .fontWeight(.bold)
@@ -100,12 +105,16 @@ struct UpcomingEventRow: View {
                             .strikethrough(isCompleted)
                             .lineLimit(1)
                         Text(entry.subtitle)
-                            .font(.captionS)
-                            .foregroundStyle(Color.textSecondary)
+                            .font(.bodyS)
+                            .foregroundStyle(Color.textTertiary)
                             .lineLimit(1)
                     }
 
                     Spacer(minLength: 8)
+
+                    if entry.hasAttachment {
+                        EntryAttachmentIcon()
+                    }
                 }
                 .contentShape(Rectangle())
             }
@@ -129,7 +138,7 @@ struct UpcomingEventRow: View {
         if isCompleted {
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: 22))
-                .foregroundStyle(entry.type.color)
+                .foregroundStyle(Color.accent)
         } else {
             Circle()
                 .strokeBorder(entry.type.color.opacity(0.6), lineWidth: 2)

@@ -19,7 +19,7 @@ struct OnboardingContinueButton: View {
     private var effectivelyEnabled: Bool { isEnabled && !isLoading }
 
     private var primaryBackground: Color {
-        isLoading ? Color.black : (effectivelyEnabled ? Color.black : Color.textTertiary)
+        (isEnabled || isLoading) ? Color.surfaceDark : Color.textTertiary
     }
 
     var body: some View {
@@ -42,11 +42,7 @@ struct OnboardingContinueButton: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: 56)
                 .background(primaryBackground)
-                .clipShape(.rect(cornerRadius: 28))
-                .shadow(
-                    color: effectivelyEnabled ? .black.opacity(0.15) : .clear,
-                    radius: 10, x: 0, y: 5
-                )
+                .clipShape(Capsule())
             }
             .buttonStyle(ScaleButtonStyle())
             .disabled(!effectivelyEnabled)

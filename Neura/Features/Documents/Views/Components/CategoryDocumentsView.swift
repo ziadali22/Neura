@@ -34,10 +34,6 @@ struct CategoryDocumentsView: View {
                 VStack(spacing: 0) {
                     searchBar
 
-                    if isSelecting {
-                        selectedCountRow
-                    }
-
                     documentsList
                 }
             }
@@ -46,6 +42,7 @@ struct CategoryDocumentsView: View {
         .background(Color.backgroundPrimary.ignoresSafeArea())
         .navigationTitle(isSelecting ? "" : category.localizedName)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(isSelecting ? .hidden : .visible, for: .navigationBar)
         .toolbar {
             if !documents.isEmpty && !isSelecting {
                 toolbarContent
@@ -83,7 +80,7 @@ struct CategoryDocumentsView: View {
 
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
-        ToolbarItemGroup(placement: .navigationBarTrailing) {
+        ToolbarItem(placement: .topBarTrailing) {
             Button {
                 viewModel.showAddOptions(destination: .category(category))
             } label: {
@@ -92,7 +89,11 @@ struct CategoryDocumentsView: View {
                     .foregroundStyle(Color.accent)
             }
             .accessibilityLabel(L10n.Documents.addDocument)
+        }
 
+        ToolbarSpacer(.fixed, placement: .topBarTrailing)
+
+        ToolbarItem(placement: .topBarTrailing) {
             Button {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                     isSelecting = true
@@ -100,7 +101,7 @@ struct CategoryDocumentsView: View {
             } label: {
                 Text(L10n.Documents.select)
                     .font(.system(size: 15, weight: .medium))
-                    .foregroundStyle(Color.accent)
+                    .foregroundStyle(Color.textPrimary)
             }
         }
     }
@@ -108,11 +109,13 @@ struct CategoryDocumentsView: View {
     // MARK: - Selection Header (replaces nav bar in selection mode)
 
     private var selectionHeader: some View {
-        HStack {
-            // Select All
-            Button {
+        DocsSelectionHeader(
+            title: category.localizedName,
+            titleFont: .headingS,
+            countFont: .headingXS,
+            selectedCount: selectedDocuments.count,
+            onSelectAll: {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                    // Exclude locked documents from bulk selection
                     let allIDs = Set(filteredDocuments
                         .filter { !viewModel.isLocked($0) }
                         .map(\.id))
@@ -122,43 +125,14 @@ struct CategoryDocumentsView: View {
                         selectedDocuments = allIDs
                     }
                 }
-            } label: {
-                Text(L10n.Documents.selectAll)
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundStyle(Color.textPrimary)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .background(Color.surfaceWhite)
-                    .clipShape(Capsule())
-                    .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
-            }
-
-            Spacer()
-
-            Text(selectedDocuments.isEmpty ? category.localizedName : "\(selectedDocuments.count) Items")
-                .font(.headingS)
-                .foregroundStyle(Color.textPrimary)
-                .contentTransition(.numericText())
-                .animation(.spring(response: 0.3, dampingFraction: 0.8), value: selectedDocuments.count)
-
-            Spacer()
-
-            // Done
-            Button {
+            },
+            onDone: {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                     isSelecting = false
                     selectedDocuments.removeAll()
                 }
-            } label: {
-                Image(systemName: "checkmark")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(Color.textPrimary)
-                    .frame(width: 34, height: 34)
-                    .background(Color.surfaceWhite)
-                    .clipShape(Circle())
-                    .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
             }
-        }
+        )
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
     }
@@ -181,19 +155,6 @@ struct CategoryDocumentsView: View {
         .padding(.horizontal, 16)
         .padding(.top, 10)
         .padding(.bottom, 4)
-    }
-
-    // MARK: - Selected Count Row (selection mode)
-
-    private var selectedCountRow: some View {
-        HStack {
-            Text(selectedDocuments.isEmpty ? L10n.Documents.noneSelected : L10n.Documents.selected(selectedDocuments.count))
-                .font(.system(size: 14, weight: .medium))
-                .foregroundStyle(Color.textSecondary)
-            Spacer()
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 6)
     }
 
     // MARK: - Documents List
@@ -282,7 +243,7 @@ struct CategoryDocumentsView: View {
                     .foregroundStyle(.white)
                     .frame(width: 190)
                     .padding(.vertical, 14)
-                    .background(Color.textPrimary)
+                    .background(Color.accent)
                     .clipShape(Capsule())
             }
             .buttonStyle(ScaleButtonStyle())

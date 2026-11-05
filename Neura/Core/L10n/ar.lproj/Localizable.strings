@@ -91,6 +91,8 @@
 "onboarding.location.cityPlaceholder" = "مثال: الرياض";
 "onboarding.location.country" = "الدولة";
 "onboarding.location.countryPlaceholder" = "مثال: المملكة العربية السعودية";
+"onboarding.location.detect" = "تحديد موقعي";
+"onboarding.location.detecting" = "جارٍ تحديد الموقع…";
 
 // MARK: - Onboarding Profile Card
 "onboarding.profileCardIntro.title" = "تعرّف على بطاقتك الصحية";
@@ -263,6 +265,7 @@
 "documents.scan" = "مسح المستند";
 "documents.uploadPhotos" = "رفع من الصور";
 "documents.importFile" = "استيراد ملف";
+"documents.importGoogleDrive" = "استيراد من Google Drive";
 "documents.deleteAlertTitleFormat" = "حذف %d مستند(ات)؟";
 "documents.selectedCountFormat" = "%d عنصر";
 "documents.noneSelected" = "لم يتم التحديد";
@@ -342,6 +345,7 @@
 "documents.addDocument.scanSubtitle" = "استخدم الكاميرا لمسح الصفحات";
 "documents.addDocument.photoSubtitle" = "اختر صورة من مكتبتك";
 "documents.addDocument.fileSubtitle" = "اختر ملف PDF أو صورة";
+"documents.addDocument.googleDriveSubtitle" = "أحضر ملفًا من Drive";
 
 // MARK: - Documents Category Picker
 "documents.categoryPicker.title" = "اختر الفئة";
@@ -393,6 +397,7 @@
 "healthProfile.addSection" = "إضافة قسم";
 "healthProfile.sectionTitlePlaceholder" = "عنوان القسم";
 "healthProfile.fullName" = "الاسم الكامل";
+"healthProfile.location" = "الموقع";
 "healthProfile.dateOfBirth" = "تاريخ الميلاد";
 "healthProfile.gender" = "الجنس";
 "healthProfile.height" = "الطول";
@@ -705,10 +710,28 @@
 "calendar.reminderInfoMedicalEvent" = "سيتم تذكيرك قبل 30 و15 دقيقة من هذا الحدث.";
 "calendar.reminderInfoMedicalEventRecurring" = "سيتم تذكيرك قبل 30 و15 دقيقة من كل حدث قادم.";
 "calendar.today" = "اليوم";
+"calendar.tomorrow" = "غدًا";
 "calendar.emptyHint" = "اضغط على أي يوم لإضافة حدث.";
 "calendar.todayEmptyHint" = "لا شيء مخطط لهذا اليوم — أضف موعدًا أو دواءً أو حدثًا طبيًا لتبقى على المسار.";
 "calendar.addEvent" = "إضافة";
 "calendar.a11yHasEvents" = "يحتوي على أحداث";
+"calendar.a11yHasAttachment" = "يحتوي على مرفق";
+"calendar.attachments" = "المرفقات";
+"calendar.attachment.image" = "صورة";
+"calendar.attachment.document" = "مستند";
+"calendar.attachment.prescription" = "وصفة طبية";
+"calendar.attachment.addImage" = "إضافة صورة";
+"calendar.attachment.addDocument" = "إضافة مستند";
+"calendar.attachment.addPrescription" = "إضافة وصفة";
+"calendar.attachment.chooseExisting" = "اختيار من المحفوظ";
+"calendar.attachment.choosePhoto" = "اختيار صورة";
+"calendar.attachment.importFile" = "استيراد ملف";
+"calendar.attachment.remove" = "إزالة";
+"calendar.attachment.empty" = "لا يوجد شيء محفوظ بعد";
+"calendar.attachment.missing" = "الملف غير متاح";
+"calendar.attachment.existingSubtitle" = "من ملفاتك المحفوظة";
+"calendar.attachment.photoSubtitle" = "من مكتبة الصور";
+"calendar.attachment.importSubtitle" = "ملف PDF أو صورة";
 
 // MARK: - Health Profile extras
 "healthProfile.chooseFromContacts" = "اختر من جهات الاتصال";
@@ -732,6 +755,5 @@
 "growth.chartTitle" = "الاتجاه";
 "growth.chartMonths" = "أشهر";
 "growth.chartYears" = "سنوات";
-"growth.yearGrowthFormat" = "%1$@ · %2$@ في %3$@";
 "growth.latest" = "الأحدث";
 "growth.delete" = "حذف القياس";

@@ -62,7 +62,7 @@ struct SwitchAccountConfirmSheet: View {
                                 .foregroundStyle(.white)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 16)
-                                .background(Color.textPrimary)
+                                .background(Color.accent)
                                 .clipShape(Capsule())
                         }
                         .buttonStyle(ScaleButtonStyle())

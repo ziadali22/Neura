@@ -57,10 +57,6 @@ struct CustomFolderDocumentsView: View {
                 VStack(spacing: 0) {
                     searchBar
 
-                    if isSelecting {
-                        selectedCountRow
-                    }
-
                     documentsList
                 }
             }
@@ -69,6 +65,7 @@ struct CustomFolderDocumentsView: View {
         .background(Color.backgroundPrimary.ignoresSafeArea())
         .navigationTitle(isSelecting ? "" : currentName)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(isSelecting ? .hidden : .visible, for: .navigationBar)
         .toolbar {
             if !documents.isEmpty && !isSelecting {
                 toolbarContent
@@ -106,7 +103,7 @@ struct CustomFolderDocumentsView: View {
 
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
-        ToolbarItemGroup(placement: .navigationBarTrailing) {
+        ToolbarItem(placement: .topBarTrailing) {
             Button {
                 viewModel.showAddOptions(destination: .customFolder(folder.id))
             } label: {
@@ -115,7 +112,11 @@ struct CustomFolderDocumentsView: View {
                     .foregroundStyle(Color.accent)
             }
             .accessibilityLabel(L10n.Documents.addDocument)
+        }
 
+        ToolbarSpacer(.fixed, placement: .topBarTrailing)
+
+        ToolbarItem(placement: .topBarTrailing) {
             Button {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                     isSelecting = true
@@ -123,7 +124,7 @@ struct CustomFolderDocumentsView: View {
             } label: {
                 Text(L10n.Documents.select)
                     .font(.system(size: 15, weight: .medium))
-                    .foregroundStyle(Color.accent)
+                    .foregroundStyle(Color.textPrimary)
             }
         }
     }
@@ -131,8 +132,12 @@ struct CustomFolderDocumentsView: View {
     // MARK: - Selection Header (replaces nav bar in selection mode)
 
     private var selectionHeader: some View {
-        HStack {
-            Button {
+        DocsSelectionHeader(
+            title: currentName,
+            titleFont: .headingS,
+            countFont: .headingXS,
+            selectedCount: selectedDocuments.count,
+            onSelectAll: {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                     let allIDs = Set(filteredDocuments
                         .filter { !viewModel.isLocked($0) }
@@ -143,43 +148,14 @@ struct CustomFolderDocumentsView: View {
                         selectedDocuments = allIDs
                     }
                 }
-            } label: {
-                Text(L10n.Documents.selectAll)
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundStyle(Color.textPrimary)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .background(Color.surfaceWhite)
-                    .clipShape(Capsule())
-                    .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
-            }
-
-            Spacer()
-
-            Text(selectedDocuments.isEmpty ? currentName : L10n.Documents.selectedCount(selectedDocuments.count))
-                .font(.headingS)
-                .foregroundStyle(Color.textPrimary)
-                .contentTransition(.numericText())
-                .animation(.spring(response: 0.3, dampingFraction: 0.8), value: selectedDocuments.count)
-
-            Spacer()
-
-            Button {
+            },
+            onDone: {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                     isSelecting = false
                     selectedDocuments.removeAll()
                 }
-            } label: {
-                Image(systemName: "checkmark")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(Color.textPrimary)
-                    .frame(width: 34, height: 34)
-                    .background(Color.surfaceWhite)
-                    .clipShape(Circle())
-                    .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
             }
-            .accessibilityLabel(L10n.Documents.done)
-        }
+        )
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
     }
@@ -202,19 +178,6 @@ struct CustomFolderDocumentsView: View {
         .padding(.horizontal, 16)
         .padding(.top, 10)
         .padding(.bottom, 4)
-    }
-
-    // MARK: - Selected Count Row
-
-    private var selectedCountRow: some View {
-        HStack {
-            Text(selectedDocuments.isEmpty ? L10n.Documents.noneSelected : L10n.Documents.selected(selectedDocuments.count))
-                .font(.system(size: 14, weight: .medium))
-                .foregroundStyle(Color.textSecondary)
-            Spacer()
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 6)
     }
 
     // MARK: - Documents List
@@ -286,9 +249,10 @@ struct CustomFolderDocumentsView: View {
         VStack(spacing: 20) {
             Spacer()
 
-            Image(systemName: "folder.fill")
-                .font(.system(size: 80))
-                .foregroundStyle(Color.accent)
+            Image("folder-icon")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 160, height: 160)
 
             VStack(spacing: 8) {
                 Text(L10n.Documents.Folder.noDocuments)
@@ -310,7 +274,7 @@ struct CustomFolderDocumentsView: View {
                     .foregroundStyle(.white)
                     .frame(width: 190)
                     .padding(.vertical, 14)
-                    .background(Color.textPrimary)
+                    .background(Color.accent)
                     .clipShape(Capsule())
             }
             .buttonStyle(ScaleButtonStyle())

@@ -129,6 +129,13 @@ struct CalendarEntry: Identifiable, Codable, Equatable {
     var isAllDay: Bool?
     var notes: String?
     var linkedDocumentID: UUID?
+    /// Photo attached to this entry. Separate from `linkedDocumentID`, which
+    /// older builds used as the single linked file.
+    var imageAttachmentID: UUID?
+    /// General document (PDF or scan) attached to this entry.
+    var documentAttachmentID: UUID?
+    /// Prescription attached to this entry.
+    var prescriptionAttachmentID: UUID?
     var reminder: ReminderRule?
     var recurrence: RecurrenceRule
     var doctor: String?
@@ -147,6 +154,9 @@ struct CalendarEntry: Identifiable, Codable, Equatable {
         isAllDay: Bool? = nil,
         notes: String? = nil,
         linkedDocumentID: UUID? = nil,
+        imageAttachmentID: UUID? = nil,
+        documentAttachmentID: UUID? = nil,
+        prescriptionAttachmentID: UUID? = nil,
         reminder: ReminderRule? = nil,
         recurrence: RecurrenceRule = RecurrenceRule(),
         doctor: String? = nil,
@@ -161,6 +171,9 @@ struct CalendarEntry: Identifiable, Codable, Equatable {
         self.isAllDay = isAllDay
         self.notes = notes
         self.linkedDocumentID = linkedDocumentID
+        self.imageAttachmentID = imageAttachmentID
+        self.documentAttachmentID = documentAttachmentID
+        self.prescriptionAttachmentID = prescriptionAttachmentID
         self.reminder = reminder
         self.recurrence = recurrence
         self.doctor = doctor
@@ -172,6 +185,19 @@ struct CalendarEntry: Identifiable, Codable, Equatable {
     /// Occurrence dates of this entry within a date range.
     func occurrences(in range: ClosedRange<Date>) -> [Date] {
         recurrence.occurrences(in: range, from: date)
+    }
+
+    /// True when the entry has an image, document, prescription, or a legacy single link.
+    var hasAttachment: Bool {
+        imageAttachmentID != nil
+            || documentAttachmentID != nil
+            || prescriptionAttachmentID != nil
+            || linkedDocumentID != nil
+    }
+
+    /// File a notification should open. Prefers the general document, then the prescription, then the image.
+    var primaryAttachmentID: UUID? {
+        documentAttachmentID ?? prescriptionAttachmentID ?? imageAttachmentID ?? linkedDocumentID
     }
 
     /// Whether the occurrence on the given date is marked complete.

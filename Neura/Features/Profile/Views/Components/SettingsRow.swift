@@ -30,13 +30,16 @@ struct SettingsRow: View {
                 Group {
                     if isSystemIcon {
                         Image(systemName: icon)
+                            .font(.system(size: 20))
                     } else {
                         Image(icon)
+                            .resizable()
+                            .scaledToFit()
                     }
                 }
-                    .font(.system(size: 20))
-                    .foregroundStyle(style == .destructive ? Color.red : Color.textPrimary)
-                    .frame(width: 24, height: 24)
+                .foregroundStyle(style == .destructive ? Color.red : Color.textPrimary)
+                .frame(width: 24, height: 24)
+                .clipped()
 
                 Text(title)
                     .font(.statLabel)
@@ -52,6 +55,7 @@ struct SettingsRow: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
+            .contentShape(Rectangle())
             .background(Color.surfaceWhite)
             .clipShape(.rect(cornerRadius: 16))
             .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 4)

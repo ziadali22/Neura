@@ -109,10 +109,8 @@ struct CalendarEntryRow: View {
 
                     Spacer(minLength: 8)
 
-                    if entry.linkedDocumentID != nil {
-                        Image(systemName: "paperclip")
-                            .font(.system(size: 12))
-                            .foregroundStyle(Color.textTertiary)
+                    if entry.hasAttachment {
+                        EntryAttachmentIcon()
                     }
                 }
                 .contentShape(Rectangle())
@@ -132,7 +130,17 @@ struct CalendarEntryRow: View {
     }
 }
 
-/// Shared completion indicator: filled check when done, accent-tinted ring otherwise.
+/// Paperclip shown beside an entry that has a linked document.
+struct EntryAttachmentIcon: View {
+    var body: some View {
+        Image(systemName: "paperclip")
+            .font(.system(size: 12))
+            .foregroundStyle(Color.textTertiary)
+            .accessibilityLabel(L10n.Calendar.a11yHasAttachment)
+    }
+}
+
+/// Shared completion indicator: accent check when done, type-tinted ring otherwise.
 struct CompletionRing: View {
     let color: Color
     let isCompleted: Bool
@@ -141,7 +149,7 @@ struct CompletionRing: View {
         if isCompleted {
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: 22))
-                .foregroundStyle(color)
+                .foregroundStyle(Color.accent)
         } else {
             Circle()
                 .strokeBorder(color.opacity(0.6), lineWidth: 2)

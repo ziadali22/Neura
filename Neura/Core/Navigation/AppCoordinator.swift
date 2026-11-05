@@ -11,7 +11,7 @@ final class AppCoordinator: ObservableObject {
         case docs = 2
     }
 
-    enum AddDocumentAction { case scan, photo, file }
+    enum AddDocumentAction { case scan, photo, file, googleDrive }
 
     @Published var selectedTab: Tab = .home
     @Published var showAddMenu = false
@@ -49,12 +49,12 @@ enum ProfileRoute: Hashable {
     case growth
     case language
     case subscription
+    case emergencyCard
 }
 
 enum HomeRoute: Hashable {
     case healthProfile
     case healthProfileDetail
-    case emergencyCard
     case calendar
 }
 

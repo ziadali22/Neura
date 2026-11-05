@@ -19,6 +19,9 @@ struct GeneralDataSheet: View {
     // Emergency contact picker
     @State private var showContactPicker = false
 
+    @AppStorage(UserLocationStore.defaultsKey) private var userLocation = ""
+    @State private var showLocationEditor = false
+
     var body: some View {
         VStack(spacing: 0) {
             // Nav bar
@@ -43,7 +46,13 @@ struct GeneralDataSheet: View {
                         .foregroundColor(.textPrimary)
                         .padding(.bottom, 8)
 
-                    ForEach(fields) { field in
+                    if let nameField = fields.first(where: { $0.keyPath == \.fullName }) {
+                        fieldRow(nameField)
+                    }
+
+                    locationRow
+
+                    ForEach(fields.filter { $0.keyPath != \.fullName }) { field in
                         if field.keyPath == \.emergencyContactName {
                             emergencyContactRow(field)
                         } else {
@@ -126,6 +135,12 @@ struct GeneralDataSheet: View {
             }
             .ignoresSafeArea()
         }
+        .sheet(isPresented: $showLocationEditor) {
+            LocationEditSheet(location: userLocation) { city, country in
+                viewModel.updateLocation(city: city, country: country)
+            }
+            .presentationDragIndicator(.hidden)
+        }
         .alert(L10n.HealthProfile.addField, isPresented: $showAddFieldAlert) {
             TextField(L10n.HealthProfile.fieldNamePlaceholder, text: $newFieldName)
             Button(L10n.Common.add) {
@@ -174,6 +189,40 @@ struct GeneralDataSheet: View {
 // MARK: - Subviews
 
 private extension GeneralDataSheet {
+    var locationRow: some View {
+        Button { showLocationEditor = true } label: {
+            HStack {
+                Text(L10n.HealthProfile.location)
+                    .font(.bodyL)
+                    .foregroundColor(.textPrimary)
+
+                Spacer()
+
+                if userLocation.isEmpty {
+                    HStack(spacing: 4) {
+                        Text(L10n.Common.add)
+                            .font(.bodyL)
+                            .foregroundColor(.textTertiary)
+                        Image(systemName: "plus")
+                            .font(.system(size: 14))
+                            .foregroundColor(.textTertiary)
+                    }
+                } else {
+                    Text(userLocation)
+                        .font(.statLabel)
+                        .foregroundColor(.textSecondary)
+                        .lineLimit(1)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .background(Color.surfaceWhite)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 4)
+        }
+        .buttonStyle(ScaleButtonStyle())
+    }
+
     func fieldRow(_ field: GeneralFieldInfo) -> some View {
         Button { open(field) } label: {
             HStack {

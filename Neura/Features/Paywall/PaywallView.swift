@@ -139,11 +139,18 @@ struct PaywallView: View {
         }
         .task { await subscriptionManager.loadProducts() }
         .onAppear {
+            if subscriptionManager.isPro {
+                dismiss()
+                return
+            }
             if let source {
                 AnalyticsManager.shared.track(.paywallViewed, properties: ["source": source])
             } else {
                 AnalyticsManager.shared.track(.paywallViewed)
             }
+        }
+        .onChange(of: subscriptionManager.isPro) { _, isPro in
+            if isPro { dismiss() }
         }
         .alert(
             L10n.Common.neura,
@@ -302,7 +309,7 @@ struct PaywallView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 17)
-            .background(Color.black)
+            .background(Color.accent)
             .clipShape(Capsule())
         }
         .buttonStyle(ScaleButtonStyle())

@@ -48,6 +48,9 @@ struct SectionDetailSheet: View {
             AddEntrySheet(config: config) { name, f1, f2, notes in
                 viewModel.addEntry(to: sectionID, text: name, field1: f1, field2: f2, notes: notes)
             }
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+            .presentationBackground(Color.backgroundPrimary)
         }
         .sheet(item: $editingEntry) { entry in
             AddEntrySheet(
@@ -62,6 +65,9 @@ struct SectionDetailSheet: View {
                     }
                 }
             )
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+            .presentationBackground(Color.backgroundPrimary)
         }
     }
 }
@@ -96,9 +102,7 @@ private extension SectionDetailSheet {
         VStack(spacing: 12) {
             Spacer()
 
-            Image(systemName: emptyIcon)
-                .font(.system(size: 40, weight: .medium))
-                .foregroundStyle(Color.textTertiary)
+            emptyIllustration
                 .accessibilityHidden(true)
                 .scaleEffect(emptyStateAppear ? 1 : 0.8)
                 .opacity(emptyStateAppear ? 1 : 0)
@@ -129,16 +133,21 @@ private extension SectionDetailSheet {
         }
     }
 
-    private var emptyIcon: String {
-        let title = section?.title.lowercased() ?? ""
-        if title.contains("vaccin") { return "syringe" }
-        if title.contains("allerg") { return "leaf" }
-        if title.contains("medication") || title.contains("supplement") { return "pills" }
-        if title.contains("condition") { return "heart.text.clipboard" }
-        if title.contains("symptom") { return "waveform.path.ecg" }
-        if title.contains("family") { return "figure.2.and.child.holdinghands" }
-        return "square.and.pencil"
+    @ViewBuilder
+    private var emptyIllustration: some View {
+        if let name = section?.emptyIllustrationName {
+            Image(name)
+                .resizable()
+                .scaledToFit()
+                .frame(height: 160)
+        } else {
+            Image(systemName: emptyIcon)
+                .font(.system(size: 40, weight: .medium))
+                .foregroundStyle(Color.textTertiary)
+        }
     }
+
+    private var emptyIcon: String { "square.and.pencil" }
 
     func entryCard(_ entry: HealthProfile.HealthSection.Entry) -> some View {
         Button {
@@ -178,7 +187,6 @@ private extension SectionDetailSheet {
             .frame(height: 56)
             .background(Color.accent)
             .clipShape(Capsule())
-            .shadow(color: Color.accent.opacity(0.3), radius: 8, x: 0, y: 4)
         }
     }
 }

@@ -38,7 +38,6 @@ struct DocumentMetadataView: View {
     @State private var showAddImageOptions = false
     @State private var showPhotoPicker = false
     @State private var selectedPhotoItems: [PhotosPickerItem] = []
-    @State private var showSpecializationPicker = false
     @State private var hasExpiry = false
     @FocusState private var focusedField: Field?
 
@@ -106,9 +105,6 @@ struct DocumentMetadataView: View {
             .background(Color.backgroundPrimary)
             .navigationTitle(editingDocument == nil ? L10n.Documents.Metadata.title : L10n.Common.edit)
             .navigationBarTitleDisplayMode(.inline)
-            .navigationDestination(isPresented: $showSpecializationPicker) {
-                SpecializationPickerView(selected: $metadata.specialization)
-            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(L10n.Common.cancel) { dismiss() }
@@ -338,26 +334,32 @@ struct DocumentMetadataView: View {
                 .font(.headingXS)
                 .foregroundColor(.textPrimary)
 
-            Button {
-                focusedField = nil
-                showSpecializationPicker = true
+            Menu {
+                Picker(L10n.Documents.Metadata.specialization, selection: $metadata.specialization) {
+                    ForEach(MedicalSpecialization.allCases) { spec in
+                        Text(spec.localizedName).tag(spec)
+                    }
+                }
             } label: {
-                HStack {
+                HStack(spacing: 12) {
                     Text(metadata.specialization.localizedName)
                         .font(.bodyL)
-                        .foregroundColor(.textPrimary)
+                        .foregroundStyle(Color.textPrimary)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
 
-                    Spacer()
-
-                    Image(systemName: "chevron.forward")
-                        .font(.system(size: 14))
-                        .foregroundColor(.textTertiary)
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(Color.textTertiary)
                 }
                 .padding(16)
-                .background(Color.surfaceWhite)
-                .cornerRadius(14)
-                .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
+                .contentShape(.rect)
             }
+            .buttonStyle(.plain)
+            .background(Color.surfaceWhite)
+            .clipShape(.rect(cornerRadius: 14))
+            .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
         }
     }
 
@@ -565,72 +567,6 @@ struct DocumentMetadataView: View {
 
         onSave(trimmed, finalPreview)
         dismiss()
-    }
-}
-
-// MARK: - Specialization Picker View
-
-private struct SpecializationPickerView: View {
-    @Binding var selected: MedicalSpecialization
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                ForEach(MedicalSpecialization.allCases) { spec in
-                    Button {
-                        selected = spec
-                        dismiss()
-                    } label: {
-                        HStack(spacing: 16) {
-                            Image(systemName: spec.icon)
-                                .font(.system(size: 18))
-                                .foregroundStyle(Color.textSecondary)
-                                .frame(width: 28, alignment: .center)
-
-                            Text(spec.localizedName)
-                                .font(.bodyL)
-                                .foregroundStyle(Color.textPrimary)
-
-                            Spacer()
-
-                            ZStack {
-                                Circle()
-                                    .strokeBorder(
-                                        selected == spec ? Color.accent : Color.textTertiary.opacity(0.35),
-                                        lineWidth: 2
-                                    )
-                                    .frame(width: 22, height: 22)
-
-                                if selected == spec {
-                                    Circle()
-                                        .fill(Color.accent)
-                                        .frame(width: 13, height: 13)
-                                        .transition(.scale.combined(with: .opacity))
-                                }
-                            }
-                            .animation(.spring(response: 0.25, dampingFraction: 0.7), value: selected)
-                        }
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 14)
-                        .contentShape(.rect)
-                    }
-                    .buttonStyle(ScaleButtonStyle())
-
-                    if spec != MedicalSpecialization.allCases.last {
-                        Divider()
-                            .padding(.leading, 64)
-                    }
-                }
-            }
-            .background(Color.surfaceWhite)
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
-        }
-        .background(Color.backgroundPrimary)
-        .navigationTitle(L10n.Documents.Metadata.specializationTitle)
-        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

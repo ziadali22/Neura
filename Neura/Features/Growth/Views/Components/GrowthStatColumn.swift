@@ -37,7 +37,7 @@ struct GrowthStatColumn: View {
             if let delta {
                 Text(delta)
                     .font(.headingXS)
-                    .foregroundStyle(Color.accent)
+                    .foregroundStyle(Color.textPrimary)
             }
         }
     }

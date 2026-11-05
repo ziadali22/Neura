@@ -158,53 +158,24 @@ private struct FilterCategoryChip: View {
     let isSelected: Bool
 
     var body: some View {
-        HStack(spacing: 10) {
-            categoryIcon
-                .frame(width: 28, height: 28)
-                .background(
-                    isSelected
-                        ? Color.white.opacity(0.18)
-                        : category.color.opacity(0.12)
-                )
-                .clipShape(Circle())
-                .accessibilityHidden(true)
-
-            Text(category.localizedName)
-                .font(.labelM)
-                .foregroundStyle(isSelected ? .white : Color.textPrimary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-
-            Spacer(minLength: 0)
-        }
-        .padding(.leading, 10)
-        .padding(.trailing, 14)
-        .padding(.vertical, 12)
-        .frame(maxWidth: .infinity, minHeight: 50)
-        .background(isSelected ? Color.surfaceDark : Color.clear)
-        .clipShape(Capsule())
-        .overlay {
-            if !isSelected {
-                Capsule().strokeBorder(Color.stroke, lineWidth: 1.5)
+        Text(category.localizedName)
+            .font(.labelM)
+            .foregroundStyle(isSelected ? .white : Color.textPrimary)
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .frame(maxWidth: .infinity, minHeight: 46)
+            .background(isSelected ? Color.surfaceDark : Color.clear)
+            .clipShape(Capsule())
+            .overlay {
+                if !isSelected {
+                    Capsule().strokeBorder(Color.stroke, lineWidth: 1.5)
+                }
             }
-        }
-        .accessibilityLabel(
-            Text("\(category.localizedName)\(isSelected ? ", selected" : "")")
-        )
-    }
-
-    @ViewBuilder
-    private var categoryIcon: some View {
-        if let assetName = category.assetIcon {
-            Image(assetName)
-                .resizable()
-                .scaledToFit()
-                .padding(4)
-        } else {
-            Image(systemName: category.icon)
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(isSelected ? .white : category.color)
-        }
+            .accessibilityLabel(
+                Text("\(category.localizedName)\(isSelected ? ", selected" : "")")
+            )
     }
 }
 
@@ -246,41 +217,24 @@ private struct FilterSpecializationChip: View {
     let isSelected: Bool
 
     var body: some View {
-        HStack(spacing: 10) {
-            Image(systemName: specialization.icon)
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(isSelected ? .white : Color.textSecondary)
-                .frame(width: 28, height: 28)
-                .background(
-                    isSelected
-                        ? Color.white.opacity(0.18)
-                        : Color.backgroundCard
-                )
-                .clipShape(Circle())
-                .accessibilityHidden(true)
-
-            Text(specialization.localizedName)
-                .font(.labelM)
-                .foregroundStyle(isSelected ? .white : Color.textPrimary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-
-            Spacer(minLength: 0)
-        }
-        .padding(.leading, 10)
-        .padding(.trailing, 14)
-        .padding(.vertical, 12)
-        .frame(maxWidth: .infinity, minHeight: 50)
-        .background(isSelected ? Color.surfaceDark : Color.clear)
-        .clipShape(Capsule())
-        .overlay {
-            if !isSelected {
-                Capsule().strokeBorder(Color.stroke, lineWidth: 1.5)
+        Text(specialization.localizedName)
+            .font(.labelM)
+            .foregroundStyle(isSelected ? .white : Color.textPrimary)
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .frame(maxWidth: .infinity, minHeight: 46)
+            .background(isSelected ? Color.surfaceDark : Color.clear)
+            .clipShape(Capsule())
+            .overlay {
+                if !isSelected {
+                    Capsule().strokeBorder(Color.stroke, lineWidth: 1.5)
+                }
             }
-        }
-        .accessibilityLabel(
-            Text("\(specialization.localizedName)\(isSelected ? ", selected" : "")")
-        )
+            .accessibilityLabel(
+                Text("\(specialization.localizedName)\(isSelected ? ", selected" : "")")
+            )
     }
 }
 
@@ -305,20 +259,25 @@ private struct FilterSheetBottomBar: View {
     let onApply: () -> Void
 
     var body: some View {
-        HStack(spacing: 16) {
-            Button(L10n.Documents.Filter.clearAll, action: onClear)
-                .font(.labelM)
-                .foregroundStyle(Color.textSecondary)
-                .frame(minHeight: 50)
-
-            Spacer()
+        HStack(spacing: 12) {
+            Button(action: onClear) {
+                Text(L10n.Documents.Filter.clearAll)
+                    .font(.buttonM)
+                    .foregroundStyle(Color.textPrimary)
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: 50)
+                    .background(Color.surfaceWhite)
+                    .clipShape(Capsule())
+                    .overlay(Capsule().strokeBorder(Color.stroke, lineWidth: 1.5))
+            }
+            .buttonStyle(.plain)
 
             Button(action: onApply) {
                 Text(L10n.Documents.Filter.result(resultCount))
                     .font(.buttonM)
                     .foregroundStyle(.white)
-                    .padding(.horizontal, 28)
-                    .padding(.vertical, 15)
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: 50)
                     .background(Color.accent)
                     .clipShape(Capsule())
             }

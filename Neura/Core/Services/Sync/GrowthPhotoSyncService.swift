@@ -40,7 +40,9 @@ actor GrowthPhotoSyncService {
     }
 
     /// Downloads any growth photos that exist in the cloud but not on disk.
-    func downloadMissing(uid: String, key: SymmetricKey) async throws {
+    /// Returns the ids present in Firebase, including ones already on disk,
+    /// so the caller can upload device-only photos that never reached the cloud.
+    func downloadMissing(uid: String, key: SymmetricKey) async throws -> Set<UUID> {
         SyncLog.info("Downloading missing growth photos")
         let snapshot = try await Firestore.firestore()
             .collection("users").document(uid)
@@ -49,10 +51,12 @@ actor GrowthPhotoSyncService {
 
         let store = GrowthPhotoStore.shared
         var restored = 0
+        var cloudIDs = Set<UUID>()
 
         for docSnapshot in snapshot.documents {
-            guard let entryID = UUID(uuidString: docSnapshot.documentID),
-                  let fileIV = docSnapshot.data()["fileIV"] as? Data,
+            guard let entryID = UUID(uuidString: docSnapshot.documentID) else { continue }
+            cloudIDs.insert(entryID)
+            guard let fileIV = docSnapshot.data()["fileIV"] as? Data,
                   let storagePath = docSnapshot.data()["storagePath"] as? String
             else { continue }
 
@@ -70,5 +74,6 @@ actor GrowthPhotoSyncService {
         }
 
         SyncLog.success("Restored \(restored) growth photo(s)")
+        return cloudIDs
     }
 }

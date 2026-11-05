@@ -124,8 +124,8 @@ struct DocumentNamingView: View {
             .foregroundColor(.white)
             .frame(maxWidth: .infinity)
             .frame(height: 56)
-            .background(trimmedName.isEmpty ? Color.gray : Color.blue)
-            .cornerRadius(16)
+            .background(trimmedName.isEmpty ? Color.textTertiary : Color.accent)
+            .clipShape(Capsule())
         }
         .disabled(trimmedName.isEmpty)
         .padding(.horizontal, 20)

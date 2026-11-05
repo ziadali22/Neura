@@ -91,6 +91,8 @@
 "onboarding.location.cityPlaceholder" = "ex. Iași";
 "onboarding.location.country" = "Țară";
 "onboarding.location.countryPlaceholder" = "ex. România";
+"onboarding.location.detect" = "Detectează locația mea";
+"onboarding.location.detecting" = "Se detectează locația…";
 
 // MARK: - Onboarding Profile Card
 "onboarding.profileCardIntro.title" = "Cunoaște-ți Cardul de Sănătate";
@@ -263,6 +265,7 @@
 "documents.scan" = "Scanează document";
 "documents.uploadPhotos" = "Încarcă din poze";
 "documents.importFile" = "Importă fișier";
+"documents.importGoogleDrive" = "Importă din Google Drive";
 "documents.deleteAlertTitleFormat" = "Șterge %d document(e)?";
 "documents.selectedCountFormat" = "%d elemente";
 "documents.noneSelected" = "Niciunul selectat";
@@ -342,6 +345,7 @@
 "documents.addDocument.scanSubtitle" = "Folosește camera pentru a scana pagini";
 "documents.addDocument.photoSubtitle" = "Alege o imagine din biblioteca ta";
 "documents.addDocument.fileSubtitle" = "Selectează un fișier PDF sau imagine";
+"documents.addDocument.googleDriveSubtitle" = "Adu un fișier din Drive";
 
 // MARK: - Documents Category Picker
 "documents.categoryPicker.title" = "Selectați categoria";
@@ -393,6 +397,7 @@
 "healthProfile.addSection" = "Adaugă secțiune";
 "healthProfile.sectionTitlePlaceholder" = "Titlul secțiunii";
 "healthProfile.fullName" = "Nume complet";
+"healthProfile.location" = "Locație";
 "healthProfile.dateOfBirth" = "Data nașterii";
 "healthProfile.gender" = "Sex";
 "healthProfile.height" = "Înălțime";
@@ -705,10 +710,28 @@
 "calendar.reminderInfoMedicalEvent" = "Vei fi notificat cu 30 și 15 minute înainte de acest eveniment.";
 "calendar.reminderInfoMedicalEventRecurring" = "Vei fi notificat cu 30 și 15 minute înainte de fiecare apariție viitoare.";
 "calendar.today" = "Astăzi";
+"calendar.tomorrow" = "Mâine";
 "calendar.emptyHint" = "Atinge orice zi pentru a adăuga un eveniment.";
 "calendar.todayEmptyHint" = "Nimic planificat pentru azi — adaugă o programare, un medicament sau un eveniment medical ca să rămâi pe drumul cel bun.";
 "calendar.addEvent" = "Adaugă";
 "calendar.a11yHasEvents" = "Are evenimente";
+"calendar.a11yHasAttachment" = "Are atașament";
+"calendar.attachments" = "Atașamente";
+"calendar.attachment.image" = "Imagine";
+"calendar.attachment.document" = "Document";
+"calendar.attachment.prescription" = "Rețetă";
+"calendar.attachment.addImage" = "Adaugă imagine";
+"calendar.attachment.addDocument" = "Adaugă document";
+"calendar.attachment.addPrescription" = "Adaugă rețetă";
+"calendar.attachment.chooseExisting" = "Alege existent";
+"calendar.attachment.choosePhoto" = "Alege o poză";
+"calendar.attachment.importFile" = "Importă fișier";
+"calendar.attachment.remove" = "Elimină";
+"calendar.attachment.empty" = "Nimic salvat încă";
+"calendar.attachment.missing" = "Fișier indisponibil";
+"calendar.attachment.existingSubtitle" = "Din fișierele salvate";
+"calendar.attachment.photoSubtitle" = "Din galeria foto";
+"calendar.attachment.importSubtitle" = "Un fișier PDF sau o imagine";
 
 // MARK: - Health Profile extras
 "healthProfile.chooseFromContacts" = "Alege din Contacte";
@@ -732,6 +755,5 @@
 "growth.chartTitle" = "Tendință";
 "growth.chartMonths" = "Luni";
 "growth.chartYears" = "Ani";
-"growth.yearGrowthFormat" = "%1$@ · %2$@ în %3$@";
 "growth.latest" = "Cea mai recentă";
 "growth.delete" = "Șterge măsurătoarea";

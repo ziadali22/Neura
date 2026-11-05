@@ -791,6 +791,32 @@ final class DocumentsListViewModel: ObservableObject {
         }
     }
 
+    /// Files a document created from a calendar entry into the active space and
+    /// the document library. Prescriptions keep their category; everything else
+    /// lands in Other so it still shows up in the folders grid.
+    func registerAttachment(_ document: Document) {
+        var document = document
+        if document.spaceID == nil {
+            document.spaceID = activeSpaceManager.currentSpaceID
+        }
+        if document.category == nil {
+            let folderID = CustomFolderStore.shared
+                .findOrCreate(name: CustomFolderStore.otherFolderName).id
+            var tags = document.tags ?? []
+            if !tags.contains(folderID.uuidString) {
+                tags.append(folderID.uuidString)
+            }
+            document.tags = tags
+        }
+        guard !documents.contains(where: { $0.id == document.id }) else { return }
+        documents.insert(document, at: 0)
+        persistMetadata()
+        rescheduleExpiryReminders()
+        SyncQueueManager.shared.enqueueUpload(document)
+        SubscriptionManager.shared.recordUpload()
+        AnalyticsManager.shared.track(.documentSaved, properties: ["source": "calendar"])
+    }
+
     // MARK: - Reminders
 
     /// Expiry reminders span every account by design, labelled with the owning

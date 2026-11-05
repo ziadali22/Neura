@@ -34,6 +34,9 @@ struct VaccinationsView: View {
                 guard let id = section?.id else { return }
                 viewModel.addEntry(to: id, text: name, field1: f1, field2: f2, notes: notes)
             }
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+            .presentationBackground(Color.backgroundPrimary)
         }
         .sheet(item: $editingEntry) { entry in
             AddEntrySheet(
@@ -50,6 +53,9 @@ struct VaccinationsView: View {
                     }
                 }
             )
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+            .presentationBackground(Color.backgroundPrimary)
         }
     }
 
@@ -88,10 +94,10 @@ struct VaccinationsView: View {
     private var emptyState: some View {
         VStack(spacing: 12) {
             Spacer()
-            Image("Vaccination")
+            Image("Vaccinations")
                 .resizable()
                 .scaledToFit()
-                .frame(height: 140)
+                .frame(height: 160)
                 .accessibilityHidden(true)
             Text(L10n.HealthProfile.vaccinationsEmptyTitle)
                 .font(.headingS)
@@ -149,7 +155,7 @@ struct VaccinationsView: View {
                 if !latest.field1.isEmpty {
                     Text(latest.field1)
                         .font(.headingS)
-                        .foregroundStyle(Color.accent)
+                        .foregroundStyle(Color.textPrimary)
                 }
                 Text(L10n.HealthProfile.vaccinationsLatest)
                     .font(.captionS)
@@ -173,7 +179,6 @@ struct VaccinationsView: View {
             .frame(height: 56)
             .background(Color.accent)
             .clipShape(Capsule())
-            .shadow(color: Color.accent.opacity(0.3), radius: 8, x: 0, y: 4)
         }
         .accessibilityLabel(config.addTitle)
     }

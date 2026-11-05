@@ -158,6 +158,27 @@ final class ActiveSpaceManager: ObservableObject {
         SyncLog.info("mergeFromCloud — cloud=\(cloudSpaces.count) localBefore=\(before) localAfter=\(spaces.count) current=\(currentSpaceID.uuidString.prefix(8))")
     }
 
+    /// Merges an iCloud backup. Accounts that exist only in the backup are added.
+    /// A freshly installed default "Me" account is replaced by the backup's
+    /// version so a reinstall does not wipe a renamed account. Does not upload.
+    func mergeBackup(_ cloudSpaces: [Space]) {
+        if let cloudDefault = cloudSpaces.first(where: { $0.id == Self.defaultSpaceID }),
+           let index = spaces.firstIndex(where: { $0.id == Self.defaultSpaceID }),
+           Self.isUntouchedDefault(spaces[index]) {
+            spaces[index] = cloudDefault
+            Self.persist(spaces)
+        }
+        mergeFromCloud(cloudSpaces)
+    }
+
+    private static func isUntouchedDefault(_ space: Space) -> Bool {
+        space.isDefault
+            && space.name == "Me"
+            && space.avatarFilename == nil
+            && space.relationship == nil
+            && !space.isArchived
+    }
+
     /// Wipes all local space state — called on logout/account deletion so the
     /// next signed-in user (on a shared device) never sees the previous
     /// account's spaces.

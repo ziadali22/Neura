@@ -8,6 +8,7 @@ struct DayDetailSheet: View {
     @ObservedObject var viewModel: CalendarViewModel
     let documents: [Document]
     var onDeleteDocument: ((Document) -> Void)? = nil
+    var onCreateDocument: ((Document) -> Void)? = nil
 
     @Environment(\.dismiss) private var dismiss
     @State private var editorEntry: CalendarEntry?
@@ -33,7 +34,7 @@ struct DayDetailSheet: View {
             // scrolls out of reach on busy days.
             .safeAreaInset(edge: .bottom) {
                 if !viewModel.entries(on: day).isEmpty {
-                    PrimaryButton(title: L10n.Calendar.addEntry, systemImage: "plus") {
+                    PrimaryButton(title: L10n.Common.add, labelFont: .buttonRegular) {
                         showNewEntry = true
                     }
                     .padding(.horizontal, 24)
@@ -66,7 +67,8 @@ struct DayDetailSheet: View {
                 existing: nil,
                 initialDate: day,
                 documents: documents,
-                onSave: { viewModel.save($0) }
+                onSave: { viewModel.save($0) },
+                onCreateDocument: { onCreateDocument?($0) }
             )
         }
         // Edit an existing entry
@@ -77,7 +79,8 @@ struct DayDetailSheet: View {
                 documents: documents,
                 onSave: { viewModel.save($0) },
                 onDelete: { viewModel.delete($0) },
-                onDeleteDocument: onDeleteDocument
+                onDeleteDocument: onDeleteDocument,
+                onCreateDocument: { onCreateDocument?($0) }
             )
         }
     }

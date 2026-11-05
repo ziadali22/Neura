@@ -223,11 +223,7 @@ struct DocsView: View {
     // MARK: - Navigation Content
 
     private var navigationContent: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            header
-            searchBar
-            contentArea
-        }
+        contentArea
         .background(Color.backgroundPrimary)
         .toolbar(.hidden, for: .navigationBar)
         .navigationDestination(for: DocumentCategory.self) { category in
@@ -261,56 +257,17 @@ struct DocsView: View {
     private var header: some View {
         Group {
             if viewModel.displayMode == .files && isSelecting {
-                // Selection mode: Select All pill (left) + count/title (center) + Done ✓ (right)
-                HStack {
-                    Button {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                            // Exclude locked documents from bulk selection
-                            let allIDs = Set(viewModel.filteredDocuments
-                                .filter { !viewModel.isLocked($0) }
-                                .map(\.id))
-                            if !allIDs.isEmpty && allIDs.isSubset(of: selectedDocuments) {
-                                selectedDocuments.removeAll()
-                            } else {
-                                selectedDocuments = allIDs
-                            }
-                        }
-                    } label: {
-                        Text(L10n.Documents.selectAll)
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundStyle(Color.textPrimary)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 9)
-                            .background(Color.surfaceWhite)
-                            .clipShape(Capsule())
-                            .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
-                    }
-
-                    Spacer()
-
-                    Text(selectedDocuments.isEmpty ? L10n.Documents.title : L10n.Documents.selectedCount(selectedDocuments.count))
-                        .font(.displayXL)
-                        .foregroundStyle(Color.textPrimary)
-                        .contentTransition(.numericText())
-                        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: selectedDocuments.count)
-
-                    Spacer()
-
-                    Button {
+                DocsSelectionHeader(
+                    title: L10n.Documents.title,
+                    selectedCount: selectedDocuments.count,
+                    onSelectAll: toggleSelectAllDocuments,
+                    onDone: {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                             isSelecting = false
                             selectedDocuments.removeAll()
                         }
-                    } label: {
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(Color.textPrimary)
-                            .frame(width: 36, height: 36)
-                            .background(Color.surfaceWhite)
-                            .clipShape(Circle())
-                            .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
                     }
-                }
+                )
             } else {
                 // Normal mode
                 HStack(alignment: .center) {
@@ -360,13 +317,11 @@ struct DocsView: View {
                 .submitLabel(.search)
                 .onSubmit { isSearchFocused = false }
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 11)
-        .background(Color.surfaceWhite)
-        .clipShape(.rect(cornerRadius: 20))
-        .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .glassEffect(.regular, in: .capsule)
         .padding(.horizontal, 20)
-        .padding(.bottom, 24)
+        .padding(.bottom, 8)
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
@@ -378,6 +333,13 @@ struct DocsView: View {
 
     // MARK: - Content Area
 
+    private var screenHeader: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            header
+            searchBar
+        }
+    }
+
     private var contentArea: some View {
         ZStack {
             if viewModel.displayMode == .folders {
@@ -386,7 +348,8 @@ struct DocsView: View {
                     folderStore: folderStore,
                     showNewFolderAlert: $showNewFolderAlert,
                     newFolderName: $newFolderName,
-                    onNavigate: { isSearchFocused = false }
+                    onNavigate: { isSearchFocused = false },
+                    topContent: { screenHeader }
                 )
                 .transition(.opacity)
             } else {
@@ -395,7 +358,8 @@ struct DocsView: View {
                     isSelecting: $isSelecting,
                     selectedDocuments: $selectedDocuments,
                     showFilters: $showFilters,
-                    onAddDocument: { viewModel.showAddOptions() }
+                    onAddDocument: { viewModel.showAddOptions() },
+                    topContent: { screenHeader }
                 )
                 .transition(.opacity)
             }
@@ -407,9 +371,10 @@ struct DocsView: View {
 
     private func handlePendingAction(_ action: AppCoordinator.AddDocumentAction) {
         switch action {
-        case .scan:  viewModel.startScanning()
+        case .scan: viewModel.startScanning()
         case .photo: viewModel.startPhotoUpload()
-        case .file:  viewModel.startFileImport()
+        case .file: viewModel.startFileImport()
+        case .googleDrive: viewModel.startGoogleDriveImport()
         }
     }
 
@@ -433,6 +398,19 @@ struct DocsView: View {
             spaceID: space.id,
             spaceName: space.name
         )
+    }
+
+    private func toggleSelectAllDocuments() {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+            let allIDs = Set(viewModel.filteredDocuments
+                .filter { !viewModel.isLocked($0) }
+                .map(\.id))
+            if !allIDs.isEmpty && allIDs.isSubset(of: selectedDocuments) {
+                selectedDocuments.removeAll()
+            } else {
+                selectedDocuments = allIDs
+            }
+        }
     }
 
     private func shareSelectedDocuments() {

@@ -53,14 +53,10 @@ struct VaccinationEntryCard: View {
     }
 
     private var icon: some View {
-        Circle()
-            .fill(Color.accent.opacity(0.15))
+        Image("Vaccination")
+            .resizable()
+            .scaledToFit()
             .frame(width: 44, height: 44)
-            .overlay {
-                Image(systemName: "syringe")
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundStyle(Color.accent)
-            }
             .accessibilityHidden(true)
     }
 }

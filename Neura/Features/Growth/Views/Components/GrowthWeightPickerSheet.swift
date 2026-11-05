@@ -18,11 +18,11 @@ struct GrowthWeightPickerSheet: View {
             HStack {
                 Spacer()
                 Button(action: save) {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 16, weight: .bold))
+                    Image(systemName: "xmark")
+                        .font(.system(size: 13, weight: .bold))
                         .foregroundStyle(.white)
                         .frame(width: 36, height: 36)
-                        .background(Color.accent)
+                        .background(Color.surfaceDark)
                         .clipShape(Circle())
                 }
                 .accessibilityLabel(L10n.Common.save)
@@ -38,7 +38,7 @@ struct GrowthWeightPickerSheet: View {
 
                 Text(GrowthEntry.formatWeight(totalKg))
                     .font(.system(size: 40, weight: .bold))
-                    .foregroundStyle(Color.accent)
+                    .foregroundStyle(Color.textPrimary)
                     .frame(maxWidth: .infinity)
                     .contentTransition(.numericText())
                     .animation(.spring(response: 0.3, dampingFraction: 0.8), value: totalKg)

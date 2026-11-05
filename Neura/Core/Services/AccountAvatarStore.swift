@@ -1,11 +1,11 @@
 import Foundation
 import UIKit
 
-/// Local-only JPEG storage for account avatar photos, one file per Space id
+/// JPEG storage for account avatar photos, one file per Space id
 /// (fixed filename, so re-saving a new photo for the same account overwrites
-/// the old one automatically — no orphaned files to clean up). Mirrors
-/// CardBackground's custom-photo storage pattern. Not synced to the cloud —
-/// only the filename reference travels through SpaceSyncService.
+/// the old one automatically — no orphaned files to clean up). The filename
+/// reference travels through Space sync. The image itself is copied to the
+/// iCloud backup, not to Firebase.
 final class AccountAvatarStore {
     static let shared = AccountAvatarStore()
 
@@ -41,5 +41,16 @@ final class AccountAvatarStore {
 
     func delete(filename: String) {
         try? fileManager.removeItem(at: resolveURL(for: filename))
+    }
+
+    /// Space ids that have an avatar JPEG on this device.
+    func localSpaceIDs() -> [UUID] {
+        guard let names = try? fileManager.contentsOfDirectory(atPath: avatarsDirectory.path) else {
+            return []
+        }
+        return names.compactMap { name in
+            guard name.lowercased().hasSuffix(".jpg") else { return nil }
+            return UUID(uuidString: String(name.dropLast(4)))
+        }
     }
 }

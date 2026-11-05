@@ -22,6 +22,7 @@ struct FloatingDocumentMenu: View {
         .init(icon: "scanAdd",  title: "Scan Document",      subtitle: "Use camera to scan pages",          action: .scan),
         .init(icon: "imageAdd", title: "Upload from Photos", subtitle: "Choose an image from your library", action: .photo),
         .init(icon: "fileAdd",  title: "Import File",        subtitle: "Select a PDF or image file",        action: .file),
+        .init(icon: "google-drive", title: "Import from Google Drive", subtitle: "Bring in a file from your Drive", action: .googleDrive),
     ]
 
     // MARK: - Body
@@ -87,9 +88,8 @@ struct FloatingDocumentMenu: View {
                 .font(.system(size: 20, weight: .semibold))
                 .foregroundStyle(.white)
                 .frame(width: 56, height: 56)
-                .background(Color.accent)
+                .background(Color.surfaceDark)
                 .clipShape(Circle())
-                .shadow(color: Color.accent.opacity(0.35), radius: 14, x: 0, y: 6)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Close menu")
@@ -107,9 +107,16 @@ struct FloatingDocumentMenu: View {
                     .fill(Color(hex: "E7E0D8").opacity(0.6))
                     .frame(width: 52, height: 52)
                     .overlay {
-                        Image(item.icon)
-                            .font(.system(size: 23))
-                            .foregroundStyle(Color.accent)
+                        if item.action == .googleDrive {
+                            Image(item.icon)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 25, height: 25)
+                        } else {
+                            Image(item.icon)
+                                .font(.system(size: 23))
+                                .foregroundStyle(Color.accent)
+                        }
                     }
 
                 VStack(alignment: .leading, spacing: 3) {

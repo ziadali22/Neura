@@ -1,11 +1,28 @@
 import SwiftUI
 
-struct DocsFoldersGrid: View {
+struct DocsFoldersGrid<TopContent: View>: View {
     @ObservedObject var viewModel: DocumentsListViewModel
     @ObservedObject var folderStore: CustomFolderStore
     @Binding var showNewFolderAlert: Bool
     @Binding var newFolderName: String
     var onNavigate: () -> Void = {}
+    private let topContent: TopContent
+
+    init(
+        viewModel: DocumentsListViewModel,
+        folderStore: CustomFolderStore,
+        showNewFolderAlert: Binding<Bool>,
+        newFolderName: Binding<String>,
+        onNavigate: @escaping () -> Void = {},
+        @ViewBuilder topContent: () -> TopContent
+    ) {
+        self.viewModel = viewModel
+        self.folderStore = folderStore
+        self._showNewFolderAlert = showNewFolderAlert
+        self._newFolderName = newFolderName
+        self.onNavigate = onNavigate
+        self.topContent = topContent()
+    }
 
     @State private var folderPendingDelete: CustomFolder?
     @State private var folderToRename: CustomFolder?
@@ -18,7 +35,10 @@ struct DocsFoldersGrid: View {
 
     var body: some View {
         ScrollView {
-            grid
+            VStack(alignment: .leading, spacing: 8) {
+                topContent
+                grid
+            }
         }
         .scrollIndicators(.hidden)
         .scrollDismissesKeyboard(.immediately)

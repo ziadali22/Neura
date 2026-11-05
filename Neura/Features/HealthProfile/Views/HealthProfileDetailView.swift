@@ -9,6 +9,7 @@ struct HealthProfileDetailView: View {
     @State private var navigateToEdit = false
     @State private var selectedSectionID: UUID?
     @State private var showGeneralData = false
+    @AppStorage(UserLocationStore.defaultsKey) private var userLocation = ""
 
     var body: some View {
         VStack(spacing: 0) {
@@ -98,6 +99,17 @@ private extension HealthProfileDetailView {
                     .foregroundColor(.textTertiary)
             }
 
+            Button { navigateToEdit = true } label: {
+                Image(systemName: "pencil")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.textPrimary)
+                    .frame(width: 40, height: 40)
+                    .background(Color.surfaceWhite)
+                    .clipShape(Circle())
+                    .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 4)
+            }
+            .frame(maxWidth: .infinity, alignment: .trailing)
+            .accessibilityLabel(L10n.Common.edit)
         }
         .padding(.horizontal, 20)
         .padding(.top, 12)
@@ -119,6 +131,7 @@ private extension HealthProfileDetailView {
         let data = viewModel.profile.generalData
         let fields: [(label: String, value: String)] = [
             (L10n.HealthProfile.fullName,         data.fullName),
+            (L10n.HealthProfile.location,         userLocation),
             (L10n.HealthProfile.dateOfBirth,      data.dateOfBirth),
             (L10n.HealthProfile.gender,           HealthOption.localized(data.gender)),
             (L10n.HealthProfile.height,           data.height),
@@ -279,7 +292,6 @@ private extension HealthProfileDetailView {
             .frame(height: 56)
             .background(Color.accent)
             .clipShape(Capsule())
-            .shadow(color: Color.accent.opacity(0.3), radius: 10, x: 0, y: 4)
         }
         .disabled(isSharingProfile)
     }

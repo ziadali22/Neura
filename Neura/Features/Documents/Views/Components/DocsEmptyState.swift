@@ -35,7 +35,7 @@ struct DocsEmptyState: View {
                     .foregroundStyle(.white)
                     .frame(width: 190)
                     .padding(.vertical, 18)
-                    .background(Color.textPrimary)
+                    .background(Color.accent)
                     .clipShape(Capsule())
             }
             .padding(.horizontal, 32)

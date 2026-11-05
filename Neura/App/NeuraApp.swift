@@ -51,10 +51,16 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 
 @main
 struct NeuraApp: App {
+    @Environment(\.scenePhase) private var scenePhase
     @State private var languageManager = LanguageManager.shared
     @State private var showSplash: Bool
     @State private var hasCompletedOnboarding: Bool
     @State private var isSignedIn: Bool
+    /// Launch paywall for free users. Shown after splash on a cold start, and
+    /// again each time the app returns from the background.
+    @State private var showLaunchPaywall = false
+    @State private var resumedFromBackground = false
+    @State private var launchPaywallTask: Task<Void, Never>?
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
 
     init() {
@@ -160,8 +166,49 @@ struct NeuraApp: App {
                 if user == nil {
                     isSignedIn = false
                     hasCompletedOnboarding = false
+                    launchPaywallTask?.cancel()
+                    showLaunchPaywall = false
                 }
             }
+            .fullScreenCover(isPresented: $showLaunchPaywall) {
+                PaywallView(subscriptionManager: .shared, source: "app_open")
+            }
+            .onChange(of: showSplash) { _, showing in
+                if !showing { presentLaunchPaywall() }
+            }
+            .onChange(of: scenePhase) { _, phase in
+                switch phase {
+                case .background:
+                    resumedFromBackground = true
+                case .active where resumedFromBackground:
+                    resumedFromBackground = false
+                    presentLaunchPaywall()
+                default:
+                    break
+                }
+            }
+            .onReceive(SubscriptionManager.shared.$isPro) { isPro in
+                guard isPro else { return }
+                launchPaywallTask?.cancel()
+                showLaunchPaywall = false
+            }
+        }
+    }
+
+    /// Presents the paywall once the dashboard is on screen. Skips Pro users
+    /// and waits out the splash hand-off so the cover doesn't fight that animation.
+    private func presentLaunchPaywall() {
+        guard isSignedIn, hasCompletedOnboarding, !showSplash else { return }
+        guard !SubscriptionManager.shared.isPro else { return }
+        guard !showLaunchPaywall else { return }
+
+        launchPaywallTask?.cancel()
+        launchPaywallTask = Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(400))
+            guard !Task.isCancelled else { return }
+            guard isSignedIn, hasCompletedOnboarding, !showSplash else { return }
+            guard !SubscriptionManager.shared.isPro else { return }
+            showLaunchPaywall = true
         }
     }
 }

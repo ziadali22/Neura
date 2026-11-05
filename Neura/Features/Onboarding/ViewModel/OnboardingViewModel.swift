@@ -334,19 +334,7 @@ final class OnboardingViewModel: ObservableObject {
         // Persist card background
         state.cardBackground.save()
 
-        // Persist location
-        let location: String
-        switch (state.city.trimmingCharacters(in: .whitespaces).isEmpty,
-                state.country.trimmingCharacters(in: .whitespaces).isEmpty) {
-        case (false, false): location = "\(state.city), \(state.country)"
-        case (false, true):  location = state.city
-        case (true, false):  location = state.country
-        case (true, true):   location = ""
-        }
-        UserDefaults.standard.set(location, forKey: "user_location")
-
-        // Upload preferences to Firestore so they restore on reinstall.
-        let prefs = UserPreferences(medicalAreas: areas, location: location)
-        SyncQueueManager.shared.enqueuePreferencesUpload(prefs)
+        // Persist location and upload preferences so they restore on reinstall.
+        UserLocationStore.save(city: state.city, country: state.country, medicalAreas: areas)
     }
 }

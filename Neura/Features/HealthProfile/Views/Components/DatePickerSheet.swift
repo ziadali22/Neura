@@ -32,11 +32,11 @@ struct DatePickerSheet: View {
                     onSave(formattedValue)
                     dismiss()
                 } label: {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 16, weight: .bold))
+                    Image(systemName: "xmark")
+                        .font(.system(size: 13, weight: .bold))
                         .foregroundStyle(.white)
                         .frame(width: 36, height: 36)
-                        .background(Color.accent)
+                        .background(Color.surfaceDark)
                         .clipShape(Circle())
                 }
             }
@@ -53,7 +53,7 @@ struct DatePickerSheet: View {
                 VStack(spacing: 2) {
                     Text(Self.displayFormatter.string(from: selectedDate))
                         .font(.system(size: 28, weight: .bold))
-                        .foregroundStyle(Color.accent)
+                        .foregroundStyle(Color.textPrimary)
                         .contentTransition(.numericText())
 
                     Text("\(age) years old")

@@ -9,7 +9,6 @@ struct EntryEditorSheet: View {
     let documents: [Document]
     let onSave: (CalendarEntry) -> Void
     let onDelete: ((CalendarEntry) -> Void)?
-    let onDeleteDocument: ((Document) -> Void)?
 
     @State private var type: CalendarEntryType
     @State private var title: String
@@ -34,14 +33,14 @@ struct EntryEditorSheet: View {
         documents: [Document],
         onSave: @escaping (CalendarEntry) -> Void,
         onDelete: ((CalendarEntry) -> Void)? = nil,
-        onDeleteDocument: ((Document) -> Void)? = nil
+        onDeleteDocument _: ((Document) -> Void)? = nil,
+        onCreateDocument _: @escaping (Document) -> Void = { _ in }
     ) {
         self.existing = existing
         self.initialDate = initialDate
         self.documents = documents
         self.onSave = onSave
         self.onDelete = onDelete
-        self.onDeleteDocument = onDeleteDocument
 
         _type = State(initialValue: existing?.type ?? .medication)
         _title = State(initialValue: existing?.title ?? "")
@@ -51,7 +50,7 @@ struct EntryEditorSheet: View {
         _hasEndDate = State(initialValue: existing?.recurrence.endDate != nil)
         _endDate = State(initialValue: existing?.recurrence.endDate ?? initialDate)
         _notes = State(initialValue: existing?.notes ?? "")
-        _linkedDocumentID = State(initialValue: existing?.linkedDocumentID)
+        _linkedDocumentID = State(initialValue: Self.resolvedDocumentID(existing: existing))
         _doctor = State(initialValue: existing?.doctor ?? "")
         _specialization = State(initialValue: existing?.specialization)
     }
@@ -109,24 +108,11 @@ struct EntryEditorSheet: View {
                 Section {
                     Picker(L10n.Calendar.fieldLinkDocument, selection: $linkedDocumentID) {
                         Text(L10n.Calendar.noDocumentLinked).tag(UUID?.none)
-                        ForEach(documents) { doc in
-                            Text(doc.name).tag(UUID?.some(doc.id))
+                        if let linkedDocumentID, !linkableDocuments.contains(where: { $0.id == linkedDocumentID }) {
+                            Text(L10n.Calendar.attachmentMissing).tag(UUID?.some(linkedDocumentID))
                         }
-                    }
-                    if let id = linkedDocumentID, let doc = documents.first(where: { $0.id == id }) {
-                        NavigationLink {
-                            DocumentViewerView(document: doc, onDelete: {
-                                onDeleteDocument?(doc)
-                                linkedDocumentID = nil
-                            })
-                            .toolbar(.hidden, for: .navigationBar)
-                        } label: {
-                            Label(L10n.Calendar.openDocument, systemImage: "doc.text")
-                        }
-                        Button(role: .destructive) {
-                            linkedDocumentID = nil
-                        } label: {
-                            Label(L10n.Calendar.removeLinkedDocument, systemImage: "link.badge.minus")
+                        ForEach(linkableDocuments) { document in
+                            Text(document.name).tag(UUID?.some(document.id))
                         }
                     }
                 }
@@ -210,13 +196,32 @@ struct EntryEditorSheet: View {
             isAllDay: isAllDay,
             notes: notes.isEmpty ? nil : notes,
             linkedDocumentID: linkedDocumentID,
+            imageAttachmentID: nil,
+            documentAttachmentID: linkedDocumentID,
+            prescriptionAttachmentID: nil,
+            reminder: existing?.reminder,
             recurrence: recurrence,
             doctor: trimmedDoctor.isEmpty ? nil : trimmedDoctor,
             specialization: specialization,
-            completedDates: existing?.completedDates ?? []
+            completedDates: existing?.completedDates ?? [],
+            spaceID: existing?.spaceID
         )
         onSave(entry)
         dismiss()
+    }
+
+    /// Newest first. The menu shows the same saved files as Docs.
+    private var linkableDocuments: [Document] {
+        documents.sorted { $0.createdAt > $1.createdAt }
+    }
+
+    /// One linked file. Older entries may have stored it on any attachment slot.
+    private static func resolvedDocumentID(existing: CalendarEntry?) -> UUID? {
+        guard let existing else { return nil }
+        return existing.documentAttachmentID
+            ?? existing.linkedDocumentID
+            ?? existing.prescriptionAttachmentID
+            ?? existing.imageAttachmentID
     }
 
     /// 9 AM on the same calendar day as `date`.

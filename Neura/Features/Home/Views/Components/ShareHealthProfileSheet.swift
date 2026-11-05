@@ -122,7 +122,7 @@ struct ShareHealthProfileSheet: View {
             }
             .frame(maxWidth: .infinity)
             .frame(height: 52)
-            .background(Color.surfaceDark)
+            .background(Color.accent)
             .clipShape(Capsule())
         }
         .disabled(isGeneratingPDF)

@@ -96,6 +96,8 @@
 "onboarding.location.cityPlaceholder" = "e.g. Iași";
 "onboarding.location.country" = "Country";
 "onboarding.location.countryPlaceholder" = "e.g. Romania";
+"onboarding.location.detect" = "Detect my location";
+"onboarding.location.detecting" = "Detecting location…";
 
 // MARK: - Onboarding Profile Card
 "onboarding.profileCardIntro.title" = "Meet your Health Card";
@@ -268,6 +270,7 @@
 "documents.scan" = "Scan Document";
 "documents.uploadPhotos" = "Upload from Photos";
 "documents.importFile" = "Import File";
+"documents.importGoogleDrive" = "Import from Google Drive";
 "documents.deleteAlertTitleFormat" = "Delete %d Document(s)?";
 "documents.selectedCountFormat" = "%d Items";
 "documents.noneSelected" = "None Selected";
@@ -380,6 +383,7 @@
 "documents.addDocument.scanSubtitle" = "Use camera to scan pages";
 "documents.addDocument.photoSubtitle" = "Choose an image from your library";
 "documents.addDocument.fileSubtitle" = "Select a PDF or image file";
+"documents.addDocument.googleDriveSubtitle" = "Bring in a file from your Drive";
 
 // MARK: - QR Sharing
 "qr.uploading" = "Uploading Document";
@@ -398,6 +402,7 @@
 "healthProfile.addSection" = "Add Section";
 "healthProfile.sectionTitlePlaceholder" = "Section title";
 "healthProfile.fullName" = "Full Name";
+"healthProfile.location" = "Location";
 "healthProfile.dateOfBirth" = "Date of Birth";
 "healthProfile.gender" = "Gender";
 "healthProfile.height" = "Height";
@@ -710,10 +715,28 @@
 "calendar.reminderInfoMedicalEvent" = "You'll be reminded 30 and 15 minutes before this event.";
 "calendar.reminderInfoMedicalEventRecurring" = "You'll be reminded 30 and 15 minutes before each upcoming occurrence.";
 "calendar.today" = "Today";
+"calendar.tomorrow" = "Tomorrow";
 "calendar.emptyHint" = "Tap any day to add an event.";
 "calendar.todayEmptyHint" = "Nothing planned for today — add an appointment, medication, or medical event to stay on track.";
 "calendar.addEvent" = "Add";
 "calendar.a11yHasEvents" = "Has events";
+"calendar.a11yHasAttachment" = "Has attachment";
+"calendar.attachments" = "Attachments";
+"calendar.attachment.image" = "Image";
+"calendar.attachment.document" = "Document";
+"calendar.attachment.prescription" = "Prescription";
+"calendar.attachment.addImage" = "Add image";
+"calendar.attachment.addDocument" = "Add document";
+"calendar.attachment.addPrescription" = "Add prescription";
+"calendar.attachment.chooseExisting" = "Choose existing";
+"calendar.attachment.choosePhoto" = "Choose photo";
+"calendar.attachment.importFile" = "Import file";
+"calendar.attachment.remove" = "Remove";
+"calendar.attachment.empty" = "Nothing saved yet";
+"calendar.attachment.missing" = "File unavailable";
+"calendar.attachment.existingSubtitle" = "From your saved files";
+"calendar.attachment.photoSubtitle" = "From your photo library";
+"calendar.attachment.importSubtitle" = "A PDF or image file";
 
 // MARK: - Health Profile extras
 "healthProfile.chooseFromContacts" = "Choose from Contacts";
@@ -737,6 +760,5 @@
 "growth.chartTitle" = "Trend";
 "growth.chartMonths" = "Months";
 "growth.chartYears" = "Years";
-"growth.yearGrowthFormat" = "%1$@ · %2$@ in %3$@";
 "growth.latest" = "Latest";
 "growth.delete" = "Delete measurement";

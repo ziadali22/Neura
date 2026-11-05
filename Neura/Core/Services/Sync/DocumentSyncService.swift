@@ -126,6 +126,7 @@ actor DocumentSyncService {
                 doctorName: syncMeta.doctorName,
                 notes: syncMeta.notes,
                 tags: syncMeta.tags,
+                expiryDate: syncMeta.expiryDate,
                 spaceID: syncMeta.spaceID
             )
             restored.append(doc)
@@ -148,6 +149,7 @@ private struct DocumentSyncMetadata: Codable {
     let doctorName: String?
     let notes: String?
     let tags: [String]?
+    let expiryDate: Date?
     let spaceID: UUID?
 
     init(from doc: Document) {
@@ -160,6 +162,7 @@ private struct DocumentSyncMetadata: Codable {
         doctorName     = doc.doctorName
         notes          = doc.notes
         tags           = doc.tags
+        expiryDate     = doc.expiryDate
         spaceID        = doc.spaceID
     }
 }

@@ -244,7 +244,7 @@ private extension HealthProfileView {
                 } label: {
                     Text(isEditing ? L10n.Common.done : L10n.Common.edit)
                         .font(.bodyL)
-                        .foregroundColor(.accent)
+                        .foregroundColor(.textPrimary)
                 }
                 .frame(maxWidth: .infinity, alignment: .trailing)
             }
@@ -258,6 +258,7 @@ private extension HealthProfileView {
     @ViewBuilder
     func sectionRow(_ section: HealthProfile.HealthSection) -> some View {
         let editable = isEditing && isCustomSection(section)
+        let iconName = iconForSection(section.title)
 
         HStack(spacing: 12) {
             if editable {
@@ -272,9 +273,10 @@ private extension HealthProfileView {
             }
 
             SettingsRow(
-                icon: iconForSection(section.title),
+                icon: iconName,
                 title: section.localizedTitle,
-                showChevron: !editable
+                showChevron: !editable,
+                isSystemIcon: iconName == "syringe"
             ) {
                 if editable {
                     renameText = section.title

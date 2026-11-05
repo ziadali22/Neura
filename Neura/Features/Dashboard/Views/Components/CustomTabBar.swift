@@ -40,9 +40,10 @@ struct CustomTabBar: View {
     }
 
     private let actions: [ActionItem] = [
-        .init(icon: "scanAdd",  title: L10n.Documents.scan,         subtitle: L10n.Documents.AddDocument.scanSubtitle,  action: .scan),
+        .init(icon: "scanAdd", title: L10n.Documents.scan, subtitle: L10n.Documents.AddDocument.scanSubtitle, action: .scan),
         .init(icon: "imageAdd", title: L10n.Documents.uploadPhotos, subtitle: L10n.Documents.AddDocument.photoSubtitle, action: .photo),
-        .init(icon: "fileAdd",  title: L10n.Documents.importFile,   subtitle: L10n.Documents.AddDocument.fileSubtitle,  action: .file),
+        .init(icon: "fileAdd", title: L10n.Documents.importFile, subtitle: L10n.Documents.AddDocument.fileSubtitle, action: .file),
+        .init(icon: "google-drive", title: L10n.Documents.importGoogleDrive, subtitle: L10n.Documents.AddDocument.googleDriveSubtitle, action: .googleDrive),
     ]
 
     // MARK: - Body
@@ -71,7 +72,7 @@ struct CustomTabBar: View {
                     cornerRadius: cornerRadius
                 ) {
                     addDocsMenu
-                        .frame(height: 420)
+                        .frame(height: 550)
                 } label: {
                     TabSegmentedControl(tabs: tabs, selectedTab: $selectedTab)
                         .frame(height: barHeight - 4)
@@ -110,15 +111,24 @@ struct CustomTabBar: View {
             fire(item.action)
         } label: {
             HStack(spacing: 14) {
-                Image(item.icon)
-                    .renderingMode(.template)
-                    .font(.title3)
-                    .foregroundStyle(Color.accent)
-                    .frame(width: 45, height: 45)
-                    .background(
-                        Color(hex: "E7E0D8").opacity(0.6),
-                        in: RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    )
+                Group {
+                    if item.action == .googleDrive {
+                        Image(item.icon)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 24, height: 24)
+                    } else {
+                        Image(item.icon)
+                            .renderingMode(.template)
+                            .font(.title3)
+                            .foregroundStyle(Color.accent)
+                    }
+                }
+                .frame(width: 45, height: 45)
+                .background(
+                    Color(hex: "E7E0D8").opacity(0.6),
+                    in: RoundedRectangle(cornerRadius: 16, style: .continuous)
+                )
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(item.title)
@@ -170,7 +180,6 @@ struct CustomTabBar: View {
                 .frame(width: 56, height: 56)
                 .background(Color.accent)
                 .clipShape(Circle())
-                .shadow(color: Color.accent.opacity(0.18), radius: 8, x: 0, y: 3)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(isMenuOpen ? L10n.Common.close : L10n.Documents.addDocument)

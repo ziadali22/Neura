@@ -107,7 +107,7 @@ private struct DayCell: View {
                 .background(
                     ZStack {
                         if isSelected {
-                            Circle().fill(Color.textPrimary)
+                            Circle().fill(Color.accent)
                         } else if isToday {
                             Circle().strokeBorder(Color.accent, lineWidth: 1.5)
                         }

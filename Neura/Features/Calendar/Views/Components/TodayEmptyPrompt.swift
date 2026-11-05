@@ -8,7 +8,7 @@ struct TodayEmptyPrompt: View {
     let onAdd: () -> Void
 
     var body: some View {
-        PrimaryButton(title: L10n.Calendar.addEvent, systemImage: "", action: onAdd)
+        PrimaryButton(title: L10n.Calendar.addEvent, action: onAdd)
             .padding(.horizontal, 24)
             .padding(.top, 12)
             .padding(.bottom, 12)

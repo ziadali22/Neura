@@ -67,6 +67,10 @@ struct ProfileView: View {
                         // Profile section
                         ProfileSectionHeader(title: L10n.Profile.Section.profile)
                         VStack(spacing: 11) {
+                            EmergencyCardBanner {
+                                AnalyticsManager.shared.track(.emergencyCardTapped)
+                                router.push(.emergencyCard)
+                            }
                             SettingsRow(icon: "profile", title: L10n.Profile.healthProfile) {
                                 router.push(.healthProfile)
                             }
@@ -167,6 +171,8 @@ struct ProfileView: View {
                     LanguagePickerView()
                 case .subscription:
                     SubscriptionCommunityView()
+                case .emergencyCard:
+                    EmergencyCardView()
                 }
             }
         }

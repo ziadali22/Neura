@@ -69,6 +69,9 @@ struct DashboardView: View {
             .opacity(visible ? 1 : 0)
             .allowsHitTesting(visible)
             .animation(.easeInOut(duration: 0.2), value: visible)
+            // The keyboard safe area would otherwise lift this inset and float
+            // the bar over the page. Stay on the home-indicator edge instead.
+            .modifier(TabBarKeyboardPin())
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.85), value: coordinator.showAddMenu)
         .overlay {
@@ -178,6 +181,74 @@ private extension DashboardView {
             }
         }
         .ignoresSafeArea()
+    }
+}
+
+// MARK: - Keyboard pin
+
+/// Holds the tab bar on the screen bottom while the keyboard is up.
+///
+/// `safeAreaInset` follows the keyboard safe area, which floats the bar over
+/// the page. This measures that lift and shifts the bar back down by the same
+/// amount, collapsing the reserved inset so content meets the keyboard.
+private struct TabBarKeyboardPin: ViewModifier {
+    @State private var naturalHeight: CGFloat = 0
+    @State private var keyboardLift: CGFloat = 0
+
+    func body(content: Content) -> some View {
+        VStack(spacing: 0) {
+            content
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
+                    guard height > 1, abs(height - naturalHeight) > 0.5 else { return }
+                    withoutAnimation { naturalHeight = height }
+                }
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(
+                    height: naturalHeight > 0 ? max(0, naturalHeight - keyboardLift) : nil,
+                    alignment: .bottom
+                )
+                .offset(y: keyboardLift)
+                .accessibilityHidden(keyboardLift > 1)
+
+            KeyboardRestingAnchor(lift: $keyboardLift)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private func withoutAnimation(_ update: () -> Void) {
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction, update)
+    }
+}
+
+/// Reports how far the bottom safe area has risen above the home indicator.
+private struct KeyboardRestingAnchor: View {
+    @Binding var lift: CGFloat
+
+    var body: some View {
+        Color.clear
+            .frame(height: 0)
+            .allowsHitTesting(false)
+            .onGeometryChange(for: CGFloat.self) { proxy in
+                let maxY = proxy.frame(in: .global).maxY
+                guard maxY > 1, let window = Self.activeWindow else { return 0 }
+                let restingBottom = window.bounds.height - window.safeAreaInsets.bottom
+                return max(0, restingBottom - maxY)
+            } action: { newLift in
+                guard abs(newLift - lift) > 0.5 else { return }
+                var transaction = Transaction()
+                transaction.disablesAnimations = true
+                withTransaction(transaction) {
+                    lift = newLift
+                }
+            }
+    }
+
+    private static var activeWindow: UIWindow? {
+        let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        let scene = scenes.first { $0.activationState == .foregroundActive } ?? scenes.first
+        return scene?.keyWindow ?? scene?.windows.first
     }
 }
 

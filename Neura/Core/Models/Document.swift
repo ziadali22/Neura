@@ -138,27 +138,6 @@ enum MedicalSpecialization: String, Codable, CaseIterable, Identifiable {
         case .other:            return L10n.MedicalSpecialization.other
         }
     }
-
-    var icon: String {
-        switch self {
-        case .cardiology:       return "heart.fill"
-        case .dermatology:      return "wand.and.sparkles"
-        case .dentistry:        return "mouth.fill"
-        case .endocrinology:    return "drop.circle.fill"
-        case .gastroenterology: return "cross.case.fill"
-        case .generalMedicine:  return "stethoscope"
-        case .gynaecology:      return "figure.stand.dress"
-        case .neurology:        return "brain.head.profile"
-        case .oncology:         return "shield.lefthalf.filled"
-        case .ophthalmology:    return "eye.fill"
-        case .orthopaedics:     return "figure.walk"
-        case .pulmonology:      return "lungs.fill"
-        case .psychiatry:       return "brain"
-        case .surgery:          return "scissors"
-        case .urology:          return "drop.triangle.fill"
-        case .other:            return "ellipsis.circle"
-        }
-    }
 }
 
 // MARK: - Document Model

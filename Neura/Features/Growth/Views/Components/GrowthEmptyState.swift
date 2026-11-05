@@ -34,7 +34,7 @@ struct GrowthEmptyState: View {
                     .foregroundStyle(.white)
                     .padding(.horizontal, 24)
                     .padding(.vertical, 14)
-                    .background(Color.surfaceDark)
+                    .background(Color.accent)
                     .clipShape(Capsule())
             }
             .buttonStyle(ScaleButtonStyle())

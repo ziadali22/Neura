@@ -27,6 +27,9 @@ struct GrowthView: View {
                     viewModel.save(entry: entry, photo: photo, removePhoto: removePhoto)
                 }
             )
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+            .presentationBackground(Color.backgroundPrimary)
         }
         .fullScreenCover(item: $previewingEntry) { entry in
             GrowthPhotoGalleryView(entries: viewModel.photoEntries, initialID: entry.id)
@@ -42,6 +45,9 @@ struct GrowthView: View {
                 },
                 onDelete: { viewModel.delete(entry) }
             )
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+            .presentationBackground(Color.backgroundPrimary)
         }
     }
 
@@ -85,7 +91,6 @@ struct GrowthView: View {
 
                     GrowthChartCard(
                         points: viewModel.trendPoints,
-                        totals: viewModel.trendTotals,
                         periodLabel: viewModel.trendPeriodLabel
                     )
 
@@ -155,7 +160,6 @@ struct GrowthView: View {
             .frame(height: 56)
             .background(Color.accent)
             .clipShape(Capsule())
-            .shadow(color: Color.accent.opacity(0.3), radius: 8, x: 0, y: 4)
         }
         .accessibilityLabel(L10n.Growth.add)
     }

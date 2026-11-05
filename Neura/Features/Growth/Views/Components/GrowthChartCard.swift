@@ -5,16 +5,14 @@ import SwiftUI
 /// scale control only changes the x-axis, so one reading per year still draws a line.
 struct GrowthChartCard: View {
     let points: [GrowthTrendPoint]
-    let totals: GrowthYearTotals
     let periodLabel: String
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var scale: GrowthChartScale
     @State private var selectedPointID: UUID?
 
-    init(points: [GrowthTrendPoint], totals: GrowthYearTotals, periodLabel: String) {
+    init(points: [GrowthTrendPoint], periodLabel: String) {
         self.points = points
-        self.totals = totals
         self.periodLabel = periodLabel
         let years = Set(points.map { Calendar.current.component(.year, from: $0.date) })
         _scale = State(initialValue: years.count > 1 ? .years : .months)
@@ -29,7 +27,6 @@ struct GrowthChartCard: View {
                 selectedPointID: $selectedPointID
             )
             .padding(.horizontal, 16)
-            footer
         }
         .padding(.vertical, 16)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -105,31 +102,6 @@ struct GrowthChartCard: View {
         .accessibilityAddTraits(scale == value ? .isSelected : [])
         .accessibilityLabel(title)
     }
-
-    @ViewBuilder
-    private var footer: some View {
-        if !totals.isEmpty {
-            Text(L10n.Growth.yearGrowth(
-                formatHeightTotal(totals.heightCm),
-                formatWeightTotal(totals.weightKg),
-                periodLabel
-            ))
-            .font(.headingS)
-            .foregroundStyle(Color.accent)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .lineLimit(1)
-            .padding(.horizontal, 16)
-        }
-    }
-
-    private func formatHeightTotal(_ cm: Int) -> String {
-        cm >= 0 ? "+\(cm)cm" : "\(cm)cm"
-    }
-
-    private func formatWeightTotal(_ kg: Double) -> String {
-        let amount = GrowthEntry.formatWeight(abs(kg)).replacingOccurrences(of: " kg", with: "")
-        return kg >= 0 ? "+\(amount)kg" : "-\(amount)kg"
-    }
 }
 
 // MARK: - Motion
@@ -172,7 +144,7 @@ private struct GrowthTrendPage: View {
                 metric: .height,
                 axis: axis,
                 points: GrowthMetric.height.chartPoints(from: points),
-                showsDateLabels: false,
+                showsDateLabels: true,
                 reveal: heightReveal,
                 selectedPointID: $selectedPointID
             )
@@ -180,6 +152,7 @@ private struct GrowthTrendPage: View {
                 metric: .weight,
                 axis: axis,
                 points: GrowthMetric.weight.chartPoints(from: points),
+                showsDateLabels: true,
                 reveal: weightReveal,
                 selectedPointID: $selectedPointID
             )
@@ -483,19 +456,12 @@ private enum GrowthChartPreviewData {
 
     static func card(_ entries: [GrowthEntry]) -> some View {
         let points = GrowthTrendPoint.points(from: entries)
-        let totals: GrowthYearTotals = {
-            guard let first = points.first, let last = points.last else { return .zero }
-            return GrowthYearTotals(
-                heightCm: last.heightCm - first.heightCm,
-                weightKg: last.weightKg - first.weightKg
-            )
-        }()
         let years = Set(points.map { Calendar.current.component(.year, from: $0.date) }).sorted()
         let period: String = {
             guard let first = years.first, let last = years.last else { return "" }
             return first == last ? String(first) : "\(first)–\(last)"
         }()
-        return GrowthChartCard(points: points, totals: totals, periodLabel: period)
+        return GrowthChartCard(points: points, periodLabel: period)
     }
 }
 

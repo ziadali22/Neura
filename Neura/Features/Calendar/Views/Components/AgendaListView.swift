@@ -84,7 +84,7 @@ struct TimelineRow: View {
     let entry: CalendarEntry
 
     var body: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: 12) {
             VStack(spacing: 2) {
                 Text(entry.date, format: .dateTime.day())
                     .font(.system(size: 22, weight: .bold))
@@ -95,18 +95,27 @@ struct TimelineRow: View {
             }
             .frame(width: 44)
 
-            VStack(alignment: .leading, spacing: 3) {
+            Rectangle()
+                .fill(Color.stroke)
+                .frame(width: 1)
+                .padding(.vertical, 4)
+
+            VStack(alignment: .leading, spacing: 4) {
                 Text(entry.title)
                     .font(.headingXS)
                     .foregroundStyle(Color.textPrimary)
                     .lineLimit(1)
                 Text(entry.subtitle)
-                    .font(.captionS)
-                    .foregroundStyle(Color.textSecondary)
+                    .font(.bodyS)
+                    .foregroundStyle(Color.textTertiary)
                     .lineLimit(1)
             }
 
             Spacer(minLength: 8)
+
+            if entry.hasAttachment {
+                EntryAttachmentIcon()
+            }
 
             Image(systemName: "chevron.right")
                 .font(.system(size: 13, weight: .semibold))
