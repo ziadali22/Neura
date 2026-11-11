@@ -1,46 +1,51 @@
 import SwiftUI
 
-struct DocsFilesView: View {
+struct DocsFilesView<TopContent: View>: View {
     @ObservedObject var viewModel: DocumentsListViewModel
     @ObservedObject private var subscriptionManager = SubscriptionManager.shared
     @Binding var isSelecting: Bool
     @Binding var selectedDocuments: Set<UUID>
     @Binding var showFilters: Bool
     let onAddDocument: () -> Void
+    private let topContent: TopContent
 
-    var body: some View {
-        if viewModel.documents.isEmpty {
-            DocsEmptyState(onAddDocument: onAddDocument)
-        } else {
-            VStack(spacing: 0) {
-                // Show selected count row when in selection mode
-                if isSelecting {
-                    selectedCountRow
-                }
-
-                // Filter bar only when not selecting
-                if !isSelecting {
-                    filterBar
-                }
-
-                documentsList
-            }
-        }
+    init(
+        viewModel: DocumentsListViewModel,
+        isSelecting: Binding<Bool>,
+        selectedDocuments: Binding<Set<UUID>>,
+        showFilters: Binding<Bool>,
+        onAddDocument: @escaping () -> Void,
+        @ViewBuilder topContent: () -> TopContent
+    ) {
+        self.viewModel = viewModel
+        self._isSelecting = isSelecting
+        self._selectedDocuments = selectedDocuments
+        self._showFilters = showFilters
+        self.onAddDocument = onAddDocument
+        self.topContent = topContent()
     }
 
-    // MARK: - Selected Count Row
+    var body: some View {
+        if viewModel.spaceScopedDocuments.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
+                topContent
+                DocsEmptyState(onAddDocument: onAddDocument)
+            }
+        } else {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    topContent
 
-    private var selectedCountRow: some View {
-        HStack {
-            Text(selectedDocuments.isEmpty
-                 ? L10n.Documents.noneSelected
-                 : L10n.Documents.selected(selectedDocuments.count))
-                .font(.system(size: 14, weight: .medium))
-                .foregroundStyle(Color.textSecondary)
-            Spacer()
+                    if !isSelecting {
+                        filterBar
+                    }
+
+                    documentsList
+                }
+            }
+            .scrollIndicators(.hidden)
+            .scrollDismissesKeyboard(.immediately)
         }
-        .padding(.horizontal, 20)
-        .padding(.bottom, 8)
     }
 
     // MARK: - Filter Bar
@@ -72,8 +77,6 @@ struct DocsFilesView: View {
 
             if let category = viewModel.selectedCategoryFilter {
                 HStack(spacing: 4) {
-                    Image(systemName: category.icon)
-                        .font(.system(size: 12))
                     Text(category.localizedName)
                         .font(.labelM)
                     Button {
@@ -83,11 +86,15 @@ struct DocsFilesView: View {
                             .font(.system(size: 10, weight: .bold))
                     }
                 }
-                .foregroundStyle(Color.accent)
+                .foregroundStyle(Color.textPrimary)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
-                .background(Color.accent.opacity(0.1))
+                .background(Color.surfaceWhite)
                 .clipShape(.rect(cornerRadius: 8))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 8)
+                        .strokeBorder(Color.stroke, lineWidth: 1)
+                }
             }
 
             Spacer()
@@ -99,8 +106,12 @@ struct DocsFilesView: View {
             } label: {
                 Text(L10n.Documents.select)
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(Color.textSecondary)
+                    .foregroundStyle(Color.textPrimary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .glassEffect(.regular.interactive(), in: .capsule)
             }
+            .buttonStyle(.plain)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 8)
@@ -112,71 +123,80 @@ struct DocsFilesView: View {
     private var documentsList: some View {
         let sections = viewModel.groupedDocuments
         if sections.isEmpty {
-            ContentUnavailableView(
-                viewModel.activeFilterCount > 0 ? L10n.Documents.noMatchingTitle : L10n.Documents.noDocumentsTitle,
-                systemImage: viewModel.activeFilterCount > 0 ? "doc.text.magnifyingglass" : "doc.badge.plus",
-                description: Text(
+            ContentUnavailableView {
+                VStack(spacing: 16) {
+                    Image("search")
+                        .resizable()
+                        .renderingMode(.original)
+                        .scaledToFit()
+                        .frame(width: 96, height: 96)
+                        .accessibilityHidden(true)
+
+                    Text(viewModel.activeFilterCount > 0 ? L10n.Documents.noMatchingTitle : L10n.Documents.noDocumentsTitle)
+                        .font(.headingS)
+                        .foregroundStyle(Color.textPrimary)
+                }
+            } description: {
+                Text(
                     viewModel.activeFilterCount > 0
                         ? L10n.Documents.noMatchingMessage
                         : L10n.Documents.noDocumentsMessage
                 )
-            )
+                .font(.bodyS)
+            }
         } else {
-            ScrollView {
-                LazyVStack(spacing: 20) {
-                    ForEach(sections) { section in
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(section.title)
-                                .font(.system(size: 15, weight: .semibold))
-                                .foregroundStyle(Color.textPrimary)
-                                .padding(.horizontal, 4)
+            LazyVStack(spacing: 20) {
+                ForEach(sections) { section in
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(section.title)
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(Color.textPrimary)
+                            .padding(.horizontal, 4)
 
-                            VStack(spacing: 8) {
-                                ForEach(section.documents) { document in
-                                    let locked = viewModel.isLocked(document)
+                        VStack(spacing: 8) {
+                            ForEach(section.documents) { document in
+                                let locked = viewModel.isLocked(document)
 
-                                    if isSelecting {
-                                        if locked {
-                                            // Locked docs are visible but not selectable
-                                            DocumentListRow(
-                                                document: document,
-                                                isLocked: true,
-                                                onUnlock: { viewModel.showPaywall = true }
-                                            )
-                                        } else {
-                                            Button { toggleSelection(document) } label: {
-                                                DocumentListRow(
-                                                    document: document,
-                                                    isSelecting: true,
-                                                    isSelected: selectedDocuments.contains(document.id)
-                                                )
-                                            }
-                                            .buttonStyle(ScaleButtonStyle())
-                                        }
+                                if isSelecting {
+                                    if locked {
+                                        // Locked docs are visible but not selectable
+                                        DocumentListRow(
+                                            document: document,
+                                            isLocked: true,
+                                            onUnlock: { viewModel.showPaywall = true }
+                                        )
                                     } else {
-                                        if locked {
+                                        Button { toggleSelection(document) } label: {
                                             DocumentListRow(
                                                 document: document,
-                                                isLocked: true,
-                                                onUnlock: { viewModel.showPaywall = true }
+                                                isSelecting: true,
+                                                isSelected: selectedDocuments.contains(document.id)
                                             )
-                                        } else {
-                                            NavigationLink(value: document) {
-                                                DocumentListRow(document: document)
-                                            }
-                                            .buttonStyle(ScaleButtonStyle())
                                         }
+                                        .buttonStyle(ScaleButtonStyle())
+                                    }
+                                } else {
+                                    if locked {
+                                        DocumentListRow(
+                                            document: document,
+                                            isLocked: true,
+                                            onUnlock: { viewModel.showPaywall = true }
+                                        )
+                                    } else {
+                                        NavigationLink(value: document) {
+                                            DocumentListRow(document: document)
+                                        }
+                                        .buttonStyle(ScaleButtonStyle())
                                     }
                                 }
                             }
                         }
                     }
                 }
-                .padding(.horizontal, 16)
-                .padding(.top, 4)
-                .padding(.bottom, 100)
             }
-            .scrollIndicators(.hidden)
+            .padding(.horizontal, 16)
+            .padding(.top, 4)
+            .padding(.bottom, 100)
         }
     }
 

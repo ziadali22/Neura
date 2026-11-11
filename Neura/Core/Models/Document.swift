@@ -1,6 +1,7 @@
 import Foundation
 import PDFKit
 import SwiftUI
+import L10n_swift
 
 // MARK: - Document Type
 
@@ -117,24 +118,24 @@ enum MedicalSpecialization: String, Codable, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    var icon: String {
+    var localizedName: String {
         switch self {
-        case .cardiology:       return "heart.fill"
-        case .dermatology:      return "wand.and.sparkles"
-        case .dentistry:        return "mouth.fill"
-        case .endocrinology:    return "drop.circle.fill"
-        case .gastroenterology: return "cross.case.fill"
-        case .generalMedicine:  return "stethoscope"
-        case .gynaecology:      return "figure.stand.dress"
-        case .neurology:        return "brain.head.profile"
-        case .oncology:         return "shield.lefthalf.filled"
-        case .ophthalmology:    return "eye.fill"
-        case .orthopaedics:     return "figure.walk"
-        case .pulmonology:      return "lungs.fill"
-        case .psychiatry:       return "brain"
-        case .surgery:          return "scissors"
-        case .urology:          return "drop.triangle.fill"
-        case .other:            return "ellipsis.circle"
+        case .cardiology:       return L10n.MedicalSpecialization.cardiology
+        case .dermatology:      return L10n.MedicalSpecialization.dermatology
+        case .dentistry:        return L10n.MedicalSpecialization.dentistry
+        case .endocrinology:    return L10n.MedicalSpecialization.endocrinology
+        case .gastroenterology: return L10n.MedicalSpecialization.gastroenterology
+        case .generalMedicine:  return L10n.MedicalSpecialization.generalMedicine
+        case .gynaecology:      return L10n.MedicalSpecialization.gynaecology
+        case .neurology:        return L10n.MedicalSpecialization.neurology
+        case .oncology:         return L10n.MedicalSpecialization.oncology
+        case .ophthalmology:    return L10n.MedicalSpecialization.ophthalmology
+        case .orthopaedics:     return L10n.MedicalSpecialization.orthopaedics
+        case .pulmonology:      return L10n.MedicalSpecialization.pulmonology
+        case .psychiatry:       return L10n.MedicalSpecialization.psychiatry
+        case .surgery:          return L10n.MedicalSpecialization.surgery
+        case .urology:          return L10n.MedicalSpecialization.urology
+        case .other:            return L10n.MedicalSpecialization.other
         }
     }
 }
@@ -153,6 +154,12 @@ struct Document: Identifiable, Codable, Equatable, Hashable {
     var notes: String?
     var tags: [String]?
     var specialization: MedicalSpecialization?
+    /// Optional renewal/expiry date (passport, insurance card, warranty, etc.).
+    /// Drives `DocumentExpiryReminderScheduler` reminders when set.
+    var expiryDate: Date?
+    /// Which Space this document belongs to. `nil` means it predates Spaces
+    /// and is treated as belonging to the default space.
+    var spaceID: UUID?
 
     /// Full resolved URL in the current sandbox. Not encoded.
     var fileURL: URL {
@@ -169,7 +176,9 @@ struct Document: Identifiable, Codable, Equatable, Hashable {
         specialization: MedicalSpecialization? = nil,
         doctorName: String? = nil,
         notes: String? = nil,
-        tags: [String]? = nil
+        tags: [String]? = nil,
+        expiryDate: Date? = nil,
+        spaceID: UUID? = nil
     ) {
         self.id = id
         self.name = name
@@ -181,12 +190,14 @@ struct Document: Identifiable, Codable, Equatable, Hashable {
         self.doctorName = doctorName
         self.notes = notes
         self.tags = tags
+        self.expiryDate = expiryDate
+        self.spaceID = spaceID
     }
 
     // MARK: - Codable
 
     private enum CodingKeys: String, CodingKey {
-        case id, name, filename, createdAt, documentType, category, specialization, doctorName, notes, tags
+        case id, name, filename, createdAt, documentType, category, specialization, doctorName, notes, tags, expiryDate, spaceID
         // Legacy key for backward compatibility
         case fileURL
     }
@@ -202,6 +213,8 @@ struct Document: Identifiable, Codable, Equatable, Hashable {
         doctorName = try container.decodeIfPresent(String.self, forKey: .doctorName)
         notes = try container.decodeIfPresent(String.self, forKey: .notes)
         tags = try container.decodeIfPresent([String].self, forKey: .tags)
+        expiryDate = try container.decodeIfPresent(Date.self, forKey: .expiryDate)
+        spaceID = try container.decodeIfPresent(UUID.self, forKey: .spaceID)
 
         // Try new filename key first, fall back to extracting from legacy fileURL
         if let fn = try container.decodeIfPresent(String.self, forKey: .filename) {
@@ -225,12 +238,20 @@ struct Document: Identifiable, Codable, Equatable, Hashable {
         try container.encodeIfPresent(doctorName, forKey: .doctorName)
         try container.encodeIfPresent(notes, forKey: .notes)
         try container.encodeIfPresent(tags, forKey: .tags)
+        try container.encodeIfPresent(expiryDate, forKey: .expiryDate)
+        try container.encodeIfPresent(spaceID, forKey: .spaceID)
     }
 
     // MARK: - Computed Properties
 
     var fileExists: Bool {
         FileManager.default.fileExists(atPath: fileURL.path)
+    }
+
+    /// Whether this document belongs to the given account. A nil `spaceID` means
+    /// it predates multi-account support and belongs to the default account.
+    func belongsToSpace(_ spaceID: UUID) -> Bool {
+        (self.spaceID ?? ActiveSpaceManager.defaultSpaceID) == spaceID
     }
 
     var isPDF: Bool {

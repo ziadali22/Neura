@@ -9,7 +9,7 @@ struct CategoryFolderGridCard: View {
             Image(category.gridIcon)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 48, height: 48)
+                .frame(width: 40, height: 40)
 
             HStack(spacing: 4) {
                 Text(category.localizedName)

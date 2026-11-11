@@ -58,8 +58,8 @@ struct OnboardingWelcomeStep: View {
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 56)
-                        .background(Color.black)
-                        .clipShape(.rect(cornerRadius: 28))
+                        .background(Color.surfaceDark)
+                        .clipShape(Capsule())
                     }
                     .buttonStyle(ScaleButtonStyle())
                     .disabled(viewModel.isSigningIn)
@@ -84,7 +84,7 @@ struct OnboardingWelcomeStep: View {
                         .frame(maxWidth: .infinity)
                         .frame(height: 56)
                         .background(.white)
-                        .clipShape(.rect(cornerRadius: 28))
+                        .clipShape(Capsule())
                     }
                     .buttonStyle(ScaleButtonStyle())
                     .disabled(viewModel.isSigningIn)

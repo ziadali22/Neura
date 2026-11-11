@@ -7,46 +7,47 @@ struct EditFieldSheet: View {
     @State private var value: String
     let onSave: (String) -> Void
     let onDelete: (() -> Void)?
+    /// Optional format check run on save (e.g. email). Skipped when the trimmed
+    /// value is empty, so clearing a field never triggers a validation error.
+    let validate: ((String) -> Bool)?
+    let invalidMessage: String?
     @Environment(\.dismiss) private var dismiss
     @FocusState private var isFocused: Bool
+    @State private var showError = false
 
-    init(fieldName: String, value: String, keyboardType: UIKeyboardType = .default, onDelete: (() -> Void)? = nil, onSave: @escaping (String) -> Void) {
+    init(fieldName: String, value: String, keyboardType: UIKeyboardType = .default, validate: ((String) -> Bool)? = nil, invalidMessage: String? = nil, onDelete: (() -> Void)? = nil, onSave: @escaping (String) -> Void) {
         self.fieldName = fieldName
         self.keyboardType = keyboardType
         self._value = State(initialValue: value)
+        self.validate = validate
+        self.invalidMessage = invalidMessage
         self.onDelete = onDelete
         self.onSave = onSave
     }
 
     var body: some View {
+        NavigationStack {
         VStack(spacing: 0) {
             HStack {
-                if let onDelete {
-                    Button(role: .destructive) {
-                        onDelete()
-                        dismiss()
-                    } label: {
-                        Image(systemName: "trash")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundStyle(Color.red)
-                            .frame(width: 36, height: 36)
-                            .background(Color.surfaceWhite)
-                            .clipShape(Circle())
-                    }
-                }
-
                 Spacer()
                 Button {
-                    onSave(value.trimmingCharacters(in: .whitespaces))
+                    let trimmed = value.trimmingCharacters(in: .whitespaces)
+                    if let validate, !trimmed.isEmpty, !validate(trimmed) {
+                        showError = true
+                        return
+                    }
+                    onSave(trimmed)
                     dismiss()
                 } label: {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 16, weight: .bold))
+                    Image(systemName: "xmark")
+                        .font(.system(size: 13, weight: .bold))
                         .foregroundStyle(.white)
                         .frame(width: 36, height: 36)
-                        .background(Color.accent)
+                        .background(Color.surfaceDark)
                         .clipShape(Circle())
                 }
+                .buttonStyle(.plain)
+                .accessibilityLabel(L10n.Common.done)
             }
             .padding(.horizontal, 20)
             .padding(.top, 16)
@@ -65,14 +66,46 @@ struct EditFieldSheet: View {
                     .background(Color.surfaceWhite)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
                     .focused($isFocused)
+                    .onChange(of: value) { _, _ in showError = false }
+
+                if showError, let invalidMessage {
+                    Text(invalidMessage)
+                        .font(.captionS)
+                        .foregroundStyle(Color.red)
+                }
             }
             .padding(.horizontal, 20)
             .padding(.top, 20)
 
             Spacer()
+
+            if let onDelete {
+                Button(role: .destructive) {
+                    onDelete()
+                    dismiss()
+                } label: {
+                    Image(systemName: "trash")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(Color.red)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 8)
+            }
         }
         .background(Color.backgroundPrimary)
         .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 4)
+        .toolbar(.hidden, for: .navigationBar)
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button(L10n.Common.done) { isFocused = false }
+                    .fontWeight(.semibold)
+                    .foregroundStyle(Color.textPrimary)
+            }
+        }
+        }
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 isFocused = true

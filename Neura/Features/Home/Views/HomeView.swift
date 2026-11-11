@@ -7,6 +7,8 @@ struct HomeView: View {
     @StateObject private var updateChecker = AppUpdateChecker.shared
     @StateObject private var healthVM = HealthProfileViewModel()
     @StateObject private var docsViewModel = DocumentsListViewModel()
+    @StateObject private var calendarViewModel = CalendarViewModel()
+    @ObservedObject private var activeSpaceManager = ActiveSpaceManager.shared
     @State private var recentDocuments: [Document] = []
     @State private var greetingAppear = true
     @State private var bannerAppear = true
@@ -18,6 +20,21 @@ struct HomeView: View {
     @State private var showBackgroundPicker = false
     @State private var selectedDocument: Document?
     @State private var cardBackground: CardBackground = CardBackground.saved()
+    @AppStorage(UserLocationStore.defaultsKey) private var userLocation = ""
+    @AppStorage("hasSeenCalendarPromo") private var hasSeenCalendarPromo = false
+    /// Shared with DashboardView — the calendar promo waits until the
+    /// plus-button coach mark has been seen before it appears.
+    @AppStorage("hasSeenDocumentCoachmark") private var hasSeenCoachmark = false
+    @State private var showCalendarPromo = false
+    /// Clock the next-appointment card is evaluated against. Advanced when the
+    /// one-hour grace after an appointment elapses, and whenever Home reappears.
+    @State private var appointmentClock = Date()
+    @State private var editingAppointment: CalendarEntry?
+    @Environment(\.scenePhase) private var scenePhase
+
+    private var nextAppointment: HomeNextAppointment? {
+        HomeNextAppointment.next(in: calendarViewModel.entries, at: appointmentClock)
+    }
 
     private var greeting: String {
         let hour = Calendar.current.component(.hour, from: Date())
@@ -45,61 +62,101 @@ struct HomeView: View {
     var body: some View {
         NavigationStack(path: $router.path) {
             ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    // MARK: - Greeting
-                    Text(greeting)
-                        .font(.displaySemi)
-                        .foregroundStyle(Color.textPrimary)
+                VStack(alignment: .leading, spacing: 16) {
+                    // MARK: - Greeting + health card
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack(alignment: .center, spacing: 12) {
+                            Text(greeting)
+                                .font(.displaySemi)
+                                .foregroundStyle(Color.textPrimary)
+                                .lineLimit(1)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+
+                            Button {
+                                router.push(.calendar)
+                            } label: {
+                                GlassIconButton(size: 44) {
+                                    Image("calendar-date")
+                                        .renderingMode(.original)
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 24, height: 24)
+                                }
+                            }
+                            .buttonStyle(ScaleButtonStyle())
+                            .accessibilityLabel(L10n.Calendar.title)
+                        }
+                        .overlay(alignment: .topTrailing) {
+                            if showCalendarPromo {
+                                CalendarPromoPopover(
+                                    onOpen: {
+                                        dismissCalendarPromo()
+                                        router.push(.calendar)
+                                    },
+                                    onDismiss: { dismissCalendarPromo() }
+                                )
+                                .offset(x: 0, y: 48)
+                                .transition(.scale(scale: 0.9).combined(with: .opacity))
+                            }
+                        }
                         .padding(.horizontal, 20)
-                        .padding(.top, 24)
+                        .padding(.top, 16)
                         .opacity(greetingAppear ? 1 : 0)
                         .offset(y: greetingAppear ? 0 : -20)
                         .animation(.spring(response: 0.6, dampingFraction: 0.8), value: greetingAppear)
+                        .zIndex(1)
 
-                    // MARK: - Upload Limit Banner
-                    // Shown for all free users from install onward; the banner itself
-                    // swaps to an upsell once the upload limit is reached.
-                    if !subscriptionManager.isPro {
-                        UploadLimitBanner(
-                            subscriptionManager: subscriptionManager,
-                            onTap: { showPaywall = true }
-                        )
-                        .padding(.horizontal, 24)
-                        .opacity(bannerAppear ? 1 : 0)
-                        .offset(y: bannerAppear ? 0 : -10)
-                        .animation(.spring(response: 0.6, dampingFraction: 0.8), value: bannerAppear)
-                    }
+                        // MARK: - Profile Cards
+                        VStack(alignment: .leading, spacing: 16) {
+                            SecureProfileCard(
+                                name: healthVM.profile.generalData.fullName,
+                                location: userLocation,
+                                background: cardBackground,
+                                onShareTap: {
+                                    AnalyticsManager.shared.track(.shareHealthProfileTapped, properties: ["source": "home"])
+                                    showShareSheet = true
+                                },
+                                onCustomizeTap: {
+                                    AnalyticsManager.shared.track(.backgroundPickerOpened)
+                                    showBackgroundPicker = true
+                                },
+                                onTap: {
+                                    AnalyticsManager.shared.track(.secureProfileCardTapped)
+                                    authenticateAndOpenProfile()
+                                }
+                            )
+                            .scaleEffect(profileCardAppear ? 1 : 0.95)
+                            .opacity(profileCardAppear ? 1 : 0)
+                            .animation(.spring(response: 0.7, dampingFraction: 0.8), value: profileCardAppear)
 
-                    // MARK: - Profile Cards
-                    VStack(alignment: .leading, spacing: 16) {
-                        SecureProfileCard(
-                            name: healthVM.profile.generalData.fullName,
-                            location: UserDefaults.standard.string(forKey: "user_location") ?? "",
-                            background: cardBackground,
-                            onShareTap: { showShareSheet = true },
-                            onCustomizeTap: { showBackgroundPicker = true },
-                            onTap: { authenticateAndOpenProfile() }
-                        )
-                        .scaleEffect(profileCardAppear ? 1 : 0.95)
-                        .opacity(profileCardAppear ? 1 : 0)
-                        .animation(.spring(response: 0.7, dampingFraction: 0.8), value: profileCardAppear)
-
-                        CompleteProfileCard(
-                            generalData: healthVM.profile.generalData,
-                            onTap: { router.push(.healthProfile) }
-                        )
+                            CompleteProfileCard(
+                                generalData: healthVM.profile.generalData,
+                                onTap: {
+                                    AnalyticsManager.shared.track(.completeProfileCardTapped)
+                                    router.push(.healthProfile)
+                                }
+                            )
                             .offset(y: completeCardAppear ? 0 : 30)
                             .opacity(completeCardAppear ? 1 : 0)
                             .animation(.spring(response: 0.7, dampingFraction: 0.8), value: completeCardAppear)
-                    }
-                    .padding(.horizontal, 20)
-
-                    // MARK: - Emergency Card
-                    EmergencyCardBanner { router.push(.emergencyCard) }
+                        }
                         .padding(.horizontal, 20)
-                        .opacity(completeCardAppear ? 1 : 0)
-                        .offset(y: completeCardAppear ? 0 : 20)
-                        .animation(.spring(response: 0.7, dampingFraction: 0.8), value: completeCardAppear)
+                    }
+
+                    // MARK: - Next appointment
+                    if let nextAppointment {
+                        NextAppointmentSection(
+                            appointment: nextAppointment,
+                            onTap: { editingAppointment = nextAppointment.entry },
+                            onToggle: {
+                                calendarViewModel.toggleCompletion(nextAppointment.entry, on: nextAppointment.occurrence)
+                            }
+                        )
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                        .task(id: nextAppointment.hideAt) {
+                            await dismissAppointmentWhenDue(nextAppointment.hideAt)
+                        }
+                    }
 
                     // MARK: - Recent Documents
                     RecentDocumentsSection(
@@ -111,6 +168,7 @@ struct HomeView: View {
 
                     Spacer(minLength: 80)
                 }
+                .animation(.spring(response: 0.45, dampingFraction: 0.85), value: nextAppointment)
             }
             .scrollIndicators(.hidden)
             .background(Color.backgroundPrimary)
@@ -120,8 +178,8 @@ struct HomeView: View {
                     HealthProfileView()
                 case .healthProfileDetail:
                     HealthProfileDetailView()
-                case .emergencyCard:
-                    EmergencyCardView()
+                case .calendar:
+                    CalendarView()
                 }
             }
             .sheet(isPresented: $showShareSheet) {
@@ -141,6 +199,21 @@ struct HomeView: View {
                 AppUpdateSheet(update: update)
                     .presentationDetents([.medium])
                     .presentationCornerRadius(32)
+                    .onAppear { AnalyticsManager.shared.track(.appUpdatePromptShown) }
+            }
+            .sheet(item: $editingAppointment) { entry in
+                EntryEditorSheet(
+                    existing: entry,
+                    initialDate: entry.date,
+                    documents: docsViewModel.spaceScopedDocuments,
+                    onSave: { calendarViewModel.save($0) },
+                    onDelete: { calendarViewModel.delete($0) },
+                    onDeleteDocument: { docsViewModel.deleteDocument($0) },
+                    onCreateDocument: { docsViewModel.registerAttachment($0) },
+                    onUpdateDocument: { document, metadata, preview in
+                        docsViewModel.updateDocument(document, metadata: metadata, preview: preview)
+                    }
+                )
             }
             .sheet(item: $selectedDocument) { document in
                 NavigationStack {
@@ -157,16 +230,33 @@ struct HomeView: View {
                 }
             }
             .onAppear {
+                AnalyticsManager.shared.track(.homeViewed)
+                appointmentClock = Date()
                 loadRecentDocuments()
                 Task { await updateChecker.checkForUpdate() }
+                maybeShowCalendarPromo()
+            }
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .active { appointmentClock = Date() }
+            }
+            .onChange(of: hasSeenCoachmark) { _, seen in
+                // The coach mark just got dismissed — now surface the promo.
+                if seen { maybeShowCalendarPromo() }
             }
             .onChange(of: router.path) {
                 if router.path.isEmpty {
+                    appointmentClock = Date()
                     healthVM.reload()
                     loadRecentDocuments()
                 }
             }
             .onReceive(NotificationCenter.default.publisher(for: .documentsRestored)) { _ in
+                loadRecentDocuments()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .documentsChanged)) { _ in
+                loadRecentDocuments()
+            }
+            .onChange(of: activeSpaceManager.currentSpaceID) { _, _ in
                 loadRecentDocuments()
             }
             .onReceive(NotificationCenter.default.publisher(for: .healthProfileRestored)) { _ in
@@ -176,6 +266,30 @@ struct HomeView: View {
     }
 
     // MARK: - Actions
+
+    /// Drops the home appointment once its grace period ends, even if Home stays open.
+    private func dismissAppointmentWhenDue(_ hideAt: Date) async {
+        let delay = hideAt.timeIntervalSinceNow
+        if delay > 0 {
+            try? await Task.sleep(for: .seconds(delay))
+            guard !Task.isCancelled else { return }
+        }
+        appointmentClock = max(Date(), hideAt)
+    }
+
+    /// Shows the calendar promo once — but only after the plus-button coach
+    /// mark has been seen, so the two onboarding hints don't overlap.
+    private func maybeShowCalendarPromo() {
+        guard hasSeenCoachmark, !hasSeenCalendarPromo, !showCalendarPromo else { return }
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.8).delay(1.0)) {
+            showCalendarPromo = true
+        }
+    }
+
+    private func dismissCalendarPromo() {
+        withAnimation(.easeOut(duration: 0.2)) { showCalendarPromo = false }
+        hasSeenCalendarPromo = true
+    }
 
     private func authenticateAndOpenProfile() {
         guard biometricAuth.isBiometricLockEnabled else {
@@ -193,9 +307,8 @@ struct HomeView: View {
     // MARK: - Data Loading
 
     private func loadRecentDocuments() {
-        recentDocuments = DocumentFileManager.shared.loadMetadata()
-            .filter { $0.fileExists }
-            .sorted { $0.createdAt > $1.createdAt }
+        docsViewModel.loadDocuments()
+        recentDocuments = docsViewModel.allFilesSorted
     }
 
 }

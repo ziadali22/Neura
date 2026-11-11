@@ -5,12 +5,13 @@ struct CustomFolderDocumentsView: View {
     @ObservedObject var viewModel: DocumentsListViewModel
     @ObservedObject private var folderStore = CustomFolderStore.shared
 
-    @State private var showRename = false
-    @State private var renameText = ""
     @State private var searchText = ""
+    @State private var isSelecting = false
+    @State private var selectedDocuments: Set<UUID> = []
+    @State private var showDeleteAlert = false
 
     private var documents: [Document] {
-        viewModel.documents
+        viewModel.spaceScopedDocuments
             .filter { $0.tags?.contains(folder.id.uuidString) == true }
             .sorted { $0.createdAt > $1.createdAt }
     }
@@ -40,65 +41,123 @@ struct CustomFolderDocumentsView: View {
         .sorted { $0.date > $1.date }
     }
 
+    private var currentName: String {
+        folderStore.folders.first(where: { $0.id == folder.id })?.displayName ?? folder.displayName
+    }
+
     var body: some View {
-        Group {
+        VStack(spacing: 0) {
+            if isSelecting {
+                selectionHeader
+            }
+
             if documents.isEmpty {
                 folderEmptyState
             } else {
                 VStack(spacing: 0) {
                     searchBar
-                    ScrollView {
-                        LazyVStack(alignment: .leading, spacing: 24) {
-                            ForEach(monthSections) { section in
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text(section.title)
-                                        .font(.headingXS)
-                                        .foregroundStyle(Color.textSecondary)
-                                        .padding(.horizontal, 4)
 
-                                    VStack(spacing: 8) {
-                                        ForEach(section.documents) { document in
-                                            NavigationLink(value: document) {
-                                                CustomFolderDocumentRow(document: document)
-                                            }
-                                            .buttonStyle(ScaleButtonStyle())
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        .padding(.horizontal, 20)
-                        .padding(.top, 16)
-                        .padding(.bottom, 100)
-                    }
-                    .scrollIndicators(.hidden)
+                    documentsList
                 }
             }
         }
-        .navigationTitle(currentName)
-        .navigationBarTitleDisplayMode(.inline)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.backgroundPrimary.ignoresSafeArea())
+        .navigationTitle(isSelecting ? "" : currentName)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar(isSelecting ? .hidden : .visible, for: .navigationBar)
         .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    renameText = currentName
-                    showRename = true
-                } label: {
-                    Image(systemName: "pencil")
-                        .foregroundStyle(Color.accent)
-                }
+            if !documents.isEmpty && !isSelecting {
+                toolbarContent
             }
         }
-        .alert(L10n.Documents.Folder.renameTitle, isPresented: $showRename) {
-            TextField(L10n.Documents.Folder.namePlaceholder, text: $renameText)
-            Button(L10n.Common.rename) { folderStore.rename(folder, to: renameText) }
+        .overlay(alignment: .bottom) {
+            if isSelecting && !selectedDocuments.isEmpty {
+                DocsSelectionBar(
+                    onDelete: { showDeleteAlert = true },
+                    onShare: shareSelected
+                )
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(.spring(response: 0.3, dampingFraction: 0.85), value: isSelecting)
+        .animation(.spring(response: 0.3, dampingFraction: 0.85), value: selectedDocuments.isEmpty)
+        .onAppear { viewModel.folderContext = .customFolder(folder.id) }
+        .onDisappear {
+            if viewModel.folderContext == .customFolder(folder.id) {
+                viewModel.folderContext = nil
+            }
+        }
+        .alert(
+            L10n.Documents.deleteAlertTitle(selectedDocuments.count),
+            isPresented: $showDeleteAlert
+        ) {
             Button(L10n.Common.cancel, role: .cancel) {}
+            Button(L10n.Common.delete, role: .destructive, action: deleteSelected)
+        } message: {
+            Text(L10n.Common.thisActionCannotBeUndone)
         }
     }
 
-    private var currentName: String {
-        folderStore.folders.first(where: { $0.id == folder.id })?.name ?? folder.name
+    // MARK: - Toolbar
+
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        ToolbarItem(placement: .topBarTrailing) {
+            Button {
+                viewModel.showAddOptions(destination: .customFolder(folder.id))
+            } label: {
+                Image(systemName: "plus")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(Color.accent)
+            }
+            .accessibilityLabel(L10n.Documents.addDocument)
+        }
+
+        ToolbarSpacer(.fixed, placement: .topBarTrailing)
+
+        ToolbarItem(placement: .topBarTrailing) {
+            Button {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                    isSelecting = true
+                }
+            } label: {
+                Text(L10n.Documents.select)
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(Color.textPrimary)
+            }
+        }
+    }
+
+    // MARK: - Selection Header (replaces nav bar in selection mode)
+
+    private var selectionHeader: some View {
+        DocsSelectionHeader(
+            title: currentName,
+            titleFont: .headingS,
+            countFont: .headingXS,
+            selectedCount: selectedDocuments.count,
+            onSelectAll: {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                    let allIDs = Set(filteredDocuments
+                        .filter { !viewModel.isLocked($0) }
+                        .map(\.id))
+                    if !allIDs.isEmpty && allIDs.isSubset(of: selectedDocuments) {
+                        selectedDocuments.removeAll()
+                    } else {
+                        selectedDocuments = allIDs
+                    }
+                }
+            },
+            onDone: {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                    isSelecting = false
+                    selectedDocuments.removeAll()
+                }
+            }
+        )
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
     }
 
     // MARK: - Search Bar
@@ -108,7 +167,7 @@ struct CustomFolderDocumentsView: View {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(Color.textTertiary)
                 .font(.system(size: 15))
-            TextField("Search documents", text: $searchText)
+            TextField(L10n.Documents.searchPlaceholder, text: $searchText)
                 .font(.bodyL)
         }
         .padding(.horizontal, 14)
@@ -117,7 +176,71 @@ struct CustomFolderDocumentsView: View {
         .clipShape(.rect(cornerRadius: 12))
         .shadow(color: .black.opacity(0.04), radius: 4, x: 0, y: 2)
         .padding(.horizontal, 16)
-        .padding(.vertical, 10)
+        .padding(.top, 10)
+        .padding(.bottom, 4)
+    }
+
+    // MARK: - Documents List
+
+    private var documentsList: some View {
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 24) {
+                ForEach(monthSections) { section in
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(section.title)
+                            .font(.headingXS)
+                            .foregroundStyle(Color.textSecondary)
+                            .padding(.horizontal, 4)
+
+                        VStack(spacing: 8) {
+                            ForEach(section.documents) { document in
+                                documentRow(document)
+                            }
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 16)
+            .padding(.bottom, 100)
+        }
+        .scrollIndicators(.hidden)
+        .scrollDismissesKeyboard(.immediately)
+    }
+
+    @ViewBuilder
+    private func documentRow(_ document: Document) -> some View {
+        let locked = viewModel.isLocked(document)
+
+        if isSelecting {
+            if locked {
+                DocumentListRow(
+                    document: document,
+                    isLocked: true,
+                    onUnlock: { viewModel.showPaywall = true }
+                )
+            } else {
+                Button { toggleSelection(document) } label: {
+                    DocumentListRow(
+                        document: document,
+                        isSelecting: true,
+                        isSelected: selectedDocuments.contains(document.id)
+                    )
+                }
+                .buttonStyle(ScaleButtonStyle())
+            }
+        } else if locked {
+            DocumentListRow(
+                document: document,
+                isLocked: true,
+                onUnlock: { viewModel.showPaywall = true }
+            )
+        } else {
+            NavigationLink(value: document) {
+                DocumentListRow(document: document)
+            }
+            .buttonStyle(ScaleButtonStyle())
+        }
     }
 
     // MARK: - Empty State
@@ -126,9 +249,10 @@ struct CustomFolderDocumentsView: View {
         VStack(spacing: 20) {
             Spacer()
 
-            Image(systemName: "folder.fill")
-                .font(.system(size: 80))
-                .foregroundStyle(Color.accent)
+            Image("folder-icon")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 160, height: 160)
 
             VStack(spacing: 8) {
                 Text(L10n.Documents.Folder.noDocuments)
@@ -143,20 +267,57 @@ struct CustomFolderDocumentsView: View {
             }
 
             Button {
-                viewModel.showAddOptions()
+                viewModel.showAddOptions(destination: .customFolder(folder.id))
             } label: {
-                Text("Add document")
+                Text(L10n.Documents.addDocument)
                     .font(.buttonM)
                     .foregroundStyle(.white)
                     .frame(width: 190)
                     .padding(.vertical, 14)
-                    .background(Color.textPrimary)
+                    .background(Color.accent)
                     .clipShape(Capsule())
             }
             .buttonStyle(ScaleButtonStyle())
             .padding(.top, 4)
 
             Spacer()
+        }
+    }
+
+    // MARK: - Actions
+
+    private func toggleSelection(_ document: Document) {
+        withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+            if selectedDocuments.contains(document.id) {
+                selectedDocuments.remove(document.id)
+            } else {
+                selectedDocuments.insert(document.id)
+            }
+        }
+    }
+
+    private func deleteSelected() {
+        let toDelete = viewModel.spaceScopedDocuments.filter { selectedDocuments.contains($0.id) }
+        for doc in toDelete { viewModel.deleteDocument(doc) }
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+            selectedDocuments.removeAll()
+            isSelecting = false
+        }
+    }
+
+    private func shareSelected() {
+        let urls = viewModel.spaceScopedDocuments
+            .filter { selectedDocuments.contains($0.id) && $0.fileExists }
+            .map(\.fileURL)
+        guard !urls.isEmpty else { return }
+        let activityVC = UIActivityViewController(activityItems: urls, applicationActivities: nil)
+        if let windowScene = UIApplication.shared.connectedScenes
+            .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
+           let root = windowScene.keyWindow?.rootViewController {
+            var topVC = root
+            while let presented = topVC.presentedViewController { topVC = presented }
+            activityVC.popoverPresentationController?.sourceView = topVC.view
+            topVC.present(activityVC, animated: true)
         }
     }
 }
@@ -168,47 +329,4 @@ private struct MonthSection: Identifiable {
     let date: Date
     let title: String
     let documents: [Document]
-}
-
-// MARK: - Document Row
-
-private struct CustomFolderDocumentRow: View {
-    let document: Document
-    @ScaledMetric private var iconSize: CGFloat = 44
-
-    var body: some View {
-        HStack(spacing: 14) {
-            Circle()
-                .fill(Color.accent.opacity(0.13))
-                .frame(width: iconSize, height: iconSize)
-                .overlay {
-                    Image(systemName: "folder.fill")
-                        .font(.system(size: 18))
-                        .foregroundStyle(Color.accent)
-                }
-                .accessibilityHidden(true)
-
-            VStack(alignment: .leading, spacing: 3) {
-                Text(document.name)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundStyle(Color.textPrimary)
-                    .lineLimit(1)
-
-                Text(document.createdAt.formatted(date: .numeric, time: .omitted))
-                    .font(.system(size: 13))
-                    .foregroundStyle(Color.textSecondary)
-            }
-
-            Spacer()
-
-            Image(systemName: "chevron.forward")
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(Color.textTertiary)
-                .accessibilityHidden(true)
-        }
-        .padding(16)
-        .background(Color.surfaceWhite)
-        .clipShape(.rect(cornerRadius: 14))
-        .shadow(color: .black.opacity(0.04), radius: 6, x: 0, y: 2)
-    }
 }

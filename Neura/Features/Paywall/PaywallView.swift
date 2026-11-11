@@ -3,6 +3,7 @@ import StoreKit
 
 struct PaywallView: View {
     @ObservedObject var subscriptionManager: SubscriptionManager
+    var source: String? = nil
     @Environment(\.dismiss) private var dismiss
     @State private var currentSlide = 0
     @State private var scrollID: Int? = 0
@@ -137,7 +138,20 @@ struct PaywallView: View {
             }
         }
         .task { await subscriptionManager.loadProducts() }
-        .onAppear { AnalyticsManager.shared.track("paywall_viewed") }
+        .onAppear {
+            if subscriptionManager.isPro {
+                dismiss()
+                return
+            }
+            if let source {
+                AnalyticsManager.shared.track(.paywallViewed, properties: ["source": source])
+            } else {
+                AnalyticsManager.shared.track(.paywallViewed)
+            }
+        }
+        .onChange(of: subscriptionManager.isPro) { _, isPro in
+            if isPro { dismiss() }
+        }
         .alert(
             L10n.Common.neura,
             isPresented: Binding(
@@ -295,7 +309,7 @@ struct PaywallView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 17)
-            .background(Color.black)
+            .background(Color.accent)
             .clipShape(Capsule())
         }
         .buttonStyle(ScaleButtonStyle())
@@ -332,8 +346,10 @@ struct PaywallView: View {
 
             HStack(spacing: 6) {
                 Link(L10n.Paywall.termsOfUse, destination: Self.termsURL)
+                    .buttonStyle(.plain)
                 Text("·").foregroundStyle(Color.black.opacity(0.3))
                 Link(L10n.Paywall.privacyPolicy, destination: Self.privacyURL)
+                    .buttonStyle(.plain)
             }
             .font(.system(size: 11, weight: .medium))
             .tint(Color.black.opacity(0.55))

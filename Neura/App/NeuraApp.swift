@@ -1,26 +1,66 @@
 import SwiftUI
 import FirebaseCore
 import GoogleSignIn
+import UserNotifications
 
 //Firebase Integrations
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+        UNUserNotificationCenter.current().delegate = self
+
+        // Meta App Events. Must run here rather than in NeuraApp.init() — the Facebook SDK
+        // needs the launch options to log fb_mobile_activate_app and resolve ad deep links.
+        MetaAdsManager.shared.initialize(application: application, launchOptions: launchOptions)
+
         return true
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
-        GIDSignIn.sharedInstance.handle(url)
+        // Let the Facebook SDK claim ad-attribution URLs first; anything it does not
+        // consume is a Google Sign-In callback.
+        if MetaAdsManager.shared.handle(url: url, application: app, options: options) { return true }
+        return GIDSignIn.sharedInstance.handle(url)
+    }
+}
+
+// MARK: - Notification tap routing
+
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    /// Shows local notification banners even while the app is in the foreground
+    /// (e.g. a calendar reminder or document-expiry alert firing while the user
+    /// is already inside the app). Without a delegate, iOS suppresses them.
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                 willPresent notification: UNNotification,
+                                 withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.banner, .sound])
+    }
+
+    /// Deep-links a tapped reminder to its linked document, if any.
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                 didReceive response: UNNotificationResponse,
+                                 withCompletionHandler completionHandler: @escaping () -> Void) {
+        if let idString = response.notification.request.content.userInfo["documentID"] as? String,
+           let id = UUID(uuidString: idString) {
+            NotificationRouter.shared.pendingDocumentID = id
+        }
+        completionHandler()
     }
 }
 
 
 @main
 struct NeuraApp: App {
+    @Environment(\.scenePhase) private var scenePhase
     @State private var languageManager = LanguageManager.shared
     @State private var showSplash: Bool
     @State private var hasCompletedOnboarding: Bool
     @State private var isSignedIn: Bool
+    /// Launch paywall for free users. Shown after splash on a cold start, and
+    /// again each time the app returns from the background.
+    @State private var showLaunchPaywall = false
+    @State private var resumedFromBackground = false
+    @State private var launchPaywallTask: Task<Void, Never>?
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
 
     init() {
@@ -48,8 +88,20 @@ struct NeuraApp: App {
            Auth.auth().currentUser != nil {
             try? Auth.auth().signOut()
         }
-        let done = UserDefaults.standard.bool(forKey: key)
-        let signedIn = Auth.auth().currentUser != nil
+        var done = UserDefaults.standard.bool(forKey: key)
+        var signedIn = Auth.auth().currentUser != nil
+
+        #if DEBUG
+        // Tester bypass (DEBUG builds only): launch with `-skipAuth YES` to jump
+        // straight into the Dashboard without signing in. Set it in Xcode via
+        // Edit Scheme… → Run → Arguments → Arguments Passed On Launch: `-skipAuth YES`.
+        // The flag is compiled out of Release builds, so it can never ship.
+        if UserDefaults.standard.bool(forKey: "skipAuth") {
+            done = true
+            signedIn = true
+        }
+        #endif
+
         _hasCompletedOnboarding = State(initialValue: done)
         _isSignedIn = State(initialValue: signedIn)
         _showSplash = State(initialValue: done && signedIn)
@@ -101,15 +153,62 @@ struct NeuraApp: App {
                 SubscriptionManager.shared.start()
             }
             .onOpenURL { url in
+                if MetaAdsManager.shared.handle(url: url, application: UIApplication.shared) { return }
                 GIDSignIn.sharedInstance.handle(url)
             }
             // Only react to sign-out — not to sign-in during onboarding
             .onReceive(AuthService.shared.$currentUser) { user in
+                #if DEBUG
+                // In the tester bypass there is no real Firebase user, so ignore the
+                // nil publish that would otherwise bounce us back to onboarding.
+                if UserDefaults.standard.bool(forKey: "skipAuth") { return }
+                #endif
                 if user == nil {
                     isSignedIn = false
                     hasCompletedOnboarding = false
+                    launchPaywallTask?.cancel()
+                    showLaunchPaywall = false
                 }
             }
+            .fullScreenCover(isPresented: $showLaunchPaywall) {
+                PaywallView(subscriptionManager: .shared, source: "app_open")
+            }
+            .onChange(of: showSplash) { _, showing in
+                if !showing { presentLaunchPaywall() }
+            }
+            .onChange(of: scenePhase) { _, phase in
+                switch phase {
+                case .background:
+                    resumedFromBackground = true
+                case .active where resumedFromBackground:
+                    resumedFromBackground = false
+                    presentLaunchPaywall()
+                default:
+                    break
+                }
+            }
+            .onReceive(SubscriptionManager.shared.$isPro) { isPro in
+                guard isPro else { return }
+                launchPaywallTask?.cancel()
+                showLaunchPaywall = false
+            }
+        }
+    }
+
+    /// Presents the paywall once the dashboard is on screen. Skips Pro users
+    /// and waits out the splash hand-off so the cover doesn't fight that animation.
+    private func presentLaunchPaywall() {
+        guard isSignedIn, hasCompletedOnboarding, !showSplash else { return }
+        guard !SubscriptionManager.shared.isPro else { return }
+        guard !showLaunchPaywall else { return }
+
+        launchPaywallTask?.cancel()
+        launchPaywallTask = Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(400))
+            guard !Task.isCancelled else { return }
+            guard isSignedIn, hasCompletedOnboarding, !showSplash else { return }
+            guard !SubscriptionManager.shared.isPro else { return }
+            showLaunchPaywall = true
         }
     }
 }
@@ -117,11 +216,15 @@ struct NeuraApp: App {
 // MARK: - Notification helpers
 
 private extension NeuraApp {
-    /// Reads the saved profile from UserDefaults and asks the notification manager
-    /// to schedule (or cancel) reminders based on current fill state.
+    /// Reads the default space's saved profile from UserDefaults and asks the
+    /// notification manager to schedule (or cancel) reminders based on current
+    /// fill state. Always the default (account-owner) space, regardless of
+    /// which space is currently active — this nudge is about the owner's own
+    /// profile completeness.
     func scheduleProfileNotificationIfNeeded() {
-        guard let data = UserDefaults.standard.data(forKey: "health_profile_data"),
-              let profile = try? JSONDecoder().decode(HealthProfile.self, from: data) else {
+        guard let data = UserDefaults.standard.data(forKey: "health_profiles_by_space"),
+              let profiles = try? JSONDecoder().decode([UUID: HealthProfile].self, from: data),
+              let profile = profiles[ActiveSpaceManager.defaultSpaceID] else {
             // No profile saved yet — schedule a gentle first-time nudge
             ProfileNotificationManager.shared.requestPermissionAndScheduleIfNeeded(filledCount: 0, total: 8)
             return

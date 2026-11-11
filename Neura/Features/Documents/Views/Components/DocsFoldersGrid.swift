@@ -1,10 +1,28 @@
 import SwiftUI
 
-struct DocsFoldersGrid: View {
+struct DocsFoldersGrid<TopContent: View>: View {
     @ObservedObject var viewModel: DocumentsListViewModel
     @ObservedObject var folderStore: CustomFolderStore
     @Binding var showNewFolderAlert: Bool
     @Binding var newFolderName: String
+    var onNavigate: () -> Void = {}
+    private let topContent: TopContent
+
+    init(
+        viewModel: DocumentsListViewModel,
+        folderStore: CustomFolderStore,
+        showNewFolderAlert: Binding<Bool>,
+        newFolderName: Binding<String>,
+        onNavigate: @escaping () -> Void = {},
+        @ViewBuilder topContent: () -> TopContent
+    ) {
+        self.viewModel = viewModel
+        self.folderStore = folderStore
+        self._showNewFolderAlert = showNewFolderAlert
+        self._newFolderName = newFolderName
+        self.onNavigate = onNavigate
+        self.topContent = topContent()
+    }
 
     @State private var folderPendingDelete: CustomFolder?
     @State private var folderToRename: CustomFolder?
@@ -17,9 +35,13 @@ struct DocsFoldersGrid: View {
 
     var body: some View {
         ScrollView {
-            grid
+            VStack(alignment: .leading, spacing: 8) {
+                topContent
+                grid
+            }
         }
         .scrollIndicators(.hidden)
+        .scrollDismissesKeyboard(.immediately)
         .alert("Rename Folder", isPresented: Binding(
             get: { folderToRename != nil },
             set: { if !$0 { folderToRename = nil } }
@@ -35,14 +57,32 @@ struct DocsFoldersGrid: View {
         }
     }
 
+    private var searchQuery: String {
+        viewModel.searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var matchingDocuments: [Document] {
+        let scoped = viewModel.spaceScopedDocuments
+        guard !searchQuery.isEmpty else { return scoped }
+        return scoped.filter { viewModel.matchesSearch($0, query: searchQuery) }
+    }
+
     private var grid: some View {
         let docsByCategory = Dictionary(
-            grouping: viewModel.documents.filter { $0.category != nil },
+            grouping: matchingDocuments.filter { $0.category != nil },
             by: { $0.category! }
         )
+        let visibleCategories = DocumentCategory.allCases.filter {
+            searchQuery.isEmpty || (docsByCategory[$0]?.isEmpty == false)
+        }
+        let visibleFolders = folderStore.foldersForActiveSpace.filter { folder in
+            searchQuery.isEmpty || matchingDocuments.contains {
+                $0.tags?.contains(folder.id.uuidString) == true
+            }
+        }
         return LazyVGrid(columns: columns, spacing: 12) {
             // Built-in categories
-            ForEach(DocumentCategory.allCases) { category in
+            ForEach(visibleCategories) { category in
                 NavigationLink(value: category) {
                     CategoryFolderGridCard(
                         category: category,
@@ -50,17 +90,25 @@ struct DocsFoldersGrid: View {
                     )
                 }
                 .buttonStyle(ScaleButtonStyle())
+                .simultaneousGesture(TapGesture().onEnded {
+                    onNavigate()
+                    AnalyticsManager.shared.track(.categoryOpened, properties: ["category": category.rawValue])
+                })
             }
 
             // User-created custom folders
-            ForEach(folderStore.folders) { folder in
-                let count = viewModel.documents.filter {
+            ForEach(visibleFolders) { folder in
+                let count = matchingDocuments.filter {
                     $0.tags?.contains(folder.id.uuidString) == true
                 }.count
                 NavigationLink(value: folder) {
                     CustomFolderGridCard(folder: folder, count: count)
                 }
                 .buttonStyle(ScaleButtonStyle())
+                .simultaneousGesture(TapGesture().onEnded {
+                    onNavigate()
+                    AnalyticsManager.shared.track(.folderOpened)
+                })
                 .contextMenu {
                     Button {
                         renameText = folder.name
@@ -92,6 +140,7 @@ struct DocsFoldersGrid: View {
 
             // New Folder card
             Button {
+                onNavigate()
                 newFolderName = ""
                 showNewFolderAlert = true
             } label: {

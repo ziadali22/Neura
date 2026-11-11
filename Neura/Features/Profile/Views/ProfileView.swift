@@ -4,6 +4,8 @@ struct ProfileView: View {
     @EnvironmentObject private var router: ProfileRouter
     @StateObject private var subscriptionManager = SubscriptionManager.shared
     @StateObject private var biometricAuth = BiometricAuthManager.shared
+    @StateObject private var activeSpaceManager = ActiveSpaceManager.shared
+    @State private var showsGrowth = ActiveSpaceManager.shared.currentSpace?.showsGrowth == true
     @State private var showLogOutAlert = false
     @State private var showDeleteAlert = false
     @State private var isDeleting = false
@@ -14,6 +16,7 @@ struct ProfileView: View {
     @State private var showFeedback = false
     @State private var titleAppear = true
     @State private var contentAppear = true
+    @State private var toastMessage: String?
 
     // Legal links, reachable by all users (incl. free tier) outside the paywall (App Review 5.1.1 / 5.1.2).
     private static let privacyURL = URL(string: "https://myneura.org/privacy")!
@@ -22,8 +25,10 @@ struct ProfileView: View {
     private var legalFooter: some View {
         HStack(spacing: 6) {
             Link(L10n.Paywall.privacyPolicy, destination: Self.privacyURL)
+                .buttonStyle(.plain)
             Text("·").foregroundStyle(Color.textTertiary)
             Link(L10n.Paywall.termsOfUse, destination: Self.termsURL)
+                .buttonStyle(.plain)
         }
         .font(.system(size: 13, weight: .medium))
         .tint(Color.textSecondary)
@@ -44,6 +49,15 @@ struct ProfileView: View {
                         .animation(.spring(response: 0.6, dampingFraction: 0.8), value: titleAppear)
 
                     VStack(alignment: .leading, spacing: 0) {
+                        // Accounts
+                        SpacesSection(
+                            onProfileSwitched: {
+                                toastMessage = L10n.Profile.Spaces.switchSuccess
+                            },
+                            onSpaceChanged: { syncGrowthRow() }
+                        )
+                            .padding(.bottom, 24)
+
                         // Neura Pro
                         if !subscriptionManager.isPro {
                             NeuraProCard()
@@ -51,14 +65,34 @@ struct ProfileView: View {
                         }
 
                         // Profile section
-//                        ProfileSectionHeader(title: L10n.Profile.Section.profile)
+                        ProfileSectionHeader(title: L10n.Profile.Section.profile)
                         VStack(spacing: 11) {
+                            EmergencyCardBanner {
+                                AnalyticsManager.shared.track(.emergencyCardTapped)
+                                router.push(.emergencyCard)
+                            }
                             SettingsRow(icon: "profile", title: L10n.Profile.healthProfile) {
                                 router.push(.healthProfile)
+                            }
+                            SettingsRow(icon: "syringe", title: L10n.Profile.vaccinations, isSystemIcon: true) {
+                                router.push(.vaccinations)
+                            }
+                            if showsGrowth {
+                                SettingsRow(icon: "ruler", title: L10n.Profile.growth, isSystemIcon: true) {
+                                    router.push(.growth)
+                                }
                             }
                             SettingsRow(icon: "sub", title: L10n.Profile.subscription) {
                                 handleSubscriptionTap()
                             }
+                        }
+                        .id(activeSpaceManager.currentSpaceID)
+                        .animation(.spring(response: 0.35, dampingFraction: 0.85), value: showsGrowth)
+                        .padding(.bottom, 24)
+
+                        // Preferences section
+                        ProfileSectionHeader(title: L10n.Profile.Section.preferences)
+                        VStack(spacing: 11) {
                             BiometricLockRow(
                                 icon: biometricAuth.biometricIcon,
                                 title: L10n.Profile.biometricLock(biometricAuth.biometricLabel),
@@ -70,7 +104,14 @@ struct ProfileView: View {
                             SettingsRow(icon: "lan", title: L10n.Profile.language) {
                                 router.push(.language)
                             }
+                        }
+                        .padding(.bottom, 24)
+
+                        // Support section
+                        ProfileSectionHeader(title: L10n.Profile.Section.support)
+                        VStack(spacing: 11) {
                             SettingsRow(icon: "fav", title: L10n.Profile.feedback) {
+                                AnalyticsManager.shared.track(.feedbackSheetOpened)
                                 showFeedback = true
                             }
                             SettingsRow(icon: "Instagram", title: L10n.Profile.contactUs) {
@@ -78,7 +119,12 @@ struct ProfileView: View {
                                     UIApplication.shared.open(url)
                                 }
                             }
+                        }
+                        .padding(.bottom, 24)
 
+                        // Account section
+                        ProfileSectionHeader(title: L10n.Profile.Section.account)
+                        VStack(spacing: 11) {
                             SettingsRow(
                                 icon: "logout",
                                 title: L10n.Profile.logOut,
@@ -96,44 +142,6 @@ struct ProfileView: View {
                             }
                         }
                         .padding(.bottom, 20)
-
-                        // Preferences section
-//                        ProfileSectionHeader(title: L10n.Profile.Section.preferences)
-//                        VStack(spacing: 11) {
-//                            SettingsRow(icon: "sec", title: L10n.Profile.security)
-//                            SettingsRow(icon: "lan", title: L10n.Profile.language) {
-//                                router.push(.language)
-//                            }
-//                        }
-//                        .padding(.bottom, 20)
-
-                        // Support section
-//                        ProfileSectionHeader(title: L10n.Profile.Section.support)
-//                        VStack(spacing: 11) {
-//                            SettingsRow(icon: "fav", title: L10n.Profile.feedback)
-//                            SettingsRow(icon: "Instagram", title: L10n.Profile.contactUs)
-//                        }
-//                        .padding(.bottom, 20)
-
-                        // Account section
-//                        ProfileSectionHeader(title: L10n.Profile.Section.account)
-//                        VStack(spacing: 11) {
-//                            SettingsRow(
-//                                icon: "logout",
-//                                title: L10n.Profile.logOut,
-//                                showChevron: false
-//                            ) {
-//                                showLogOutAlert = true
-//                            }
-//                            SettingsRow(
-//                                icon: "delete",
-//                                title: L10n.Profile.deleteAccount,
-//                                style: .destructive,
-//                                showChevron: false
-//                            ) {
-//                                showDeleteAlert = true
-//                            }
-//                        }
 
                         legalFooter
                             .padding(.top, 8)
@@ -153,12 +161,29 @@ struct ProfileView: View {
                 switch route {
                 case .healthProfile:
                     HealthProfileView()
+                case .vaccinations:
+                    VaccinationsView()
+                case .growth:
+                    if showsGrowth {
+                        GrowthView()
+                    }
                 case .language:
                     LanguagePickerView()
                 case .subscription:
                     SubscriptionCommunityView()
+                case .emergencyCard:
+                    EmergencyCardView()
                 }
             }
+        }
+        .topToast($toastMessage)
+        .onAppear {
+            AnalyticsManager.shared.track(.profileViewed)
+            activeSpaceManager.ensureRelationshipsCanonical()
+            syncGrowthRow()
+        }
+        .onChange(of: activeSpaceManager.currentSpaceID) { _, _ in
+            syncGrowthRow()
         }
         .fullScreenCover(isPresented: $showPaywall) {
             PaywallView(subscriptionManager: subscriptionManager)
@@ -259,7 +284,16 @@ private struct BiometricLockRow: View {
 // MARK: - Actions
 
 private extension ProfileView {
+    func syncGrowthRow() {
+        let next = activeSpaceManager.currentSpace?.showsGrowth == true
+        guard next != showsGrowth else { return }
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+            showsGrowth = next
+        }
+    }
+
     func handleLogOut() {
+        AnalyticsManager.shared.track(.loggedOut)
         clearLocalUserData()
         // Sign out from Firebase — AuthService publishes isSignedIn=false,
         // which causes NeuraApp to switch back to OnboardingView.
@@ -275,6 +309,7 @@ private extension ProfileView {
                 // actually gone — otherwise a failed/cancelled deletion would strand the
                 // user in Home with all their data erased.
                 try await AuthService.shared.deleteAccount()
+                AnalyticsManager.shared.track(.accountDeleted)
                 clearLocalUserData()
                 // deleteAccount() published currentUser = nil, so NeuraApp has already
                 // swapped to OnboardingView; this view (and its overlay) tears down with it.
@@ -294,6 +329,7 @@ private extension ProfileView {
             return
         }
 
+        AnalyticsManager.shared.track(.biometricToggleChanged, properties: ["enabled": enabled])
         Task {
             _ = await biometricAuth.setBiometricLockEnabled(enabled)
         }
@@ -301,6 +337,7 @@ private extension ProfileView {
 
     func handleSubscriptionTap() {
         if subscriptionManager.isPro {
+            AnalyticsManager.shared.track(.subscriptionScreenViewed, properties: ["source": "profile"])
             router.push(.subscription)
         } else {
             showPaywall = true
@@ -310,6 +347,7 @@ private extension ProfileView {
     func clearLocalUserData() {
         let keys = [
             "health_profile_data",
+            "health_profiles_by_space",
             "hasCompletedOnboarding",
             "user_location",
             "onboarding_medical_areas",
@@ -320,6 +358,7 @@ private extension ProfileView {
         ]
         keys.forEach { UserDefaults.standard.removeObject(forKey: $0) }
         try? DocumentFileManager.shared.deleteAllLocalDocuments()
+        ActiveSpaceManager.shared.resetForSignOut()
     }
 }
 

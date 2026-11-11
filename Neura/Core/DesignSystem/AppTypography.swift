@@ -72,6 +72,9 @@ extension Font {
 
     // MARK: Button
 
+    /// 18pt Regular - quiet primary actions such as Add
+    static let buttonRegular = Estedad.font(Estedad.regular, size: 18)
+
     /// 17pt Bold - primary buttons
     static let buttonL = Estedad.font(Estedad.bold, size: 17)
 

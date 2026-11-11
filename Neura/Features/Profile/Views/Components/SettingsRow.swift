@@ -5,6 +5,7 @@ struct SettingsRow: View {
     let title: String
     var style: RowStyle = .normal
     var showChevron: Bool = true
+    var isSystemIcon: Bool = false
     var action: (() -> Void)? = nil
 
     enum RowStyle {
@@ -12,11 +13,12 @@ struct SettingsRow: View {
         case destructive
     }
 
-    init(icon: String, title: String, style: RowStyle = .normal, showChevron: Bool = true, action: (() -> Void)? = nil) {
+    init(icon: String, title: String, style: RowStyle = .normal, showChevron: Bool = true, isSystemIcon: Bool = false, action: (() -> Void)? = nil) {
         self.icon = icon
         self.title = title
         self.style = style
         self.showChevron = showChevron
+        self.isSystemIcon = isSystemIcon
         self.action = action
     }
 
@@ -25,10 +27,19 @@ struct SettingsRow: View {
             action?()
         } label: {
             HStack(spacing: 12) {
-                Image(icon)
-                    .font(.system(size: 20))
-                    .foregroundStyle(style == .destructive ? Color.red : Color.textPrimary)
-                    .frame(width: 24, height: 24)
+                Group {
+                    if isSystemIcon {
+                        Image(systemName: icon)
+                            .font(.system(size: 20))
+                    } else {
+                        Image(icon)
+                            .resizable()
+                            .scaledToFit()
+                    }
+                }
+                .foregroundStyle(style == .destructive ? Color.red : Color.textPrimary)
+                .frame(width: 24, height: 24)
+                .clipped()
 
                 Text(title)
                     .font(.statLabel)
@@ -44,6 +55,7 @@ struct SettingsRow: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
+            .contentShape(Rectangle())
             .background(Color.surfaceWhite)
             .clipShape(.rect(cornerRadius: 16))
             .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 4)

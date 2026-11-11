@@ -42,8 +42,8 @@ struct EmptyDocumentsView: View {
                 .foregroundColor(.white)
                 .padding(.horizontal, 32)
                 .padding(.vertical, 16)
-                .background(Color.black)
-                .cornerRadius(25)
+                .background(Color.accent)
+                .clipShape(Capsule())
             }
             .padding(.top, 16)
 

@@ -21,8 +21,9 @@ final class SubscriptionManager: ObservableObject {
         static let all = [annual, monthly]
     }
 
-    private let freeUploadLimit = 3
+    private let freeUploadLimit = 5
     private let freeShareLimit = 1
+    private let freeSpaceLimit = 2
     private let uploadCountKey = "neura_document_upload_count"
     private let shareCountKey = "neura_share_count"
     private let isProKey = "neura_is_pro"
@@ -73,6 +74,10 @@ final class SubscriptionManager: ObservableObject {
 
     var canShareViaQR: Bool {
         isPro || shareCount < freeShareLimit
+    }
+
+    var canCreateSpace: Bool {
+        isPro || ActiveSpaceManager.shared.visibleSpaces.count < freeSpaceLimit
     }
 
     /// "remaining/total" for the home banner — counts down from the limit as uploads are used.
@@ -169,9 +174,12 @@ final class SubscriptionManager: ObservableObject {
                 case .verified(let transaction):
                     await transaction.finish()
                     await refreshEntitlements()
-                    AnalyticsManager.shared.track("subscription_started", properties: [
+                    AnalyticsManager.shared.track(.subscriptionStarted, properties: [
                         "product_id": product.id,
-                        "price": NSDecimalNumber(decimal: product.price).doubleValue
+                        "price": NSDecimalNumber(decimal: product.price).doubleValue,
+                        // Needed so this event can also be reported to Meta as
+                        // fb_mobile_purchase, which requires an explicit currency.
+                        "currency": product.priceFormatStyle.currencyCode
                     ])
                     return .success
                 case .unverified:

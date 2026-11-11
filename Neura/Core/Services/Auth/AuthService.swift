@@ -203,13 +203,16 @@ final class AuthService: ObservableObject {
 
     private func restoreCloudData(for uid: String) {
         Task {
+            // iCloud first. A Firebase outage must not block recovering or
+            // saving the copy that lives in the user's private iCloud database.
+            await SyncQueueManager.shared.restoreFromICloudBackup(uid: uid)
             guard let key = await EncryptionKeyService.shared.resolveKey(uid: uid) else {
-                SyncLog.info("Key unavailable (offline); deferring restore and sync")
+                await SyncQueueManager.shared.mirrorLocalDataToICloud(uid: uid)
+                SyncLog.info("Firebase unavailable; on-device data was backed up to iCloud")
                 return
             }
-            // Key is now cached in KeychainManager. Pull cloud data down, then push
-            // anything that failed to upload previously.
-            SyncQueueManager.shared.performInitialRestore(uid: uid, key: key)
+            await SyncQueueManager.shared.performInitialRestore(uid: uid, key: key)
+            await SyncQueueManager.shared.mirrorLocalDataToICloud(uid: uid)
             SyncQueueManager.shared.drainPending()
         }
     }

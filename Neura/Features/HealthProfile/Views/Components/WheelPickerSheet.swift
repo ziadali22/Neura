@@ -11,11 +11,16 @@ struct WheelPickerSheet: View {
         fieldName: String,
         values: [String],
         current: String,
+        defaultValue: String = "",
         onSave: @escaping (String) -> Void
     ) {
         self.fieldName = fieldName
         self.values = values
-        let startIndex = values.firstIndex(of: current) ?? (values.count / 2)
+        // Land on the saved value, else the field's preferred default, else the
+        // middle of the range.
+        let startIndex = values.firstIndex(of: current)
+            ?? values.firstIndex(of: defaultValue)
+            ?? (values.count / 2)
         self._selectedIndex = State(initialValue: startIndex)
         self.onSave = onSave
     }
@@ -29,11 +34,11 @@ struct WheelPickerSheet: View {
                     onSave(values[selectedIndex])
                     dismiss()
                 } label: {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 16, weight: .bold))
+                    Image(systemName: "xmark")
+                        .font(.system(size: 13, weight: .bold))
                         .foregroundStyle(.white)
                         .frame(width: 36, height: 36)
-                        .background(Color.accent)
+                        .background(Color.surfaceDark)
                         .clipShape(Circle())
                 }
             }
@@ -49,7 +54,7 @@ struct WheelPickerSheet: View {
                 // Selected value display
                 Text(values[selectedIndex])
                     .font(.system(size: 40, weight: .bold))
-                    .foregroundStyle(Color.accent)
+                    .foregroundStyle(Color.textPrimary)
                     .frame(maxWidth: .infinity)
                     .contentTransition(.numericText())
                     .animation(.spring(response: 0.3, dampingFraction: 0.8), value: selectedIndex)
@@ -80,12 +85,19 @@ struct WheelPickerSheet: View {
 // MARK: - Preset Value Ranges
 
 extension WheelPickerSheet {
+    // 30 cm / 1 kg covers infants and children as well as adults.
     static var heightValues: [String] {
-        (100...230).map { "\($0) cm" }
+        (30...230).map { "\($0) cm" }
     }
 
     static var weightValues: [String] {
-        (30...200).map { "\($0) kg" }
+        let light = stride(from: 1.0, through: 30.0, by: 0.5).map { value -> String in
+            value.rounded() == value
+                ? "\(Int(value)) kg"
+                : String(format: "%.1f kg", value)
+        }
+        let heavy = (31...300).map { "\($0) kg" }
+        return light + heavy
     }
 }
 

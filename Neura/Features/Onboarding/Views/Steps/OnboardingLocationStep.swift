@@ -61,7 +61,7 @@ struct OnboardingLocationStep: View {
                                         .font(.system(size: 15))
                                         .foregroundStyle(Color.accent)
                                 }
-                                Text(locationDetector.isDetecting ? "Detecting location…" : "Detect my location")
+                                Text(locationDetector.isDetecting ? L10n.Onboarding.Location.detecting : L10n.Onboarding.Location.detect)
                                     .font(.bodyL)
                                     .foregroundStyle(Color.accent)
                                 Spacer()

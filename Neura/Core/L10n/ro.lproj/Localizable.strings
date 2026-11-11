@@ -27,6 +27,8 @@
 "common.create" = "Creează";
 "common.error" = "Eroare";
 "common.ok" = "OK";
+"common.notSet" = "Nesetat";
+"common.confirm" = "Confirmă";
 
 // MARK: - Onboarding Welcome
 "onboarding.welcome.title" = "Bun venit în Neura";
@@ -60,6 +62,10 @@
 "onboarding.documentScan.title" = "Scanează, organizează\nși distribuie dosarele";
 "onboarding.documentScan.subtitle" = "Îndreaptă camera spre orice document medical și Neura îl arhivează automat.";
 
+// MARK: - Onboarding Calendar
+"onboarding.calendarStep.title" = "Începe-ți cronologia de sănătate";
+"onboarding.calendarStep.subtitle" = "Urmărește medicamentele, programările și evenimentele medicale într-un singur loc.";
+
 // MARK: - Onboarding Privacy
 "onboarding.privacy.title" = "Datele tale de sănătate\nsunt private și securizate";
 "onboarding.privacy.subtitle" = "Documentele tale sunt criptate și stocate în siguranță. Numai tu controlezi ce distribui.";
@@ -85,6 +91,8 @@
 "onboarding.location.cityPlaceholder" = "ex. Iași";
 "onboarding.location.country" = "Țară";
 "onboarding.location.countryPlaceholder" = "ex. România";
+"onboarding.location.detect" = "Detectează locația mea";
+"onboarding.location.detecting" = "Se detectează locația…";
 
 // MARK: - Onboarding Profile Card
 "onboarding.profileCardIntro.title" = "Cunoaște-ți Cardul de Sănătate";
@@ -195,15 +203,23 @@
 "onboarding.scanning.bloodTest" = "Analize de sânge";
 "onboarding.scanning.readyToShare" = "Gata de partajat";
 
+// MARK: - Tab Bar
+"tabBar.profile" = "Profil";
+"tabBar.home" = "Acasă";
+"tabBar.docs" = "Documente";
+
 // MARK: - Home
 "home.greeting.morning" = "Bună dimineața";
 "home.greeting.afternoon" = "Bună ziua";
 "home.greeting.evening" = "Bună seara";
+"home.greeting.withNameFormat" = "%@, %@";
 "home.recent" = "Recente";
 "home.empty" = "Nimic aici — scanează sau încarcă un document.";
+"home.emptyForAccountFormat" = "Nimic aici — adaugă primul document al lui %@.";
 "home.customizeCard" = "Personalizează cardul";
 "home.shareHealthProfile" = "Distribuie profilul de sănătate";
 "home.completeProfile" = "Completează-ți profilul";
+"home.encryptedSecure" = "CRIPTAT ȘI SECURIZAT";
 "home.uploadLimit.remainingFormat" = "%@ încărcări gratuite rămase";
 "home.uploadLimit.upgrade" = "Încearcă Neura Pro pentru a elimina limita";
 "home.uploadLimit.reachedTitle" = "Elimină limita de încărcare";
@@ -243,18 +259,27 @@
 "documents.noDocumentsTitle" = "Niciun document";
 "documents.noMatchingMessage" = "Încearcă să ajustezi filtrele.";
 "documents.noDocumentsMessage" = "Scanează sau încarcă primul tău document medical.";
+"documents.emptyTitleForAccountFormat" = "Niciun document pentru %@ încă";
+"documents.emptyMessageForAccountFormat" = "Adaugă sau scanează primul document medical al lui %@.";
 "documents.addDocument" = "Adaugă document";
 "documents.scan" = "Scanează document";
 "documents.uploadPhotos" = "Încarcă din poze";
 "documents.importFile" = "Importă fișier";
+"documents.importGoogleDrive" = "Importă din Google Drive";
 "documents.deleteAlertTitleFormat" = "Șterge %d document(e)?";
 "documents.selectedCountFormat" = "%d elemente";
 "documents.noneSelected" = "Niciunul selectat";
 "documents.selectedFormat" = "%d selectate";
 "documents.newFolderMessage" = "Introdu un nume pentru noul dosar.";
+"documents.categoryEmptyTitle" = "Niciun document încă";
+"documents.categoryEmptyMessageFormat" = "Scanează sau încarcă un document și etichetează-l ca %@.";
+"documents.otherFolderName" = "Altele";
 "documents.photoAccess.title" = "Acces la poze necesar";
 "documents.photoAccess.openSettings" = "Deschide Setări";
 "documents.photoAccess.message" = "Neura are nevoie de acces la biblioteca ta de poze pentru a încărca imagini. Permite accesul în Setări.";
+"documents.googleDriveImport.tipTitle" = "Import din Google Drive";
+"documents.googleDriveImport.tipMessage" = "În fereastra care se deschide, atinge Browse, apoi Locations, apoi Google Drive. Dacă nu îl vezi, instalează aplicația Google Drive și conectează-te mai întâi.";
+"documents.googleDriveImport.tipContinue" = "Continuă";
 "documents.filter.title" = "Filtre";
 "documents.filter.button" = "Filtru";
 "documents.filter.order" = "Ordine";
@@ -314,12 +339,13 @@
 "documents.folder.renameTitle" = "Redenumește dosarul";
 "documents.folder.namePlaceholder" = "Numele dosarului";
 "documents.folder.noDocuments" = "Niciun document";
-"documents.folder.emptyDescriptionFormat" = "Scanează sau încarcă un document și atribuie-l lui %@.";
+"documents.folder.emptyDescriptionFormat" = "Scanează sau încarcă un document.";
 
 // MARK: - Add Document Sheet Subtitles
 "documents.addDocument.scanSubtitle" = "Folosește camera pentru a scana pagini";
 "documents.addDocument.photoSubtitle" = "Alege o imagine din biblioteca ta";
 "documents.addDocument.fileSubtitle" = "Selectează un fișier PDF sau imagine";
+"documents.addDocument.googleDriveSubtitle" = "Adu un fișier din Drive";
 
 // MARK: - Documents Category Picker
 "documents.categoryPicker.title" = "Selectați categoria";
@@ -342,6 +368,17 @@
 "documents.metadata.notesPlaceholder" = "Detalii suplimentare despre acest document";
 "documents.metadata.save" = "Salvează documentul";
 "documents.metadata.specializationTitle" = "Specializare";
+"documents.metadata.expiryToggle" = "Setează data expirării / reînnoirii";
+"documents.metadata.expiryDate" = "Data expirării";
+"documents.metadata.pageOfFormat" = "Pagina %d din %d";
+"documents.metadata.previewHint" = "Atinge pentru previzualizare";
+"documents.metadata.reorderHint" = "Atinge pentru previzualizare · Ține apăsat pentru reordonare";
+"documents.metadata.deletePageFormat" = "Șterge pagina %d";
+"documents.metadata.moveEarlier" = "Mută mai devreme";
+"documents.metadata.moveLater" = "Mută mai târziu";
+"documents.metadata.addPage" = "Adaugă o pagină";
+"documents.metadata.scanPage" = "Scanează documentul";
+"documents.metadata.uploadPage" = "Încarcă din Poze";
 
 // MARK: - QR Sharing
 "qr.uploading" = "Se încarcă documentul";
@@ -360,6 +397,7 @@
 "healthProfile.addSection" = "Adaugă secțiune";
 "healthProfile.sectionTitlePlaceholder" = "Titlul secțiunii";
 "healthProfile.fullName" = "Nume complet";
+"healthProfile.location" = "Locație";
 "healthProfile.dateOfBirth" = "Data nașterii";
 "healthProfile.gender" = "Sex";
 "healthProfile.height" = "Înălțime";
@@ -380,6 +418,9 @@
 "healthProfile.additionalDetails" = "Detalii suplimentare";
 "healthProfile.noEntries" = "Nicio intrare încă";
 "healthProfile.noEntriesSubtitle" = "Apasă butonul de mai jos pentru a adăuga una";
+"healthProfile.vaccinations.emptyTitle" = "Nicio vaccinare încă";
+"healthProfile.vaccinations.emptySubtitle" = "Notează vaccinurile și datele pentru acest cont.";
+"healthProfile.vaccinations.latest" = "Cea mai recentă";
 "healthProfile.editFormat" = "Editează %@";
 "healthProfile.deleteFormat" = "Șterge %@";
 "healthProfile.report.title" = "Raport de sănătate";
@@ -413,6 +454,7 @@
 "healthProfile.section.allergies" = "Alergii";
 "healthProfile.section.symptoms" = "Simptome raportate";
 "healthProfile.section.familyHistory" = "Istoric familial";
+"healthProfile.section.vaccinations" = "Vaccinări";
 
 "healthProfile.option.male" = "Masculin";
 "healthProfile.option.female" = "Feminin";
@@ -466,6 +508,15 @@
 "healthProfile.entry.family.field2" = "Detalii";
 "healthProfile.entry.family.field2Placeholder" = "Ex. diagnosticat la 50 de ani";
 
+"healthProfile.entry.vaccination.add" = "Adaugă vaccinare";
+"healthProfile.entry.vaccination.delete" = "Șterge vaccinarea";
+"healthProfile.entry.vaccination.name" = "Vaccin";
+"healthProfile.entry.vaccination.namePlaceholder" = "Ex. ROR, Hepatita B";
+"healthProfile.entry.vaccination.field1" = "Data administrării";
+"healthProfile.entry.vaccination.field1Placeholder" = "Ex. 12 mar 2024";
+"healthProfile.entry.vaccination.field2" = "Doză / următoarea";
+"healthProfile.entry.vaccination.field2Placeholder" = "Ex. Doza 2 din 3, sau următoarea iun 2026";
+
 "healthProfile.entry.default.add" = "Adaugă intrare";
 "healthProfile.entry.default.delete" = "Șterge intrarea";
 "healthProfile.entry.default.name" = "Nume";
@@ -478,13 +529,39 @@
 // MARK: - Profile
 "profile.title" = "Profil";
 "profile.section.profile" = "Profil";
+"profile.section.spaces" = "Conturi";
+"profile.spaces.addSpaceTitle" = "Adaugă cont";
+"profile.spaces.editSpaceTitle" = "Editează contul";
+"profile.spaces.changePhoto" = "Schimbă fotografia";
+"profile.spaces.namePlaceholder" = "Nume";
+"profile.spaces.removeTitle" = "Elimină contul";
+"profile.spaces.removeMessage" = "Documentele, evenimentele din calendar și profilul medical ale acestui cont rămân salvate, dar ascunse. Contactează asistența pentru a restaura accesul mai târziu.";
+"profile.spaces.detailsSectionTitle" = "Despre această persoană";
+"profile.spaces.relationshipLabel" = "Relație";
+"profile.spaces.relationshipChild" = "Copil";
+"profile.spaces.relationshipSpouse" = "Soț/Soție";
+"profile.spaces.relationshipParent" = "Părinte";
+"profile.spaces.relationshipSibling" = "Frate/Soră";
+"profile.spaces.relationshipOther" = "Altul";
+"profile.spaces.includeDateOfBirth" = "Adaugă data nașterii";
+"profile.spaces.confirmSwitchTitleFormat" = "Treci la %@?";
+"profile.spaces.confirmSwitchMessageFormat" = "Dacă schimbi profilul, vei vedea fișa medicală a lui %@ și toate înregistrările sale.";
+"profile.spaces.switchedToFormat" = "Ai trecut la %@";
+"profile.spaces.switchSuccess" = "Profilul a fost schimbat cu succes";
+"profile.spaces.openInAccountTitleFormat" = "Deschizi în contul lui %@?";
+"profile.spaces.openInAccountMessageFormat" = "Acest document aparține lui %@. Schimbă contul pentru a-l deschide.";
+"profile.spaces.openInAccountConfirm" = "Schimbă și deschide";
 "profile.section.preferences" = "Preferințe";
 "profile.section.support" = "Asistență";
 "profile.section.account" = "Cont";
 "profile.healthProfile" = "Profil de sănătate";
+"profile.vaccinations" = "Vaccinări";
+"profile.growth" = "Creștere";
 "profile.subscription" = "Abonament";
 "profile.security" = "Securitate";
 "profile.language" = "Limbă";
+"profile.email" = "E-mail";
+"profile.emailInvalid" = "Introduceți o adresă de e-mail validă";
 "profile.feedback" = "Feedback";
 "profile.feedback.title" = "Trimite feedback";
 "profile.feedback.emailLabel" = "E-mail";
@@ -552,3 +629,134 @@
 // MARK: - Coachmark
 "coachmark.documentUpload.title" = "Adaugă primul tău document";
 "coachmark.documentUpload.subtitle" = "Apasă + pentru a scana, a încărca o fotografie sau a importa un fișier.";
+
+// MARK: - Medical Specialization
+"medicalSpecialization.cardiology" = "Cardiologie";
+"medicalSpecialization.dermatology" = "Dermatologie";
+"medicalSpecialization.dentistry" = "Stomatologie";
+"medicalSpecialization.endocrinology" = "Endocrinologie";
+"medicalSpecialization.gastroenterology" = "Gastroenterologie";
+"medicalSpecialization.generalMedicine" = "Medicină generală";
+"medicalSpecialization.gynaecology" = "Ginecologie";
+"medicalSpecialization.neurology" = "Neurologie";
+"medicalSpecialization.oncology" = "Oncologie";
+"medicalSpecialization.ophthalmology" = "Oftalmologie";
+"medicalSpecialization.orthopaedics" = "Ortopedie";
+"medicalSpecialization.pulmonology" = "Pneumologie";
+"medicalSpecialization.psychiatry" = "Psihiatrie";
+"medicalSpecialization.surgery" = "Chirurgie";
+"medicalSpecialization.urology" = "Urologie";
+"medicalSpecialization.other" = "Altele";
+
+// MARK: - Calendar
+"calendar.title" = "Calendar";
+"calendar.promoTitle" = "Calendarul tău de sănătate";
+"calendar.promoOpen" = "Deschide";
+"calendar.emptyTitle" = "Începe cronologia ta de sănătate";
+"calendar.emptyMessage" = "Urmărește medicamente, programări și evenimente medicale într-un singur loc.";
+"calendar.emptyTitleForAccountFormat" = "Începe cronologia de sănătate a lui %@";
+"calendar.emptyMessageForAccountFormat" = "Urmărește medicamente, programări și evenimente medicale pentru %@.";
+"calendar.addFirstEntry" = "Adaugă prima înregistrare";
+"calendar.addEntry" = "Adaugă înregistrare";
+"calendar.agendaTitle" = "Cronologie";
+"calendar.agendaEmptyTitle" = "Nicio cronologie încă";
+"calendar.agendaEmptyMessage" = "Programările, medicamentele și evenimentele medicale pe care le adaugi vor apărea aici.";
+"calendar.agendaEmptyCTA" = "Adaugă o programare";
+"calendar.newEntryTitle" = "Înregistrare nouă";
+"calendar.editEntryTitle" = "Editează înregistrarea";
+"calendar.field.type" = "Tip";
+"calendar.entryType.medication" = "Medicament";
+"calendar.entryType.appointment" = "Programare";
+"calendar.entryType.medicalEvent" = "Eveniment medical";
+"calendar.field.title" = "Titlu";
+"calendar.field.titlePlaceholder" = "ex. Vitamina D";
+"calendar.field.date" = "Data";
+"calendar.field.time" = "Ora";
+"calendar.field.repeat" = "Repetare";
+"calendar.field.endDate" = "Se termină";
+"calendar.field.reminder" = "Memento";
+"calendar.field.notes" = "Note";
+"calendar.field.linkDocument" = "Atașează un document";
+"calendar.noDocumentLinked" = "Niciunul";
+"calendar.deleteEntry" = "Șterge înregistrarea";
+"calendar.deleteConfirmTitle" = "Ștergi această înregistrare?";
+"calendar.deleteConfirmMessage" = "Această acțiune nu poate fi anulată.";
+"calendar.field.allDay" = "Toată ziua";
+"calendar.recurrence.none" = "Nu se repetă";
+"calendar.recurrence.daily" = "Zilnic";
+"calendar.recurrence.weekly" = "Săptămânal";
+"calendar.recurrence.monthly" = "Lunar";
+"calendar.reminder.atTime" = "La ora evenimentului";
+"calendar.reminder.min15" = "Cu 15 minute înainte";
+"calendar.reminder.hour1" = "Cu 1 oră înainte";
+"calendar.reminder.day1" = "Cu 1 zi înainte";
+"calendar.openDocument" = "Deschide documentul";
+"calendar.removeLinkedDocument" = "Elimină documentul asociat";
+"calendar.next" = "Următor";
+"calendar.field.specialization" = "Specializare";
+"calendar.field.doctor" = "Medic";
+"calendar.field.doctorPlaceholder" = "ex. Dr. Jamie Brown";
+"calendar.reminder.body30" = "Începe în 30 de minute";
+"calendar.reminder.body15" = "Începe în 15 minute";
+"calendar.reminder.bodyWeek" = "Urmează în 1 săptămână";
+"calendar.reminder.body1Day" = "Urmează într-o zi";
+"calendar.reminder.body2Hours" = "Urmează în 2 ore";
+"calendar.reminder.bodyMedTime" = "E timpul să îți iei medicamentul";
+"calendar.reminder.bodyMedFollowUp" = "Ți-ai luat medicamentul?";
+"calendar.reminder.appt" = "Salut, programare la %@";
+"calendar.reminder.apptWithSpec" = "Salut, programare la %@ (%@)";
+"calendar.reminder.apptPlain" = "Salut, %@";
+"calendar.reminderInfoAppointment" = "Vei fi notificat cu 1 săptămână, 1 zi și 2 ore înainte de această programare.";
+"calendar.reminderInfoAppointmentRecurring" = "Vei fi notificat cu 1 săptămână, 1 zi și 2 ore înainte de fiecare apariție viitoare.";
+"calendar.reminderInfoMedication" = "Vei fi notificat la ora programată.";
+"calendar.reminderInfoMedicationRecurring" = "Vei fi notificat la ora programată pentru fiecare doză.";
+"calendar.reminderInfoMedicalEvent" = "Vei fi notificat cu 30 și 15 minute înainte de acest eveniment.";
+"calendar.reminderInfoMedicalEventRecurring" = "Vei fi notificat cu 30 și 15 minute înainte de fiecare apariție viitoare.";
+"calendar.today" = "Astăzi";
+"calendar.tomorrow" = "Mâine";
+"calendar.emptyHint" = "Atinge orice zi pentru a adăuga un eveniment.";
+"calendar.todayEmptyHint" = "Nimic planificat pentru azi — adaugă o programare, un medicament sau un eveniment medical ca să rămâi pe drumul cel bun.";
+"calendar.addEvent" = "Adaugă";
+"calendar.a11yHasEvents" = "Are evenimente";
+"calendar.a11yHasAttachment" = "Are atașament";
+"calendar.attachments" = "Atașamente";
+"calendar.attachment.image" = "Imagine";
+"calendar.attachment.document" = "Document";
+"calendar.attachment.prescription" = "Rețetă";
+"calendar.attachment.addImage" = "Adaugă imagine";
+"calendar.attachment.addDocument" = "Adaugă document";
+"calendar.attachment.addPrescription" = "Adaugă rețetă";
+"calendar.attachment.chooseExisting" = "Alege existent";
+"calendar.attachment.choosePhoto" = "Alege o poză";
+"calendar.attachment.importFile" = "Importă fișier";
+"calendar.attachment.remove" = "Elimină";
+"calendar.attachment.empty" = "Nimic salvat încă";
+"calendar.attachment.missing" = "Fișier indisponibil";
+"calendar.attachment.existingSubtitle" = "Din fișierele salvate";
+"calendar.attachment.photoSubtitle" = "Din galeria foto";
+"calendar.attachment.importSubtitle" = "Un fișier PDF sau o imagine";
+
+// MARK: - Health Profile extras
+"healthProfile.chooseFromContacts" = "Alege din Contacte";
+
+// MARK: - Growth
+"growth.title" = "Creștere";
+"growth.add" = "Adaugă măsurătoare";
+"growth.edit" = "Editează măsurătoarea";
+"growth.date" = "Data";
+"growth.height" = "Înălțime";
+"growth.weight" = "Greutate";
+"growth.photo" = "Fotografie";
+"growth.viewPhoto" = "Vezi fotografia întreagă";
+"growth.addPhoto" = "Adaugă o fotografie";
+"growth.changePhoto" = "Schimbă fotografia";
+"growth.removePhoto" = "Elimină fotografia";
+"growth.notes" = "Note";
+"growth.notesPlaceholder" = "Notă opțională";
+"growth.emptyTitle" = "Nicio măsurătoare încă";
+"growth.emptySubtitle" = "Notează înălțimea, greutatea și o fotografie ca să vezi cum crește.";
+"growth.chartTitle" = "Tendință";
+"growth.chartMonths" = "Luni";
+"growth.chartYears" = "Ani";
+"growth.latest" = "Cea mai recentă";
+"growth.delete" = "Șterge măsurătoarea";

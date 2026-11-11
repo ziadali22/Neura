@@ -17,6 +17,10 @@ final class AppleSignInHandler: NSObject {
 
     private var continuation: CheckedContinuation<AppleSignInResult, Error>?
     private var currentNonce: String?
+    /// Must be retained for the lifetime of the request. A local `ASAuthorizationController`
+    /// is deallocated when `signIn()` returns, which leaves the system sheet hanging
+    /// on "Signing in…" because the delegate never fires.
+    private var authorizationController: ASAuthorizationController?
 
     private override init() { super.init() }
 
@@ -37,6 +41,7 @@ final class AppleSignInHandler: NSObject {
             let controller = ASAuthorizationController(authorizationRequests: [request])
             controller.delegate = self
             controller.presentationContextProvider = self
+            authorizationController = controller
             controller.performRequests()
         }
     }
@@ -78,6 +83,7 @@ extension AppleSignInHandler: ASAuthorizationControllerDelegate {
               let idToken = String(data: tokenData, encoding: .utf8) else {
             continuation?.resume(throwing: AuthError.missingToken)
             continuation = nil
+            authorizationController = nil
             return
         }
 
@@ -88,11 +94,13 @@ extension AppleSignInHandler: ASAuthorizationControllerDelegate {
         )
         continuation?.resume(returning: result)
         continuation = nil
+        authorizationController = nil
     }
 
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
         continuation?.resume(throwing: error)
         continuation = nil
+        authorizationController = nil
     }
 }
 

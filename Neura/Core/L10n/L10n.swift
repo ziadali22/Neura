@@ -33,6 +33,107 @@ enum L10n {
         static var create: String { "common.create".l10n() }
         static var error: String { "common.error".l10n() }
         static var ok: String { "common.ok".l10n() }
+        static var notSet: String { "common.notSet".l10n() }
+        static var confirm: String { "common.confirm".l10n() }
+    }
+
+    // MARK: - Medical Specialization
+    enum MedicalSpecialization {
+        static var cardiology: String { "medicalSpecialization.cardiology".l10n() }
+        static var dermatology: String { "medicalSpecialization.dermatology".l10n() }
+        static var dentistry: String { "medicalSpecialization.dentistry".l10n() }
+        static var endocrinology: String { "medicalSpecialization.endocrinology".l10n() }
+        static var gastroenterology: String { "medicalSpecialization.gastroenterology".l10n() }
+        static var generalMedicine: String { "medicalSpecialization.generalMedicine".l10n() }
+        static var gynaecology: String { "medicalSpecialization.gynaecology".l10n() }
+        static var neurology: String { "medicalSpecialization.neurology".l10n() }
+        static var oncology: String { "medicalSpecialization.oncology".l10n() }
+        static var ophthalmology: String { "medicalSpecialization.ophthalmology".l10n() }
+        static var orthopaedics: String { "medicalSpecialization.orthopaedics".l10n() }
+        static var pulmonology: String { "medicalSpecialization.pulmonology".l10n() }
+        static var psychiatry: String { "medicalSpecialization.psychiatry".l10n() }
+        static var surgery: String { "medicalSpecialization.surgery".l10n() }
+        static var urology: String { "medicalSpecialization.urology".l10n() }
+        static var other: String { "medicalSpecialization.other".l10n() }
+    }
+
+    // MARK: - Calendar
+    enum Calendar {
+        static var title: String { "calendar.title".l10n() }
+        static var promoTitle: String { "calendar.promoTitle".l10n() }
+        static var promoOpen: String { "calendar.promoOpen".l10n() }
+        static var emptyTitle: String { "calendar.emptyTitle".l10n() }
+        static var emptyMessage: String { "calendar.emptyMessage".l10n() }
+        static func emptyTitleForAccount(_ name: String) -> String { "calendar.emptyTitleForAccountFormat".l10n(args: [name]) }
+        static func emptyMessageForAccount(_ name: String) -> String { "calendar.emptyMessageForAccountFormat".l10n(args: [name]) }
+        static var addFirstEntry: String { "calendar.addFirstEntry".l10n() }
+        static var addEntry: String { "calendar.addEntry".l10n() }
+        static var agendaTitle: String { "calendar.agendaTitle".l10n() }
+        static var agendaEmptyTitle: String { "calendar.agendaEmptyTitle".l10n() }
+        static var agendaEmptyMessage: String { "calendar.agendaEmptyMessage".l10n() }
+        static var agendaEmptyCTA: String { "calendar.agendaEmptyCTA".l10n() }
+        static var next: String { "calendar.next".l10n() }
+        static var today: String { "calendar.today".l10n() }
+        static var tomorrow: String { "calendar.tomorrow".l10n() }
+        static var emptyHint: String { "calendar.emptyHint".l10n() }
+        static var todayEmptyHint: String { "calendar.todayEmptyHint".l10n() }
+        static var addEvent: String { "calendar.addEvent".l10n() }
+        static var newEntryTitle: String { "calendar.newEntryTitle".l10n() }
+        static var editEntryTitle: String { "calendar.editEntryTitle".l10n() }
+        static var fieldType: String { "calendar.field.type".l10n() }
+        static var fieldTitle: String { "calendar.field.title".l10n() }
+        static var fieldTitlePlaceholder: String { "calendar.field.titlePlaceholder".l10n() }
+        static var fieldDate: String { "calendar.field.date".l10n() }
+        static var fieldTime: String { "calendar.field.time".l10n() }
+        static var fieldRepeat: String { "calendar.field.repeat".l10n() }
+        static var fieldEndDate: String { "calendar.field.endDate".l10n() }
+        static var fieldReminder: String { "calendar.field.reminder".l10n() }
+        static var fieldNotes: String { "calendar.field.notes".l10n() }
+        static var fieldSpecialization: String { "calendar.field.specialization".l10n() }
+        static var fieldDoctor: String { "calendar.field.doctor".l10n() }
+        static var fieldDoctorPlaceholder: String { "calendar.field.doctorPlaceholder".l10n() }
+        static var reminderBody30: String { "calendar.reminder.body30".l10n() }
+        static var reminderBody15: String { "calendar.reminder.body15".l10n() }
+        static var reminderBodyWeek: String { "calendar.reminder.bodyWeek".l10n() }
+        static var reminderBody1Day: String { "calendar.reminder.body1Day".l10n() }
+        static var reminderBody2Hours: String { "calendar.reminder.body2Hours".l10n() }
+        static var reminderBodyMedTime: String { "calendar.reminder.bodyMedTime".l10n() }
+        static var reminderBodyMedFollowUp: String { "calendar.reminder.bodyMedFollowUp".l10n() }
+        static var reminderAppt: String { "calendar.reminder.appt".l10n() }
+        static var reminderApptWithSpec: String { "calendar.reminder.apptWithSpec".l10n() }
+        static var reminderApptPlain: String { "calendar.reminder.apptPlain".l10n() }
+        static var reminderInfoAppointment: String { "calendar.reminderInfoAppointment".l10n() }
+        static var reminderInfoAppointmentRecurring: String { "calendar.reminderInfoAppointmentRecurring".l10n() }
+        static var reminderInfoMedication: String { "calendar.reminderInfoMedication".l10n() }
+        static var reminderInfoMedicationRecurring: String { "calendar.reminderInfoMedicationRecurring".l10n() }
+        static var reminderInfoMedicalEvent: String { "calendar.reminderInfoMedicalEvent".l10n() }
+        static var reminderInfoMedicalEventRecurring: String { "calendar.reminderInfoMedicalEventRecurring".l10n() }
+        static var a11yHasEvents: String { "calendar.a11yHasEvents".l10n() }
+        static var a11yHasAttachment: String { "calendar.a11yHasAttachment".l10n() }
+        static var fieldLinkDocument: String { "calendar.field.linkDocument".l10n() }
+        static var noDocumentLinked: String { "calendar.noDocumentLinked".l10n() }
+        static var openDocument: String { "calendar.openDocument".l10n() }
+        static var removeLinkedDocument: String { "calendar.removeLinkedDocument".l10n() }
+        static var deleteEntry: String { "calendar.deleteEntry".l10n() }
+        static var deleteConfirmTitle: String { "calendar.deleteConfirmTitle".l10n() }
+        static var deleteConfirmMessage: String { "calendar.deleteConfirmMessage".l10n() }
+        static var fieldAllDay: String { "calendar.field.allDay".l10n() }
+        static var attachments: String { "calendar.attachments".l10n() }
+        static var attachmentImage: String { "calendar.attachment.image".l10n() }
+        static var attachmentDocument: String { "calendar.attachment.document".l10n() }
+        static var attachmentPrescription: String { "calendar.attachment.prescription".l10n() }
+        static var addImage: String { "calendar.attachment.addImage".l10n() }
+        static var addDocument: String { "calendar.attachment.addDocument".l10n() }
+        static var addPrescription: String { "calendar.attachment.addPrescription".l10n() }
+        static var chooseExisting: String { "calendar.attachment.chooseExisting".l10n() }
+        static var choosePhoto: String { "calendar.attachment.choosePhoto".l10n() }
+        static var importFile: String { "calendar.attachment.importFile".l10n() }
+        static var removeAttachment: String { "calendar.attachment.remove".l10n() }
+        static var attachmentEmpty: String { "calendar.attachment.empty".l10n() }
+        static var attachmentMissing: String { "calendar.attachment.missing".l10n() }
+        static var attachmentExistingSubtitle: String { "calendar.attachment.existingSubtitle".l10n() }
+        static var attachmentPhotoSubtitle: String { "calendar.attachment.photoSubtitle".l10n() }
+        static var attachmentImportSubtitle: String { "calendar.attachment.importSubtitle".l10n() }
     }
 
     // MARK: - Onboarding
@@ -59,6 +160,11 @@ enum L10n {
             static var title: String            { "onboarding.qrShare.title".l10n() }
             static var subtitle: String         { "onboarding.qrShare.subtitle".l10n() }
             static var mediaAccessibility: String { "onboarding.qrShare.mediaAccessibility".l10n() }
+        }
+
+        enum CalendarStep {
+            static var title: String    { "onboarding.calendarStep.title".l10n() }
+            static var subtitle: String { "onboarding.calendarStep.subtitle".l10n() }
         }
 
         enum Statistics {
@@ -108,6 +214,8 @@ enum L10n {
             static var cityPlaceholder: String { "onboarding.location.cityPlaceholder".l10n() }
             static var country: String { "onboarding.location.country".l10n() }
             static var countryPlaceholder: String { "onboarding.location.countryPlaceholder".l10n() }
+            static var detect: String { "onboarding.location.detect".l10n() }
+            static var detecting: String { "onboarding.location.detecting".l10n() }
         }
 
         enum ProfileCardIntro {
@@ -251,18 +359,30 @@ enum L10n {
         }
     }
 
+    // MARK: - Tab Bar
+    enum TabBar {
+        static var profile: String { "tabBar.profile".l10n() }
+        static var home: String { "tabBar.home".l10n() }
+        static var docs: String { "tabBar.docs".l10n() }
+    }
+
     // MARK: - Home
     enum Home {
         enum Greeting {
             static var morning: String { "home.greeting.morning".l10n() }
             static var afternoon: String { "home.greeting.afternoon".l10n() }
             static var evening: String { "home.greeting.evening".l10n() }
+            static func withName(_ greeting: String, _ name: String) -> String {
+                "home.greeting.withNameFormat".l10n(args: [greeting, name])
+            }
         }
         static var recent: String { "home.recent".l10n() }
         static var empty: String { "home.empty".l10n() }
+        static func emptyForAccount(_ name: String) -> String { "home.emptyForAccountFormat".l10n(args: [name]) }
         static var customizeCard: String { "home.customizeCard".l10n() }
         static var shareHealthProfile: String { "home.shareHealthProfile".l10n() }
         static var completeProfile: String { "home.completeProfile".l10n() }
+        static var encryptedSecure: String { "home.encryptedSecure".l10n() }
 
         enum UploadLimit {
             static func remaining(_ text: String) -> String {
@@ -326,10 +446,13 @@ enum L10n {
         static var noDocumentsTitle: String { "documents.noDocumentsTitle".l10n() }
         static var noMatchingMessage: String { "documents.noMatchingMessage".l10n() }
         static var noDocumentsMessage: String { "documents.noDocumentsMessage".l10n() }
+        static func emptyTitleForAccount(_ name: String) -> String { "documents.emptyTitleForAccountFormat".l10n(args: [name]) }
+        static func emptyMessageForAccount(_ name: String) -> String { "documents.emptyMessageForAccountFormat".l10n(args: [name]) }
         static var addDocument: String { "documents.addDocument".l10n() }
         static var scan: String { "documents.scan".l10n() }
         static var uploadPhotos: String { "documents.uploadPhotos".l10n() }
         static var importFile: String { "documents.importFile".l10n() }
+        static var importGoogleDrive: String { "documents.importGoogleDrive".l10n() }
         static func deleteAlertTitle(_ count: Int) -> String {
             "documents.deleteAlertTitleFormat".l10n(args: [count])
         }
@@ -341,6 +464,11 @@ enum L10n {
             "documents.selectedFormat".l10n(args: [count])
         }
         static var newFolderMessage: String { "documents.newFolderMessage".l10n() }
+        static var categoryEmptyTitle: String { "documents.categoryEmptyTitle".l10n() }
+        static func categoryEmptyMessage(_ category: String) -> String {
+            "documents.categoryEmptyMessageFormat".l10n(args: [category])
+        }
+        static var otherFolderName: String { "documents.otherFolderName".l10n() }
 
         enum PhotoAccess {
             static var title: String { "documents.photoAccess.title".l10n() }
@@ -423,6 +551,13 @@ enum L10n {
             static var scanSubtitle: String { "documents.addDocument.scanSubtitle".l10n() }
             static var photoSubtitle: String { "documents.addDocument.photoSubtitle".l10n() }
             static var fileSubtitle: String { "documents.addDocument.fileSubtitle".l10n() }
+            static var googleDriveSubtitle: String { "documents.addDocument.googleDriveSubtitle".l10n() }
+        }
+
+        enum GoogleDriveImport {
+            static var tipTitle: String { "documents.googleDriveImport.tipTitle".l10n() }
+            static var tipMessage: String { "documents.googleDriveImport.tipMessage".l10n() }
+            static var tipContinue: String { "documents.googleDriveImport.tipContinue".l10n() }
         }
 
         enum CategoryPicker {
@@ -458,6 +593,21 @@ enum L10n {
             static var notesPlaceholder: String { "documents.metadata.notesPlaceholder".l10n() }
             static var save: String { "documents.metadata.save".l10n() }
             static var specializationTitle: String { "documents.metadata.specializationTitle".l10n() }
+            static var expiryToggle: String { "documents.metadata.expiryToggle".l10n() }
+            static var expiryDate: String { "documents.metadata.expiryDate".l10n() }
+            static func pageOf(_ page: Int, _ total: Int) -> String {
+                "documents.metadata.pageOfFormat".l10n(args: [page, total])
+            }
+            static var previewHint: String { "documents.metadata.previewHint".l10n() }
+            static var reorderHint: String { "documents.metadata.reorderHint".l10n() }
+            static func deletePage(_ number: Int) -> String {
+                "documents.metadata.deletePageFormat".l10n(args: [number])
+            }
+            static var moveEarlier: String { "documents.metadata.moveEarlier".l10n() }
+            static var moveLater: String { "documents.metadata.moveLater".l10n() }
+            static var addPage: String { "documents.metadata.addPage".l10n() }
+            static var scanPage: String { "documents.metadata.scanPage".l10n() }
+            static var uploadPage: String { "documents.metadata.uploadPage".l10n() }
         }
     }
 
@@ -488,6 +638,7 @@ enum L10n {
         static var insuranceStatus: String { "healthProfile.insuranceStatus".l10n() }
         static var bloodType: String { "healthProfile.bloodType".l10n() }
         static var emergencyContact: String { "healthProfile.emergencyContact".l10n() }
+        static var chooseFromContacts: String { "healthProfile.chooseFromContacts".l10n() }
         static var addName: String { "healthProfile.addName".l10n() }
         static var addDate: String { "healthProfile.addDate".l10n() }
         static var addGender: String { "healthProfile.addGender".l10n() }
@@ -501,6 +652,9 @@ enum L10n {
         static var additionalDetails: String { "healthProfile.additionalDetails".l10n() }
         static var noEntries: String { "healthProfile.noEntries".l10n() }
         static var noEntriesSubtitle: String { "healthProfile.noEntriesSubtitle".l10n() }
+        static var vaccinationsEmptyTitle: String { "healthProfile.vaccinations.emptyTitle".l10n() }
+        static var vaccinationsEmptySubtitle: String { "healthProfile.vaccinations.emptySubtitle".l10n() }
+        static var vaccinationsLatest: String { "healthProfile.vaccinations.latest".l10n() }
         static func editFormat(_ name: String) -> String { "healthProfile.editFormat".l10n(args: [name]) }
         static func deleteFormat(_ name: String) -> String { "healthProfile.deleteFormat".l10n(args: [name]) }
         static func updatedFormat(_ dateString: String) -> String {
@@ -509,6 +663,7 @@ enum L10n {
         static var valueLabel: String { "healthProfile.valueLabel".l10n() }
 
         // Field labels not already covered above
+        static var location: String { "healthProfile.location".l10n() }
         static var fieldName: String { "healthProfile.field.name".l10n() }
         static var myNumber: String { "healthProfile.field.myNumber".l10n() }
         static var emergencyNumber: String { "healthProfile.field.emergencyNumber".l10n() }
@@ -533,6 +688,7 @@ enum L10n {
             static var allergies: String { "healthProfile.section.allergies".l10n() }
             static var symptoms: String { "healthProfile.section.symptoms".l10n() }
             static var familyHistory: String { "healthProfile.section.familyHistory".l10n() }
+            static var vaccinations: String { "healthProfile.section.vaccinations".l10n() }
         }
 
         // Picker option values (stored value stays English; localized only at render)
@@ -592,6 +748,15 @@ enum L10n {
             static var familyDetails: String { "healthProfile.entry.family.field2".l10n() }
             static var familyDetailsPlaceholder: String { "healthProfile.entry.family.field2Placeholder".l10n() }
 
+            static var addVaccination: String { "healthProfile.entry.vaccination.add".l10n() }
+            static var deleteVaccination: String { "healthProfile.entry.vaccination.delete".l10n() }
+            static var vaccinationName: String { "healthProfile.entry.vaccination.name".l10n() }
+            static var vaccinationNamePlaceholder: String { "healthProfile.entry.vaccination.namePlaceholder".l10n() }
+            static var vaccinationDate: String { "healthProfile.entry.vaccination.field1".l10n() }
+            static var vaccinationDatePlaceholder: String { "healthProfile.entry.vaccination.field1Placeholder".l10n() }
+            static var vaccinationDose: String { "healthProfile.entry.vaccination.field2".l10n() }
+            static var vaccinationDosePlaceholder: String { "healthProfile.entry.vaccination.field2Placeholder".l10n() }
+
             static var addEntry: String { "healthProfile.entry.default.add".l10n() }
             static var deleteEntry: String { "healthProfile.entry.default.delete".l10n() }
             static var defaultName: String { "healthProfile.entry.default.name".l10n() }
@@ -625,15 +790,44 @@ enum L10n {
 
         enum Section {
             static var profile: String { "profile.section.profile".l10n() }
+            static var spaces: String { "profile.section.spaces".l10n() }
             static var preferences: String { "profile.section.preferences".l10n() }
             static var support: String { "profile.section.support".l10n() }
             static var account: String { "profile.section.account".l10n() }
         }
 
+        enum Spaces {
+            static var addSpaceTitle: String { "profile.spaces.addSpaceTitle".l10n() }
+            static var editSpaceTitle: String { "profile.spaces.editSpaceTitle".l10n() }
+            static var changePhoto: String { "profile.spaces.changePhoto".l10n() }
+            static var namePlaceholder: String { "profile.spaces.namePlaceholder".l10n() }
+            static var removeTitle: String { "profile.spaces.removeTitle".l10n() }
+            static var removeMessage: String { "profile.spaces.removeMessage".l10n() }
+            static var detailsSectionTitle: String { "profile.spaces.detailsSectionTitle".l10n() }
+            static var relationshipLabel: String { "profile.spaces.relationshipLabel".l10n() }
+            static var relationshipChild: String { "profile.spaces.relationshipChild".l10n() }
+            static var relationshipSpouse: String { "profile.spaces.relationshipSpouse".l10n() }
+            static var relationshipParent: String { "profile.spaces.relationshipParent".l10n() }
+            static var relationshipSibling: String { "profile.spaces.relationshipSibling".l10n() }
+            static var relationshipOther: String { "profile.spaces.relationshipOther".l10n() }
+            static var includeDateOfBirth: String { "profile.spaces.includeDateOfBirth".l10n() }
+            static func confirmSwitchTitleFormat(_ name: String) -> String { "profile.spaces.confirmSwitchTitleFormat".l10n(args: [name]) }
+            static func confirmSwitchMessageFormat(_ name: String) -> String { "profile.spaces.confirmSwitchMessageFormat".l10n(args: [name]) }
+            static func switchedToFormat(_ name: String) -> String { "profile.spaces.switchedToFormat".l10n(args: [name]) }
+            static var switchSuccess: String { "profile.spaces.switchSuccess".l10n() }
+            static func openInAccountTitleFormat(_ name: String) -> String { "profile.spaces.openInAccountTitleFormat".l10n(args: [name]) }
+            static func openInAccountMessageFormat(_ name: String) -> String { "profile.spaces.openInAccountMessageFormat".l10n(args: [name]) }
+            static var openInAccountConfirm: String { "profile.spaces.openInAccountConfirm".l10n() }
+        }
+
         static var healthProfile: String { "profile.healthProfile".l10n() }
+        static var vaccinations: String { "profile.vaccinations".l10n() }
+        static var growth: String { "profile.growth".l10n() }
         static var subscription: String { "profile.subscription".l10n() }
         static var security: String { "profile.security".l10n() }
         static var language: String { "profile.language".l10n() }
+        static var email: String { "profile.email".l10n() }
+        static var emailInvalid: String { "profile.emailInvalid".l10n() }
         static var feedback: String { "profile.feedback".l10n() }
 
         enum Feedback {
@@ -685,6 +879,30 @@ enum L10n {
                 "profile.subscriptionDetail.expiresOnFormat".l10n(args: [date])
             }
         }
+    }
+
+    // MARK: - Growth
+    enum Growth {
+        static var title: String { "growth.title".l10n() }
+        static var add: String { "growth.add".l10n() }
+        static var edit: String { "growth.edit".l10n() }
+        static var date: String { "growth.date".l10n() }
+        static var height: String { "growth.height".l10n() }
+        static var weight: String { "growth.weight".l10n() }
+        static var photo: String { "growth.photo".l10n() }
+        static var viewPhoto: String { "growth.viewPhoto".l10n() }
+        static var addPhoto: String { "growth.addPhoto".l10n() }
+        static var changePhoto: String { "growth.changePhoto".l10n() }
+        static var removePhoto: String { "growth.removePhoto".l10n() }
+        static var notes: String { "growth.notes".l10n() }
+        static var notesPlaceholder: String { "growth.notesPlaceholder".l10n() }
+        static var emptyTitle: String { "growth.emptyTitle".l10n() }
+        static var emptySubtitle: String { "growth.emptySubtitle".l10n() }
+        static var chartTitle: String { "growth.chartTitle".l10n() }
+        static var chartMonths: String { "growth.chartMonths".l10n() }
+        static var chartYears: String { "growth.chartYears".l10n() }
+        static var latest: String { "growth.latest".l10n() }
+        static var delete: String { "growth.delete".l10n() }
     }
 
     // MARK: - Paywall

@@ -126,8 +126,8 @@ private extension ShareDocumentSheet {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                .background(Color.surfaceDark)
-                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .background(Color.accent)
+                .clipShape(Capsule())
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 32)
@@ -178,7 +178,7 @@ private extension ShareDocumentSheet {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
                 .background(Color.accent)
-                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .clipShape(Capsule())
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 32)
@@ -229,7 +229,7 @@ private extension ShareDocumentSheet {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
                 .background(Color.accent)
-                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .clipShape(Capsule())
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 32)

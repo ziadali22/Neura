@@ -111,9 +111,9 @@ private extension FeedbackView {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
-            .background(viewModel.isValid ? Color.accent : Color.accent.opacity(0.4))
+            .background(viewModel.isValid ? Color.accent : Color.textTertiary)
             .foregroundColor(.white)
-            .cornerRadius(14)
+            .clipShape(Capsule())
         }
         .buttonStyle(ScaleButtonStyle())
         .disabled(!viewModel.isValid || viewModel.isSubmitting || viewModel.state == .success)

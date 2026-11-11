@@ -96,7 +96,7 @@ struct AppUpdateSheet: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: 52)
-                .background(Color.surfaceDark)
+                .background(Color.accent)
                 .clipShape(Capsule())
         }
     }

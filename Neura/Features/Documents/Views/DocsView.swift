@@ -16,23 +16,35 @@ struct DocsView: View {
     @State private var showDeleteSelectedAlert = false
     @State private var showNewFolderAlert = false
     @State private var newFolderName = ""
+    @State private var didAutoSwitchToFilesForSearch = false
+    @FocusState private var isSearchFocused: Bool
+    @State private var crossSpacePrompt: CrossSpaceDocumentPrompt?
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
             navigationContent
         }
         .onChange(of: navigationPath.count) { _, count in
+            if count > 0 {
+                isSearchFocused = false
+            }
             withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                 coordinator.isInDetailView = count > 0
             }
         }
-        .sheet(isPresented: $viewModel.showSourcePicker) {
+        .onChange(of: viewModel.showSourcePicker) { _, show in
+            if show { isSearchFocused = false }
+        }
+        .sheet(isPresented: $viewModel.showSourcePicker, onDismiss: {
+            viewModel.sourcePickerDidDismiss()
+        }) {
             AddDocumentSheet(
                 onScan: { viewModel.startScanning() },
                 onPhoto: { viewModel.startPhotoUpload() },
-                onFile: { viewModel.startFileImport() }
+                onFile: { viewModel.startFileImport() },
+                onGoogleDrive: { viewModel.startGoogleDriveImport() }
             )
-            .presentationDetents([.height(270)])
+            .presentationDetents([.height(400)])
             .presentationDragIndicator(.hidden)
             .presentationBackground(Color.surfaceWhite)
         }
@@ -42,11 +54,12 @@ struct DocsView: View {
         }
         .photosPicker(
             isPresented: $viewModel.showPhotoPicker,
-            selection: $viewModel.selectedPhotoItem,
+            selection: $viewModel.selectedPhotoItems,
+            maxSelectionCount: DocumentsListViewModel.photoSelectionLimit,
             matching: .images
         )
-        .onChange(of: viewModel.selectedPhotoItem) { _, item in
-            viewModel.handlePhotoSelection(item)
+        .onChange(of: viewModel.selectedPhotoItems) { _, items in
+            viewModel.handlePhotoSelection(items)
         }
         .fileImporter(
             isPresented: $viewModel.showFileImporter,
@@ -60,9 +73,15 @@ struct DocsView: View {
                 viewModel.handleFileImport(.failure(error))
             }
         }
-        .sheet(isPresented: $viewModel.showMetadataForm) {
+        .sheet(isPresented: $viewModel.showMetadataForm, onDismiss: {
+            viewModel.addFlowDidEnd()
+        }) {
             if let preview = viewModel.pendingPreview {
-                DocumentMetadataView(preview: preview) { metadata, updatedPreview in
+                DocumentMetadataView(
+                    preview: preview,
+                    initialCategory: viewModel.capturedFormDestination?.category ?? viewModel.pendingAddDestination?.category,
+                    initialCustomFolderId: viewModel.capturedFormDestination?.customFolderId ?? viewModel.pendingAddDestination?.customFolderId
+                ) { metadata, updatedPreview in
                     viewModel.saveDocument(metadata: metadata, preview: updatedPreview)
                 }
             }
@@ -91,10 +110,47 @@ struct DocsView: View {
         } message: {
             Text(L10n.Documents.PhotoAccess.message)
         }
+        .alert(L10n.Documents.GoogleDriveImport.tipTitle, isPresented: $viewModel.showDriveImportTip) {
+            Button(L10n.Documents.GoogleDriveImport.tipContinue) {
+                viewModel.confirmDriveImportTip()
+            }
+        } message: {
+            Text(L10n.Documents.GoogleDriveImport.tipMessage)
+        }
         .alert(L10n.Common.error, isPresented: .constant(viewModel.errorMessage != nil)) {
             Button(L10n.Common.ok) { viewModel.errorMessage = nil }
         } message: {
             if let error = viewModel.errorMessage { Text(error) }
+        }
+        .alert(
+            crossSpacePrompt.map { L10n.Profile.Spaces.openInAccountTitleFormat($0.spaceName) } ?? "",
+            isPresented: Binding(
+                get: { crossSpacePrompt != nil },
+                set: { if !$0 { crossSpacePrompt = nil } }
+            )
+        ) {
+            Button(L10n.Profile.Spaces.openInAccountConfirm) {
+                guard let prompt = crossSpacePrompt else { return }
+                crossSpacePrompt = nil
+                ActiveSpaceManager.shared.setActive(prompt.spaceID)
+                AnalyticsManager.shared.track(.spaceSwitched, properties: [
+                    "source": "notification_deep_link",
+                    "to_default": prompt.spaceID == ActiveSpaceManager.defaultSpaceID
+                ])
+                // Allow the space filter to refresh before navigating.
+                Task { @MainActor in
+                    try? await Task.sleep(nanoseconds: 50_000_000)
+                    if let document = viewModel.spaceScopedDocuments.first(where: { $0.id == prompt.documentID })
+                        ?? viewModel.documents.first(where: { $0.id == prompt.documentID }) {
+                        navigationPath.append(document)
+                    }
+                }
+            }
+            Button(L10n.Common.cancel, role: .cancel) { crossSpacePrompt = nil }
+        } message: {
+            if let prompt = crossSpacePrompt {
+                Text(L10n.Profile.Spaces.openInAccountMessageFormat(prompt.spaceName))
+            }
         }
         .alert(
             L10n.Documents.deleteAlertTitle(selectedDocuments.count),
@@ -111,17 +167,22 @@ struct DocsView: View {
                 let trimmed = newFolderName.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard !trimmed.isEmpty else { return }
                 folderStore.add(name: trimmed)
+                AnalyticsManager.shared.track(.folderCreated, properties: [
+                    "total_folders": folderStore.foldersForActiveSpace.count
+                ])
             }
             Button(L10n.Common.cancel, role: .cancel) {}
         } message: {
             Text(L10n.Documents.newFolderMessage)
         }
         .onAppear {
+            AnalyticsManager.shared.track(.docsViewed)
             viewModel.loadDocuments()
             if let action = coordinator.pendingAddAction {
                 coordinator.pendingAddAction = nil
                 handlePendingAction(action)
             }
+            openPendingDocumentIfNeeded()
         }
         .onChange(of: coordinator.pendingAddAction) { _, action in
             if let action {
@@ -129,22 +190,40 @@ struct DocsView: View {
                 handlePendingAction(action)
             }
         }
+        .onChange(of: coordinator.pendingDocumentID) { _, id in
+            if id != nil { openPendingDocumentIfNeeded() }
+        }
         .onChange(of: isSelecting) { _, selecting in
             withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                 coordinator.isSelectingDocs = selecting
             }
         }
-        .onDisappear { coordinator.isSelectingDocs = false }
+        .onChange(of: isSearchFocused) { _, focused in
+            withAnimation(.easeInOut(duration: 0.2)) {
+                coordinator.isSearchingDocs = focused
+            }
+        }
+        .onChange(of: viewModel.searchText) { _, text in
+            withAnimation(.easeInOut(duration: 0.22)) {
+                if !text.isEmpty && viewModel.displayMode == .folders {
+                    didAutoSwitchToFilesForSearch = true
+                    viewModel.displayMode = .files
+                } else if text.isEmpty && didAutoSwitchToFilesForSearch {
+                    didAutoSwitchToFilesForSearch = false
+                    viewModel.displayMode = .folders
+                }
+            }
+        }
+        .onDisappear {
+            coordinator.isSelectingDocs = false
+            coordinator.isSearchingDocs = false
+        }
     }
 
     // MARK: - Navigation Content
 
     private var navigationContent: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            header
-            searchBar
-            contentArea
-        }
+        contentArea
         .background(Color.backgroundPrimary)
         .toolbar(.hidden, for: .navigationBar)
         .navigationDestination(for: DocumentCategory.self) { category in
@@ -178,56 +257,17 @@ struct DocsView: View {
     private var header: some View {
         Group {
             if viewModel.displayMode == .files && isSelecting {
-                // Selection mode: Select All pill (left) + count/title (center) + Done ✓ (right)
-                HStack {
-                    Button {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                            // Exclude locked documents from bulk selection
-                            let allIDs = Set(viewModel.filteredDocuments
-                                .filter { !viewModel.isLocked($0) }
-                                .map(\.id))
-                            if !allIDs.isEmpty && allIDs.isSubset(of: selectedDocuments) {
-                                selectedDocuments.removeAll()
-                            } else {
-                                selectedDocuments = allIDs
-                            }
-                        }
-                    } label: {
-                        Text(L10n.Documents.selectAll)
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundStyle(Color.textPrimary)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 9)
-                            .background(Color.surfaceWhite)
-                            .clipShape(Capsule())
-                            .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
-                    }
-
-                    Spacer()
-
-                    Text(selectedDocuments.isEmpty ? L10n.Documents.title : L10n.Documents.selectedCount(selectedDocuments.count))
-                        .font(.displayXL)
-                        .foregroundStyle(Color.textPrimary)
-                        .contentTransition(.numericText())
-                        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: selectedDocuments.count)
-
-                    Spacer()
-
-                    Button {
+                DocsSelectionHeader(
+                    title: L10n.Documents.title,
+                    selectedCount: selectedDocuments.count,
+                    onSelectAll: toggleSelectAllDocuments,
+                    onDone: {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                             isSelecting = false
                             selectedDocuments.removeAll()
                         }
-                    } label: {
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(Color.textPrimary)
-                            .frame(width: 36, height: 36)
-                            .background(Color.surfaceWhite)
-                            .clipShape(Circle())
-                            .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
                     }
-                }
+                )
             } else {
                 // Normal mode
                 HStack(alignment: .center) {
@@ -239,7 +279,9 @@ struct DocsView: View {
 
                     Button {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                            isSearchFocused = false
                             viewModel.displayMode = viewModel.displayMode == .folders ? .files : .folders
+                            didAutoSwitchToFilesForSearch = false
                             isSelecting = false
                             selectedDocuments.removeAll()
                         }
@@ -271,17 +313,32 @@ struct DocsView: View {
                 .font(.system(size: 15))
             TextField(L10n.Documents.searchPlaceholder, text: $viewModel.searchText)
                 .font(.bodyL)
+                .focused($isSearchFocused)
+                .submitLabel(.search)
+                .onSubmit { isSearchFocused = false }
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 11)
-        .background(Color.surfaceWhite)
-        .clipShape(.rect(cornerRadius: 20))
-        .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .glassEffect(.regular, in: .capsule)
         .padding(.horizontal, 20)
-        .padding(.bottom, 24)
+        .padding(.bottom, 8)
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button(L10n.Common.done) { isSearchFocused = false }
+                    .fontWeight(.medium)
+            }
+        }
     }
 
     // MARK: - Content Area
+
+    private var screenHeader: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            header
+            searchBar
+        }
+    }
 
     private var contentArea: some View {
         ZStack {
@@ -290,7 +347,9 @@ struct DocsView: View {
                     viewModel: viewModel,
                     folderStore: folderStore,
                     showNewFolderAlert: $showNewFolderAlert,
-                    newFolderName: $newFolderName
+                    newFolderName: $newFolderName,
+                    onNavigate: { isSearchFocused = false },
+                    topContent: { screenHeader }
                 )
                 .transition(.opacity)
             } else {
@@ -299,7 +358,8 @@ struct DocsView: View {
                     isSelecting: $isSelecting,
                     selectedDocuments: $selectedDocuments,
                     showFilters: $showFilters,
-                    onAddDocument: { viewModel.showAddOptions() }
+                    onAddDocument: { viewModel.showAddOptions() },
+                    topContent: { screenHeader }
                 )
                 .transition(.opacity)
             }
@@ -311,14 +371,50 @@ struct DocsView: View {
 
     private func handlePendingAction(_ action: AppCoordinator.AddDocumentAction) {
         switch action {
-        case .scan:  viewModel.startScanning()
+        case .scan: viewModel.startScanning()
         case .photo: viewModel.startPhotoUpload()
-        case .file:  viewModel.startFileImport()
+        case .file: viewModel.startFileImport()
+        case .googleDrive: viewModel.startGoogleDriveImport()
+        }
+    }
+
+    /// Pushes the document a tapped reminder notification pointed at, if any —
+    /// mirrors `handlePendingAction`'s consumption of `coordinator.pendingAddAction`.
+    private func openPendingDocumentIfNeeded() {
+        guard let id = coordinator.pendingDocumentID else { return }
+        coordinator.pendingDocumentID = nil
+
+        if let document = viewModel.spaceScopedDocuments.first(where: { $0.id == id }) {
+            navigationPath.append(document)
+            return
+        }
+
+        // Document exists in another account — offer to switch before opening.
+        guard let document = viewModel.documents.first(where: { $0.id == id }) else { return }
+        let spaceID = document.spaceID ?? ActiveSpaceManager.defaultSpaceID
+        guard let space = ActiveSpaceManager.shared.visibleSpaces.first(where: { $0.id == spaceID }) else { return }
+        crossSpacePrompt = CrossSpaceDocumentPrompt(
+            documentID: document.id,
+            spaceID: space.id,
+            spaceName: space.name
+        )
+    }
+
+    private func toggleSelectAllDocuments() {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+            let allIDs = Set(viewModel.filteredDocuments
+                .filter { !viewModel.isLocked($0) }
+                .map(\.id))
+            if !allIDs.isEmpty && allIDs.isSubset(of: selectedDocuments) {
+                selectedDocuments.removeAll()
+            } else {
+                selectedDocuments = allIDs
+            }
         }
     }
 
     private func shareSelectedDocuments() {
-        let urls = viewModel.documents
+        let urls = viewModel.spaceScopedDocuments
             .filter { selectedDocuments.contains($0.id) && $0.fileExists }
             .map(\.fileURL)
         guard !urls.isEmpty else { return }
@@ -333,7 +429,8 @@ struct DocsView: View {
     }
 
     private func deleteSelectedDocuments() {
-        let toDelete = viewModel.documents.filter { selectedDocuments.contains($0.id) }
+        let toDelete = viewModel.spaceScopedDocuments.filter { selectedDocuments.contains($0.id) }
+        AnalyticsManager.shared.track(.documentsBulkDeleted, properties: ["count": toDelete.count])
         for doc in toDelete { viewModel.deleteDocument(doc) }
         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
             selectedDocuments.removeAll()
@@ -347,4 +444,13 @@ struct DocsView: View {
 #Preview {
     DocsView()
         .environmentObject(AppCoordinator())
+}
+
+// MARK: - Cross-space notification prompt
+
+private struct CrossSpaceDocumentPrompt: Identifiable {
+    let id = UUID()
+    let documentID: UUID
+    let spaceID: UUID
+    let spaceName: String
 }

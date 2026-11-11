@@ -39,5 +39,13 @@
         "destination": "/index.html"
       }
     ]
+  },
+  "auth": {
+    "providers": {
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "Neura",
+        "supportEmail": "neuratech.sec@gmail.com"
+      }
+    }
   }
 }

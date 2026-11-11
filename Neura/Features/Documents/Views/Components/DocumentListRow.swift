@@ -109,21 +109,11 @@ struct DocumentListRow: View {
     // MARK: - Icon
 
     private var documentIcon: some View {
-        let iconColor = document.category?.color ?? Color.accent
-        return ZStack {
-            if let gridIcon = document.category?.gridIcon {
-                Image(gridIcon)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 36, height: 36)
-                    .accessibilityHidden(true)
-            } else {
-                Image(systemName: document.isPDF ? "doc.fill" : "photo.fill")
-                    .font(.system(size: 18))
-                    .foregroundStyle(iconColor)
-                    .accessibilityHidden(true)
-            }
-        }
+        Image(document.category?.gridIcon ?? "otherIcon")
+            .resizable()
+            .scaledToFit()
+            .frame(width: 36, height: 36)
+            .accessibilityHidden(true)
     }
 
     // MARK: - Selection Indicator

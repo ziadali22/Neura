@@ -8,9 +8,14 @@ struct PendingSyncOp: Codable, Hashable {
         case documentDelete
         case profileUpload
         case preferencesUpload
+        case calendarUpload
+        case customFoldersUpload
+        case spacesUpload
+        case growthPhotoUpload
+        case growthPhotoDelete
     }
     let kind: Kind
-    /// Document UUID string for document ops; nil for profile/preferences (single-doc).
+    /// Document UUID string for document ops; nil for profile/preferences/calendar/folders (single-doc).
     let id: String?
 }
 

@@ -1,9 +1,44 @@
 import Foundation
 
 struct HealthProfile: Codable {
+    static let vaccinationsSectionTitle = "Vaccinations"
+
     var generalData: GeneralData
     var sections: [HealthSection]
     var lastUpdated: Date
+    var growthEntries: [GrowthEntry]
+
+    init(
+        generalData: GeneralData,
+        sections: [HealthSection],
+        lastUpdated: Date,
+        growthEntries: [GrowthEntry] = []
+    ) {
+        self.generalData = generalData
+        self.sections = sections
+        self.lastUpdated = lastUpdated
+        self.growthEntries = growthEntries
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        generalData = try container.decode(GeneralData.self, forKey: .generalData)
+        sections = try container.decode([HealthSection].self, forKey: .sections)
+        lastUpdated = try container.decode(Date.self, forKey: .lastUpdated)
+        growthEntries = try container.decodeIfPresent([GrowthEntry].self, forKey: .growthEntries) ?? []
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(generalData, forKey: .generalData)
+        try container.encode(sections, forKey: .sections)
+        try container.encode(lastUpdated, forKey: .lastUpdated)
+        try container.encode(growthEntries, forKey: .growthEntries)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case generalData, sections, lastUpdated, growthEntries
+    }
 
     struct GeneralData: Codable {
         var fullName: String
@@ -16,6 +51,7 @@ struct HealthProfile: Codable {
         var myPhoneNumber: String
         var emergencyContactName: String
         var emergencyContactNumber: String
+        var email: String
         /// User-added fields beyond the built-in ones (label + value).
         var customFields: [CustomField]
 
@@ -31,7 +67,7 @@ struct HealthProfile: Codable {
             }
         }
 
-        init(fullName: String, dateOfBirth: String, gender: String, height: String, weight: String, bloodType: String, insuranceStatus: String, myPhoneNumber: String = "", emergencyContactName: String = "", emergencyContactNumber: String = "", customFields: [CustomField] = []) {
+        init(fullName: String, dateOfBirth: String, gender: String, height: String, weight: String, bloodType: String, insuranceStatus: String, myPhoneNumber: String = "", emergencyContactName: String = "", emergencyContactNumber: String = "", email: String = "", customFields: [CustomField] = []) {
             self.fullName = fullName
             self.dateOfBirth = dateOfBirth
             self.gender = gender
@@ -42,6 +78,7 @@ struct HealthProfile: Codable {
             self.myPhoneNumber = myPhoneNumber
             self.emergencyContactName = emergencyContactName
             self.emergencyContactNumber = emergencyContactNumber
+            self.email = email
             self.customFields = customFields
         }
 
@@ -56,6 +93,9 @@ struct HealthProfile: Codable {
             insuranceStatus = try container.decode(String.self, forKey: .insuranceStatus)
             myPhoneNumber = try container.decodeIfPresent(String.self, forKey: .myPhoneNumber) ?? ""
             emergencyContactName = try container.decodeIfPresent(String.self, forKey: .emergencyContactName) ?? ""
+            // Backward-compatible: profiles saved before the email field existed
+            // have no `email` key — default to empty rather than throwing.
+            email = try container.decodeIfPresent(String.self, forKey: .email) ?? ""
             // Backward-compatible: profiles saved before custom fields existed
             // have no `customFields` key — default to empty rather than throwing.
             customFields = try container.decodeIfPresent([CustomField].self, forKey: .customFields) ?? []
@@ -70,7 +110,7 @@ struct HealthProfile: Codable {
 
         private enum CodingKeys: String, CodingKey {
             case fullName, dateOfBirth, gender, height, weight, bloodType, insuranceStatus
-            case myPhoneNumber, emergencyContactName, emergencyContactNumber, customFields
+            case myPhoneNumber, emergencyContactName, emergencyContactNumber, email, customFields
         }
 
         private enum LegacyCodingKeys: String, CodingKey {
@@ -92,9 +132,24 @@ struct HealthProfile: Codable {
             case "Known Conditions":        return L10n.HealthProfile.Section.knownConditions
             case "Medication & Supplements": return L10n.HealthProfile.Section.medications
             case "Allergies":               return L10n.HealthProfile.Section.allergies
+            case HealthProfile.vaccinationsSectionTitle:
+                                            return L10n.HealthProfile.Section.vaccinations
             case "Reported Symptoms":       return L10n.HealthProfile.Section.symptoms
             case "Family History":          return L10n.HealthProfile.Section.familyHistory
             default:                        return title
+            }
+        }
+
+        /// Illustration shown on the empty-entries screen. `nil` for custom sections.
+        var emptyIllustrationName: String? {
+            switch title {
+            case "Known Conditions": return "KnownConditions"
+            case "Medication & Supplements": return "MedicationAndSupplements"
+            case "Allergies": return "Allergies"
+            case HealthProfile.vaccinationsSectionTitle: return "Vaccinations"
+            case "Reported Symptoms": return "ReportedSymptoms"
+            case "Family History": return "FamilyHistory"
+            default: return nil
             }
         }
 
@@ -148,6 +203,7 @@ struct HealthProfile: Codable {
             HealthSection(title: "Known Conditions"),
             HealthSection(title: "Medication & Supplements"),
             HealthSection(title: "Allergies"),
+            HealthSection(title: vaccinationsSectionTitle),
             HealthSection(title: "Reported Symptoms"),
             HealthSection(title: "Family History"),
         ],
@@ -185,6 +241,9 @@ struct HealthProfile: Codable {
                 .init(text: "Ambrosia", field1: "Swelling, rash", field2: "EpiPen"),
                 .init(text: "Pollen", field1: "Swelling, rash", field2: "EpiPen")
             ]),
+            HealthSection(title: vaccinationsSectionTitle, entries: [
+                .init(text: "MMR", field1: "14 Jun 2023", field2: "Dose 2 of 2")
+            ]),
             HealthSection(title: "Reported Symptoms", entries: [
                 .init(text: "Persistent fatigue"),
                 .init(text: "Intermittent dizziness"),
@@ -211,6 +270,7 @@ struct SectionFieldConfig {
     let field1Placeholder: String
     let field2Label: String
     let field2Placeholder: String
+    var field1IsDate: Bool = false
 
     /// Matches on the canonical (English) section title — callers always pass the
     /// stored `title`, never `localizedTitle`, so matching is language-independent.
@@ -271,6 +331,18 @@ struct SectionFieldConfig {
                 field1Placeholder: E.familyRelationPlaceholder,
                 field2Label: E.familyDetails,
                 field2Placeholder: E.familyDetailsPlaceholder
+            )
+        case let t where t.contains("vaccin"):
+            return .init(
+                addTitle: E.addVaccination,
+                deleteTitle: E.deleteVaccination,
+                nameLabel: E.vaccinationName,
+                namePlaceholder: E.vaccinationNamePlaceholder,
+                field1Label: E.vaccinationDate,
+                field1Placeholder: E.vaccinationDatePlaceholder,
+                field2Label: E.vaccinationDose,
+                field2Placeholder: E.vaccinationDosePlaceholder,
+                field1IsDate: true
             )
         default:
             return .init(

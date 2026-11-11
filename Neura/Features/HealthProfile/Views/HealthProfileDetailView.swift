@@ -7,6 +7,9 @@ struct HealthProfileDetailView: View {
     @State private var isGeneratingReport = false
     @State private var isSharingProfile = false
     @State private var navigateToEdit = false
+    @State private var selectedSectionID: UUID?
+    @State private var showGeneralData = false
+    @AppStorage(UserLocationStore.defaultsKey) private var userLocation = ""
 
     var body: some View {
         VStack(spacing: 0) {
@@ -26,6 +29,7 @@ struct HealthProfileDetailView: View {
             }
         }
         .background(Color.backgroundPrimary)
+        .onAppear { AnalyticsManager.shared.track(.healthProfileViewed) }
         .overlay(alignment: .bottom) {
             HStack(spacing: 12) {
                 reportButton
@@ -50,6 +54,19 @@ struct HealthProfileDetailView: View {
                 .presentationDetents([.height(650)])
                 .presentationDragIndicator(.hidden)
         }
+        .sheet(isPresented: Binding(
+            get: { selectedSectionID != nil },
+            set: { if !$0 { selectedSectionID = nil } }
+        )) {
+            if let id = selectedSectionID {
+                SectionDetailSheet(viewModel: viewModel, sectionID: id)
+                    .presentationDragIndicator(.hidden)
+            }
+        }
+        .sheet(isPresented: $showGeneralData) {
+            GeneralDataSheet(viewModel: viewModel)
+                .presentationDragIndicator(.hidden)
+        }
     }
 }
 
@@ -62,7 +79,7 @@ private extension HealthProfileDetailView {
     var navBar: some View {
         ZStack {
             Button { dismiss() } label: {
-                Image(systemName: "chevron.backward")
+                Image(systemName: LanguageManager.shared.backChevronSymbol)
                     .font(.system(size: 18, weight: .medium))
                     .foregroundColor(.textPrimary)
                     .frame(width: 40, height: 40)
@@ -84,7 +101,7 @@ private extension HealthProfileDetailView {
 
             Button { navigateToEdit = true } label: {
                 Image(systemName: "pencil")
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.textPrimary)
                     .frame(width: 40, height: 40)
                     .background(Color.surfaceWhite)
@@ -92,6 +109,7 @@ private extension HealthProfileDetailView {
                     .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 4)
             }
             .frame(maxWidth: .infinity, alignment: .trailing)
+            .accessibilityLabel(L10n.Common.edit)
         }
         .padding(.horizontal, 20)
         .padding(.top, 12)
@@ -113,6 +131,7 @@ private extension HealthProfileDetailView {
         let data = viewModel.profile.generalData
         let fields: [(label: String, value: String)] = [
             (L10n.HealthProfile.fullName,         data.fullName),
+            (L10n.HealthProfile.location,         userLocation),
             (L10n.HealthProfile.dateOfBirth,      data.dateOfBirth),
             (L10n.HealthProfile.gender,           HealthOption.localized(data.gender)),
             (L10n.HealthProfile.height,           data.height),
@@ -122,13 +141,25 @@ private extension HealthProfileDetailView {
             (L10n.HealthProfile.myNumber,         data.myPhoneNumber),
             (L10n.HealthProfile.emergencyContact, data.emergencyContactName),
             (L10n.HealthProfile.emergencyNumber,  data.emergencyContactNumber),
+            (L10n.Profile.email,                  data.email),
         ] + data.customFields.map { (label: $0.label, value: $0.value) }
 
-        return VStack(alignment: .leading, spacing: 0) {
-            Text(L10n.HealthProfile.generalData)
-                .font(.system(size: 20, weight: .bold))
-                .foregroundColor(.textPrimary)
-                .padding(.bottom, 16)
+        return Button {
+            showGeneralData = true
+        } label: {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Text(L10n.HealthProfile.generalData)
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(.textPrimary)
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.textTertiary)
+            }
+            .padding(.bottom, 16)
 
             ForEach(Array(fields.enumerated()), id: \.offset) { index, field in
                 VStack(spacing: 0) {
@@ -157,41 +188,56 @@ private extension HealthProfileDetailView {
         .background(Color.surfaceWhite)
         .clipShape(RoundedRectangle(cornerRadius: 20))
         .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+        }
+        .buttonStyle(ScaleButtonStyle())
     }
 
     // MARK: Section Cards
 
     func sectionCard(_ section: HealthProfile.HealthSection) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(section.localizedTitle)
-                .font(.system(size: 20, weight: .bold))
-                .foregroundColor(.textPrimary)
+        Button {
+            selectedSectionID = section.id
+        } label: {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text(section.localizedTitle)
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.textPrimary)
 
-            if section.entries.isEmpty {
-                Text(L10n.HealthProfile.noEntries)
-                    .font(.bodyS)
-                    .foregroundColor(.textTertiary)
-            } else {
-                VStack(alignment: .leading, spacing: 6) {
-                    ForEach(section.entries) { entry in
-                        HStack(alignment: .top, spacing: 8) {
-                            Circle()
-                                .fill(Color.accent)
-                                .frame(width: 6, height: 6)
-                                .padding(.top, 6)
-                            Text(entry.text)
-                                .font(.bodyL)
-                                .foregroundColor(.textSecondary)
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.textTertiary)
+                }
+
+                if section.entries.isEmpty {
+                    Text(L10n.HealthProfile.noEntries)
+                        .font(.bodyS)
+                        .foregroundColor(.textTertiary)
+                } else {
+                    VStack(alignment: .leading, spacing: 6) {
+                        ForEach(section.entries) { entry in
+                            HStack(alignment: .top, spacing: 8) {
+                                Circle()
+                                    .fill(Color.accent)
+                                    .frame(width: 6, height: 6)
+                                    .padding(.top, 6)
+                                Text(entry.text)
+                                    .font(.bodyL)
+                                    .foregroundColor(.textSecondary)
+                            }
                         }
                     }
                 }
             }
+            .padding(20)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.surfaceWhite)
+            .clipShape(RoundedRectangle(cornerRadius: 20))
+            .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
         }
-        .padding(20)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.surfaceWhite)
-        .clipShape(RoundedRectangle(cornerRadius: 20))
-        .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+        .buttonStyle(ScaleButtonStyle())
     }
 
     // MARK: Report Button
@@ -246,7 +292,6 @@ private extension HealthProfileDetailView {
             .frame(height: 56)
             .background(Color.accent)
             .clipShape(Capsule())
-            .shadow(color: Color.accent.opacity(0.3), radius: 10, x: 0, y: 4)
         }
         .disabled(isSharingProfile)
     }
@@ -273,9 +318,13 @@ private extension HealthProfileDetailView {
         isGeneratingReport = true
 
         Task.detached(priority: .userInitiated) {
-            let profile = await MainActor.run { viewModel.profile }
+            let (profile, spaceID) = await MainActor.run {
+                (viewModel.profile, ActiveSpaceManager.shared.currentSpaceID)
+            }
+            // The report is this account's medical record — including another
+            // account's documents would leak them into an exported PDF.
             let documents = DocumentFileManager.shared.loadMetadata()
-                .filter { $0.fileExists }
+                .filter { $0.fileExists && $0.belongsToSpace(spaceID) }
                 .sorted { $0.createdAt > $1.createdAt }
 
             let url = HealthReportGenerator().generate(profile: profile, documents: documents)

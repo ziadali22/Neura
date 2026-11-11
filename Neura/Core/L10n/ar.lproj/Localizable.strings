@@ -27,6 +27,8 @@
 "common.create" = "إنشاء";
 "common.error" = "خطأ";
 "common.ok" = "حسناً";
+"common.notSet" = "غير محدد";
+"common.confirm" = "تأكيد";
 
 // MARK: - Onboarding Welcome
 "onboarding.welcome.title" = "مرحباً بك في Neura";
@@ -60,6 +62,10 @@
 "onboarding.documentScan.title" = "امسح، نظّم\nوشارك سجلاتك";
 "onboarding.documentScan.subtitle" = "وجّه كاميرتك نحو أي مستند طبي وسيقوم Neura بحفظه لك تلقائياً.";
 
+// MARK: - Onboarding Calendar
+"onboarding.calendarStep.title" = "ابدأ جدولك الزمني الصحي";
+"onboarding.calendarStep.subtitle" = "تتبّع الأدوية والمواعيد والأحداث الطبية في مكان واحد.";
+
 // MARK: - Onboarding Privacy
 "onboarding.privacy.title" = "بياناتك الصحية\nخاصة وآمنة";
 "onboarding.privacy.subtitle" = "مستنداتك مشفّرة ومحفوظة بأمان. أنت فقط من يتحكم في ما تشاركه.";
@@ -85,6 +91,8 @@
 "onboarding.location.cityPlaceholder" = "مثال: الرياض";
 "onboarding.location.country" = "الدولة";
 "onboarding.location.countryPlaceholder" = "مثال: المملكة العربية السعودية";
+"onboarding.location.detect" = "تحديد موقعي";
+"onboarding.location.detecting" = "جارٍ تحديد الموقع…";
 
 // MARK: - Onboarding Profile Card
 "onboarding.profileCardIntro.title" = "تعرّف على بطاقتك الصحية";
@@ -195,15 +203,23 @@
 "onboarding.scanning.bloodTest" = "فحص الدم";
 "onboarding.scanning.readyToShare" = "جاهز للمشاركة";
 
+// MARK: - Tab Bar
+"tabBar.profile" = "الملف الشخصي";
+"tabBar.home" = "الرئيسية";
+"tabBar.docs" = "المستندات";
+
 // MARK: - Home
 "home.greeting.morning" = "صباح الخير";
 "home.greeting.afternoon" = "مساء الخير";
 "home.greeting.evening" = "مساء النور";
+"home.greeting.withNameFormat" = "%@، %@";
 "home.recent" = "الأخيرة";
 "home.empty" = "لا يوجد شيء هنا بعد — امسح مستنداً أو ارفعه.";
+"home.emptyForAccountFormat" = "لا يوجد شيء هنا بعد — أضف أول مستند لـ %@.";
 "home.customizeCard" = "تخصيص البطاقة";
 "home.shareHealthProfile" = "مشاركة الملف الصحي";
 "home.completeProfile" = "أكمل ملفك الشخصي";
+"home.encryptedSecure" = "مشفّر وآمن";
 "home.uploadLimit.remainingFormat" = "%@ رفع مستند مجاني متبقٍ";
 "home.uploadLimit.upgrade" = "جرّب Neura Pro لإزالة الحد";
 "home.uploadLimit.reachedTitle" = "أزِل حد الرفع";
@@ -243,18 +259,27 @@
 "documents.noDocumentsTitle" = "لا توجد مستندات";
 "documents.noMatchingMessage" = "جرّب تعديل الفلاتر.";
 "documents.noDocumentsMessage" = "امسح أو ارفع أول مستند طبي لك.";
+"documents.emptyTitleForAccountFormat" = "لا مستندات لـ %@ بعد";
+"documents.emptyMessageForAccountFormat" = "أضف أو امسح أول سجل طبي لـ %@.";
 "documents.addDocument" = "إضافة مستند";
 "documents.scan" = "مسح المستند";
 "documents.uploadPhotos" = "رفع من الصور";
 "documents.importFile" = "استيراد ملف";
+"documents.importGoogleDrive" = "استيراد من Google Drive";
 "documents.deleteAlertTitleFormat" = "حذف %d مستند(ات)؟";
 "documents.selectedCountFormat" = "%d عنصر";
 "documents.noneSelected" = "لم يتم التحديد";
 "documents.selectedFormat" = "%d محدد";
 "documents.newFolderMessage" = "أدخل اسماً لمجلدك الجديد.";
+"documents.categoryEmptyTitle" = "لا توجد مستندات بعد";
+"documents.categoryEmptyMessageFormat" = "امسح أو ارفع مستنداً وصنّفه كـ %@.";
+"documents.otherFolderName" = "أخرى";
 "documents.photoAccess.title" = "الوصول إلى الصور مطلوب";
 "documents.photoAccess.openSettings" = "فتح الإعدادات";
 "documents.photoAccess.message" = "يحتاج Neura إلى الوصول إلى مكتبة صورك لرفع الصور. يُرجى السماح بالوصول من الإعدادات.";
+"documents.googleDriveImport.tipTitle" = "الاستيراد من Google Drive";
+"documents.googleDriveImport.tipMessage" = "في المتصفح الذي يفتح، اضغط على تصفح، ثم المواقع، ثم Google Drive. إذا لم تجده، ثبّت تطبيق Google Drive وسجّل الدخول أولاً.";
+"documents.googleDriveImport.tipContinue" = "متابعة";
 "documents.filter.title" = "الفلاتر";
 "documents.filter.button" = "فلتر";
 "documents.filter.order" = "الترتيب";
@@ -314,12 +339,13 @@
 "documents.folder.renameTitle" = "إعادة تسمية المجلد";
 "documents.folder.namePlaceholder" = "اسم المجلد";
 "documents.folder.noDocuments" = "لا توجد مستندات";
-"documents.folder.emptyDescriptionFormat" = "قم بمسح أو رفع مستند وتعيينه إلى %@.";
+"documents.folder.emptyDescriptionFormat" = "قم بمسح أو رفع مستند";
 
 // MARK: - Add Document Sheet Subtitles
 "documents.addDocument.scanSubtitle" = "استخدم الكاميرا لمسح الصفحات";
 "documents.addDocument.photoSubtitle" = "اختر صورة من مكتبتك";
 "documents.addDocument.fileSubtitle" = "اختر ملف PDF أو صورة";
+"documents.addDocument.googleDriveSubtitle" = "أحضر ملفًا من Drive";
 
 // MARK: - Documents Category Picker
 "documents.categoryPicker.title" = "اختر الفئة";
@@ -342,6 +368,17 @@
 "documents.metadata.notesPlaceholder" = "تفاصيل إضافية حول هذا المستند";
 "documents.metadata.save" = "حفظ المستند";
 "documents.metadata.specializationTitle" = "التخصص";
+"documents.metadata.expiryToggle" = "تعيين تاريخ الانتهاء / التجديد";
+"documents.metadata.expiryDate" = "تاريخ الانتهاء";
+"documents.metadata.pageOfFormat" = "الصفحة %d من %d";
+"documents.metadata.previewHint" = "انقر للمعاينة";
+"documents.metadata.reorderHint" = "انقر للمعاينة · اضغط مطولاً لإعادة الترتيب";
+"documents.metadata.deletePageFormat" = "حذف الصفحة %d";
+"documents.metadata.moveEarlier" = "نقل للسابق";
+"documents.metadata.moveLater" = "نقل للتالي";
+"documents.metadata.addPage" = "إضافة صفحة";
+"documents.metadata.scanPage" = "مسح مستند";
+"documents.metadata.uploadPage" = "رفع من الصور";
 
 // MARK: - QR Sharing
 "qr.uploading" = "جارٍ رفع المستند";
@@ -360,6 +397,7 @@
 "healthProfile.addSection" = "إضافة قسم";
 "healthProfile.sectionTitlePlaceholder" = "عنوان القسم";
 "healthProfile.fullName" = "الاسم الكامل";
+"healthProfile.location" = "الموقع";
 "healthProfile.dateOfBirth" = "تاريخ الميلاد";
 "healthProfile.gender" = "الجنس";
 "healthProfile.height" = "الطول";
@@ -380,6 +418,9 @@
 "healthProfile.additionalDetails" = "تفاصيل إضافية";
 "healthProfile.noEntries" = "لا توجد مدخلات بعد";
 "healthProfile.noEntriesSubtitle" = "اضغط الزر أدناه لإضافة مدخل";
+"healthProfile.vaccinations.emptyTitle" = "لا توجد تطعيمات بعد";
+"healthProfile.vaccinations.emptySubtitle" = "سجّل اللقاحات وتواريخها لهذا الحساب.";
+"healthProfile.vaccinations.latest" = "الأحدث";
 "healthProfile.editFormat" = "تعديل %@";
 "healthProfile.deleteFormat" = "حذف %@";
 "healthProfile.report.title" = "التقرير الصحي";
@@ -413,6 +454,7 @@
 "healthProfile.section.allergies" = "الحساسيات";
 "healthProfile.section.symptoms" = "الأعراض المُبلَّغ عنها";
 "healthProfile.section.familyHistory" = "التاريخ العائلي";
+"healthProfile.section.vaccinations" = "التطعيمات";
 
 "healthProfile.option.male" = "ذكر";
 "healthProfile.option.female" = "أنثى";
@@ -466,6 +508,15 @@
 "healthProfile.entry.family.field2" = "التفاصيل";
 "healthProfile.entry.family.field2Placeholder" = "مثال: شُخِّص في سن الخمسين";
 
+"healthProfile.entry.vaccination.add" = "إضافة تطعيم";
+"healthProfile.entry.vaccination.delete" = "حذف التطعيم";
+"healthProfile.entry.vaccination.name" = "اللقاح";
+"healthProfile.entry.vaccination.namePlaceholder" = "مثال: الحصبة والنكاف والحصبة الألمانية";
+"healthProfile.entry.vaccination.field1" = "تاريخ الإعطاء";
+"healthProfile.entry.vaccination.field1Placeholder" = "مثال: 12 مارس 2024";
+"healthProfile.entry.vaccination.field2" = "الجرعة / الموعد التالي";
+"healthProfile.entry.vaccination.field2Placeholder" = "مثال: الجرعة 2 من 3، أو الموعد التالي يونيو 2026";
+
 "healthProfile.entry.default.add" = "إضافة مدخل";
 "healthProfile.entry.default.delete" = "حذف المدخل";
 "healthProfile.entry.default.name" = "الاسم";
@@ -478,13 +529,39 @@
 // MARK: - Profile
 "profile.title" = "الملف الشخصي";
 "profile.section.profile" = "الملف الشخصي";
+"profile.section.spaces" = "الحسابات";
+"profile.spaces.addSpaceTitle" = "إضافة حساب";
+"profile.spaces.editSpaceTitle" = "تعديل الحساب";
+"profile.spaces.changePhoto" = "تغيير الصورة";
+"profile.spaces.namePlaceholder" = "الاسم";
+"profile.spaces.removeTitle" = "إزالة الحساب";
+"profile.spaces.removeMessage" = "تبقى مستندات هذا الحساب وأحداث التقويم والملف الصحي محفوظة لكنها مخفية. تواصل مع الدعم لاستعادة الوصول لاحقًا.";
+"profile.spaces.detailsSectionTitle" = "عن هذا الشخص";
+"profile.spaces.relationshipLabel" = "صلة القرابة";
+"profile.spaces.relationshipChild" = "طفل";
+"profile.spaces.relationshipSpouse" = "زوج/زوجة";
+"profile.spaces.relationshipParent" = "أحد الوالدين";
+"profile.spaces.relationshipSibling" = "أخ/أخت";
+"profile.spaces.relationshipOther" = "أخرى";
+"profile.spaces.includeDateOfBirth" = "إضافة تاريخ الميلاد";
+"profile.spaces.confirmSwitchTitleFormat" = "هل تريد التبديل إلى %@؟";
+"profile.spaces.confirmSwitchMessageFormat" = "عند التبديل بين الحسابات، سترى البطاقة الطبية لـ %@ وجميع سجلاته.";
+"profile.spaces.switchedToFormat" = "تم التبديل إلى %@";
+"profile.spaces.switchSuccess" = "تم تبديل الملف الشخصي بنجاح";
+"profile.spaces.openInAccountTitleFormat" = "فتح في حساب %@؟";
+"profile.spaces.openInAccountMessageFormat" = "هذا المستند يخص %@. بدّل الحساب لفتحه.";
+"profile.spaces.openInAccountConfirm" = "تبديل وفتح";
 "profile.section.preferences" = "التفضيلات";
 "profile.section.support" = "الدعم";
 "profile.section.account" = "الحساب";
 "profile.healthProfile" = "الملف الصحي";
+"profile.vaccinations" = "التطعيمات";
+"profile.growth" = "النمو";
 "profile.subscription" = "الاشتراك";
 "profile.security" = "الأمان";
 "profile.language" = "اللغة";
+"profile.email" = "البريد الإلكتروني";
+"profile.emailInvalid" = "أدخل بريدًا إلكترونيًا صالحًا";
 "profile.feedback" = "ملاحظات";
 "profile.feedback.title" = "إرسال ملاحظات";
 "profile.feedback.emailLabel" = "البريد الإلكتروني";
@@ -552,3 +629,134 @@
 // MARK: - Coachmark
 "coachmark.documentUpload.title" = "أضف وثيقتك الأولى";
 "coachmark.documentUpload.subtitle" = "اضغط + لمسح ضوئي أو رفع صورة أو استيراد ملف.";
+
+// MARK: - Medical Specialization
+"medicalSpecialization.cardiology" = "أمراض القلب";
+"medicalSpecialization.dermatology" = "الأمراض الجلدية";
+"medicalSpecialization.dentistry" = "طب الأسنان";
+"medicalSpecialization.endocrinology" = "الغدد الصماء";
+"medicalSpecialization.gastroenterology" = "أمراض الجهاز الهضمي";
+"medicalSpecialization.generalMedicine" = "الطب العام";
+"medicalSpecialization.gynaecology" = "أمراض النساء";
+"medicalSpecialization.neurology" = "الأعصاب";
+"medicalSpecialization.oncology" = "الأورام";
+"medicalSpecialization.ophthalmology" = "طب العيون";
+"medicalSpecialization.orthopaedics" = "جراحة العظام";
+"medicalSpecialization.pulmonology" = "أمراض الرئة";
+"medicalSpecialization.psychiatry" = "الطب النفسي";
+"medicalSpecialization.surgery" = "الجراحة";
+"medicalSpecialization.urology" = "المسالك البولية";
+"medicalSpecialization.other" = "أخرى";
+
+// MARK: - Calendar
+"calendar.title" = "التقويم";
+"calendar.promoTitle" = "تقويمك الصحي";
+"calendar.promoOpen" = "فتح";
+"calendar.emptyTitle" = "ابدأ سجلك الصحي";
+"calendar.emptyMessage" = "تابع الأدوية والمواعيد والأحداث الطبية في مكان واحد.";
+"calendar.emptyTitleForAccountFormat" = "ابدأ السجل الصحي لـ %@";
+"calendar.emptyMessageForAccountFormat" = "تابع الأدوية والمواعيد والأحداث الطبية لـ %@.";
+"calendar.addFirstEntry" = "أضف أول إدخال";
+"calendar.addEntry" = "إضافة إدخال";
+"calendar.agendaTitle" = "الجدول الزمني";
+"calendar.agendaEmptyTitle" = "لا يوجد سجل بعد";
+"calendar.agendaEmptyMessage" = "ستظهر هنا المواعيد والأدوية والأحداث الطبية التي تضيفها.";
+"calendar.agendaEmptyCTA" = "إضافة موعد";
+"calendar.newEntryTitle" = "إدخال جديد";
+"calendar.editEntryTitle" = "تعديل الإدخال";
+"calendar.field.type" = "النوع";
+"calendar.entryType.medication" = "دواء";
+"calendar.entryType.appointment" = "موعد";
+"calendar.entryType.medicalEvent" = "حدث طبي";
+"calendar.field.title" = "العنوان";
+"calendar.field.titlePlaceholder" = "مثال: فيتامين د";
+"calendar.field.date" = "التاريخ";
+"calendar.field.time" = "الوقت";
+"calendar.field.repeat" = "التكرار";
+"calendar.field.endDate" = "ينتهي";
+"calendar.field.reminder" = "تذكير";
+"calendar.field.notes" = "ملاحظات";
+"calendar.field.linkDocument" = "ربط مستند";
+"calendar.noDocumentLinked" = "لا شيء";
+"calendar.deleteEntry" = "حذف الإدخال";
+"calendar.deleteConfirmTitle" = "حذف هذا الإدخال؟";
+"calendar.deleteConfirmMessage" = "لا يمكن التراجع عن هذا.";
+"calendar.field.allDay" = "طوال اليوم";
+"calendar.recurrence.none" = "لا يتكرر";
+"calendar.recurrence.daily" = "يوميًا";
+"calendar.recurrence.weekly" = "أسبوعيًا";
+"calendar.recurrence.monthly" = "شهريًا";
+"calendar.reminder.atTime" = "وقت الحدث";
+"calendar.reminder.min15" = "قبل 15 دقيقة";
+"calendar.reminder.hour1" = "قبل ساعة";
+"calendar.reminder.day1" = "قبل يوم";
+"calendar.openDocument" = "فتح المستند";
+"calendar.removeLinkedDocument" = "إزالة المستند المرتبط";
+"calendar.next" = "التالي";
+"calendar.field.specialization" = "التخصص";
+"calendar.field.doctor" = "الطبيب";
+"calendar.field.doctorPlaceholder" = "مثال: د. جيمي براون";
+"calendar.reminder.body30" = "يبدأ خلال 30 دقيقة";
+"calendar.reminder.body15" = "يبدأ خلال 15 دقيقة";
+"calendar.reminder.bodyWeek" = "قادم خلال أسبوع";
+"calendar.reminder.body1Day" = "قادم خلال يوم";
+"calendar.reminder.body2Hours" = "قادم خلال ساعتين";
+"calendar.reminder.bodyMedTime" = "حان وقت تناول دوائك";
+"calendar.reminder.bodyMedFollowUp" = "هل تناولت دواءك؟";
+"calendar.reminder.appt" = "مرحبًا، موعد مع %@";
+"calendar.reminder.apptWithSpec" = "مرحبًا، موعد مع %@ (%@)";
+"calendar.reminder.apptPlain" = "مرحبًا، %@";
+"calendar.reminderInfoAppointment" = "سيتم تذكيرك بأسبوع ويوم وساعتين قبل هذا الموعد.";
+"calendar.reminderInfoAppointmentRecurring" = "سيتم تذكيرك بأسبوع ويوم وساعتين قبل كل موعد قادم.";
+"calendar.reminderInfoMedication" = "سيتم تذكيرك في الوقت المحدد.";
+"calendar.reminderInfoMedicationRecurring" = "سيتم تذكيرك في الوقت المحدد لكل جرعة.";
+"calendar.reminderInfoMedicalEvent" = "سيتم تذكيرك قبل 30 و15 دقيقة من هذا الحدث.";
+"calendar.reminderInfoMedicalEventRecurring" = "سيتم تذكيرك قبل 30 و15 دقيقة من كل حدث قادم.";
+"calendar.today" = "اليوم";
+"calendar.tomorrow" = "غدًا";
+"calendar.emptyHint" = "اضغط على أي يوم لإضافة حدث.";
+"calendar.todayEmptyHint" = "لا شيء مخطط لهذا اليوم — أضف موعدًا أو دواءً أو حدثًا طبيًا لتبقى على المسار.";
+"calendar.addEvent" = "إضافة";
+"calendar.a11yHasEvents" = "يحتوي على أحداث";
+"calendar.a11yHasAttachment" = "يحتوي على مرفق";
+"calendar.attachments" = "المرفقات";
+"calendar.attachment.image" = "صورة";
+"calendar.attachment.document" = "مستند";
+"calendar.attachment.prescription" = "وصفة طبية";
+"calendar.attachment.addImage" = "إضافة صورة";
+"calendar.attachment.addDocument" = "إضافة مستند";
+"calendar.attachment.addPrescription" = "إضافة وصفة";
+"calendar.attachment.chooseExisting" = "اختيار من المحفوظ";
+"calendar.attachment.choosePhoto" = "اختيار صورة";
+"calendar.attachment.importFile" = "استيراد ملف";
+"calendar.attachment.remove" = "إزالة";
+"calendar.attachment.empty" = "لا يوجد شيء محفوظ بعد";
+"calendar.attachment.missing" = "الملف غير متاح";
+"calendar.attachment.existingSubtitle" = "من ملفاتك المحفوظة";
+"calendar.attachment.photoSubtitle" = "من مكتبة الصور";
+"calendar.attachment.importSubtitle" = "ملف PDF أو صورة";
+
+// MARK: - Health Profile extras
+"healthProfile.chooseFromContacts" = "اختر من جهات الاتصال";
+
+// MARK: - Growth
+"growth.title" = "النمو";
+"growth.add" = "إضافة قياس";
+"growth.edit" = "تعديل القياس";
+"growth.date" = "التاريخ";
+"growth.height" = "الطول";
+"growth.weight" = "الوزن";
+"growth.photo" = "صورة";
+"growth.viewPhoto" = "عرض الصورة كاملة";
+"growth.addPhoto" = "أضف صورة";
+"growth.changePhoto" = "تغيير الصورة";
+"growth.removePhoto" = "إزالة الصورة";
+"growth.notes" = "ملاحظات";
+"growth.notesPlaceholder" = "ملاحظة اختيارية";
+"growth.emptyTitle" = "لا توجد قياسات بعد";
+"growth.emptySubtitle" = "سجّل الطول والوزن وصورة لمتابعة النمو.";
+"growth.chartTitle" = "الاتجاه";
+"growth.chartMonths" = "أشهر";
+"growth.chartYears" = "سنوات";
+"growth.latest" = "الأحدث";
+"growth.delete" = "حذف القياس";

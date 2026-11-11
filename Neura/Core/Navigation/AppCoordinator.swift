@@ -11,13 +11,17 @@ final class AppCoordinator: ObservableObject {
         case docs = 2
     }
 
-    enum AddDocumentAction { case scan, photo, file }
+    enum AddDocumentAction { case scan, photo, file, googleDrive }
 
     @Published var selectedTab: Tab = .home
     @Published var showAddMenu = false
     @Published var pendingAddAction: AddDocumentAction? = nil
+    /// Set when a tapped notification should deep-link into a document — consumed
+    /// by `DocsView` the same way `pendingAddAction` is consumed by the FAB flow.
+    @Published var pendingDocumentID: UUID? = nil
     @Published var isInDetailView = false
     @Published var isSelectingDocs = false
+    @Published var isSearchingDocs = false
 
     let profileRouter = ProfileRouter()
     let homeRouter = HomeRouter()
@@ -41,14 +45,17 @@ final class AppCoordinator: ObservableObject {
 
 enum ProfileRoute: Hashable {
     case healthProfile
+    case vaccinations
+    case growth
     case language
     case subscription
+    case emergencyCard
 }
 
 enum HomeRoute: Hashable {
     case healthProfile
     case healthProfileDetail
-    case emergencyCard
+    case calendar
 }
 
 enum DocsRoute: Hashable {

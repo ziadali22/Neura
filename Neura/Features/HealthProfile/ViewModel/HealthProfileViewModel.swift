@@ -6,11 +6,23 @@ import Combine
 final class HealthProfileViewModel: ObservableObject {
     @Published var profile: HealthProfile
 
-    private static let storageKey = "health_profile_data"
+    private static let storageKey = "health_profiles_by_space"
+    /// Legacy single-profile key from before Spaces existed — read once for migration.
+    private static let legacyStorageKey = "health_profile_data"
+
+    private let activeSpaceManager: ActiveSpaceManager
+    private var spaceObserver: AnyCancellable?
     private var restoreObserver: NSObjectProtocol?
 
-    init() {
-        self.profile = Self.loadFromDisk() ?? .sample
+    init(activeSpaceManager: ActiveSpaceManager = .shared) {
+        self.activeSpaceManager = activeSpaceManager
+        Self.migrateBuiltInSectionsOnDisk()
+        let all = Self.loadAllFromDisk()
+        self.profile = Self.profile(for: activeSpaceManager.currentSpaceID, in: all)
+
+        spaceObserver = activeSpaceManager.$currentSpaceID.sink { [weak self] newSpaceID in
+            self?.reload(for: newSpaceID)
+        }
         restoreObserver = NotificationCenter.default.addObserver(
             forName: .healthProfileRestored, object: nil, queue: .main
         ) { [weak self] _ in
@@ -19,22 +31,137 @@ final class HealthProfileViewModel: ObservableObject {
     }
 
     func reload() {
-        if let fresh = Self.loadFromDisk() {
-            profile = fresh
-        }
+        reload(for: activeSpaceManager.currentSpaceID)
     }
 
-    private static func loadFromDisk() -> HealthProfile? {
-        guard let data = UserDefaults.standard.data(forKey: storageKey),
-              let saved = try? JSONDecoder().decode(HealthProfile.self, from: data) else { return nil }
-        return saved
+    /// Reloads for an explicit space id rather than re-reading
+    /// `activeSpaceManager.currentSpaceID`. Required when called from the
+    /// `$currentSpaceID` sink: `@Published` notifies subscribers from `willSet`,
+    /// before the backing storage is updated, so re-reading the property inside
+    /// the sink would still see the *previous* space — the emitted value is the
+    /// only reliable source of the new one at that point.
+    private func reload(for spaceID: UUID) {
+        let all = Self.loadAllFromDisk()
+        profile = Self.profile(for: spaceID, in: all)
+    }
+
+    /// A space with no stored profile yet gets an empty `.default` profile —
+    /// EXCEPT the original default space, which keeps showing the `.sample`
+    /// demo data on first launch (existing pre-Spaces behavior, preserved so
+    /// new users aren't regressed). A newly created child space must never
+    /// show demo or another space's data.
+    private static func profile(for spaceID: UUID, in all: [UUID: HealthProfile]) -> HealthProfile {
+        if let existing = all[spaceID] { return ensuringBuiltInSections(existing).profile }
+        return spaceID == ActiveSpaceManager.defaultSpaceID ? .sample : .default
+    }
+
+    /// Adds any newly introduced built-in sections (e.g. Vaccinations) to a
+    /// profile saved before they existed. Existing custom sections are left as-is.
+    private static func ensuringBuiltInSections(_ profile: HealthProfile) -> (profile: HealthProfile, didChange: Bool) {
+        var profile = profile
+        var didChange = false
+        let existingTitles = Set(profile.sections.map(\.title))
+        for title in HealthProfile.default.sections.map(\.title) where !existingTitles.contains(title) {
+            profile.sections.append(.init(title: title))
+            didChange = true
+        }
+        return (profile, didChange)
+    }
+
+    /// One-time disk write so every saved space picks up new built-in sections
+    /// without waiting for the user to open and edit that profile.
+    private static func migrateBuiltInSectionsOnDisk() {
+        var all = loadAllFromDisk()
+        guard !all.isEmpty else { return }
+        var changed = false
+        for (id, stored) in all {
+            let (updated, didChange) = ensuringBuiltInSections(stored)
+            if didChange {
+                all[id] = updated
+                changed = true
+            }
+        }
+        guard changed else { return }
+        if let data = try? JSONEncoder().encode(all) {
+            UserDefaults.standard.set(data, forKey: storageKey)
+        }
+        SyncQueueManager.shared.enqueueProfileUpload(all)
+    }
+
+    private static func loadAllFromDisk() -> [UUID: HealthProfile] {
+        if let data = UserDefaults.standard.data(forKey: storageKey),
+           let saved = try? JSONDecoder().decode([UUID: HealthProfile].self, from: data) {
+            return saved
+        }
+        // One-time migration: wrap the pre-Spaces single profile under the default space.
+        if let legacyData = UserDefaults.standard.data(forKey: legacyStorageKey),
+           let legacyProfile = try? JSONDecoder().decode(HealthProfile.self, from: legacyData) {
+            let migrated = [ActiveSpaceManager.defaultSpaceID: legacyProfile]
+            if let data = try? JSONEncoder().encode(migrated) {
+                UserDefaults.standard.set(data, forKey: storageKey)
+            }
+            return migrated
+        }
+        return [:]
+    }
+
+    /// Seeds a brand-new account's profile with the answers collected while
+    /// creating it, so a newly added family member isn't a blank profile. Writes
+    /// directly to the space's slot in the on-disk dictionary rather than through
+    /// the `profile`/`save()` instance path, since the new space is typically not
+    /// the active one yet.
+    static func seedInitialProfile(
+        for spaceID: UUID, fullName: String, dateOfBirth: String?, gender: String?,
+        bloodType: String? = nil, height: String? = nil, weight: String? = nil
+    ) {
+        var all = loadAllFromDisk()
+        var profile = all[spaceID] ?? .default
+        profile.generalData.fullName = fullName
+        if let dateOfBirth { profile.generalData.dateOfBirth = dateOfBirth }
+        if let gender { profile.generalData.gender = gender }
+        if let bloodType { profile.generalData.bloodType = bloodType }
+        if let height { profile.generalData.height = height }
+        if let weight { profile.generalData.weight = weight }
+        if let heightCm = height.flatMap(GrowthEntry.parseHeightCm),
+           let weightKg = weight.flatMap(GrowthEntry.parseWeightKg) {
+            profile.growthEntries = [
+                GrowthEntry(date: Date(), heightCm: heightCm, weightKg: weightKg)
+            ]
+        }
+        profile.lastUpdated = Date()
+        all[spaceID] = profile
+        if let data = try? JSONEncoder().encode(all) {
+            UserDefaults.standard.set(data, forKey: storageKey)
+        }
+        SyncQueueManager.shared.enqueueProfileUpload(all)
+    }
+
+    /// Whether a space's general health data is missing required fields — used
+    /// for incomplete badges on account chips. Matches `CompleteProfileCard`.
+    static func isGeneralDataIncomplete(for spaceID: UUID) -> Bool {
+        let data = profile(for: spaceID, in: loadAllFromDisk()).generalData
+        return data.fullName.isEmpty
+            || data.dateOfBirth.isEmpty
+            || data.gender.isEmpty
+            || data.height.isEmpty
+            || data.weight.isEmpty
+            || data.bloodType.isEmpty
+            || data.insuranceStatus.isEmpty
     }
 
     // MARK: - General Data
 
+    func updateLocation(city: String, country: String) {
+        UserLocationStore.save(city: city, country: country)
+    }
+
     func updateGeneralField(_ keyPath: WritableKeyPath<HealthProfile.GeneralData, String>, value: String) {
         profile.generalData[keyPath: keyPath] = value
         save()
+
+        if keyPath == \HealthProfile.GeneralData.email, !value.trimmingCharacters(in: .whitespaces).isEmpty {
+            AnalyticsManager.shared.setUserEmail(value, isSubscribed: SubscriptionManager.shared.isPro)
+        }
     }
 
     // MARK: - Custom General Fields
@@ -86,6 +213,11 @@ final class HealthProfileViewModel: ObservableObject {
         save()
     }
 
+    func ensureVaccinationsSection() {
+        guard !profile.sections.contains(where: { $0.title == HealthProfile.vaccinationsSectionTitle }) else { return }
+        addSection(title: HealthProfile.vaccinationsSectionTitle)
+    }
+
     func removeSection(id: UUID) {
         profile.sections.removeAll { $0.id == id }
         save()
@@ -95,6 +227,35 @@ final class HealthProfileViewModel: ObservableObject {
         guard let index = profile.sections.firstIndex(where: { $0.id == id }) else { return }
         profile.sections[index].title = title
         save()
+    }
+
+    // MARK: - Growth
+
+    func upsertGrowthEntry(_ entry: GrowthEntry) {
+        if let index = profile.growthEntries.firstIndex(where: { $0.id == entry.id }) {
+            profile.growthEntries[index] = entry
+        } else {
+            profile.growthEntries.append(entry)
+        }
+        writeBackLatestGrowthToGeneralData()
+        save()
+    }
+
+    func removeGrowthEntry(id: UUID) {
+        if let existing = profile.growthEntries.first(where: { $0.id == id }),
+           let filename = existing.photoFilename {
+            GrowthPhotoStore.shared.delete(filename: filename)
+            SyncQueueManager.shared.enqueueGrowthPhotoDelete(id)
+        }
+        profile.growthEntries.removeAll { $0.id == id }
+        writeBackLatestGrowthToGeneralData()
+        save()
+    }
+
+    private func writeBackLatestGrowthToGeneralData() {
+        guard let latest = profile.growthEntries.max(by: { $0.date < $1.date }) else { return }
+        profile.generalData.height = latest.heightLabel
+        profile.generalData.weight = latest.weightLabel
     }
 
     // MARK: - PDF Generation
@@ -239,6 +400,7 @@ final class HealthProfileViewModel: ObservableObject {
             // MARK: General Data card
             let generalFields: [(String, String)] = [
                 ("Full Name",         profile.generalData.fullName),
+                ("Location",          UserLocationStore.current),
                 ("Date of Birth",     profile.generalData.dateOfBirth),
                 ("Gender",            profile.generalData.gender),
                 ("Height",            profile.generalData.height),
@@ -370,11 +532,14 @@ final class HealthProfileViewModel: ObservableObject {
 
     private func save() {
         profile.lastUpdated = Date()
-        if let data = try? JSONEncoder().encode(profile) {
+        var all = Self.loadAllFromDisk()
+        all[activeSpaceManager.currentSpaceID] = profile
+        if let data = try? JSONEncoder().encode(all) {
             UserDefaults.standard.set(data, forKey: Self.storageKey)
         }
-        SyncQueueManager.shared.enqueueProfileUpload(profile)
+        SyncQueueManager.shared.enqueueProfileUpload(all)
         updateNotifications()
+        AnalyticsManager.shared.track(.healthProfileSaved)
     }
 
     private func updateNotifications() {

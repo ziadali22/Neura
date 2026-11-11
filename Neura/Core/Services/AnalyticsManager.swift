@@ -40,10 +40,71 @@ final class AnalyticsManager {
         Mixpanel.mainInstance().track(event: event, properties: properties)
     }
 
+    /// Tracks an event using a centrally-defined name. Prefer this over the
+    /// string overload above for any event whose name isn't dynamically built.
+    func track(_ event: AnalyticsEvent, properties: [String: MixpanelType]? = nil) {
+        track(event.rawValue, properties: properties)
+        forwardToMeta(event, properties: properties)
+    }
+
+    /// Mirrors the handful of events Meta can optimise ad delivery on to Meta App Events,
+    /// so existing call sites gain Meta tracking without importing the Facebook SDK.
+    ///
+    /// Deliberately a short allow-list rather than a blanket forward of every Mixpanel
+    /// event: Meta Events Manager treats unrecognised names as custom events, and a flood
+    /// of them dilutes the signal that App Install campaigns optimise against.
+    ///
+    /// Note this runs regardless of `isInitialized` — Mixpanel and Meta are independent
+    /// integrations, and one being unconfigured must not silence the other.
+    private func forwardToMeta(_ event: AnalyticsEvent, properties: [String: MixpanelType]?) {
+        switch event {
+        case .signUpCompleted:
+            let method = properties?["method"] as? String ?? "unknown"
+            MetaAdsManager.shared.logCompleteRegistration(method: method)
+
+        case .subscriptionStarted:
+            // Price and currency are attached by SubscriptionManager at the point of
+            // purchase; without them Meta can count the conversion but not its value.
+            guard let amount = properties?["price"] as? Double,
+                  let currency = properties?["currency"] as? String else { return }
+            let productID = properties?["product_id"] as? String ?? ""
+            MetaAdsManager.shared.logPurchase(amount: amount, currency: currency, productID: productID)
+
+        case .paywallViewed:
+            MetaAdsManager.shared.logInitiatedCheckout()
+
+        case .documentSaved:
+            MetaAdsManager.shared.logDocumentSaved()
+
+        default:
+            break
+        }
+    }
+
+    /// `fb_mobile_tutorial_completion` — onboarding finished. Not driven by an
+    /// `AnalyticsEvent` case because onboarding completion has no single Mixpanel event
+    /// (it is tracked per-step with dynamically built names).
+    func trackOnboardingCompleted() {
+        MetaAdsManager.shared.logCompletedTutorial()
+    }
+
     /// Associates subsequent events with a stable user identifier (e.g. after sign-in).
     func identify(_ distinctId: String) {
         guard isInitialized else { return }
         Mixpanel.mainInstance().identify(distinctId: distinctId)
+    }
+
+    /// Sets the user's email on their Mixpanel People profile (via the reserved
+    /// `$email` property) plus their current subscription status, and fires an
+    /// `email_submitted` event carrying the same status. No-ops if analytics isn't
+    /// initialized yet.
+    func setUserEmail(_ email: String, isSubscribed: Bool) {
+        guard isInitialized else { return }
+        Mixpanel.mainInstance().people.set(properties: [
+            "$email": email,
+            "is_subscribed": isSubscribed
+        ])
+        track(.emailSubmitted, properties: ["is_subscribed": isSubscribed])
     }
 
     /// Clears the current identity (e.g. on sign-out).

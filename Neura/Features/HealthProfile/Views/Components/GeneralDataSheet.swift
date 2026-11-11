@@ -16,6 +16,12 @@ struct GeneralDataSheet: View {
     @State private var showAddFieldAlert = false
     @State private var newFieldName = ""
 
+    // Emergency contact picker
+    @State private var showContactPicker = false
+
+    @AppStorage(UserLocationStore.defaultsKey) private var userLocation = ""
+    @State private var showLocationEditor = false
+
     var body: some View {
         VStack(spacing: 0) {
             // Nav bar
@@ -40,8 +46,18 @@ struct GeneralDataSheet: View {
                         .foregroundColor(.textPrimary)
                         .padding(.bottom, 8)
 
-                    ForEach(fields) { field in
-                        fieldRow(field)
+                    if let nameField = fields.first(where: { $0.keyPath == \.fullName }) {
+                        fieldRow(nameField)
+                    }
+
+                    locationRow
+
+                    ForEach(fields.filter { $0.keyPath != \.fullName }) { field in
+                        if field.keyPath == \.emergencyContactName {
+                            emergencyContactRow(field)
+                        } else {
+                            fieldRow(field)
+                        }
                     }
 
                     ForEach(viewModel.profile.generalData.customFields) { field in
@@ -57,7 +73,13 @@ struct GeneralDataSheet: View {
         .background(Color.backgroundPrimary)
         // Text input sheet (Name only)
         .sheet(item: $textEditingField) { field in
-            EditFieldSheet(fieldName: field.label, value: field.value, keyboardType: field.keyboardType) { newValue in
+            EditFieldSheet(
+                fieldName: field.label,
+                value: field.value,
+                keyboardType: field.keyboardType,
+                validate: field.validate,
+                invalidMessage: field.invalidMessage
+            ) { newValue in
                 viewModel.updateGeneralField(field.keyPath, value: newValue)
             }
             .presentationDragIndicator(.hidden)
@@ -85,7 +107,8 @@ struct GeneralDataSheet: View {
             WheelPickerSheet(
                 fieldName: field.label,
                 values: field.wheelValues,
-                current: field.value
+                current: field.value,
+                defaultValue: field.wheelDefault
             ) { newValue in
                 viewModel.updateGeneralField(field.keyPath, value: newValue)
             }
@@ -99,6 +122,22 @@ struct GeneralDataSheet: View {
                 onDelete: { viewModel.removeGeneralCustomField(id: field.id) }
             ) { newValue in
                 viewModel.updateGeneralCustomField(id: field.id, value: newValue)
+            }
+            .presentationDragIndicator(.hidden)
+        }
+        // Emergency contact picker (pulls name + number from phone Contacts)
+        .sheet(isPresented: $showContactPicker) {
+            ContactPicker(isPresented: $showContactPicker) { name, phone in
+                viewModel.updateGeneralField(\.emergencyContactName, value: name)
+                if !phone.isEmpty {
+                    viewModel.updateGeneralField(\.emergencyContactNumber, value: phone)
+                }
+            }
+            .ignoresSafeArea()
+        }
+        .sheet(isPresented: $showLocationEditor) {
+            LocationEditSheet(location: userLocation) { city, country in
+                viewModel.updateLocation(city: city, country: country)
             }
             .presentationDragIndicator(.hidden)
         }
@@ -122,20 +161,68 @@ struct GeneralDataSheet: View {
             .init(label: L10n.HealthProfile.fieldName,        keyPath: \.fullName,        value: data.fullName,        kind: .text),
             .init(label: L10n.HealthProfile.dateOfBirth,      keyPath: \.dateOfBirth,     value: data.dateOfBirth,     kind: .date),
             .init(label: L10n.HealthProfile.gender,           keyPath: \.gender,          value: data.gender,          kind: .options(["Male", "Female", "Prefer not to say"])),
-            .init(label: L10n.HealthProfile.height,           keyPath: \.height,          value: data.height,          kind: .wheel(WheelPickerSheet.heightValues)),
-            .init(label: L10n.HealthProfile.weight,           keyPath: \.weight,          value: data.weight,          kind: .wheel(WheelPickerSheet.weightValues)),
+            .init(label: L10n.HealthProfile.height,           keyPath: \.height,          value: data.height,          kind: .wheel(values: WheelPickerSheet.heightValues, defaultValue: "160 cm")),
+            .init(label: L10n.HealthProfile.weight,           keyPath: \.weight,          value: data.weight,          kind: .wheel(values: WheelPickerSheet.weightValues, defaultValue: "80 kg")),
             .init(label: L10n.HealthProfile.insuranceStatus,  keyPath: \.insuranceStatus,       value: data.insuranceStatus,       kind: .options(["Insured", "Uninsured", "Partially Insured"])),
             .init(label: L10n.HealthProfile.bloodType,        keyPath: \.bloodType,             value: data.bloodType,             kind: .options(["A+", "A−", "B+", "B−", "AB+", "AB−", "O+", "O−"])),
             .init(label: L10n.HealthProfile.myNumber,         keyPath: \.myPhoneNumber,         value: data.myPhoneNumber,         kind: .text, keyboardType: .phonePad),
             .init(label: L10n.HealthProfile.emergencyContact, keyPath: \.emergencyContactName,  value: data.emergencyContactName,  kind: .text),
             .init(label: L10n.HealthProfile.emergencyNumber,  keyPath: \.emergencyContactNumber, value: data.emergencyContactNumber, kind: .text, keyboardType: .phonePad),
+            .init(
+                label: L10n.Profile.email,
+                keyPath: \.email,
+                value: data.email,
+                kind: .text,
+                keyboardType: .emailAddress,
+                validate: Self.isValidEmailFormat,
+                invalidMessage: L10n.Profile.emailInvalid
+            ),
         ]
+    }
+
+    static func isValidEmailFormat(_ value: String) -> Bool {
+        let pattern = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}$"
+        return value.range(of: pattern, options: [.regularExpression, .caseInsensitive]) != nil
     }
 }
 
 // MARK: - Subviews
 
 private extension GeneralDataSheet {
+    var locationRow: some View {
+        Button { showLocationEditor = true } label: {
+            HStack {
+                Text(L10n.HealthProfile.location)
+                    .font(.bodyL)
+                    .foregroundColor(.textPrimary)
+
+                Spacer()
+
+                if userLocation.isEmpty {
+                    HStack(spacing: 4) {
+                        Text(L10n.Common.add)
+                            .font(.bodyL)
+                            .foregroundColor(.textTertiary)
+                        Image(systemName: "plus")
+                            .font(.system(size: 14))
+                            .foregroundColor(.textTertiary)
+                    }
+                } else {
+                    Text(userLocation)
+                        .font(.statLabel)
+                        .foregroundColor(.textSecondary)
+                        .lineLimit(1)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .background(Color.surfaceWhite)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 4)
+        }
+        .buttonStyle(ScaleButtonStyle())
+    }
+
     func fieldRow(_ field: GeneralFieldInfo) -> some View {
         Button { open(field) } label: {
             HStack {
@@ -174,6 +261,48 @@ private extension GeneralDataSheet {
             .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 4)
         }
         .buttonStyle(ScaleButtonStyle())
+    }
+
+    /// Emergency contact row: tap the label area to type manually, or tap the
+    /// Contacts button to pick from the phone (fills name + number at once).
+    func emergencyContactRow(_ field: GeneralFieldInfo) -> some View {
+        HStack(spacing: 12) {
+            Button { textEditingField = field } label: {
+                HStack {
+                    Text(field.label)
+                        .font(.bodyL)
+                        .foregroundColor(.textPrimary)
+
+                    Spacer()
+
+                    if field.value.isEmpty {
+                        Text("Add")
+                            .font(.bodyL)
+                            .foregroundColor(.textTertiary)
+                    } else {
+                        Text(field.value)
+                            .font(.statLabel)
+                            .foregroundColor(.textSecondary)
+                            .lineLimit(1)
+                    }
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            Button { showContactPicker = true } label: {
+                Image(systemName: "person.crop.circle.fill.badge.plus")
+                    .font(.system(size: 20))
+                    .foregroundColor(.accent)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(L10n.HealthProfile.chooseFromContacts)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .background(Color.surfaceWhite)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 4)
     }
 
     func customFieldRow(_ field: HealthProfile.GeneralData.CustomField) -> some View {
@@ -252,7 +381,7 @@ enum GeneralFieldKind: Equatable {
     case text
     case date
     case options([String])
-    case wheel([String])
+    case wheel(values: [String], defaultValue: String)
 }
 
 struct GeneralFieldInfo: Identifiable {
@@ -262,13 +391,17 @@ struct GeneralFieldInfo: Identifiable {
     let value: String
     let kind: GeneralFieldKind
     let keyboardType: UIKeyboardType
+    let validate: ((String) -> Bool)?
+    let invalidMessage: String?
 
-    init(label: String, keyPath: WritableKeyPath<HealthProfile.GeneralData, String>, value: String, kind: GeneralFieldKind, keyboardType: UIKeyboardType = .default) {
+    init(label: String, keyPath: WritableKeyPath<HealthProfile.GeneralData, String>, value: String, kind: GeneralFieldKind, keyboardType: UIKeyboardType = .default, validate: ((String) -> Bool)? = nil, invalidMessage: String? = nil) {
         self.label = label
         self.keyPath = keyPath
         self.value = value
         self.kind = kind
         self.keyboardType = keyboardType
+        self.validate = validate
+        self.invalidMessage = invalidMessage
     }
 
     var options: [String] {
@@ -277,8 +410,14 @@ struct GeneralFieldInfo: Identifiable {
     }
 
     var wheelValues: [String] {
-        if case .wheel(let vals) = kind { return vals }
+        if case .wheel(let vals, _) = kind { return vals }
         return []
+    }
+
+    /// Value the wheel lands on when the field has no saved value yet.
+    var wheelDefault: String {
+        if case .wheel(_, let def) = kind { return def }
+        return ""
     }
 }
 

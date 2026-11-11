@@ -122,7 +122,7 @@ private extension DocumentViewerView {
     var navBar: some View {
         HStack {
             Button { dismiss() } label: {
-                Image(systemName: "chevron.backward")
+                Image(systemName: LanguageManager.shared.backChevronSymbol)
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.textPrimary)
                     .frame(width: 40, height: 40)
@@ -190,12 +190,10 @@ private extension DocumentViewerView {
         VStack(spacing: 8) {
             HStack(spacing: 12) {
                 // Category icon
-                if let category = document.category {
-                    Image(category.gridIcon)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 36, height: 36)
-                }
+                Image(document.category?.gridIcon ?? "otherIcon")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 36, height: 36)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(document.name)
@@ -357,7 +355,7 @@ private extension DocumentViewerView {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(L10n.Common.done) { showInfo = false }
                         .font(.buttonM)
-                        .foregroundColor(.accent)
+                        .foregroundColor(.textPrimary)
                 }
             }
         }
@@ -438,15 +436,62 @@ private extension DocumentViewerView {
     func shareDocument() {
         guard document.fileExists else { return }
 
+        AnalyticsManager.shared.track(.documentShareTapped, properties: ["category": document.category?.rawValue ?? "none"])
+
         let activityVC = UIActivityViewController(
-            activityItems: [document.fileURL],
+            activityItems: [shareableFileURL()],
             applicationActivities: nil
         )
 
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let rootViewController = windowScene.windows.first?.rootViewController {
-            rootViewController.present(activityVC, animated: true)
+        // The overflow menu is still dismissing when this action runs.
+        // Presenting immediately is ignored, so wait until that presentation ends.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            presentActivity(activityVC)
         }
+    }
+
+    /// Copies the scan to a temporary file named after the document, so the
+    /// share sheet offers "Scan - Nov 2, 2026.pdf" instead of the stored UUID.
+    private func shareableFileURL() -> URL {
+        let ext = document.fileExtension
+        var base = document.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        if base.isEmpty { base = "Document" }
+        if !ext.isEmpty, !base.lowercased().hasSuffix(".\(ext.lowercased())") {
+            base += ".\(ext)"
+        }
+        let safe = base
+            .replacingOccurrences(of: "/", with: "-")
+            .replacingOccurrences(of: ":", with: "-")
+        let destination = FileManager.default.temporaryDirectory.appendingPathComponent(safe)
+        try? FileManager.default.removeItem(at: destination)
+        do {
+            try FileManager.default.copyItem(at: document.fileURL, to: destination)
+            return destination
+        } catch {
+            return document.fileURL
+        }
+    }
+
+    private func presentActivity(_ activityVC: UIActivityViewController) {
+        guard let windowScene = UIApplication.shared.connectedScenes
+            .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
+              let root = windowScene.keyWindow?.rootViewController else { return }
+
+        var top = root
+        while let presented = top.presentedViewController, !presented.isBeingDismissed {
+            top = presented
+        }
+        guard !top.isBeingDismissed else { return }
+
+        activityVC.popoverPresentationController?.sourceView = top.view
+        activityVC.popoverPresentationController?.sourceRect = CGRect(
+            x: top.view.bounds.midX,
+            y: top.view.bounds.midY,
+            width: 1,
+            height: 1
+        )
+        activityVC.popoverPresentationController?.permittedArrowDirections = []
+        top.present(activityVC, animated: true)
     }
 
     // MARK: Edit
