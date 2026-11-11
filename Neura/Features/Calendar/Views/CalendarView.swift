@@ -9,6 +9,7 @@ struct CalendarView: View {
     @State private var showDayDetail = false
     @State private var showNewEntry = false
     @State private var showAgenda = false
+    @State private var showAgendaNewEntry = false
     @State private var pendingAgendaEntry: CalendarEntry?
 
     var body: some View {
@@ -89,15 +90,34 @@ struct CalendarView: View {
         }
         // Agenda
         .sheet(isPresented: $showAgenda, onDismiss: {
+            showAgendaNewEntry = false
             if let entry = pendingAgendaEntry {
                 pendingAgendaEntry = nil
                 editorEntry = entry
             }
         }) {
-            AgendaListView(viewModel: viewModel, onTapEntry: { entry in
-                pendingAgendaEntry = entry
-                showAgenda = false
-            })
+            AgendaListView(
+                viewModel: viewModel,
+                onTapEntry: { entry in
+                    pendingAgendaEntry = entry
+                    showAgenda = false
+                },
+                onAdd: { showAgendaNewEntry = true }
+            )
+            .sheet(isPresented: $showAgendaNewEntry) {
+                EntryEditorSheet(
+                    existing: nil,
+                    initialDate: Date(),
+                    initialType: .appointment,
+                    documents: docsViewModel.spaceScopedDocuments,
+                    onSave: { viewModel.save($0) },
+                    onDeleteDocument: { docsViewModel.deleteDocument($0) },
+                    onCreateDocument: { docsViewModel.registerAttachment($0) },
+                    onUpdateDocument: { document, metadata, preview in
+                        docsViewModel.updateDocument(document, metadata: metadata, preview: preview)
+                    }
+                )
+            }
         }
     }
 

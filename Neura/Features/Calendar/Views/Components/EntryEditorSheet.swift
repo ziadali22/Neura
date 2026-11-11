@@ -33,6 +33,7 @@ struct EntryEditorSheet: View {
     init(
         existing: CalendarEntry?,
         initialDate: Date,
+        initialType: CalendarEntryType = .medication,
         documents: [Document],
         onSave: @escaping (CalendarEntry) -> Void,
         onDelete: ((CalendarEntry) -> Void)? = nil,
@@ -47,7 +48,7 @@ struct EntryEditorSheet: View {
         self.onDeleteDocument = onDeleteDocument
         self.onUpdateDocument = onUpdateDocument
 
-        _type = State(initialValue: existing?.type ?? .medication)
+        _type = State(initialValue: existing?.type ?? initialType)
         _title = State(initialValue: existing?.title ?? "")
         _date = State(initialValue: existing?.date ?? initialDate)
         _isAllDay = State(initialValue: existing?.isAllDay ?? false)

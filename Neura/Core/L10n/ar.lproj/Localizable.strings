@@ -659,6 +659,9 @@
 "calendar.addFirstEntry" = "أضف أول إدخال";
 "calendar.addEntry" = "إضافة إدخال";
 "calendar.agendaTitle" = "الجدول الزمني";
+"calendar.agendaEmptyTitle" = "لا يوجد سجل بعد";
+"calendar.agendaEmptyMessage" = "ستظهر هنا المواعيد والأدوية والأحداث الطبية التي تضيفها.";
+"calendar.agendaEmptyCTA" = "إضافة موعد";
 "calendar.newEntryTitle" = "إدخال جديد";
 "calendar.editEntryTitle" = "تعديل الإدخال";
 "calendar.field.type" = "النوع";

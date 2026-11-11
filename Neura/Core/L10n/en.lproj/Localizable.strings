@@ -664,6 +664,9 @@
 "calendar.addFirstEntry" = "Add your first entry";
 "calendar.addEntry" = "Add entry";
 "calendar.agendaTitle" = "Timeline";
+"calendar.agendaEmptyTitle" = "No history yet";
+"calendar.agendaEmptyMessage" = "Appointments, medications, and medical events you add will appear here.";
+"calendar.agendaEmptyCTA" = "Add appointment";
 "calendar.newEntryTitle" = "New Entry";
 "calendar.editEntryTitle" = "Edit Entry";
 "calendar.field.type" = "Type";

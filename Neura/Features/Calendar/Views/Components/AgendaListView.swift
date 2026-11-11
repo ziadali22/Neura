@@ -5,6 +5,7 @@ import SwiftUI
 struct AgendaListView: View {
     @ObservedObject var viewModel: CalendarViewModel
     let onTapEntry: (CalendarEntry) -> Void
+    let onAdd: () -> Void
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -12,50 +13,64 @@ struct AgendaListView: View {
             VStack(spacing: 0) {
                 header
 
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 24) {
-                        ForEach(yearGroups) { group in
-                            VStack(alignment: .leading, spacing: 12) {
-                                Text(group.representativeDate, format: .dateTime.year())
-                                    .font(.headingS)
-                                    .foregroundStyle(Color.textTertiary)
-                                    .padding(.horizontal, 20)
-
-                                VStack(spacing: 10) {
-                                    ForEach(group.entries) { entry in
-                                        Button { onTapEntry(entry) } label: {
-                                            TimelineRow(entry: entry)
-                                        }
-                                        .buttonStyle(ScaleButtonStyle())
-                                    }
-                                }
-                                .padding(.horizontal, 20)
-                            }
-                        }
-                    }
-                    .padding(.vertical, 12)
+                if viewModel.timelineEntries.isEmpty {
+                    AgendaEmptyState(onAdd: onAdd)
+                } else {
+                    timeline
                 }
-                .scrollIndicators(.hidden)
             }
             .background(Color.backgroundPrimary.ignoresSafeArea())
             .toolbar(.hidden, for: .navigationBar)
+            .animation(.easeInOut(duration: 0.2), value: viewModel.timelineEntries.isEmpty)
         }
     }
 
     private var header: some View {
-        HStack {
+        ZStack {
             Button { dismiss() } label: {
-                Image(systemName: "chevron.left")
+                Image(systemName: LanguageManager.shared.backChevronSymbol)
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(Color.textPrimary)
                     .frame(width: 46, height: 46)
                     .glassEffect(.regular.interactive(), in: .circle)
             }
-            Spacer()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityLabel(L10n.Common.back)
+
+            Text(L10n.Calendar.agendaTitle)
+                .font(.headingS)
+                .foregroundStyle(Color.textPrimary)
         }
         .padding(.horizontal, 20)
         .padding(.top, 12)
         .padding(.bottom, 8)
+    }
+
+    private var timeline: some View {
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 24) {
+                ForEach(yearGroups) { group in
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text(group.representativeDate, format: .dateTime.year())
+                            .font(.headingS)
+                            .foregroundStyle(Color.textTertiary)
+                            .padding(.horizontal, 20)
+
+                        VStack(spacing: 10) {
+                            ForEach(group.entries) { entry in
+                                Button { onTapEntry(entry) } label: {
+                                    TimelineRow(entry: entry)
+                                }
+                                .buttonStyle(ScaleButtonStyle())
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                    }
+                }
+            }
+            .padding(.vertical, 12)
+        }
+        .scrollIndicators(.hidden)
     }
 
     /// Entries grouped by calendar year, years descending, entries newest first.

@@ -659,6 +659,9 @@
 "calendar.addFirstEntry" = "Adaugă prima înregistrare";
 "calendar.addEntry" = "Adaugă înregistrare";
 "calendar.agendaTitle" = "Cronologie";
+"calendar.agendaEmptyTitle" = "Nicio cronologie încă";
+"calendar.agendaEmptyMessage" = "Programările, medicamentele și evenimentele medicale pe care le adaugi vor apărea aici.";
+"calendar.agendaEmptyCTA" = "Adaugă o programare";
 "calendar.newEntryTitle" = "Înregistrare nouă";
 "calendar.editEntryTitle" = "Editează înregistrarea";
 "calendar.field.type" = "Tip";

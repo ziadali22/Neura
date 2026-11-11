@@ -69,6 +69,9 @@ enum L10n {
         static var addFirstEntry: String { "calendar.addFirstEntry".l10n() }
         static var addEntry: String { "calendar.addEntry".l10n() }
         static var agendaTitle: String { "calendar.agendaTitle".l10n() }
+        static var agendaEmptyTitle: String { "calendar.agendaEmptyTitle".l10n() }
+        static var agendaEmptyMessage: String { "calendar.agendaEmptyMessage".l10n() }
+        static var agendaEmptyCTA: String { "calendar.agendaEmptyCTA".l10n() }
         static var next: String { "calendar.next".l10n() }
         static var today: String { "calendar.today".l10n() }
         static var tomorrow: String { "calendar.tomorrow".l10n() }
